@@ -71,41 +71,53 @@ instructions available for each tool.
 
 *** StarPU, fxt, and poti
 
-#+begin_src shell :results output
-wget http://download.savannah.nongnu.org/releases/fkt/fxt-0.3.7.tar.gz
-tar xfz fxt-0.3.7.tar.gz; cd fxt-0.3.7/; 
-./configure --prefix=$HOME/install/fxt-0.3.7/
-make install
+1. Install the latest version of FXT
 
-git clone http://github.com/schnorr/poti
-mkdir -p poti/build; cd poti/build
-cmake -DCMAKE_INSTALL_PREFIX=$HOME/install/poti-git/ ..; make ; make install
+   #+begin_src shell :results output
+   wget http://download.savannah.nongnu.org/releases/fkt/fxt-0.3.7.tar.gz
+   tar xfz fxt-0.3.7.tar.gz; cd fxt-0.3.7/; 
+   ./configure --prefix=$HOME/install/fxt-0.3.7/
+   make install
+   #+end_src
 
-svn checkout svn+ssh://scm.gforge.inria.fr/svnroot/starpu/trunk starpu-trunk
-mkdir -p starpu-trunk/build; cd starpu-trunk/; ./autogen.sh; cd build
-PKG_CONFIG_PATH=$HOME/install/poti-git/lib/pkgconfig/  \
-  ../configure \
-  --with-fxt=$HOME/install/fxt-0.3.7 \
-  --enable-debug \
-  --disable-build-examples \
-  --disable-build-tests \
-  --enable-verbose \
-  --disable-silent-rules \
-  --enable-poti \
-  --disable-hdf5 \
-  --prefix=$HOME/install/starpu-trunk/
-make -j 4
-make install
-#+end_src
+2. Install poti 
 
-#+RESULTS:
+   #+begin_src R :results output :session :exports both
+   git clone http://github.com/schnorr/poti
+   mkdir -p poti/build; cd poti/build
+   cmake -DCMAKE_INSTALL_PREFIX=$HOME/install/poti-git/ ..; make ; make install
+   #+end_src
+
+3. Install StarPU from the SVN
+
+   #+begin_src R :results output :session :exports both
+   svn checkout svn+ssh://scm.gforge.inria.fr/svnroot/starpu/trunk starpu-trunk
+   mkdir -p starpu-trunk/build; cd starpu-trunk/; ./autogen.sh; cd build
+   PKG_CONFIG_PATH=$HOME/install/poti-git/lib/pkgconfig/ \
+    ../configure \
+      --with-fxt=$HOME/install/fxt-0.3.7/ \
+      --enable-debug \
+      --disable-build-examples \
+      --disable-build-tests \
+      --enable-verbose \
+      --disable-silent-rules \
+      --enable-poti \
+      --disable-hdf5 \
+      --prefix=$HOME/install/starpu-trunk/
+   make -j 4
+   make install
+   #+end_src
+
 *** PajeNG
+
+One step does everything.
 
 #+begin_src shell :results output
 git clone http://github.com/schnorr/pajeng
 mkdir -p pajeng/build ; cd pajeng/build
 cmake -DCMAKE_INSTALL_PREFIX=$HOME/install/pajeng-git/ ..; make -j 4 ; make install
 #+end_src
+
 *** pmtool
 
 There is a required tool called =starpu_perfmodel_recdump= whose source

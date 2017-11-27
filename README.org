@@ -1,0 +1,177 @@
+# -*- coding: utf-8 -*-"
+#+STARTUP: overview indent
+#+OPTIONS: html-link-use-abs-url:nil html-postamble:auto
+#+OPTIONS: html-preamble:t html-scripts:t html-style:t
+#+OPTIONS: html5-fancy:nil tex:t
+#+HTML_DOCTYPE: xhtml-strict
+#+HTML_CONTAINER: div
+#+DESCRIPTION:
+#+KEYWORDS:
+#+HTML_LINK_HOME:
+#+HTML_LINK_UP:
+#+HTML_MATHJAX:
+#+HTML_HEAD:
+#+HTML_HEAD_EXTRA:
+#+SUBTITLE:
+#+INFOJS_OPT:
+#+CREATOR: <a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.2.2 (<a href="http://orgmode.org">Org</a> mode 9.0.1)
+#+LATEX_HEADER:
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+EXPORT_SELECT_TAGS: export
+#+TAGS: noexport(n) deprecated(d)
+
+* StarVZ
+
+StarVZ consists in a performance analysis workflow combining many
+different tools R functions that can be used to run the analysis
+
+** Dependencies
+*** R
+
+These are the packages required by our framework.
+
+#+begin_src R :results output :session :exports both
+install.packages(c("cowplot",
+                   "data.table",
+                   "data.tree",
+                   "dplyr",
+                   "feather",
+                   "ggplot2",
+                   "gridExtra",
+                   "logging",
+                   "lpSolve",
+                   "magrittr",
+                   "pipeR",
+                   "RColorBrewer",
+                   "Rcpp",
+                   "readr",
+                   "reshape2",
+                   "tidyr",
+                   "tidyverse",
+                   "zoo"));
+#+end_src
+
+*** Non-R
+
+You need to install these tools:
+
+- Linux tool: bash, grep, sed, date, rm, cmake, svn, git, autotools, ...
+- [[http://starpu.gforge.inria.fr/][StarPU]] (for =starpu_fxt_tool=)
+  - [[https://savannah.nongnu.org/projects/fkt][fxt]] and [[https://github.com/schnorr/poti][poti]]
+- [[https://github.com/schnorr/pajeng/][PajeNG]] (for =pj_dump=)
+- [[https://gitlab.inria.fr/eyrauddu/pmtool][pmtool]] (optional, for theoretical bounds)
+  - [[http://simgrid.gforge.inria.fr/][SimGrid]]
+  - [[https://ibm.onthehub.com/WebStore/ProductSearchOfferingList.aspx?srch=ilog+cplex][Academic Initiative CPLEX]]
+
+** Installation Procedure
+
+We provide customized installations tips for the non-R dependencies
+above. Please, make sure they are still updated against the official
+instructions available for each tool.
+
+*** StarPU, fxt, and poti
+
+#+begin_src shell :results output
+wget http://download.savannah.nongnu.org/releases/fkt/fxt-0.3.7.tar.gz
+tar xfz fxt-0.3.7.tar.gz; cd fxt-0.3.7/; 
+./configure --prefix=$HOME/install/fxt-0.3.7/
+make install
+
+git clone http://github.com/schnorr/poti
+mkdir -p poti/build; cd poti/build
+cmake -DCMAKE_INSTALL_PREFIX=$HOME/install/poti-git/ ..; make ; make install
+
+svn checkout svn+ssh://scm.gforge.inria.fr/svnroot/starpu/trunk starpu-trunk
+mkdir -p starpu-trunk/build; cd starpu-trunk/; ./autogen.sh; cd build
+PKG_CONFIG_PATH=$HOME/install/poti-git/lib/pkgconfig/  \
+  ../configure \
+  --with-fxt=$HOME/install/fxt-0.3.7 \
+  --enable-debug \
+  --disable-build-examples \
+  --disable-build-tests \
+  --enable-verbose \
+  --disable-silent-rules \
+  --enable-poti \
+  --disable-hdf5 \
+  --prefix=$HOME/install/starpu-trunk/
+make -j 4
+make install
+#+end_src
+
+#+RESULTS:
+*** PajeNG
+
+#+begin_src shell :results output
+git clone http://github.com/schnorr/pajeng
+mkdir -p pajeng/build ; cd pajeng/build
+cmake -DCMAKE_INSTALL_PREFIX=$HOME/install/pajeng-git/ ..; make -j 4 ; make install
+#+end_src
+*** pmtool
+
+There is a required tool called =starpu_perfmodel_recdump= whose source
+code is available with pmtool. To be compiled, it requires to be
+included in the StarPU tools directory and be compiled within a
+StarPU-simgrid configuration. So, the detailed steps below reflect
+this necessity:
+
+1. Install Simgrid
+
+   #+begin_src shell :results output
+   git clone https://github.com/simgrid/simgrid simgrid-git
+   mkdir simgrid-git/build ; cd simgrid-git/build
+   cmake -Denable_documentation=OFF -DCMAKE_INSTALL_PREFIX=$HOME/install/simgrid-git/ ..; make -j 4 ; make install
+   #+end_src
+
+2. Clone pmtool to get the auxiliary tool
+
+   #+begin_src shell :results output
+   git clone http://gitlab.inria.fr/eyrauddu/pmtool
+   #+end_src
+
+3. Checkout starpu and copy the auxiliary tool
+
+   #+begin_src shell :results output
+   svn checkout svn+ssh://scm.gforge.inria.fr/svnroot/starpu/trunk starpu-trunk-simgrid
+   cp pmtool/starpu_export/starpu_perfmodel_recdump.c ./starpu-trunk-simgrid/tools/
+   echo "STARPU_TOOLS += starpu_perfmodel_recdump" >> ./starpu-trunk-simgrid/tools/Makefile.am
+   echo "bin_PROGRAMS += starpu_perfmodel_recdump" >> ./starpu-trunk-simgrid/tools/Makefile.am
+   #+end_src
+
+4. Configure StarPU with SimGrid
+
+   #+begin_src shell :results output
+   mkdir -p starpu-trunk-simgrid/build; cd starpu-trunk-simgrid/; ./autogen.sh; cd build
+   PKG_CONFIG_PATH=$HOME/install/poti-git/lib/pkgconfig/  \
+      ../configure \
+         --with-simgrid-dir=$HOME/install/simgrid-git/ \
+         --enable-simgrid \
+         --enable-debug \
+         --disable-build-examples \
+         --disable-build-tests \
+         --enable-verbose \
+         --disable-silent-rules \
+         --enable-poti \
+         --disable-hdf5 \
+         --prefix=$HOME/install/starpu-trunk-simgrid/
+   make -j 4
+   make
+   #+end_src
+
+5. Install CPLEX to have richer =pmtool= results
+
+   [[https://ibm.onthehub.com/WebStore/ProductSearchOfferingList.aspx?srch=ilog+cplex][Download the appropriate version from here]].
+
+   Make sure you install CPLEX at =$HOME/install/cplex-12.7.0/=.
+
+   #+begin_src shell :results output
+   ./cplex_studio127.linux-x86-64.bin
+   #+end_src
+
+6. Compile pmtool (already cloned in Step 2)
+
+   #+begin_src shell :results output
+   cd pmtool
+   export CPLEX_DIR=$HOME/install/cplex-12.7.0/
+   #+end_src
+
+

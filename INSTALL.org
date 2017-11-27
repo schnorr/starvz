@@ -147,7 +147,7 @@ mkdir -p pajeng/build ; cd pajeng/build
 cmake -DCMAKE_INSTALL_PREFIX=$HOME/install/pajeng-git/ ..; make -j 4 ; make install
 #+end_src
 
-*** pmtool
+*** Pmtool
 
 There is a required tool called =starpu_perfmodel_recdump= whose source
 code is available with pmtool. To be compiled, it requires to be

@@ -40,29 +40,24 @@ The source code of this framework is released under the GPLv3 license.
 ** Origin and Publications
 
 A preliminary version of this framework has been released in the
-companion website (check the reproducible paper link below) of this
-workshop publication:
+companion website (check the reproducible paper link below) of the VPA
+2016 workshop (held during the SC16 conference).  A second release of
+the framework is available in the companion website of a manuscript
+submitted to Wiley's Concurrent and Computation: Practice and
+Experience.
 
 - Vinicius Garcia Pinto, Luka Stanisic, Arnaud Legrand, Lucas Mello
   Schnorr, Samuel Thibault, Vincent Danjean, "Analyzing Dynamic
   Task-Based Applications on Hybrid Platforms: An Agile Scripting
   Approach", In Third Workshop on Visual Performance Analysis, VPA@SC
   2016, Salt Lake, UT, USA, November 18, 2016,
-  pp. 17-24, 2016.
-  - [[http://perf-ev-runtime.gforge.inria.fr/vpa2016/][Reproducible Paper]]
-  - [[https://doi.org/10.1109/VPA.2016.008][DOI]]
-
-A second release of the framework is available in the companion
-website of the following manuscript, which is currently under
-evaluation in Wiley's Concurrent and Computation: Practice and
-Experience:
+  pp. 17-24, 2016 ([[http://perf-ev-runtime.gforge.inria.fr/vpa2016/][Reproducible Paper]] and [[https://doi.org/10.1109/VPA.2016.008][DOI]])
 
 - A Visual Performance Analysis Framework for Task-based Parallel
   Applications running on Hybrid Clusters. Vinicius Garcia Pinto,
   Lucas Mello Schnorr, Luka Stanisic, Arnaud Legrand, Samuel Thibault,
-  Vincent Danjean. Submitted to Wiley's CCPE.
-  - [[https://hal.inria.fr/hal-01616632/][Draft of this paper]]
-  - [[https://gitlab.in2p3.fr/schnorr/ccpe2017][Companion website]]
+  Vincent Danjean. Submitted to Wiley's CCPE. ([[https://hal.inria.fr/hal-01616632/][Draft of this paper]] and
+  [[https://gitlab.in2p3.fr/schnorr/ccpe2017][Companion website]])
 
 ** Contact
 

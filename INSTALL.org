@@ -55,10 +55,11 @@ loaded via a namespace (and not attached):
 [1] compiler_3.4.2
 #+end_example
 
-** Dependencies
-*** R
+** R Dependencies
 
-These are the packages required by our framework.
+These are the R packages required by our framework.
+
+You can run this code in your R shell to get them installed.
 
 #+begin_src R :results output :session :exports both
 install.packages(c("cowplot",
@@ -81,7 +82,7 @@ install.packages(c("cowplot",
                    "zoo"));
 #+end_src
 
-*** Non-R
+** Non-R Dependencies
 
 You need to install these tools:
 
@@ -93,10 +94,10 @@ You need to install these tools:
   - [[http://simgrid.gforge.inria.fr/][SimGrid]]
   - [[https://ibm.onthehub.com/WebStore/ProductSearchOfferingList.aspx?srch=ilog+cplex][Academic Initiative CPLEX]]
 
-** Installation Procedure
-We provide customized installations tips for the non-R dependencies
+Below, we provide customized installations tips for the non-R dependencies
 above. Please, make sure they are still updated against the official
 instructions available for each tool.
+
 *** StarPU, fxt, and poti
 
 1. Install the latest version of FXT

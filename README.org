@@ -33,6 +33,8 @@ prototypical environment to conduct hypothesis-checking for task-based
 applications that run on heterogeneous (multi-GPU, multi-core)
 multi-node experiments.
 
+The source code of this framework is released under the GPLv3 license.
+
 ** Content
 - [[./INSTALL.org][Installation Instructions]]
 ** Origin and Publications

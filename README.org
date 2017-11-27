@@ -33,7 +33,7 @@ prototypical environment to conduct hypothesis-checking for task-based
 applications that run on heterogeneous (multi-GPU, multi-core)
 multi-node experiments.
 
-* Origin and Publications
+** Origin and Publications
 
 A preliminary version of this framework has been released in the
 companion website (check the reproducible paper link below) of this
@@ -60,5 +60,5 @@ Experience:
   - [[https://hal.inria.fr/hal-01616632/][Draft of this paper]]
   - [[https://gitlab.in2p3.fr/schnorr/ccpe2017][Companion website]]
 
-* Content
+** Content
 - [[./INSTALL.org][Installation Instructions]]

@@ -64,4 +64,7 @@ Experience:
   - [[https://hal.inria.fr/hal-01616632/][Draft of this paper]]
   - [[https://gitlab.in2p3.fr/schnorr/ccpe2017][Companion website]]
 
+** Contact
+
+- [[http://www.inf.ufrgs.br/~schnorr][Lucas Mello Schnorr (http://www.inf.ufrgs.br/~schnorr)]]
 

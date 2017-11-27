@@ -22,8 +22,36 @@
 
 * StarVZ
 
-StarVZ consists in a performance analysis workflow combining many
-different tools R functions that can be used to run the analysis
+StarVZ consists in a performance analysis workflow that combines the
+power of the R language (and the =tidyverse= realm) and many auxiliary
+tools to provide a consistent, flexible, extensible, fast, and
+versatile framework for the performance analysis of task-based
+applications that run on top of the [[http://starpu.gforge.inria.fr/][StarPU runtime]] (with its MPI layer
+for multi-node support). Its goal is to provide a fruitful
+prototypical environment to conduct hypothesis-checking for task-based
+applications that run on heterogeneous (multi-GPU, multi-core)
+multi-node experiments. A preliminary version of this framework has
+been present in the companion website of this publication:
+
+- Vinicius Garcia Pinto, Luka Stanisic, Arnaud Legrand, Lucas Mello
+  Schnorr, Samuel Thibault, Vincent Danjean, "Analyzing Dynamic
+  Task-Based Applications on Hybrid Platforms: An Agile Scripting
+  Approach", In Third Workshop on Visual Performance Analysis, VPA@SC
+  2016, Salt Lake, UT, USA, November 18, 2016,
+  pp. 17-24, 2016.
+  - [[http://perf-ev-runtime.gforge.inria.fr/vpa2016/][Reproducible Paper]]
+  - [[https://doi.org/10.1109/VPA.2016.008][DOI]]
+
+A second version of the framework is available in the companion
+website of draft, which is currently under evaluation in Wiley's
+Concurrent and Computation: Practice and Experience:
+
+- A Visual Performance Analysis Framework for Task-based Parallel
+  Applications running on Hybrid Clusters. Vinicius Garcia Pinto,
+  Lucas Mello Schnorr, Luka Stanisic, Arnaud Legrand, Samuel Thibault,
+  Vincent Danjean
+  - [[https://hal.inria.fr/hal-01616632/][Draft of this paper]]
+  - [[https://gitlab.in2p3.fr/schnorr/ccpe2017][Companion website]]
 
 ** Dependencies
 *** R

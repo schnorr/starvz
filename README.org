@@ -43,13 +43,14 @@ been present in the companion website of this publication:
   - [[https://doi.org/10.1109/VPA.2016.008][DOI]]
 
 A second version of the framework is available in the companion
-website of draft, which is currently under evaluation in Wiley's
-Concurrent and Computation: Practice and Experience:
+website of the following manuscript, which is currently under
+evaluation in Wiley's Concurrent and Computation: Practice and
+Experience:
 
 - A Visual Performance Analysis Framework for Task-based Parallel
   Applications running on Hybrid Clusters. Vinicius Garcia Pinto,
   Lucas Mello Schnorr, Luka Stanisic, Arnaud Legrand, Samuel Thibault,
-  Vincent Danjean
+  Vincent Danjean. Submitted to Wiley's CCPE.
   - [[https://hal.inria.fr/hal-01616632/][Draft of this paper]]
   - [[https://gitlab.in2p3.fr/schnorr/ccpe2017][Companion website]]
 

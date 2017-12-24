@@ -1,24 +1,4 @@
-suppressMessages(
-    c(
-        library(ggplot2),
-        library(lpSolve),
-        library(pipeR),
-        library(RColorBrewer),
-        library(Rcpp),
-        library(tidyr),
-        library(tidyverse),
-        library(zoo),
-        library(cowplot),
-        library(data.tree),
-        library(dplyr),
-        library(feather),
-        library(logging),
-        library(magrittr),
-        library(pipeR),
-        library(readr),
-        library(reshape2),
-        library(tidyverse),
-        library(zoo)));
+source("deps.R");
 
 time_aggregation_prep <- function(dfw = NULL)
 {

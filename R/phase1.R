@@ -1,3 +1,5 @@
+source("deps.R");
+
 read_state_csv <- function (where = ".",
                             app_states_fun = NULL,
                             outlier_fun = NULL,

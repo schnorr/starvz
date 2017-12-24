@@ -203,8 +203,6 @@ read_state_csv <- function (where = ".",
 
     return(dfw);
 }
-suppressMessages(library(readr));
-suppressMessages(library(dplyr));
 read_vars_set_new_zero <- function (where = ".")
 {
     variable.feather = paste0(where, "/paje.variable.feather");
@@ -252,10 +250,6 @@ read_vars_set_new_zero <- function (where = ".")
                 Type = gsub("Bandwidth Out \\(MB/s)", "B. Out (MB/s)", Type));
     return(dfv);
 }
-suppressMessages(library(data.tree));
-suppressMessages(library(tidyverse));
-suppressMessages(library(feather));
-suppressMessages(library(logging));
 
 atree_load <- function(where = "."){
     atree.feather = paste0(where, "/atree.feather");
@@ -481,10 +475,6 @@ yconf <- function (dfw = NULL)
 outlier_definition <- function(x) {
     (quantile(x)["75%"] + (quantile(x)["75%"] - quantile(x)["25%"]) * 1.5)
 }
-suppressMessages(library(dplyr));
-suppressMessages(library(reshape2));
-suppressMessages(library(magrittr));
-library(lpSolve);
 
 abe_cpu_cuda <- function(dfl, debug=FALSE)
 {
@@ -644,7 +634,6 @@ abe_cpu_cuda_inner <- function(dfl, debug=FALSE)
   result <- lp("min", f.obj, m.con, m.dir, m.rhs);
   return(tibble(Result=list(result), Values=list(values), Types=list(types)));
 }
-library(Rcpp);
 cppFunction(
     includes=c(
         "#include<boost/graph/dag_shortest_paths.hpp>",
@@ -732,9 +721,6 @@ while (vtemp != source){
 ret.push_back(JobIdMap[source]);
 return ret;
 }')
-suppressMessages(library(tidyverse));
-suppressMessages(library(data.tree));
-suppressMessages(library(pipeR));
 tree_filtering <- function (dfe, natures, types)
 {
     loginfo("Starting the tree filtering to create Y coordinates");
@@ -872,7 +858,6 @@ scalfmm_colors <- function()
 #        Color =  c("#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00", "#ffff33", "#a65628", "#f781bf"));
 }
 
-library(RColorBrewer);
 starpu_colors <- function()
 {
     tibble(Value = starpu_states()) %>%
@@ -902,8 +887,6 @@ cholesky_pastix_colors <- function()
                   "#4daf4a",
                   "#c0c0c0"));
 }
-library(tidyverse);
-library(ggplot2);
 state_chart <- function (data = NULL, globalEndTime = NULL, ST.Outliers = TRUE, StarPU.View = FALSE)
 {
     if (is.null(data)) stop("data provided to state_chart is NULL");
@@ -966,7 +949,6 @@ state_chart <- function (data = NULL, globalEndTime = NULL, ST.Outliers = TRUE, 
     loginfo("Exit of state_chart");
     return(gow);
 }
-library(ggplot2);
 st_time_aggregation_plot <- function (data = NULL, dfw_agg = NULL, StarPU.View = FALSE)
 {
     if (is.null(data)) return(NULL);
@@ -1150,7 +1132,6 @@ k_chart <- function (dfw = NULL)
                       ymax=Iteration+height), alpha=.5) -> goijk;
     return(goijk);
 }
-library(ggplot2);
 var_chart <- function (dfv = NULL, ylabel = NA)
 {
     if (is.null(dfv)) return(NULL);
@@ -1171,7 +1152,6 @@ var_chart <- function (dfv = NULL, ylabel = NA)
         ylab (ylabel) +
         scale_colour_brewer(palette = "Dark2");
 }
-library(ggplot2);
 var_cumulative_chart <- function (dfv = NULL)
 {
     if (is.null(dfv)) return(NULL);
@@ -1276,9 +1256,6 @@ var_integration_segment_chart <- function (dfv = NULL, ylabel = NA, step = 250, 
     }
     return(result);
 }
-suppressMessages(library(readr));
-suppressMessages(library(feather));
-suppressMessages(library(logging));
 hl_y_paje_tree <- function (where = ".")
 {
     entities.feather = paste0(where, "/entities.feather");
@@ -1345,7 +1322,6 @@ hl_y_coordinates <- function (dfw = NULL, where = ".")
 
     return(dfw);
 }
-library(tidyr);
 hl_per_node_ABE <- function (dfw = NULL)
 {
     if(is.null(dfw)) stop("Input data frame is NULL");
@@ -1439,9 +1415,6 @@ hl_global_cpb <- function (data = NULL)
                        "tasks" = tasksOnCriticalPath));
     return(ret);
 }
-library(zoo);
-library(tidyr);
-library(pipeR);
 microscopic_time_expanding <- function (df = NULL, variable = NULL)
 {
     if (is.null(df)) return(NULL);
@@ -1481,7 +1454,6 @@ microscopic_time_expanding <- function (df = NULL, variable = NULL)
     summarize(Value=sum(Value)) %>%
     ungroup();
 }
-library(Rcpp);
 cppFunction("NumericVector integrateStepFunc(NumericVector x, NumericVector bounds, NumericVector values) {
   int nx=x.size()-1;
   int ix=0,ib=0;
@@ -1543,7 +1515,6 @@ remyTimeIntegrationPrep <- function(dfv = NULL, myStep = 100)
     tibble(Slice = mySlices, Value = c(remyTimeIntegration(dfv, slices=mySlices), 0)/myStep);
 }
 
-suppressMessages(library(cowplot));
 
 title_plot <- function(title = NULL)
 {
@@ -1665,7 +1636,6 @@ starpu_mpi_grid_arrange <- function(atree, st, starpu, ijk, lackready, ready, su
     g <- plot_grid(plotlist = P, align="v", ncol = 1, rel_heights = unlist(H));
     return(g);
 }
-suppressMessages(library(logging));
 the_reader_function <- function (directory = ".", app_states_fun = NULL, strict_state_filter = FALSE, whichApplication = NULL)
 {
     # Logging configuration
@@ -2084,8 +2054,6 @@ geom_atree <- function (data=NULL, Offset=1.02, Flip = TRUE)
         );
     return(ret);
 }
-library(tidyverse);
-library(ggplot2);
 atree_temporal_chart <- function(data = NULL, globalEndTime = NULL)
 {
     if (is.null(data)) stop("a NULL data has been provided to atree_temporal_chart");
@@ -2422,8 +2390,6 @@ geom_abe <- function(data = NULL)
     }
     return(list());
 }
-suppressMessages(library(logging));
-suppressMessages(library(feather));
 the_fast_reader_function <- function (directory = ".")
 {
     names <- c("State", "Variable", "Link", "DAG", "Y", "ATree", "Gaps");
@@ -2742,8 +2708,6 @@ geom_lackready <- function (data = NULL)
     loginfo("Finishing geom_lackready");
     return(ret);
 }
-library(tidyverse);
-library(ggplot2);
 state_mpi_chart <- function (data = NULL)
 {
     if (is.null(data)) stop("data provided to state_chart is NULL");
@@ -3023,7 +2987,6 @@ geom_aggregated_states <- function (data = NULL, Show.Outliers = FALSE, min_time
 
     return(ret);
 }
-library(ggplot2);
 st_time_aggregation_vinicius_plot <- function (data = NULL)
 {
     if (is.null(data)) return(NULL);

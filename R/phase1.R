@@ -830,3 +830,73 @@ read_dag <- function (where = ".", dfw = NULL, dfl = NULL)
         # Force the result as tibble for performance reasons
         as_tibble();
 }
+
+
+starpu_states <- function()
+{
+    c("Callback", "FetchingInput", "Idle", "Initializing", "Overhead", "PushingOutput", "Scheduling", "Submitting task", "Progressing", "Sleeping", "Submiting task");
+}
+
+cholesky_states <- function()
+{
+    cholesky_colors() %>% .$Kernel;
+}
+
+scalfmm_states <- function()
+{
+    scalfmm_colors() %>% .$Kernel;
+}
+cholesky_colors <- function()
+{
+    tibble(
+        Kernel = c("potrf", "trsm", "syrk", "gemm"),
+        Color = c("#e41a1c", "#377eb8", "#984ea3", "#4daf4a"));
+}
+
+scalfmm_colors <- function()
+{
+    tibble(
+# For the trace I've been given
+        Kernel = c("L2L-level", "L2P",     "M2L-level", "M2L-out-level", "M2M",     "P2M",     "P2P",     "P2P-out"),
+        Color =  c("#e41a1c",   "#377eb8", "#4daf4a",   "#984ea3",       "#ff7f00", "#ffff33", "#a65628", "#f781bf"));
+
+# For paper https://hal.inria.fr/hal-01474556/document
+#        Kernel = c("L2L",     "L2P",     "M2L_in",  "M2L_out", "M2M",     "P2M",     "P2P_in",  "P2P_out"),
+#        Color =  c("#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00", "#ffff33", "#a65628", "#f781bf"));
+}
+
+library(RColorBrewer);
+starpu_colors <- function()
+{
+    tibble(Value = starpu_states()) %>%
+        # Get colors from Set3
+        mutate(Color = brewer.pal(nrow(.), "Set3")) %>%
+        # Adopt Luka suggestion: Idle = orange; Sleeping = rose
+        mutate(Color = case_when(Value == "Idle" ~ "#FDB462",
+                                 Value == "PushingOutput" ~ "#BEBADA",
+                                 TRUE ~ Color)) -> t;
+    # Transform to a nice named list for ggplot
+    ret <- t %>% pull(Color)
+    names(ret) <- t %>% pull(Value);
+    return(ret);
+}
+
+cholesky_pastix_colors <- function()
+{
+    tibble(
+        Kernel = c("blok_dpotrfsp1d_panel",
+                   "cblk_dpotrfsp1d_panel",
+                   "blok_dtrsmsp",
+                   "blok_dgemmsp",
+                   "cblk_dgemmsp"),
+        Color = c("#e41a1c",
+                  "#000000",
+                  "#377eb8",
+                  "#4daf4a",
+                  "#c0c0c0"));
+}
+
+
+outlier_definition <- function(x) {
+    (quantile(x)["75%"] + (quantile(x)["75%"] - quantile(x)["25%"]) * 1.5)
+}

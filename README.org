@@ -37,6 +37,7 @@ The source code of this framework is released under the GPLv3 license.
 
 ** Content
 - [[./INSTALL.org][Installation Instructions]]
+- [[./PHASE1.org][Phase 1 Workflow Instructions]]
 ** Origin and Publications
 
 A preliminary version of this framework has been released in the

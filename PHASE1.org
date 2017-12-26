@@ -37,3 +37,37 @@ name of the application.
 : ./src/phase1-workflow.sh <fxtdir> <application>
 :   where <fxtdir> is a directory with prof_file_* FXT files from StarPU
 :   where <application> is either cholesky or qrmumps
+
+Example of utilization
+
+#+begin_src shell :results output
+./src/phase1-workflow.sh /home/schnorr/dev/Viz-For-StarPU-MPI/dpotrf_exp_7-v2_chifflet_2/7-v2_chifflet_2_5_2_lws_dpotrf_2_48000_960_false_false.dir/7-v2_chifflet_2_5_2_lws_dpotrf_2_48000_960_false_false_fxt/ cholesky
+#+end_src
+
+#+RESULTS:
+#+begin_example
+
+Start of /home/schnorr/dev/Viz-For-StarPU-MPI/dpotrf_exp_7-v2_chifflet_2/7-v2_chifflet_2_5_2_lws_dpotrf_2_48000_960_false_false.dir/7-v2_chifflet_2_5_2_lws_dpotrf_2_48000_960_false_false_fxt/
+
+~/dev/Viz-For-StarPU-MPI/dpotrf_exp_7-v2_chifflet_2/7-v2_chifflet_2_5_2_lws_dpotrf_2_48000_960_false_false.dir/7-v2_chifflet_2_5_2_lws_dpotrf_2_48000_960_false_false_fxt ~/dev/starvz
+Convert from FXT to paje.sorted.trace
+Tue Dec 26 09:59:13 -02 2017
+Convert from paje.sorted.trace to paje.csv
+Tue Dec 26 09:59:13 -02 2017
+Get states, links and variables in CSV
+Tue Dec 26 09:59:13 -02 2017
+Convert (DAG) DOT to CSV
+Tue Dec 26 09:59:13 -02 2017
+Convert (ATREE) DOT to CSV
+Post-processing CSV files
+[1] "Sourcing /home/schnorr/dev/starvz/./src/../R/phase1.R from /home/schnorr/dev/starvz/./src/../R/phase1-workflow.R"
+[1] "Sourcing /home/schnorr/dev/starvz/./src/../R/deps.R from /home/schnorr/dev/starvz/./src/../R/phase1-workflow.R"
+INFO::Files ./atree.feather or ./atree.csv do not exist.
+INFO::Reading  ./paje.state.csv
+INFO::Read of ./paje.state.csv completed
+
+End of /home/schnorr/dev/Viz-For-StarPU-MPI/dpotrf_exp_7-v2_chifflet_2/7-v2_chifflet_2_5_2_lws_dpotrf_2_48000_960_false_false.dir/7-v2_chifflet_2_5_2_lws_dpotrf_2_48000_960_false_false_fxt/
+Tue Dec 26 09:59:14 -02 2017
+
+~/dev/starvz
+#+end_example

@@ -22,9 +22,10 @@
 
 * Phase 1 Instructions
 
-  The Phase 1 of the workflow transforms the CSV files to FEATHER
-  files, which are much faster to read since it envolves no character
-  parsing. The =phase1-workflow.R= receives two parameters: a directory
-  with the input files, and a the name of the application.
+  The Phase 1 of the workflow transforms the StarPU FXT files to
+  FEATHER files, which are much faster to read than CSV files since it
+  envolves no character parsing. The =phase1-workflow.sh= receives two
+  parameters: a directory that contains the FXT input files, and the
+  name of the application.
 
 

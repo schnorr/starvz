@@ -28,6 +28,8 @@ envolves no character parsing. The =phase1-workflow.sh= receives two
 parameters: a directory that contains the FXT input files, and the
 name of the application.
 
+(you might want to hit the "Raw" button to see the output of this command)
+
 #+begin_src shell :results output :exports both
 ./src/phase1-workflow.sh
 #+end_src

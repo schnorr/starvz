@@ -40,7 +40,7 @@ name of the application.
 
 Example of utilization
 
-#+begin_src shell :results output
+#+begin_src shell :results output :exports both
 ./src/phase1-workflow.sh /home/schnorr/dev/Viz-For-StarPU-MPI/dpotrf_exp_7-v2_chifflet_2/7-v2_chifflet_2_5_2_lws_dpotrf_2_48000_960_false_false.dir/7-v2_chifflet_2_5_2_lws_dpotrf_2_48000_960_false_false_fxt/ cholesky
 #+end_src
 

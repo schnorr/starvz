@@ -20,9 +20,9 @@ function usage()
 # Parameters                 #
 ##############################
 CASE=${1:-}
-if [ -z "$CASE" ]; then echo "Error: <fxtdir> is empty"; exit; fi
+if [ -z "$CASE" ]; then echo "Error: <fxtdir> is empty"; usage; exit; fi
 APPLICATION=${2:-}
-if [ -z "$APPLICATION" ]; then echo "Error: <application> is empty"; exit; fi
+if [ -z "$APPLICATION" ]; then echo "Error: <application> is empty"; usage; exit; fi
 
 echo
 echo "Start of $CASE"

@@ -85,7 +85,7 @@ if [ -e "${ATREE}" ]; then
 fi
 
 echo "Post-processing CSV files"
-phase1-workflow.R . ${APPLICATION}
+../R/phase1-workflow.R . ${APPLICATION}
 rm -f atree.csv dag.csv entities.csv paje.link.csv paje.state.csv paje.variable.csv types.csv
 
 echo

@@ -1,0 +1,77 @@
+exp7:
+  base_size: 22
+  idleness_factor: 4.5
+
+  title:
+    active: FALSE
+    height: 0.6
+  kiteration:
+    active: TRUE
+    legend: TRUE
+  st:
+    active: TRUE
+    aggregation:
+      active: TRUE
+      method: "vinicius"
+    idleness: TRUE
+    abe:
+      active: TRUE
+    cpb: TRUE
+    cpb_mpi:
+      active: FALSE
+    makespan: TRUE
+    outliers: TRUE
+    legend: FALSE
+    tasks:
+      active: TRUE
+      list: ["1_24004"]
+      levels: 3
+  starpu:
+    active: TRUE
+    legend: TRUE
+  ready:
+    active: TRUE
+    legend: TRUE
+  lackready:
+    active: TRUE
+    aggregation: 1000
+    height: 0.3
+#    threshold: 1
+  submitted:
+    active: TRUE
+    legend: FALSE
+    height: 1.1
+  mpibandwidth:
+    active: TRUE
+    step: 100
+    legend: FALSE
+    height: 1.1
+  mpiconcurrent:
+    active: TRUE
+    legend: FALSE
+    height: 1.5
+  mpistate:
+    active: FALSE
+    legend: TRUE
+    height: 1.5
+  gpubandwidth:
+    active: TRUE
+    step: 85
+  gflops:
+    active: TRUE
+    facet: TRUE
+
+default:
+  # Empty
+  atree:
+  kiteration:
+  st:
+  starpu:
+  ready:
+  submitted:
+  usedmemory:
+  gpubandwidth:
+  mpibandwidth:
+  mpiconcurrent:
+  mpistate:
+  gflops:

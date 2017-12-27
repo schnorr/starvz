@@ -1,6 +1,7 @@
 suppressMessages(
     c(
         library(ggplot2),
+        library(gridExtra),
         library(lpSolve),
         library(pipeR),
         library(RColorBrewer),

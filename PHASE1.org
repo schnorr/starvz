@@ -41,23 +41,23 @@ name of the application.
 Example of utilization
 
 #+begin_src shell :results output :exports both
-./src/phase1-workflow.sh /home/schnorr/dev/Viz-For-StarPU-MPI/dpotrf_exp_7-v2_chifflet_2/7-v2_chifflet_2_5_2_lws_dpotrf_2_48000_960_false_false.dir/7-v2_chifflet_2_5_2_lws_dpotrf_2_48000_960_false_false_fxt/ cholesky
+./src/phase1-workflow.sh example/chifflet_2_5_2_lws_dpotrf_2_48000_960_fxt/ cholesky
 #+end_src
 
 #+RESULTS:
 #+begin_example
 
-Start of /home/schnorr/dev/Viz-For-StarPU-MPI/dpotrf_exp_7-v2_chifflet_2/7-v2_chifflet_2_5_2_lws_dpotrf_2_48000_960_false_false.dir/7-v2_chifflet_2_5_2_lws_dpotrf_2_48000_960_false_false_fxt/
+Start of example/chifflet_2_5_2_lws_dpotrf_2_48000_960_fxt/
 
-~/dev/Viz-For-StarPU-MPI/dpotrf_exp_7-v2_chifflet_2/7-v2_chifflet_2_5_2_lws_dpotrf_2_48000_960_false_false.dir/7-v2_chifflet_2_5_2_lws_dpotrf_2_48000_960_false_false_fxt ~/dev/starvz
+~/dev/starvz/example/chifflet_2_5_2_lws_dpotrf_2_48000_960_fxt ~/dev/starvz
 Convert from FXT to paje.sorted.trace
-Tue Dec 26 09:59:13 -02 2017
+Wed Dec 27 02:08:51 -02 2017
 Convert from paje.sorted.trace to paje.csv
-Tue Dec 26 09:59:13 -02 2017
+Wed Dec 27 02:08:55 -02 2017
 Get states, links and variables in CSV
-Tue Dec 26 09:59:13 -02 2017
+Wed Dec 27 02:08:59 -02 2017
 Convert (DAG) DOT to CSV
-Tue Dec 26 09:59:13 -02 2017
+Wed Dec 27 02:08:59 -02 2017
 Convert (ATREE) DOT to CSV
 Post-processing CSV files
 [1] "Sourcing /home/schnorr/dev/starvz/./src/../R/phase1.R from /home/schnorr/dev/starvz/./src/../R/phase1-workflow.R"
@@ -65,9 +65,56 @@ Post-processing CSV files
 INFO::Files ./atree.feather or ./atree.csv do not exist.
 INFO::Reading  ./paje.state.csv
 INFO::Read of ./paje.state.csv completed
+INFO::App state filter completed
+INFO::This is multi-node trace
+INFO::Define colors is starting right now.
+INFO::Colors data.frame is defined.
+INFO::Left joining the colors has completed.
+INFO::This is a cholesky application, colors are hard-coded
+INFO::Attempt to detect outliers using a basic model.
+INFO::Define the ZERO timestamp.
+INFO::Reading  ./entities.csv
+INFO::Read of ./entities.csv completed
+INFO::Starting the tree filtering to create Y coordinates
+INFO::Tree filtering completed.
+INFO::Starting y_coordinates
+INFO::The call for y_coordinates has completed.
+INFO::Converting data.tree to data.frame
+INFO::Conversion from data.tree to data.frame has completed.
+INFO::Reading  ./paje.variable.csv
+|====                                                            |   7%    1 MB|=====                                                           |   8%    1 MB|=====                                                           |   8%    1 MB|======                                                          |   9%    1 MB|======                                                          |  10%    1 MB|=======                                                         |  11%    2 MB|=======                                                         |  12%    2 MB|========                                                        |  12%    2 MB|========                                                        |  13%    2 MB|=========                                                       |  14%    2 MB|=========                                                       |  15%    2 MB|==========                                                      |  15%    2 MB|==========                                                      |  16%    3 MB|===========                                                     |  17%    3 MB|===========                                                     |  18%    3 MB|============                                                    |  18%    3 MB|============                                                    |  19%    3 MB|=============                                                   |  20%    3 MB|=============                                                   |  20%    3 MB|==============                                                  |  21%    4 MB|==============                                                  |  22%    4 MB|===============                                                 |  23%    4 MB|===============                                                 |  23%    4 MB|===============                                                 |  24%    4 MB|================                                                |  25%    4 MB|================                                                |  25%    4 MB|=================                                               |  26%    4 MB|=================                                               |  27%    5 MB|==================                                              |  27%    5 MB|==================                                              |  28%    5 MB|===================                                             |  29%    5 MB|===================                                             |  29%    5 MB|===================                                             |  30%    5 MB|====================                                            |  31%    5 MB|====================                                            |  32%    5 MB|=====================                                           |  32%    6 MB|=====================                                           |  33%    6 MB|======================                                          |  34%    6 MB|======================                                          |  34%    6 MB|=======================                                         |  35%    6 MB|=======================                                         |  36%    6 MB|=======================                                         |  36%    6 MB|========================                                        |  37%    6 MB|========================                                        |  38%    7 MB|=========================                                       |  38%    7 MB|=========================                                       |  39%    7 MB|==========================                                      |  40%    7 MB|==========================                                      |  40%    7 MB|==========================                                      |  41%    7 MB|===========================                                     |  42%    7 MB|===========================                                     |  42%    7 MB|============================                                    |  43%    8 MB|============================                                    |  44%    8 MB|=============================                                   |  44%    8 MB|=============================                                   |  45%    8 MB|==============================                                  |  46%    8 MB|==============================                                  |  47%    8 MB|===============================                                 |  47%    8 MB|===============================                                 |  48%    9 MB|===============================                                 |  49%    9 MB|================================                                |  49%    9 MB|================================                                |  50%    9 MB|=================================                               |  51%    9 MB|=================================                               |  51%    9 MB|==================================                              |  52%    9 MB|==================================                              |  53%    9 MB|===================================                             |  53%   10 MB|===================================                             |  54%   10 MB|===================================                             |  55%   10 MB|====================================                            |  55%   10 MB|====================================                            |  56%   10 MB|=====================================                           |  57%   10 MB|=====================================                           |  57%   10 MB|======================================                          |  58%   10 MB|======================================                          |  59%   11 MB|=======================================                         |  60%   11 MB|=======================================                         |  60%   11 MB|=======================================                         |  61%   11 MB|========================================                        |  62%   11 MB|========================================                        |  62%   11 MB|=========================================                       |  63%   11 MB|=========================================                       |  64%   11 MB|==========================================                      |  64%   12 MB|==========================================                      |  65%   12 MB|===========================================                     |  66%   12 MB|===========================================                     |  66%   12 MB|===========================================                     |  67%   12 MB|============================================                    |  68%   12 MB|============================================                    |  68%   12 MB|=============================================                   |  69%   12 MB|=============================================                   |  70%   13 MB|==============================================                  |  70%   13 MB|==============================================                  |  71%   13 MB|===============================================                 |  72%   13 MB|===============================================                 |  72%   13 MB|===============================================                 |  73%   13 MB|================================================                |  74%   13 MB|================================================                |  75%   14 MB|=================================================               |  75%   14 MB|=================================================               |  76%   14 MB|==================================================              |  77%   14 MB|==================================================              |  77%   14 MB|==================================================              |  78%   14 MB|===================================================             |  79%   14 MB|===================================================             |  79%   14 MB|====================================================            |  80%   15 MB|====================================================            |  81%   15 MB|=====================================================           |  81%   15 MB|=====================================================           |  82%   15 MB|======================================================          |  83%   15 MB|======================================================          |  83%   15 MB|======================================================          |  84%   15 MB|=======================================================         |  85%   15 MB|=======================================================         |  85%   16 MB|========================================================        |  86%   16 MB|========================================================        |  87%   16 MB|=========================================================       |  87%   16 MB|=========================================================       |  88%   16 MB|==========================================================      |  89%   16 MB|==========================================================      |  90%   16 MB|==========================================================      |  90%   16 MB|===========================================================     |  91%   17 MB|===========================================================     |  92%   17 MB|============================================================    |  92%   17 MB|============================================================    |  93%   17 MB|=============================================================   |  94%   17 MB|=============================================================   |  94%   17 MB|==============================================================  |  95%   17 MB|==============================================================  |  96%   17 MB|==============================================================  |  96%   18 MB|=============================================================== |  97%   18 MB|=============================================================== |  98%   18 MB|================================================================|  98%   18 MB|================================================================|  99%   18 MB|=================================================================| 100%   18 MB
+INFO::Read of ./paje.variable.csv completed
+INFO::Reading  ./paje.link.csv
+INFO::Read of ./paje.link.csv completed
+INFO::Reading  ./dag.csv
+INFO::Read of ./dag.csv completed
+INFO::Merge state data with the DAG
+INFO::Merge state data with the DAG completed
+INFO::Get MPI tasks (links) to enrich the DAG
+INFO::Merge link data with the DAG completed
+INFO::Reading  ./entities.csv
+INFO::Read of ./entities.csv completed
+INFO::Starting the tree filtering to create Y coordinates
+INFO::Tree filtering completed.
+INFO::Starting y_coordinates
+INFO::The call for y_coordinates has completed.
+INFO::Converting data.tree to data.frame
+INFO::Conversion from data.tree to data.frame has completed.
+INFO::Assembling the named list with the data from this case.
+INFO::Let's start to write the pre-processed files as feather data
+INFO::pre.state.feather
+INFO::pre.variable.feather
+INFO::pre.link.feather
+INFO::pre.dag.feather
+INFO::pre.y.feather
+INFO::pre.atree.feather
+INFO::Data for pre.atree.feather has not been feathered because is empty.
+INFO::pre.gaps.feather
+INFO::Data for pre.gaps.feather has not been feathered because is empty.
+INFO::Pre-process finished correctly.
 
-End of /home/schnorr/dev/Viz-For-StarPU-MPI/dpotrf_exp_7-v2_chifflet_2/7-v2_chifflet_2_5_2_lws_dpotrf_2_48000_960_false_false.dir/7-v2_chifflet_2_5_2_lws_dpotrf_2_48000_960_false_false_fxt/
-Tue Dec 26 09:59:14 -02 2017
+End of example/chifflet_2_5_2_lws_dpotrf_2_48000_960_fxt/
+Wed Dec 27 02:09:07 -02 2017
 
 ~/dev/starvz
 #+end_example

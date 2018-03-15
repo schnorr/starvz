@@ -125,6 +125,7 @@ yconf <- function (dfw = NULL)
         # One CPU per node
         dfw %>%
             select(Node, ResourceId, ResourceType, Position, Height) %>%
+            distinct() %>%
             group_by(Node) %>%
             arrange(Node, ResourceId, ResourceType) %>%
             slice(1) %>%
@@ -133,6 +134,7 @@ yconf <- function (dfw = NULL)
         # One GPU per node
         dfw %>%
             select(Node, ResourceId, ResourceType, Position, Height) %>%
+            distinct() %>%
             group_by(Node) %>%
             arrange(Node, ResourceId, ResourceType) %>%
             slice(n()) %>%
@@ -140,6 +142,7 @@ yconf <- function (dfw = NULL)
     }else{
         dfw %>%
             select(Node, ResourceId, ResourceType, Position, Height) %>%
+            distinct() %>%
             group_by(Node, ResourceType) %>%
             arrange(Node, ResourceId, ResourceType) %>%
             slice(c(1, n())) %>%

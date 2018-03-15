@@ -1682,7 +1682,7 @@ geom_mpistates <- function (data = NULL)
     return(ret);
 }
 
-calculate_resource_idleness <- function(dfw = NULL)
+calculate_resource_idleness <- function(dfw = NULL, max_only = TRUE)
 {
     if(is.null(dfw)) stop("Input data frame is NULL");
 
@@ -1695,20 +1695,22 @@ calculate_resource_idleness <- function(dfw = NULL)
 
     #Calculate resources idleness
     total_time <- tend - tstart;
-    dfw %>%
+    dfw <- dfw %>%
         group_by (ResourceType, ResourceId, Node, Position, Height) %>%
         summarize(Idleness = round((1-(sum(End-Start)/total_time))*100,2),
-                  End = max(End)) %>%
-        group_by(Node, ResourceType) %>%
-        filter(Idleness %in% c(max(Idleness))) %>% #, min(Idleness))) %>%
-        ungroup();
+                  End = max(End));
+    if(max_only){
+        dfw <- dfw %>% group_by(Node, ResourceType) %>%
+            filter(Idleness %in% c(max(Idleness))) #%>% #, min(Idleness))) %>%
+    }
+    dfw %>% ungroup();
 }
 
 geom_idleness <- function(data = NULL)
 {
     if(is.null(data)) stop("data provided for geom_idleness is NULL");
 
-    dfidle <- calculate_resource_idleness(data$State);
+    dfidle <- calculate_resource_idleness(data$State, !pjr_value(pajer$idleness_all, FALSE));
 
     bsize = pjr_value(pajer$base_size, 22);
     expand = pjr_value(pajer$expand, 0.05);

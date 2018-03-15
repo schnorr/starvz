@@ -139,6 +139,13 @@ yconf <- function (dfw = NULL)
             arrange(Node, ResourceId, ResourceType) %>%
             slice(n()) %>%
             ungroup;
+    }else if(pjr_value(pajer$st$labels, "1") == "ALL"){
+        dfw %>%
+            select(Node, ResourceId, ResourceType, Position, Height) %>%
+            distinct() %>%
+            group_by(Node, ResourceType) %>%
+            arrange(Node, ResourceId, ResourceType) %>%
+            ungroup;
     }else{
         dfw %>%
             select(Node, ResourceId, ResourceType, Position, Height) %>%

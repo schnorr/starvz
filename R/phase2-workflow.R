@@ -26,7 +26,7 @@ data <- the_fast_reader_function(directory);
 
 print("Data has been read");
 
-pajer <- config::get(file = pajer.config);
+pajer <- config::get(file = pajer.config, config="exp7");
 
 png(name, width = 1000, height = 900);
 print(grid.arrange(the_master_function(data)));

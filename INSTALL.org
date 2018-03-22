@@ -62,7 +62,8 @@ These are the R packages required by our framework.
 You can run this code in your R shell to get them installed.
 
 #+begin_src R :results output :session :exports both
-install.packages(c("cowplot",
+install.packages(c("config",
+                   "cowplot",
                    "data.table",
                    "data.tree",
                    "dplyr",

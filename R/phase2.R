@@ -6,7 +6,12 @@ script.name <- sub(file.arg.name, "", initial.options[grep(file.arg.name, initia
 script.basename <- dirname(script.name)
 other.name <- paste(sep="/", script.basename, "deps.R")
 print(paste("Sourcing",other.name,"from",script.name))
-source(other.name)
+
+if(file.exists(other.name)){
+  source(other.name)
+}else{
+  source("deps.R")
+}
 
 time_aggregation_prep <- function(dfw = NULL)
 {
@@ -18,7 +23,7 @@ time_aggregation_prep <- function(dfw = NULL)
         mutate(Value = 1) %>%
         select(-Duration, -Color, -Nature, -Type,
                -Size, -Depth, -Params, -JobId, -Footprint, -Tag,
-               -GFlop, -X, -Y, -Z, -Iteration, -Subiteration,
+               -GFlop, -X, -Y, -Iteration, -Subiteration,
                -Node, -Resource, -ResourceType, -Outlier, -Height,
                -Position);
 
@@ -87,7 +92,7 @@ st_time_aggregation <- function(dfw = NULL, StarPU.View = FALSE, step = 100)
     if (StarPU.View == FALSE){
         dfw <- dfw %>% filter(Application == TRUE);
     }
-    
+
     dfw_agg_prep <- time_aggregation_prep (dfw);
     dfw_agg <- time_aggregation_do (dfw_agg_prep, step);
     dfwagg_full <- time_aggregation_post (dfw, dfw_agg);
@@ -497,6 +502,9 @@ state_chart <- function (data = NULL, globalEndTime = NULL, ST.Outliers = TRUE, 
         # The per-node ABE
         if (pjr(pajer$st$abe$active)) gow = gow + geom_abe(data);
 
+        # add pmtool bound
+        if (pjr(pajer$pmtool$bounds$active)) gow = gow + geom_pmtools_bounds(data);
+
         # add makespan
         if (pjr(pajer$st$makespan)) gow = gow + geom_makespan(data);
 
@@ -529,6 +537,49 @@ state_chart <- function (data = NULL, globalEndTime = NULL, ST.Outliers = TRUE, 
     loginfo("Exit of state_chart");
     return(gow);
 }
+
+state_pmtool_chart <- function (data = NULL)
+{
+    if (is.null(data)) stop("data provided to state_chart is NULL");
+
+    # Get traces
+    dfw <- data$pmtool_states;
+
+    loginfo("Entry of state_pmtool_chart");
+
+    # Filter
+    dfwapp = dfw %>%
+        filter(sched == pajer$pmtool$state$sched);
+
+    # Obtain time interval
+    tstart <- dfwapp %>% .$Start %>% min;
+    tend <- dfwapp %>% .$End %>% max;
+
+    #Plot
+    gow <- ggplot() + default_theme();
+
+    # Add states and outliers if requested
+    gow <- gow + geom_pmtool_states(data);
+
+
+    #if (pjr(pajer$st$abe$active)) gow = gow + geom_abe(data);
+
+    #if (pjr(pajer$pmtool$bounds$active)) gow = gow + geom_pmtools_bounds(data);
+
+    # add makespan
+    if (pjr(pajer$st$makespan)) gow = gow + geom_makespan_pmtool(data);
+
+    # add idleness
+    #if (pjr(pajer$st$idleness)) gow = gow + geom_idleness(data);
+
+    # add Global CPB
+    #if (pjr(pajer$st$cpb) || pjr(pajer$st$cpb_mpi$active)) gow = gow + geom_cpb(data);
+
+    loginfo("Exit of state_pmtool_chart");
+    return(gow);
+}
+
+
 st_time_aggregation_plot <- function (data = NULL, dfw_agg = NULL, StarPU.View = FALSE)
 {
     if (is.null(data)) return(NULL);
@@ -573,7 +624,7 @@ st_time_aggregation_plot <- function (data = NULL, dfw_agg = NULL, StarPU.View =
                       ymin=Position+TaskPosition,
                       ymax=Position+(TaskPosition+TaskHeight)), alpha=.5) +
         # Print outliers on top
-        geom_rect(data=(dfw %>% filter(Outlier == TRUE)), 
+        geom_rect(data=(dfw %>% filter(Outlier == TRUE)),
                   aes(fill=Value,
                       xmin=Start,
                       xmax=End,
@@ -950,7 +1001,7 @@ microscopic_time_expanding <- function (df = NULL, variable = NULL)
     complete(ResourceId, Start=startUnique) %>%   # This is the first most important line
     # Repeat the values for the created that have been created
     mutate(Value = na.locf(Value, na.rm = FALSE)) %>% # This is the second most important line
-    # 
+    #
     ungroup() %>%
     # Repeat other columns (less important)
     mutate(
@@ -1054,7 +1105,7 @@ pjr <- function (property)
     ifelse(!is.null(property) && property, property, FALSE);
 }
 
-starpu_mpi_grid_arrange <- function(atree, st, starpu, ijk, lackready, ready, submitted, mpi, mpiconc, mpistate, gpu, memory, gflops, title = NULL)
+starpu_mpi_grid_arrange <- function(atree, st, st_pm, starpu, ijk, lackready, ready, submitted, mpi, mpiconc, mpistate, gpu, memory, gflops, title = NULL)
 {
     # The list that will contain the plots
     P <- list();
@@ -1085,7 +1136,11 @@ starpu_mpi_grid_arrange <- function(atree, st, starpu, ijk, lackready, ready, su
         P[[length(P)+1]] <- st;
         H[[length(H)+1]] <- pjr_value(pajer$st$height, 4);
     }
-   if (pjr(pajer$submitted$active)){
+    if (pjr(pajer$pmtool$state$active)){
+        P[[length(P)+1]] <- st_pm;
+        H[[length(H)+1]] <- pjr_value(pajer$st$height, 4);
+    }
+    if (pjr(pajer$submitted$active)){
         P[[length(P)+1]] <- submitted;
         H[[length(H)+1]] <- pjr_value(pajer$submitted$height, 1);
     }
@@ -1165,6 +1220,17 @@ the_master_function <- function(data = NULL)
 
     loginfo("Starting the master function");
 
+    # Fail Checking
+    if(is.null(data$pmtool_states)){
+      print("Pmtool states config is active but the data is NULL")
+      pajer$pmtool$state$active <<- FALSE;
+    }
+
+    if(is.null(data$pmtool)){
+      print("Pmtool bounds config is active but the data is NULL")
+      pajer$pmtool$bounds$active <<- FALSE;
+    }
+
     if (!is.null(pajer$time)){
         stop("pajer: you are using a deprecated parameter.");
     }
@@ -1181,6 +1247,7 @@ the_master_function <- function(data = NULL)
     # Set all possible plots to NULL
     goatreet <- geom_blank();
     gow <- geom_blank();
+    gow_pm <- geom_blank();
     gstarpu <- geom_blank();
     goijk <- geom_blank();
     golrv <- geom_blank();
@@ -1222,6 +1289,10 @@ the_master_function <- function(data = NULL)
         if (!pjr(pajer$st$legend)){
             gow <- gow + theme(legend.position="none");
         }
+    }
+
+    if (pjr(pajer$pmtool$state$active)){
+        data %>% state_pmtool_chart () + tScale -> gow_pm;
     }
 
     # StarPU SpaceTime
@@ -1386,12 +1457,13 @@ the_master_function <- function(data = NULL)
                                              xlim=c(tstart, tend));
         }
     }
-  
+
     loginfo("Assembling the plot");
 
     # assembling
     g <- starpu_mpi_grid_arrange(atree = goatreet,
                                  st = gow,
+                                 st_pm = gow_pm,
                                  starpu = gstarpu,
                                  ijk = goijk,
                                  lackready = golrv,
@@ -1405,7 +1477,7 @@ the_master_function <- function(data = NULL)
                                  gflops = gogfv,
                                  title = directory);
 
-    loginfo("Assembling concluded.");
+
     return(g);
 }
 
@@ -1633,6 +1705,42 @@ geom_states <- function (data = NULL, Show.Outliers = FALSE, StarPU = FALSE)
     return(ret);
 }
 
+geom_pmtool_states <- function (data = NULL)
+{
+    if (is.null(data)) stop("data is NULL when given to geom_states");
+
+
+    dfw <- data$pmtool_states %>% filter(sched == pajer$pmtool$state$sched);
+
+
+    loginfo("Starting geom_pmtool_states");
+
+    ret <- list();
+
+    # Color mapping
+    ret[[length(ret)+1]] <- scale_fill_manual(values = extract_colors(dfw));
+
+    # Y axis breaks and their labels
+    gg <- data$State %>% filter(Application == TRUE);
+    yconfm <- yconf(gg);
+    ret[[length(ret)+1]] <- scale_y_continuous(breaks = yconfm$Position+(yconfm$Height/3), labels=yconfm$ResourceId, expand=c(pjr_value(pajer$expand, 0.05),0));
+    # Y label
+    ret[[length(ret)+1]] <- ylab("Pmtool Workers");
+
+    # Add states
+    ret[[length(ret)+1]] <-
+        geom_rect(data=dfw, aes(fill=Value,
+                                xmin=Start,
+                                xmax=End,
+                                ymin=Position,
+                                ymax=Position+Height-0.4), alpha=0.5);
+
+
+    loginfo("Finishing geom_pmtool_states");
+
+    return(ret);
+}
+
 geom_mpistates <- function (data = NULL)
 {
     if (is.null(data)) stop("data is NULL when given to geom_mpistates");
@@ -1743,6 +1851,22 @@ geom_makespan <- function(data = NULL)
     ret <- geom_text(data=data.frame(), x=tend, y=height*.5, aes(label=round(tend,0)), angle=90, size=bsize/4);
     return(ret);
 }
+
+geom_makespan_pmtool <- function(data = NULL)
+{
+    if(is.null(data)) stop("data provided for geom_makespan_pmtool is NULL");
+    dfw <- data$pmtool_states;
+
+    bsize = pjr_value(pajer$base_size, 22);
+
+    tend = dfw %>% filter(sched == pajer$pmtool$state$sched) %>% pull(End) %>% max;
+    print(paste("makespan pm tool is", tend));
+    height = dfw %>% select(Position) %>% na.omit %>% pull(Position) %>% max;
+    print(paste("max height for makespan is", height));
+    ret <- geom_text(data=data.frame(), x=tend, y=height*.5, aes(label=round(tend,0)), angle=90, size=bsize/4);
+    return(ret);
+}
+
 geom_cpb <- function (data = NULL)
 {
     if (is.null(data)) stop("data is NULL when given to geom_cpb");
@@ -1824,6 +1948,39 @@ geom_abe <- function(data = NULL)
     }
     return(list());
 }
+
+geom_pmtools_bounds <- function(data = NULL)
+{
+    if (is.null(data)) stop("data is NULL when given to geom_pmtools_bounds");
+
+    dftemp <- data$State %>%
+        filter(Application == TRUE) %>%
+        filter(grepl("CPU|CUDA", ResourceId)) %>%
+        select(Node, Resource, ResourceType, Duration, Value, Position, Height);
+    # Y position
+    minPos = dftemp %>% pull(Position) %>% min;
+    minHeight = dftemp %>% pull(Height) %>% min;
+    maxPos = dftemp %>% pull(Position) %>% max + minHeight/2;
+
+    data$pmtool %>%
+      mutate(MinPosition = minPos,
+            MaxPosition = maxPos) -> df.pmtool;
+
+    bsize = pjr_value(pajer$base_size, 22)/5;
+
+    for(i in 1:nrow(df.pmtool)) {
+      bound <- df.pmtool[i,];
+      if (!is.null(bound)){
+          ret <- list(
+              geom_segment(data=bound, aes(x = Time+tstart, xend=Time+tstart, y = MinPosition, yend=MaxPosition), size=5, alpha=.7, color="gray"),
+              geom_text (data=bound, aes(x = Time+tstart, y = MinPosition+(MaxPosition-MinPosition)/2, label=paste0(ifelse(pjr_value(pajer$pmtool$bounds$label, TRUE), paste0(Alg, ": "), ""), round(Time, 0))), angle=90, color="black", size=bsize)
+          );
+          return(ret);
+      }
+    }
+    return(list());
+}
+
 plot_lackready <- function (data = NULL)
 {
     if (is.null(data)) stop("data is NULL when given to geom_lackready");
@@ -2040,7 +2197,7 @@ geom_path_highlight <- function (paths = NULL)
                                           ymax=Position+Height-0.4), alpha=0);
 
     # let's draw lines connecting tasks in the path
-    
+
     # collect each JobId coordinates
     paths %>% select(JobId, Start, End, Position, Height) %>% unique -> x1;
     # gather coordinates for the lines
@@ -2063,7 +2220,7 @@ geom_path_highlight <- function (paths = NULL)
 
 # This function computes chunks by ResourceId, tasks in the same chunk will be aggregated. This function is used by aggregate_trace function.
 # Input: Start,End,Duration,Value,JobId columns from a common data table with ResourceId, Start, End, Duration, Value, JobId columns
-#        excludeIds - list of JobIds to do not aggregate 
+#        excludeIds - list of JobIds to do not aggregate
 #        min_time_pure - states longer than this value should be kept pure.
 #        states - list of states to be aggregated
 # Output: a list of Chunks with the same size of the input columns (Start,End,Duration,Value,JobId)
@@ -2079,10 +2236,10 @@ compute_chunk <- function(Start,End,Duration,Value,JobId,excludeIds="",states,mi
     cumsum(chunk)
 }
 
-# This function creates an aggregated version of the trace. Using the computed chunks, it calculates the Start/End values of each chunk. It also calculates a proportion (Activity) that represents the time spent by each different state. 
+# This function creates an aggregated version of the trace. Using the computed chunks, it calculates the Start/End values of each chunk. It also calculates a proportion (Activity) that represents the time spent by each different state.
 # Input: df_native - a common data table with ResourceId, Start, End, Duration, Value, JobId columns
 #        states - list of states to be aggregated
-#        excludeIds - list of JobIds to do not aggregate 
+#        excludeIds - list of JobIds to do not aggregate
 #        min_time_pure - states longer than this value should be kept pure.
 # Output: a modified data table with new columns indicating the Chunk, the Number of tasks in this chunk (by state), Activity representing the proportion of time spent in this state, Aggregated that shows if a state is pure or not.
 aggregate_trace <- function(df_native, states, excludeIds, min_time_pure) {
@@ -2090,8 +2247,8 @@ aggregate_trace <- function(df_native, states, excludeIds, min_time_pure) {
     df_native2 <- df_native %>% group_by(ResourceId, Chunk) %>% mutate(Start=head(Start,1), End=tail(End, 1))
     df_aggregate <- df_native2 %>% group_by(ResourceId, Chunk, Value) %>%
         summarize(Duration = sum(Duration), Start=head(Start,1), End=head(End,1), Number=n()) # n() is used to get the number of lines (former length(ResourceId))
-    df_aggregate <- df_aggregate %>% group_by(ResourceId, Chunk) %>% mutate(Activity = Duration/(End-Start))  
-    df_aggregate <- df_aggregate %>% group_by(ResourceId, Chunk) %>% mutate(aggregated=ifelse((abs(Activity-1) <= 0.00001) & Number==1, FALSE, TRUE)) 
+    df_aggregate <- df_aggregate %>% group_by(ResourceId, Chunk) %>% mutate(Activity = Duration/(End-Start))
+    df_aggregate <- df_aggregate %>% group_by(ResourceId, Chunk) %>% mutate(aggregated=ifelse((abs(Activity-1) <= 0.00001) & Number==1, FALSE, TRUE))
     df_aggregate
 }
 
@@ -2196,7 +2353,7 @@ st_time_aggregation_vinicius_plot <- function (data = NULL)
                                states = with.states,
                                min_time_pure = with.min_time_pure) +
         xlab("Time [ms]");
- 
+
     # Y Label
     gow <- gow + ylab("Application Workers");
 

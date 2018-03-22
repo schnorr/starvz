@@ -20,7 +20,11 @@ if (length(args) < 2) {
 
 directory = args[[1]];
 pajer.config = args[[2]];
+
 name = "output.png";
+if (length(args)==3) {
+	name = args[[3]];
+}
 
 data <- the_fast_reader_function(directory);
 
@@ -28,6 +32,6 @@ print("Data has been read");
 
 pajer <- config::get(file = pajer.config, config="exp7");
 
-png(name, width = 1000, height = 900);
+png(name, width = 1000, height = 1500);
 print(grid.arrange(the_master_function(data)));
 dev.off();

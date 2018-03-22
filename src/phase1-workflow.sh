@@ -39,6 +39,31 @@ rm -f paje.trace
 # Put Lionel's pmtool to get bounds to enrich the visualization
 # Also create a hypothetical trace from the solution of the LP
 
+PMTOOLCSV=""
+
+# Checking if Lionel's pmtool command and platform_file.rec file are available & accessible
+if [ -x "$(command -v pmtool)" ] && [ -f "platform_file.rec" ]; then
+  PMTOOLOUT="pmtool.csv"
+
+  # This command should be executed with the cluster starpu.
+  #starpu_perfmodel_recdump tasks.rec -o platform_file.rec
+
+  # Running pmtool with default-normal configuration
+  echo "Execute pmtool"
+  pmtool -p platform_file.rec tasks.rec -d fast --threads --no-header -w -s pmtool_states.out > pmtool.out 2> /dev/null
+
+  # Cleaning pmtools bounds.
+  echo "Alg,Time" > $PMTOOLOUT
+  cat pmtool.out | awk '{ print $(NF-2), $(NF-1)}' | sed -e 's/[[:space:]]/,/g' >> $PMTOOLOUT
+
+  # Cleaning states
+  cat pmtool_states.out | sed -e 's/[[:space:]][[:space:]]*/,/g' > pmtool_states.csv
+
+  rm -f pmtool.out pmtool_states.out
+else
+  echo "Lionel's pmtool or platform_file.rec file are not available, skipping it."
+fi
+
 rm -f activity.data distrib.data trace.html tasks.rec data.rec trace.rec
 
 echo "Convert from paje.sorted.trace to paje.csv"

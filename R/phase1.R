@@ -1,4 +1,3 @@
-
 # see:
 # https://stackoverflow.com/questions/1815606/rscript-determine-path-of-the-executing-script (Suppressingfire answer)
 initial.options <- commandArgs(trailingOnly = FALSE)
@@ -7,7 +6,13 @@ script.name <- sub(file.arg.name, "", initial.options[grep(file.arg.name, initia
 script.basename <- dirname(script.name)
 other.name <- paste(sep="/", script.basename, "deps.R")
 print(paste("Sourcing",other.name,"from",script.name))
-source(other.name)
+
+if(file.exists(other.name)){
+  source(other.name)
+}else{
+  source("deps.R")
+}
+
 
 read_state_csv <- function (where = ".",
                             app_states_fun = NULL,
@@ -397,9 +402,13 @@ the_reader_function <- function (directory = ".", app_states_fun = NULL, strict_
     # Read entities.csv and register the hierarchy (with Y coordinates)
     dfhie <- hl_y_paje_tree (where = directory);
 
+    dpmtb <- pmtools_bounds_csv_parser (where = directory);
+
+    dpmts <- pmtools_states_csv_parser (where = directory, whichApplication = whichApplication, Y=dfhie);
+
     loginfo("Assembling the named list with the data from this case.");
 
-    data <- list(Origin=directory, State=dfw, Variable=dfv, Link=dfl, DAG=dfdag, Y=dfhie, ATree=dfa);
+    data <- list(Origin=directory, State=dfw, Variable=dfv, Link=dfl, DAG=dfdag, Y=dfhie, ATree=dfa, pmtool=dpmtb, pmtool_states=dpmts);
 
     # Calculate the GAPS from the DAG
     if (whichApplication == "cholesky"){
@@ -460,6 +469,129 @@ hl_y_paje_tree <- function (where = ".")
     if ((workertreedf %>% nrow) == 0) stop("After converting the tree back to DF, number of rows is zero.");
 
     return(workertreedf);
+}
+
+pmtools_bounds_csv_parser <- function (where = ".")
+{
+    entities.feather = paste0(where, "/pmtool.feather");
+    entities.csv = paste0(where, "/pmtool.csv");
+
+    if (file.exists(entities.feather)){
+        loginfo(paste("Reading ", entities.feather));
+        pm <- read_feather(entities.feather);
+        loginfo(paste("Read of", entities.feather, "completed"));
+    }else if (file.exists(entities.csv)){
+        loginfo(paste("Reading ", entities.csv));
+        pm <- read_csv(entities.csv,
+                        trim_ws=TRUE,
+                        col_types=cols(
+                            Alg = col_character(),
+                            Time = col_double()
+                        ));
+        # pmtools gives time in microsecounds
+        pm[[2]] <- pm[[2]]/1000
+        loginfo(paste("Read of", entities.csv, "completed"));
+    }else{
+        loginfo(paste("Files", entities.feather, "or", entities.csv, "do not exist."));
+        return(NULL);
+    }
+    ret <- pm;
+    return(ret);
+}
+
+pmtools_states_csv_parser <- function (where = ".", whichApplication = NULL, Y = NULL)
+{
+    entities.feather = paste0(where, "/pmtool_states.feather");
+    entities.csv = paste0(where, "/pmtool_states.csv");
+
+    if (file.exists(entities.feather)){
+        loginfo(paste("Reading ", entities.feather));
+        pm <- read_feather(entities.feather);
+        loginfo(paste("Read of", entities.feather, "completed"));
+    }else if (file.exists(entities.csv)){
+        loginfo(paste("Reading ", entities.csv));
+
+        #sched Tid   worker taskType JobId start duration end
+
+        pm <- read_csv(entities.csv,
+                        trim_ws=TRUE,
+                        col_types=cols(
+                            sched = col_character(),
+                            Tid = col_integer(),
+                            worker = col_integer(),
+                            taskType = col_character(),
+                            JobId = col_character(),
+                            start = col_double(),
+                            duration = col_double(),
+                            end = col_double()
+                        ));
+        #pmtools states gives time in milisecounds
+
+        pm[[6]] <- pm[[6]]/1000
+        pm[[7]] <- pm[[7]]/1000
+        pm[[8]] <- pm[[8]]/1000
+
+        names(pm)[names(pm) == 'taskType'] <- 'Value'
+        names(pm)[names(pm) == 'start'] <- 'Start'
+        names(pm)[names(pm) == 'end'] <- 'End'
+        names(pm)[names(pm) == 'duration'] <- 'Duration'
+        names(pm)[names(pm) == 'worker'] <- 'ResourceId'
+
+
+        fileName <- "platform_file.rec"
+        conn <- file(fileName,open="r")
+        linn <-readLines(conn)
+
+        devices <- c()
+
+        for (i in 1:length(linn)){
+        	if(substr(linn[i], 1, 18)=="%rec: worker_count"){
+        		for (y in i:length(linn)){
+        			if(substr(linn[y], 1, 12)=="%rec: timing"){
+        				break;
+        			}
+        			if(substr(linn[y], 1, 14)=="Architecture: "){
+                hard <- substr(linn[y], 15, nchar(linn[y]))
+                if(substr(hard,1,3)=="cpu"){
+                  hard <- "CPU"
+                }else{
+                  hard <- paste0(toupper(hard),"_")
+                }
+        				y <- y + 1
+        				i <- i + 1
+                num <- as.numeric(substr(linn[y], 12, nchar(linn[y])))
+                for(z in 1:num){
+                  devices <- c(devices, paste0(hard, z-1))
+                }
+        			}
+        		}
+        	}else if(substr(linn[i], 1, 12)=="%rec: timing"){
+        		break;
+        	}
+        }
+
+        pm[[3]] <- devices[pm[[3]]+1]
+
+        pm <- pm %>% left_join((Y %>% select(-Type, -Nature)), by=c("ResourceId" = "Parent"))
+
+        if (whichApplication == "cholesky"){
+            pm <- pm %>%
+                mutate(Color = case_when(
+                           Value=="dpotrf" ~ "#e41a1c",
+                           Value=="dtrsm" ~ "#377eb8",
+                           Value=="dsyrk" ~ "#984ea3",
+                           Value=="dgemm" ~ "#4daf4a",
+                           TRUE ~ "#000"));
+        }
+
+        print(pm)
+        loginfo(paste("Read of", entities.csv, "completed"));
+    }else{
+        loginfo(paste("Files", entities.feather, "or", entities.csv, "do not exist."));
+        return(NULL);
+    }
+    ret <- pm;
+    return(ret);
 }
 
 
@@ -585,7 +717,7 @@ dt_to_df_inner <- function (node)
 
 the_fast_reader_function <- function (directory = ".")
 {
-    names <- c("State", "Variable", "Link", "DAG", "Y", "ATree", "Gaps");
+    names <- c("State", "Variable", "Link", "DAG", "Y", "ATree", "Gaps", "pmtool", "pmtool_states");
     filenames <- gsub("^", "pre.", gsub("$", ".feather", tolower(names)));
 
     l1 <- list(Origin = directory);
@@ -826,7 +958,7 @@ read_dag <- function (where = ".", dfw = NULL, dfl = NULL)
             mutate(Node = as.factor(Node)) %>%
             mutate(ResourceType = as.factor(gsub('[[:digit:]]+', '', Resource)));
         dfdag <- dfdags %>% bind_rows(dfdagl);
-      
+
         loginfo("Merge link data with the DAG completed");
     }else{
         dfdag <- dfdags;

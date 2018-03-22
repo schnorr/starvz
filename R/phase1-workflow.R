@@ -8,10 +8,11 @@ script.name <- sub(file.arg.name, "", initial.options[grep(file.arg.name, initia
 script.basename <- dirname(script.name)
 other.name <- paste(sep="/", script.basename, "phase1.R")
 print(paste("Sourcing",other.name,"from",script.name))
+
 source(other.name)
 
 #
-# This script gets a directory with CSV files from StarPU PajeNGR framework 
+# This script gets a directory with CSV files from StarPU PajeNGR framework
 # and process them using the_reader_function. As output, it generates
 # ready-to-plot feather files.
 #
@@ -118,6 +119,23 @@ filename <- "pre.gaps.feather";
 loginfo(filename);
 if (!is.null(data$Gaps)){
     write_feather(data$Gaps, filename);
+}else{
+    loginfo(paste("Data for", filename, "has not been feathered because is empty."));
+}
+
+# PMtool
+filename <- "pre.pmtool.feather";
+loginfo(filename);
+if (!is.null(data$pmtool)){
+    write_feather(data$pmtool, filename);
+}else{
+    loginfo(paste("Data for", filename, "has not been feathered because is empty."));
+}
+
+filename <- "pre.pmtool_states.feather";
+loginfo(filename);
+if (!is.null(data$pmtool_states)){
+    write_feather(data$pmtool_states, filename);
 }else{
     loginfo(paste("Data for", filename, "has not been feathered because is empty."));
 }

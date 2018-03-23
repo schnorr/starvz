@@ -412,7 +412,7 @@ the_reader_function <- function (directory = ".", app_states_fun = NULL, strict_
 
     # Calculate the GAPS from the DAG
     if (whichApplication == "cholesky"){
-        data$Gaps <- NULL;#gaps(data);
+        data$Gaps <- gaps(data);
     }else{
         data$Gaps <- NULL;
     }

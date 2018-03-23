@@ -13,6 +13,7 @@ if(file.exists(other.name)){
   source("deps.R")
 }
 
+# Code starts here - Do not remove this line
 
 read_state_csv <- function (where = ".",
                             app_states_fun = NULL,

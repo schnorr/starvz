@@ -404,7 +404,7 @@ the_reader_function <- function (directory = ".", app_states_fun = NULL, strict_
 
     dpmtb <- pmtools_bounds_csv_parser (where = directory);
 
-    dpmts <- pmtools_states_csv_parser (where = directory, whichApplication = whichApplication, Y=dfhie);
+    dpmts <- pmtools_states_csv_parser (where = directory, whichApplication = whichApplication, Y=dfhie, States = dfw);
 
     loginfo("Assembling the named list with the data from this case.");
 
@@ -499,7 +499,7 @@ pmtools_bounds_csv_parser <- function (where = ".")
     return(ret);
 }
 
-pmtools_states_csv_parser <- function (where = ".", whichApplication = NULL, Y = NULL)
+pmtools_states_csv_parser <- function (where = ".", whichApplication = NULL, Y = NULL, States = NULL)
 {
     entities.feather = paste0(where, "/pmtool_states.feather");
     entities.csv = paste0(where, "/pmtool_states.csv");
@@ -537,6 +537,7 @@ pmtools_states_csv_parser <- function (where = ".", whichApplication = NULL, Y =
         names(pm)[names(pm) == 'duration'] <- 'Duration'
         names(pm)[names(pm) == 'worker'] <- 'ResourceId'
 
+        pm <- separate(data = pm, col = JobId, into = c("JobId", "Tag"), sep = "\\:")
 
         fileName <- "platform_file.rec"
         conn <- file(fileName,open="r")
@@ -573,6 +574,9 @@ pmtools_states_csv_parser <- function (where = ".", whichApplication = NULL, Y =
         pm[[3]] <- devices[pm[[3]]+1]
 
         pm <- pm %>% left_join((Y %>% select(-Type, -Nature)), by=c("ResourceId" = "Parent"))
+        print(States)
+        print(pm)
+        pm <- pm %>% left_join((States %>% select(Iteration, JobId)), by=c("JobId" = "JobId"))
 
         if (whichApplication == "cholesky"){
             pm <- pm %>%

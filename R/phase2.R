@@ -763,6 +763,52 @@ k_chart <- function (dfw = NULL)
                       ymax=Iteration+height), alpha=.5) -> goijk;
     return(goijk);
 }
+
+k_chart_pmtool <- function (dfw = NULL)
+{
+    if (is.null(dfw)) stop("dfw provided to k_chart is NULL");
+
+    dfw <- dfw %>%
+        filter(sched == pajer$pmtool$state$sched);
+
+    # Prepare for colors
+    dfw %>% select(Value, Color) %>% unique %>% .$Color -> choleskyColors
+    choleskyColors %>% setNames(dfw %>% select(Value, Color) %>% unique %>% .$Value) -> choleskyColors;
+
+    # Prepare for borders
+    dfborders <- dfw %>%
+        group_by(Iteration) %>%
+        summarize(Start = min(Start), End=max(End)) %>%
+        mutate(IterationB = lead(Iteration), StartB = lead(Start)) %>%
+        mutate(IterationE = lead(Iteration), EndB = lead(End)) %>%
+        na.omit;
+
+    # Height of each bar
+    height = 0.8;
+
+    dfw %>% ggplot() +
+        guides(fill = guide_legend(nrow = 1)) +
+        scale_fill_manual(values = choleskyColors) +
+        theme_bw(base_size=12) +
+        xlab("Time [ms]") +
+        ylab("PMTool Cholesky\nIteration") +
+        default_theme() +
+        # Keep the alpha = 1 even if we use an alpha below
+        guides(fill = guide_legend(override.aes = list(alpha=1))) +
+        scale_y_reverse() +
+        # The start border
+        geom_curve(data=dfborders, aes(x=Start, xend=StartB, y=Iteration+height, yend=IterationB+height), curvature=0.1, angle=20) +
+        # The end border
+        geom_curve(data=dfborders, aes(x=End, xend=EndB, y=Iteration, yend=IterationB), curvature=-0.1, angle=20) +
+        # The state
+        geom_rect(aes(fill=Value,
+                      xmin=Start,
+                      xmax=End,
+                      ymin=Iteration,
+                      ymax=Iteration+height), alpha=.5) -> goijk;
+    return(goijk);
+}
+
 var_chart <- function (dfv = NULL, ylabel = NA)
 {
     if (is.null(dfv)) return(NULL);
@@ -1105,7 +1151,7 @@ pjr <- function (property)
     ifelse(!is.null(property) && property, property, FALSE);
 }
 
-starpu_mpi_grid_arrange <- function(atree, st, st_pm, starpu, ijk, lackready, ready, submitted, mpi, mpiconc, mpistate, gpu, memory, gflops, title = NULL)
+starpu_mpi_grid_arrange <- function(atree, st, st_pm, starpu, ijk, ijk_pm, lackready, ready, submitted, mpi, mpiconc, mpistate, gpu, memory, gflops, title = NULL)
 {
     # The list that will contain the plots
     P <- list();
@@ -1135,6 +1181,10 @@ starpu_mpi_grid_arrange <- function(atree, st, st_pm, starpu, ijk, lackready, re
     if (pjr(pajer$st$active)){
         P[[length(P)+1]] <- st;
         H[[length(H)+1]] <- pjr_value(pajer$st$height, 4);
+    }
+    if (pjr(pajer$pmtool$kiteration$active)){
+        P[[length(P)+1]] <- ijk_pm;
+        H[[length(H)+1]] <- pjr_value(pajer$kiteration$height, 2);
     }
     if (pjr(pajer$pmtool$state$active)){
         P[[length(P)+1]] <- st_pm;
@@ -1224,6 +1274,7 @@ the_master_function <- function(data = NULL)
     if(is.null(data$pmtool_states)){
       print("Pmtool states config is active but the data is NULL")
       pajer$pmtool$state$active <<- FALSE;
+      pajer$pmtool$kiteration$active <<- FALSE;
     }
 
     if(is.null(data$pmtool)){
@@ -1250,6 +1301,7 @@ the_master_function <- function(data = NULL)
     gow_pm <- geom_blank();
     gstarpu <- geom_blank();
     goijk <- geom_blank();
+    goijk_pm <- geom_blank();
     golrv <- geom_blank();
     gorv <- geom_blank();
     gosv <- geom_blank();
@@ -1313,6 +1365,16 @@ the_master_function <- function(data = NULL)
 
         if (!pjr(pajer$kiteration$legend)){
             goijk <- goijk + theme(legend.position="none");
+        }
+    }
+
+    # KIteration PMTOOL
+    if (pjr(pajer$pmtool$kiteration$active)){
+        loginfo("Creating the KIteration for PMTool");
+        goijk_pm <- k_chart_pmtool(data$pmtool_states) + tScale;
+
+        if (!pjr(pajer$pmtool$kiteration$legend)){
+            goijk_pm <- goijk_pm + theme(legend.position="none");
         }
     }
 
@@ -1466,6 +1528,7 @@ the_master_function <- function(data = NULL)
                                  st_pm = gow_pm,
                                  starpu = gstarpu,
                                  ijk = goijk,
+                                 ijk_pm = goijk_pm,
                                  lackready = golrv,
                                  ready = gorv,
                                  submitted = gosv,

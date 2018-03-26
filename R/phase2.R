@@ -2000,7 +2000,6 @@ geom_abe <- function(data = NULL)
 
     # states and k
     pernodeABEdf <- hl_per_node_ABE(data$State);
-    print(pernodeABEdf);
 
     bsize = pjr_value(pajer$base_size, 22)/5;
 

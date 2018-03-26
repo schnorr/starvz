@@ -575,8 +575,8 @@ pmtools_states_csv_parser <- function (where = ".", whichApplication = NULL, Y =
         pm[[3]] <- devices[pm[[3]]+1]
 
         pm <- pm %>% left_join((Y %>% select(-Type, -Nature)), by=c("ResourceId" = "Parent"))
-        print(States)
-        print(pm)
+        #print(States)
+        #print(pm)
         pm <- pm %>% left_join((States %>% select(Iteration, JobId)), by=c("JobId" = "JobId"))
 
         if (whichApplication == "cholesky"){
@@ -589,7 +589,7 @@ pmtools_states_csv_parser <- function (where = ".", whichApplication = NULL, Y =
                            TRUE ~ "#000"));
         }
 
-        print(pm)
+        #print(pm)
         loginfo(paste("Read of", entities.csv, "completed"));
     }else{
         loginfo(paste("Files", entities.feather, "or", entities.csv, "do not exist."));
@@ -746,7 +746,7 @@ gaps.f_backward <- function (data)
         data$DAG %>%
             filter(grepl("mpicom", JobId)) -> tmpdag
     } else {
-        data$DAG -> tmpdag        
+        data$DAG -> tmpdag
     }
     tmpdag %>%
         rename(DepChain = JobId, Member = Dependent) %>%
@@ -846,7 +846,7 @@ gaps <- function (data)
         dfl <- data.frame()
         data.b.dag <- data.frame()
         data.f.dag <- data.frame()
-    } else {  
+    } else {
         dfl <- data$Link %>%
             filter(grepl("mpicom", Key)) %>%
             mutate(Value = NA, ResourceId = Origin, Node = NA) %>%

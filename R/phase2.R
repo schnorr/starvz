@@ -13,6 +13,8 @@ if(file.exists(other.name)){
   source("deps.R")
 }
 
+# Code starts here - Do not remove this line
+
 time_aggregation_prep <- function(dfw = NULL)
 {
     if (is.null(dfw)) return(NULL);
@@ -2188,19 +2190,27 @@ gaps_backward_deps_one <- function(data = NULL, task = NULL, levels = 1)
         left_join(dfw, by=c("JobId" = "JobId")) -> retw;
 
     # Enrich links
-    dfl <- data$Link
-    ret %>%
-        filter(grepl("mpi", JobId)) %>%
-        left_join(dfl, by=c("JobId" = "Key")) %>%
-        # Post-processing
-        # Keep only the destination of the link
-        rename(ResourceId = Dest) %>%
-        separate(ResourceId, into=c("Node", "Resource"), remove=FALSE) %>%
-        select(-Origin, -Container) %>%
-        # Enrich ResourceId with Height, Position
-        left_join((data$Y %>% select(-Type, -Nature)), by=c("ResourceId" = "Parent")) %>%
-        # Post-processing to ease row binding
-        mutate(Size = as.character(Size)) -> retl;
+    if(is.null(data$Link)){
+        dfl <- data.frame()
+    } else {
+        dfl <- data$Link
+    }
+    if(TRUE %in% grepl("mpi", ret$JobId)){
+        ret %>%
+            filter(grepl("mpi", JobId)) %>%
+            left_join(dfl, by=c("JobId" = "Key")) %>%
+            # Post-processing
+            # Keep only the destination of the link
+            rename(ResourceId = Dest) %>%
+            separate(ResourceId, into=c("Node", "Resource"), remove=FALSE) %>%
+            select(-Origin, -Container) %>%
+            # Enrich ResourceId with Height, Position
+            left_join((data$Y %>% select(-Type, -Nature)), by=c("ResourceId" = "Parent")) %>%
+            # Post-processing to ease row binding
+            mutate(Size = as.character(Size)) -> retl;
+    } else {
+        data.frame() -> retl;
+    }
 
     # Merge
     return(retw %>% bind_rows(retl) %>% arrange(Start));

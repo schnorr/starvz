@@ -13,6 +13,7 @@ if(file.exists(other.name)){
   source("deps.R")
 }
 
+# Code starts here - Do not remove this line
 
 read_state_csv <- function (where = ".",
                             app_states_fun = NULL,
@@ -412,7 +413,7 @@ the_reader_function <- function (directory = ".", app_states_fun = NULL, strict_
 
     # Calculate the GAPS from the DAG
     if (whichApplication == "cholesky"){
-        data$Gaps <- NULL;#gaps(data);
+        data$Gaps <- gaps(data);
     }else{
         data$Gaps <- NULL;
     }
@@ -741,8 +742,13 @@ the_fast_reader_function <- function (directory = ".")
 gaps.f_backward <- function (data)
 {
     # Create the seed chain
-    data$DAG %>%
-        filter(grepl("mpicom", JobId)) %>%
+    if(TRUE %in% grepl("mpicom", data$DAG$JobId)){
+        data$DAG %>%
+            filter(grepl("mpicom", JobId)) -> tmpdag
+    } else {
+        data$DAG -> tmpdag        
+    }
+    tmpdag %>%
         rename(DepChain = JobId, Member = Dependent) %>%
         select(DepChain, Member) -> seedchain;
 
@@ -770,8 +776,13 @@ gaps.f_backward <- function (data)
 gaps.f_forward <- function (data)
 {
     # Create the seed chain
-    data$DAG %>%
-        filter(grepl("mpicom", Dependent)) %>%
+    if(TRUE %in% grepl("mpicom", data$DAG$Dependent)){
+        data$DAG %>%
+            filter(grepl("mpicom", Dependent)) -> tmpdag
+    } else {
+        data$DAG -> tmpdag
+    }
+    tmpdag %>%
         rename(DepChain = Dependent, Member = JobId) %>%
         select(DepChain, Member) -> seedchain;
 
@@ -802,7 +813,7 @@ gaps <- function (data)
 
     if(is.null(data$DAG)) return(NULL);
     if(is.null(data$State)) return(NULL);
-    if(is.null(data$Link)) return(NULL);
+    #if(is.null(data$Link)) return(NULL);
 
     gaps.f_backward(data) %>%
         filter(!is.na(DepChain)) %>%
@@ -831,20 +842,26 @@ gaps <- function (data)
     dfw <- data$State %>%
         filter(Application == TRUE) %>%
         select(JobId, Value, ResourceId, Node, Start, End);
-    dfl <- data$Link %>%
-        filter(grepl("mpicom", Key)) %>%
-        mutate(Value = NA, ResourceId = Origin, Node = NA) %>%
-        rename(JobId = Key) %>%
-        select(JobId, Value, ResourceId, Node, Start, End);
+    if(is.null(data$Link)){
+        dfl <- data.frame()
+        data.b.dag <- data.frame()
+        data.f.dag <- data.frame()
+    } else {  
+        dfl <- data$Link %>%
+            filter(grepl("mpicom", Key)) %>%
+            mutate(Value = NA, ResourceId = Origin, Node = NA) %>%
+            rename(JobId = Key) %>%
+            select(JobId, Value, ResourceId, Node, Start, End);
+            data.b %>%
+                left_join(dfl, by=c("JobId" = "JobId")) %>%
+                left_join(dfw, by=c("Dependent" = "JobId")) -> data.b.dag;
+        data.f %>%
+            left_join(dfw, by=c("JobId" = "JobId")) %>%
+            left_join(dfl, by=c("Dependent" = "JobId")) -> data.f.dag;
+    }
     data.z %>%
         left_join(dfw, by=c("JobId" = "JobId")) %>%
         left_join(dfw, by=c("Dependent" = "JobId")) -> data.z.dag;
-    data.b %>%
-        left_join(dfl, by=c("JobId" = "JobId")) %>%
-        left_join(dfw, by=c("Dependent" = "JobId")) -> data.b.dag;
-    data.f %>%
-        left_join(dfw, by=c("JobId" = "JobId")) %>%
-        left_join(dfl, by=c("Dependent" = "JobId")) -> data.f.dag;
 
     loginfo("The gaps calculation has completed.");
 

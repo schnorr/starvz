@@ -533,12 +533,48 @@ state_chart <- function (data = NULL, globalEndTime = NULL, ST.Outliers = TRUE, 
 
     }else{
         # add some color palette for StarPU States
-        gow = gow + scale_fill_manual(values = starpu_colors());
+        # Move to geom_states, as it was doing 2 times...
+        # gow = gow + scale_fill_manual(values = starpu_colors());
     }
 
     loginfo("Exit of state_chart");
     return(gow);
 }
+
+
+memory_chart <- function (data = NULL, globalEndTime = NULL)
+{
+    if (is.null(data)) stop("data provided to memory_chart is NULL");
+
+    # Get traces
+    dfw <- data$State;
+
+    loginfo("Entry of memory_chart");
+
+    # Filter
+    dfwapp = dfw %>%
+        # Considering only application data
+        filter(Application == TRUE) %>%
+        # Considering only Worker State
+        filter(Type == "Memory Node State");
+
+    # Obtain time interval
+    tstart <- dfwapp %>% .$Start %>% min;
+    tend <- dfwapp %>% .$End %>% max;
+
+    #Plot
+    gow <- ggplot() + default_theme();
+
+    # Add states and outliers if requested
+    gow <- gow + geom_memory(data);
+
+
+    #gow = gow + scale_fill_manual(values = starpu_colors());
+
+    loginfo("Exit of memory_chart");
+    return(gow);
+}
+
 
 state_pmtool_chart <- function (data = NULL)
 {
@@ -793,7 +829,7 @@ k_chart_pmtool <- function (dfw = NULL)
         scale_fill_manual(values = choleskyColors) +
         theme_bw(base_size=12) +
         xlab("Time [ms]") +
-        ylab("PMTool Cholesky\nIteration") +
+        ylab("PMTool\nIteration") +
         default_theme() +
         # Keep the alpha = 1 even if we use an alpha below
         guides(fill = guide_legend(override.aes = list(alpha=1))) +
@@ -831,6 +867,12 @@ var_chart <- function (dfv = NULL, ylabel = NA)
         ylab (ylabel) +
         scale_colour_brewer(palette = "Dark2");
 }
+
+link_chart <- function (data = NULL)
+{
+    data$Link %>% ggplot(aes(x = Start, xend = End, y = Origin, yend = Dest, color = Origin)) + default_theme() + geom_segment()
+}
+
 var_cumulative_chart <- function (dfv = NULL)
 {
     if (is.null(dfv)) return(NULL);
@@ -913,7 +955,6 @@ var_integration_segment_chart <- function (dfv = NULL, ylabel = NA, step = 250, 
 
     variable <- dfv %>% select(Type) %>% .$Type %>% unique;
     if (is.na(ylabel)) ylabel = variable;
-
     dfv %>%
         group_by(Type, Node, ResourceId, ResourceType) %>%
         do(remyTimeIntegrationPrep(., myStep = step)) %>%
@@ -923,6 +964,7 @@ var_integration_segment_chart <- function (dfv = NULL, ylabel = NA, step = 250, 
         group_by(Type, Node, ResourceType, Start, End, Duration) %>%
         summarize(Value = sum(Value), N=n()) %>%
         rename(ResourceId = Node) %>%
+        ungroup() %>%
         var_chart(., ylabel=ylabel) -> result;
     if (facetting){
         result <- result +
@@ -1153,7 +1195,7 @@ pjr <- function (property)
     ifelse(!is.null(property) && property, property, FALSE);
 }
 
-starpu_mpi_grid_arrange <- function(atree, st, st_pm, starpu, ijk, ijk_pm, lackready, ready, submitted, mpi, mpiconc, mpistate, gpu, memory, gflops, title = NULL)
+starpu_mpi_grid_arrange <- function(atree, st, st_pm, st_mm, transf, starpu, ijk, ijk_pm, lackready, ready, submitted, mpi, mpiconc, mpistate, gpu, memory, gflops, title = NULL)
 {
     # The list that will contain the plots
     P <- list();
@@ -1186,11 +1228,19 @@ starpu_mpi_grid_arrange <- function(atree, st, st_pm, starpu, ijk, ijk_pm, lackr
     }
     if (pjr(pajer$pmtool$kiteration$active)){
         P[[length(P)+1]] <- ijk_pm;
-        H[[length(H)+1]] <- pjr_value(pajer$kiteration$height, 2);
+        H[[length(H)+1]] <- pjr_value(pajer$pmtool$kiteration$height, 2);
     }
     if (pjr(pajer$pmtool$state$active)){
         P[[length(P)+1]] <- st_pm;
-        H[[length(H)+1]] <- pjr_value(pajer$st$height, 4);
+        H[[length(H)+1]] <- pjr_value(pajer$pmtool$state$height, 4);
+    }
+    if (pjr(pajer$memory$state$active)){
+        P[[length(P)+1]] <- st_mm;
+        H[[length(H)+1]] <- pjr_value(pajer$memory$state$height, 2);
+    }
+    if (pjr(pajer$transfers$active)){
+        P[[length(P)+1]] <- transf;
+        H[[length(H)+1]] <- pjr_value(pajer$transfers$height, 2);
     }
     if (pjr(pajer$submitted$active)){
         P[[length(P)+1]] <- submitted;
@@ -1214,11 +1264,11 @@ starpu_mpi_grid_arrange <- function(atree, st, st_pm, starpu, ijk, ijk_pm, lackr
     }
     if (pjr(pajer$usedmemory$active)){
         P[[length(P)+1]] <- memory;
-        H[[length(H)+1]] <- pjr_value(pajer$usedmemory$height, 1);
+        H[[length(H)+1]] <- pjr_value(pajer$usedmemory$height, 2);
     }
     if (pjr(pajer$gpubandwidth$active)){
         P[[length(P)+1]] <- gpu;
-        H[[length(H)+1]] <- pjr_value(pajer$gpubandwidth$height, 1);
+        H[[length(H)+1]] <- pjr_value(pajer$gpubandwidth$height, 2);
     }
     if (pjr(pajer$mpibandwidth$active)){
         P[[length(P)+1]] <- mpi;
@@ -1265,6 +1315,9 @@ the_master_function <- function(data = NULL)
     if(is.null(data)) return(NULL);
     if(is.null(pajer)) return(NULL);
 
+    # Activate logs
+    # addHandler(writeToConsole)
+
     # Get data
     directory <- data$Origin;
     dfw <- data$State;
@@ -1301,6 +1354,8 @@ the_master_function <- function(data = NULL)
     goatreet <- geom_blank();
     gow <- geom_blank();
     gow_pm <- geom_blank();
+    gow_mm <- geom_blank();
+    gow_tf <- geom_blank();
     gstarpu <- geom_blank();
     goijk <- geom_blank();
     goijk_pm <- geom_blank();
@@ -1348,6 +1403,15 @@ the_master_function <- function(data = NULL)
     if (pjr(pajer$pmtool$state$active)){
         data %>% state_pmtool_chart () + tScale -> gow_pm;
     }
+    if (pjr(pajer$memory$state$active)){
+        data %>% memory_chart() + tScale -> gow_mm;
+    }
+
+    if (pjr(pajer$transfers$active)){
+        data %>% link_chart() + tScale -> gow_tf;
+    }
+
+
 
     # StarPU SpaceTime
     if (pjr(pajer$starpu$active)){
@@ -1447,7 +1511,7 @@ the_master_function <- function(data = NULL)
         loginfo("Creating the Used Memory plot");
         goguv <- dfv %>%
             filter(grepl("MEMMANAGER", ResourceId), grepl("Used", Type)) %>%
-            var_simple_chart(ylabel="Used Mem.\n(MB/s)") + tScale;
+            var_chart(ylabel="Used Mem.\n(MB/s)") + tScale;
         if (!pjr(pajer$usedmemory$legend)){
             goguv <- goguv + theme(legend.position="none");
         }
@@ -1528,6 +1592,8 @@ the_master_function <- function(data = NULL)
     g <- starpu_mpi_grid_arrange(atree = goatreet,
                                  st = gow,
                                  st_pm = gow_pm,
+                                 st_mm = gow_mm,
+                                 transf = gow_tf,
                                  starpu = gstarpu,
                                  ijk = goijk,
                                  ijk_pm = goijk_pm,
@@ -1738,7 +1804,11 @@ geom_states <- function (data = NULL, Show.Outliers = FALSE, StarPU = FALSE)
     ret <- list();
 
     # Color mapping
-    ret[[length(ret)+1]] <- scale_fill_manual(values = extract_colors(dfw));
+    if (StarPU){
+      ret[[length(ret)+1]] <- scale_fill_manual(values = starpu_colors());
+    }else{
+      ret[[length(ret)+1]] <- scale_fill_manual(values = extract_colors(dfw));
+    }
 
     # Y axis breaks and their labels
     yconfm <- yconf(dfw);
@@ -1770,9 +1840,51 @@ geom_states <- function (data = NULL, Show.Outliers = FALSE, StarPU = FALSE)
     return(ret);
 }
 
+geom_memory <- function (data = NULL)
+{
+    if (is.null(data)) stop("data is NULL when given to geom_memory");
+
+    dfw <- data$State %>%
+        # Memory State
+        filter(Type == "Memory Node State");
+
+
+    loginfo("Starting geom_memory");
+
+
+
+    col_pos <- data.frame(ResourceId=unique(dfw$ResourceId)) %>% tibble::rowid_to_column("Position")
+
+    dfw <- dfw %>% select(-Position) %>% left_join(col_pos, by=c("ResourceId" = "ResourceId"))
+
+    ret <- list();
+
+    # Color mapping
+    #ret[[length(ret)+1]] <- scale_fill_manual(values = extract_colors(dfw));
+
+    # Y axis breaks and their labels
+    #yconfm <- yconf(dfw);
+    #ret[[length(ret)+1]] <- scale_y_continuous(breaks = yconfm$Position+(yconfm$Height/3), labels=yconfm$ResourceId, expand=c(pjr_value(pajer$expand, 0.05),0));
+    # Y label
+    #ret[[length(ret)+1]] <- ylab(ifelse(StarPU, "StarPU Workers", "Application Workers"));
+
+    # Add states
+    ret[[length(ret)+1]] <-
+        geom_rect(data=dfw, aes(fill=Value,
+                                xmin=Start,
+                                xmax=End,
+                                ymin=Position,
+                                ymax=Position+1.0-0.4), alpha=0.5);
+
+
+    loginfo("Finishing geom_memory");
+
+    return(ret);
+}
+
 geom_pmtool_states <- function (data = NULL)
 {
-    if (is.null(data)) stop("data is NULL when given to geom_states");
+    if (is.null(data)) stop("data is NULL when given to geom_pmtool_states");
 
 
     dfw <- data$pmtool_states %>% filter(sched == pajer$pmtool$state$sched);

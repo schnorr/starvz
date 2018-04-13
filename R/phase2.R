@@ -2115,6 +2115,12 @@ geom_abe <- function(data = NULL)
 
     bsize = pjr_value(pajer$base_size, 22)/5;
 
+    # Obtain time interval 
+    dfwapp <- data$State %>% filter(Application == TRUE) %>%
+        filter(Type == "Worker State");
+    tstart <- dfwapp %>% .$Start %>% min;
+    tend <- dfwapp %>% .$End %>% max;
+
     if (!is.null(pernodeABEdf)){
         ret <- list(
             geom_segment(data=pernodeABEdf, aes(x = Result+tstart, xend=Result+tstart, y = MinPosition, yend=MaxPosition), size=5, alpha=.7, color="gray"),

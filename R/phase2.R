@@ -558,10 +558,6 @@ memory_chart <- function (data = NULL, globalEndTime = NULL)
         # Considering only Worker State
         filter(Type == "Memory Node State");
 
-    # Obtain time interval
-    tstart <- dfwapp %>% .$Start %>% min;
-    tend <- dfwapp %>% .$End %>% max;
-
     #Plot
     gow <- ggplot() + default_theme();
 
@@ -870,7 +866,20 @@ var_chart <- function (dfv = NULL, ylabel = NA)
 
 link_chart <- function (data = NULL)
 {
-    data$Link %>% ggplot(aes(x = Start, xend = End, y = Origin, yend = Dest, color = Origin)) + default_theme() + geom_segment()
+  if (is.null(data)) stop("data provided to memory_chart is NULL");
+
+  loginfo("Entry of link_chart");
+
+  #Plot
+  gow <- ggplot() + default_theme();
+
+  # Add states and outliers if requested
+  gow <- gow + geom_links(data);
+
+  #gow = gow + scale_fill_manual(values = starpu_colors());
+
+  loginfo("Exit of link_chart");
+  return(gow);
 }
 
 var_cumulative_chart <- function (dfv = NULL)
@@ -1850,6 +1859,12 @@ geom_states <- function (data = NULL, Show.Outliers = FALSE, StarPU = FALSE)
     return(ret);
 }
 
+rename_memmanager <- function (data = NULL)
+{
+  data$ResourceId <- lapply(data$ResourceId, function(x) gsub("MEMMANAGER", "MM", x));
+  return(data);
+}
+
 geom_memory <- function (data = NULL)
 {
     if (is.null(data)) stop("data is NULL when given to geom_memory");
@@ -1864,19 +1879,28 @@ geom_memory <- function (data = NULL)
 
 
     col_pos <- data.frame(ResourceId=unique(dfw$ResourceId)) %>% tibble::rowid_to_column("Position")
-
+    col_pos[2] <- data.frame(lapply(col_pos[2], as.character), stringsAsFactors=FALSE);
     dfw <- dfw %>% select(-Position) %>% left_join(col_pos, by=c("ResourceId" = "ResourceId"))
-
     ret <- list();
 
     # Color mapping
     #ret[[length(ret)+1]] <- scale_fill_manual(values = extract_colors(dfw));
 
     # Y axis breaks and their labels
-    #yconfm <- yconf(dfw);
-    #ret[[length(ret)+1]] <- scale_y_continuous(breaks = yconfm$Position+(yconfm$Height/3), labels=yconfm$ResourceId, expand=c(pjr_value(pajer$expand, 0.05),0));
+    # Hardcoded here because yconf is specific to Resources Workers
+    yconfm <- dfw %>%
+        select(Node, ResourceId, Position, Height) %>%
+        distinct() %>%
+        group_by(Node) %>%
+        arrange(Node, ResourceId) %>%
+        ungroup;
+    yconfm$Height = 1;
+
+    yconfm <- rename_memmanager(yconfm);
+
+    ret[[length(ret)+1]] <- scale_y_continuous(breaks = yconfm$Position+(yconfm$Height/3), labels=yconfm$ResourceId, expand=c(pjr_value(pajer$expand, 0.05),0));
     # Y label
-    #ret[[length(ret)+1]] <- ylab(ifelse(StarPU, "StarPU Workers", "Application Workers"));
+    ret[[length(ret)+1]] <- ylab("Memory State");
 
     # Add states
     ret[[length(ret)+1]] <-
@@ -1888,6 +1912,57 @@ geom_memory <- function (data = NULL)
 
 
     loginfo("Finishing geom_memory");
+
+    return(ret);
+}
+
+
+geom_links <- function (data = NULL)
+{
+    if (is.null(data)) stop("data is NULL when given to geom_links");
+
+    #Get the start info on states because link dont have nodes & Position
+    dfw <- data$State %>%
+        # Memory State
+        filter(Type == "Memory Node State");
+
+    dfl <- data$Link;
+
+    loginfo("Starting geom_links");
+
+    col_pos <- as.tibble(data.frame(ResourceId=unique(dfw$ResourceId)) %>% tibble::rowid_to_column("Position"));
+    col_pos[2] <- data.frame(lapply(col_pos[2], as.character), stringsAsFactors=FALSE);
+    dfw <- dfw %>% select(-Position) %>% left_join(col_pos, by=c("ResourceId" = "ResourceId"))
+
+    ret <- list();
+
+    # Y axis breaks and their labels
+    # Hardcoded here because yconf is specific to Resource Workers
+    yconfm <- dfw %>%
+        select(Node, ResourceId, Position, Height) %>%
+        distinct() %>%
+        group_by(Node) %>%
+        arrange(Node, ResourceId) %>%
+        ungroup;
+    yconfm$Height = 1;
+    yconfm <- rename_memmanager(yconfm);
+
+    dfl <- dfl %>% left_join(col_pos, by=c("Origin" = "ResourceId")) %>%
+                                  rename(O_Position = Position) %>%
+                                  left_join(col_pos, by=c("Dest" = "ResourceId")) %>%
+                                  rename(D_Position = Position);
+
+   ret[[length(ret)+1]] <- scale_y_continuous(breaks = yconfm$Position, labels=yconfm$ResourceId, expand=c(0.10,0.5));
+
+    # Color mapping
+    #ret[[length(ret)+1]] <- scale_fill_manual(values = extract_colors(dfw));
+
+    # Y label
+    ret[[length(ret)+1]] <- ylab("Transfers");
+
+    ret[[length(ret)+1]] <- geom_segment(data=dfl, aes(x = Start, xend = End, y = O_Position, yend = D_Position, color = Origin));
+
+    loginfo("Finishing geom_links");
 
     return(ret);
 }
@@ -2125,7 +2200,7 @@ geom_abe <- function(data = NULL)
 
     bsize = pjr_value(pajer$base_size, 22)/5;
 
-    # Obtain time interval 
+    # Obtain time interval
     dfwapp <- data$State %>% filter(Application == TRUE) %>%
         filter(Type == "Worker State");
     tstart <- dfwapp %>% .$Start %>% min;

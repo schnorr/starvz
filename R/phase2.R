@@ -542,7 +542,7 @@ state_chart <- function (data = NULL, globalEndTime = NULL, ST.Outliers = TRUE, 
 }
 
 
-memory_chart <- function (data = NULL, globalEndTime = NULL)
+memory_chart <- function (data = NULL, globalEndTime = NULL, combined = FALSE)
 {
     if (is.null(data)) stop("data provided to memory_chart is NULL");
 
@@ -562,8 +562,10 @@ memory_chart <- function (data = NULL, globalEndTime = NULL)
     gow <- ggplot() + default_theme();
 
     # Add states and outliers if requested
-    gow <- gow + geom_memory(data);
-
+    gow <- gow + geom_memory(data, combined=combined);
+    if(combined){
+      gow <- gow + geom_links(data, combined=TRUE);
+    }
 
     #gow = gow + scale_fill_manual(values = starpu_colors());
 
@@ -1247,9 +1249,9 @@ starpu_mpi_grid_arrange <- function(atree, st, st_pm, st_mm, transf, starpu, ijk
         P[[length(P)+1]] <- st_mm;
         H[[length(H)+1]] <- pjr_value(pajer$memory$state$height, 2);
     }
-    if (pjr(pajer$transfers$active)){
+    if (pjr(pajer$memory$transfers$active) && !pjr(pajer$memory$combined)){
         P[[length(P)+1]] <- transf;
-        H[[length(H)+1]] <- pjr_value(pajer$transfers$height, 2);
+        H[[length(H)+1]] <- pjr_value(pajer$memory$transfers$height, 2);
     }
     if (pjr(pajer$submitted$active)){
         P[[length(P)+1]] <- submitted;
@@ -1416,11 +1418,14 @@ the_master_function <- function(data = NULL)
     if (pjr(pajer$pmtool$state$active)){
         data %>% state_pmtool_chart () + tScale -> gow_pm;
     }
+
+    memory_combined <- pjr(pajer$memory$combined) && pajer$memory$transfers$active;
+
     if (pjr(pajer$memory$state$active)){
-        data %>% memory_chart() + tScale -> gow_mm;
+        data %>% memory_chart(combined = memory_combined) + tScale -> gow_mm;
     }
 
-    if (pjr(pajer$transfers$active)){
+    if (pjr(pajer$memory$transfers$active) && !memory_combined){
         data %>% link_chart() + tScale -> gow_tf;
     }
 
@@ -1865,7 +1870,7 @@ rename_memmanager <- function (data = NULL)
   return(data);
 }
 
-geom_memory <- function (data = NULL)
+geom_memory <- function (data = NULL, combined = FALSE)
 {
     if (is.null(data)) stop("data is NULL when given to geom_memory");
 
@@ -1917,7 +1922,7 @@ geom_memory <- function (data = NULL)
 }
 
 
-geom_links <- function (data = NULL)
+geom_links <- function (data = NULL, combined = FALSE)
 {
     if (is.null(data)) stop("data is NULL when given to geom_links");
 
@@ -1932,35 +1937,47 @@ geom_links <- function (data = NULL)
 
     col_pos <- as.tibble(data.frame(ResourceId=unique(dfw$ResourceId)) %>% tibble::rowid_to_column("Position"));
     col_pos[2] <- data.frame(lapply(col_pos[2], as.character), stringsAsFactors=FALSE);
-    dfw <- dfw %>% select(-Position) %>% left_join(col_pos, by=c("ResourceId" = "ResourceId"))
+
 
     ret <- list();
-
-    # Y axis breaks and their labels
-    # Hardcoded here because yconf is specific to Resource Workers
-    yconfm <- dfw %>%
-        select(Node, ResourceId, Position, Height) %>%
-        distinct() %>%
-        group_by(Node) %>%
-        arrange(Node, ResourceId) %>%
-        ungroup;
-    yconfm$Height = 1;
-    yconfm <- rename_memmanager(yconfm);
 
     dfl <- dfl %>% left_join(col_pos, by=c("Origin" = "ResourceId")) %>%
                                   rename(O_Position = Position) %>%
                                   left_join(col_pos, by=c("Dest" = "ResourceId")) %>%
                                   rename(D_Position = Position);
+    stride <- 0.3;
+    if(!combined){
+      dfw <- dfw %>% select(-Position) %>% left_join(col_pos, by=c("ResourceId" = "ResourceId"))
 
-   ret[[length(ret)+1]] <- scale_y_continuous(breaks = yconfm$Position, labels=yconfm$ResourceId, expand=c(0.10,0.5));
+      # Hardcoded here because yconf is specific to Resource Workers
+      yconfm <- dfw %>%
+          select(Node, ResourceId, Position, Height) %>%
+          distinct() %>%
+          group_by(Node) %>%
+          arrange(Node, ResourceId) %>%
+          ungroup;
+      yconfm$Height = 1;
+      yconfm <- rename_memmanager(yconfm);
 
-    # Color mapping
-    #ret[[length(ret)+1]] <- scale_fill_manual(values = extract_colors(dfw));
+      ret[[length(ret)+1]] <- scale_y_continuous(breaks = yconfm$Position, labels=yconfm$ResourceId, expand=c(0.10,0.5));
 
-    # Y label
-    ret[[length(ret)+1]] <- ylab("Transfers");
+      # Color mapping
+      #ret[[length(ret)+1]] <- scale_fill_manual(values = extract_colors(dfw));
 
-    ret[[length(ret)+1]] <- geom_segment(data=dfl, aes(x = Start, xend = End, y = O_Position, yend = D_Position, color = Origin));
+      # Y label
+      ret[[length(ret)+1]] <- ylab("Transfers");
+      stride <- 0.0;
+    }
+    dfl$O_Position = dfl$O_Position + stride;
+    dfl$D_Position = dfl$D_Position + stride;
+    arrow_g <- NULL;
+    if(pjr(pajer$memory$transfers$arrow)){
+        arrow_g <- arrow(length = unit(0.15, "cm"));
+    }
+    if(pjr(pajer$memory$transfers$border)){
+        ret[[length(ret)+1]] <- geom_segment(data=dfl, aes(x = Start, xend = End, y = O_Position, yend = D_Position), arrow = arrow_g, alpha=0.5, size=1.5, color = "black");
+    }
+    ret[[length(ret)+1]] <- geom_segment(data=dfl, aes(x = Start, xend = End, y = O_Position, yend = D_Position, color = Origin), arrow = arrow_g, alpha=1.0);
 
     loginfo("Finishing geom_links");
 

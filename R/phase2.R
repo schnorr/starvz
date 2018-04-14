@@ -1247,7 +1247,7 @@ starpu_mpi_grid_arrange <- function(atree, st, st_pm, st_mm, transf, starpu, ijk
     }
     if (pjr(pajer$memory$state$active)){
         P[[length(P)+1]] <- st_mm;
-        H[[length(H)+1]] <- pjr_value(pajer$memory$state$height, 2);
+        H[[length(H)+1]] <- pjr_value(pajer$memory$state$height, 3);
     }
     if (pjr(pajer$memory$transfers$active) && !pjr(pajer$memory$combined)){
         P[[length(P)+1]] <- transf;
@@ -1899,7 +1899,10 @@ geom_memory <- function (data = NULL, combined = FALSE)
         group_by(Node) %>%
         arrange(Node, ResourceId) %>%
         ungroup;
-    yconfm$Height = 1;
+    yconfm$Height = pjr_value(pajer$memory$state$height, 2);
+    yconfm$Position = yconfm$Position * yconfm$Height;
+    dfw$Height = pjr_value(pajer$memory$state$height, 2);
+    dfw$Position = dfw$Position * dfw$Height;
 
     yconfm <- rename_memmanager(yconfm);
 
@@ -1907,13 +1910,26 @@ geom_memory <- function (data = NULL, combined = FALSE)
     # Y label
     ret[[length(ret)+1]] <- ylab("Memory State");
 
+    border <- NA;
+
+    if(pjr(pajer$memory$state$border)){
+        border <- "black";
+    }
+    const_depth <- 0;
+
+    if(pjr(pajer$memory$state$depth$active)){
+        const_depth <- pjr_value(pajer$memory$state$depth$height, 0.15);
+    }
+
+    dfw$Height = dfw$Depth * const_depth;
+
     # Add states
     ret[[length(ret)+1]] <-
         geom_rect(data=dfw, aes(fill=Value,
                                 xmin=Start,
                                 xmax=End,
                                 ymin=Position,
-                                ymax=Position+1.0-0.4), alpha=0.5);
+                                ymax=Position+(2.0-0.4-Height)), linetype=1, color=border, size=0.4, alpha=0.5);
 
 
     loginfo("Finishing geom_memory");
@@ -1938,6 +1954,9 @@ geom_links <- function (data = NULL, combined = FALSE)
     col_pos <- as.tibble(data.frame(ResourceId=unique(dfw$ResourceId)) %>% tibble::rowid_to_column("Position"));
     col_pos[2] <- data.frame(lapply(col_pos[2], as.character), stringsAsFactors=FALSE);
 
+    if(combined){
+      col_pos$Position = col_pos$Position * pjr_value(pajer$memory$state$height, 2);;
+    }
 
     ret <- list();
 
@@ -1946,6 +1965,11 @@ geom_links <- function (data = NULL, combined = FALSE)
                                   left_join(col_pos, by=c("Dest" = "ResourceId")) %>%
                                   rename(D_Position = Position);
     stride <- 0.3;
+
+    if(combined){
+      stride = stride*pjr_value(pajer$memory$state$height, 2);;
+    }
+
     if(!combined){
       dfw <- dfw %>% select(-Position) %>% left_join(col_pos, by=c("ResourceId" = "ResourceId"))
 
@@ -1957,6 +1981,7 @@ geom_links <- function (data = NULL, combined = FALSE)
           arrange(Node, ResourceId) %>%
           ungroup;
       yconfm$Height = 1;
+
       yconfm <- rename_memmanager(yconfm);
 
       ret[[length(ret)+1]] <- scale_y_continuous(breaks = yconfm$Position, labels=yconfm$ResourceId, expand=c(0.10,0.5));

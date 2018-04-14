@@ -1323,6 +1323,10 @@ the_master_function <- function(data = NULL)
     dfw <- data$State;
     dfv <- data$Variable;
 
+    if(is.null(dfw)){
+       stop("The State data was not loaded, check if the feather files exists.");
+    }
+
     loginfo("Starting the master function");
 
     # Fail Checking
@@ -1522,12 +1526,18 @@ the_master_function <- function(data = NULL)
     if (pjr(pajer$mpibandwidth$active)){
         loginfo("Creating the MPIBandwidth plot");
         aggStep <- pjr_value(pajer$mpibandwidth$step, globalAggStep);
-        gomov <- dfv %>% filter(grepl("mpict", ResourceId), grepl("Out", Type)) %>%
-            var_integration_segment_chart(., ylabel="MPI\n(MB/s)", step=aggStep) + tScale;
-        if (!pjr(pajer$mpibandwidth$legend)){
-            gomov <- gomov + theme(legend.position="none");
+        mpi_out <- dfv %>% filter(grepl("mpict", ResourceId), grepl("Out", Type));
+        if ((mpi_out %>% nrow) == 0){
+            print("There aren't any information on MPIBandwidth, ignoring it.");
+            pajer$mpibandwidth$active <<- FALSE;
+        }else{
+            gomov <- mpi_out %>%
+                var_integration_segment_chart(., ylabel="MPI\n(MB/s)", step=aggStep) + tScale;
+            if (!pjr(pajer$mpibandwidth$legend)){
+                gomov <- gomov + theme(legend.position="none");
+            }
+            gomov <- userYLimit(gomov, pajer$mpibandwidth$limit, c(tstart, tend));
         }
-        gomov <- userYLimit(gomov, pajer$mpibandwidth$limit, c(tstart, tend));
     }
 
     # MPI Concurrent
@@ -2300,6 +2310,10 @@ gaps_backward_deps_one <- function(data = NULL, task = NULL, levels = 1)
 {
     ret <- gaps_backward_deps_rec (data = data, path = task, task = task, levels = levels);
 
+    if(is.null(ret)){
+        return(data.frame());
+    }
+
     # Enrich states
     dfw <- data$State;
     ret %>%
@@ -2339,8 +2353,16 @@ gaps_backward_deps_rec <- function(data = NULL, path = NULL, task = NULL, levels
     if (is.null(task)) stop("task is NULL when given to gaps_backward_deps_rec");
     if (is.null(path)) stop("path is NULL when given to gaps_backward_deps_rec");
 
-    data$Gaps %>%
+    dta <- data$Gaps %>%
         # get only the job id for which we have an interest
+        filter(JobId == task)
+
+    if ((dta %>% nrow) == 0){
+        print(paste0("The selected task on config$st$tasks$list is invalid (skipping it):", task));
+        return(NULL);
+    }
+
+    dta %>%
         filter(JobId == task) %>%
         mutate(Path = path) %>%
         # the group_by is really not interessant, since we have just one JobId
@@ -2372,6 +2394,9 @@ gaps_backward_deps_rec <- function(data = NULL, path = NULL, task = NULL, levels
 geom_path_highlight <- function (paths = NULL)
 {
     if (is.null(paths)) stop("paths is NULL when given to gaps_backward_deps");
+    if ((paths %>% nrow) == 0){
+        return(list());
+    }
 
     # paths is identical to data$State, but with an additional column called Path
 

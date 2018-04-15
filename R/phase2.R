@@ -855,15 +855,38 @@ var_chart <- function (dfv = NULL, ylabel = NA)
     k <- dfv %>% rename(x=Start, xend=End, y=Value) %>% mutate(yend=y) %>% select(-Duration);
     v <- k %>% group_by(ResourceId, Type) %>% mutate(xend=x, y=y, yend=lag(y));# %>% na.omit();
     k %>%
-        ggplot(aes(x=x, xend=xend, y=y, yend=yend, color=ResourceId)) +
+        ggplot() +
         default_theme() +
-        geom_segment() +
-        geom_segment(data=v) +
-        geom_point(size=.1) +
+        geom_segment(aes(x=x, xend=xend, y=y, yend=yend, color=ResourceId)) +
+        geom_segment(data=v, aes(x=x, xend=xend, y=y, yend=yend, color=ResourceId)) +
+        geom_point(size=.1, aes(x=x, y=y, color=ResourceId)) +
         coord_cartesian(xlim=c(0, max(dfv$End))) +
         ylim (0, NA) +
         ylab (ylabel) +
         scale_colour_brewer(palette = "Dark2");
+}
+
+var_chart_text <- function (dfv = NULL, tstart = NULL, tend = NULL, y_end = NULL)
+{
+    if (is.null(dfv)) return(NULL);
+    max_value <- y_end;
+    ms <- dfv %>% filter(Start < tend & End > tstart);
+    ret <- list();
+    #Calculate selected state % in time
+    total_time <- tend - tstart;
+    ms <- ms %>%
+        group_by (ResourceId) %>%
+        summarize(xvar = round(sum(Value * (Duration/1000) / 1024),2));
+
+
+    if(nrow(ms) != 0){
+        globalEndTime <- tend * 1.01;
+        ms <- ms %>% tibble::rowid_to_column("Position")
+        ms$Position <- max_value*0.9 - (ms$Position-1) * (max_value/nrow(ms))
+        ms$xvar <- paste0(ms$xvar, " GB");
+        ret[[length(ret)+1]] <- geom_label(data=ms, x = globalEndTime, colour = "white", fontface = "bold", aes(y = Position, label=xvar, fill = ResourceId), alpha=1.0, show.legend = FALSE);
+    }
+    return(ret);
 }
 
 link_chart <- function (data = NULL, tstart = NULL, tend = NULL)
@@ -1419,7 +1442,7 @@ the_master_function <- function(data = NULL)
         data %>% state_pmtool_chart () + tScale -> gow_pm;
     }
 
-    memory_combined <- pjr(pajer$memory$combined) && pajer$memory$transfers$active;
+    memory_combined <- pjr(pajer$memory$combined) & pajer$memory$transfers$active;
 
     if (pjr(pajer$memory$state$active)){
         data %>% memory_chart(combined = memory_combined, tstart=tstart, tend=tend) + tScale -> gow_mm;
@@ -1607,6 +1630,16 @@ the_master_function <- function(data = NULL)
             lbound <- pjr_value(pajer$gpubandwidth$bound, 0); # TODO: define a better default value
             gogov <- gogov + coord_cartesian(ylim=c(0, lbound),
                                              xlim=c(tstart, tend));
+        }
+        if(pjr(pajer$gpubandwidth$total)){
+           ms <- dfv %>%
+              filter(grepl("MEMMANAGER", ResourceId), grepl("Out", Type)) %>%
+              filter(Resource != "MEMMANAGER0" | Node != "MEMMANAGER0") %>%
+              group_by(Type, Node, ResourceType, Start, End, Duration) %>%
+              summarize(Value = sum(Value), N=n()) %>%
+              rename(ResourceId = Node)
+          y_size <- layer_scales(gogov)$y$range$range[2];
+          gogov <- gogov + ms %>% var_chart_text(tstart=tstart, tend=tend, y_end = y_size);
         }
     }
 

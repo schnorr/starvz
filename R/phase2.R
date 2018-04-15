@@ -542,7 +542,7 @@ state_chart <- function (data = NULL, globalEndTime = NULL, ST.Outliers = TRUE, 
 }
 
 
-memory_chart <- function (data = NULL, globalEndTime = NULL, combined = FALSE)
+memory_chart <- function (data = NULL, globalEndTime = NULL, combined = FALSE, tstart = NULL, tend = NULL)
 {
     if (is.null(data)) stop("data provided to memory_chart is NULL");
 
@@ -564,7 +564,7 @@ memory_chart <- function (data = NULL, globalEndTime = NULL, combined = FALSE)
     # Add states and outliers if requested
     gow <- gow + geom_memory(data, combined=combined);
     if(combined){
-      gow <- gow + geom_links(data, combined=TRUE);
+      gow <- gow + geom_links(data, combined=TRUE, tstart=tstart, tend=tend);
     }
 
     #gow = gow + scale_fill_manual(values = starpu_colors());
@@ -866,7 +866,7 @@ var_chart <- function (dfv = NULL, ylabel = NA)
         scale_colour_brewer(palette = "Dark2");
 }
 
-link_chart <- function (data = NULL)
+link_chart <- function (data = NULL, tstart = NULL, tend = NULL)
 {
   if (is.null(data)) stop("data provided to memory_chart is NULL");
 
@@ -876,7 +876,7 @@ link_chart <- function (data = NULL)
   gow <- ggplot() + default_theme();
 
   # Add states and outliers if requested
-  gow <- gow + geom_links(data);
+  gow <- gow + geom_links(data, tstart=tstart, tend=tend);
 
   #gow = gow + scale_fill_manual(values = starpu_colors());
 
@@ -1422,11 +1422,11 @@ the_master_function <- function(data = NULL)
     memory_combined <- pjr(pajer$memory$combined) && pajer$memory$transfers$active;
 
     if (pjr(pajer$memory$state$active)){
-        data %>% memory_chart(combined = memory_combined) + tScale -> gow_mm;
+        data %>% memory_chart(combined = memory_combined, tstart=tstart, tend=tend) + tScale -> gow_mm;
     }
 
     if (pjr(pajer$memory$transfers$active) && !memory_combined){
-        data %>% link_chart() + tScale -> gow_tf;
+        data %>% link_chart(tstart=tstart, tend=tend) + tScale -> gow_tf;
     }
 
 
@@ -1938,7 +1938,7 @@ geom_memory <- function (data = NULL, combined = FALSE)
 }
 
 
-geom_links <- function (data = NULL, combined = FALSE)
+geom_links <- function (data = NULL, combined = FALSE, tstart=NULL, tend=NULL)
 {
     if (is.null(data)) stop("data is NULL when given to geom_links");
 
@@ -1971,7 +1971,7 @@ geom_links <- function (data = NULL, combined = FALSE)
     }
 
     if(!combined){
-      dfw <- dfw %>% select(-Position) %>% left_join(col_pos, by=c("ResourceId" = "ResourceId"))
+      dfw <- dfw %>% select(-Position) %>% left_join(col_pos, by=c("ResourceId" = "ResourceId"));
 
       # Hardcoded here because yconf is specific to Resource Workers
       yconfm <- dfw %>%
@@ -2002,8 +2002,20 @@ geom_links <- function (data = NULL, combined = FALSE)
     if(pjr(pajer$memory$transfers$border)){
         ret[[length(ret)+1]] <- geom_segment(data=dfl, aes(x = Start, xend = End, y = O_Position, yend = D_Position), arrow = arrow_g, alpha=0.5, size=1.5, color = "black");
     }
-    ret[[length(ret)+1]] <- geom_segment(data=dfl, aes(x = Start, xend = End, y = O_Position, yend = D_Position, color = Origin), arrow = arrow_g, alpha=1.0);
 
+
+    ret[[length(ret)+1]] <- geom_segment(data=dfl, aes(x = Start, xend = End, y = O_Position, yend = D_Position, color = Origin), arrow = arrow_g, alpha=1.0);
+    selected_dfl <- dfl %>% filter(End > tstart) %>%  filter(Start < tend);
+
+    total_links <- data.frame(with(selected_dfl, table(Origin)))
+    if(nrow(total_links) != 0 && !combined){
+        total_links[1] <- data.frame(lapply(total_links[1], as.character), stringsAsFactors=FALSE);
+        total_links <- total_links %>% left_join(col_pos, by=c("Origin" = "ResourceId"));
+
+        globalEndTime <- tend * 1.01;
+
+        ret[[length(ret)+1]] <- geom_label(data=total_links, x = globalEndTime, colour = "white", fontface = "bold", aes(y = Position, label=Freq, fill = Origin), alpha=1.0, show.legend = FALSE);
+    }
     loginfo("Finishing geom_links");
 
     return(ret);

@@ -562,7 +562,7 @@ memory_chart <- function (data = NULL, globalEndTime = NULL, combined = FALSE, t
     gow <- ggplot() + default_theme();
 
     # Add states and outliers if requested
-    gow <- gow + geom_memory(data, combined=combined);
+    gow <- gow + geom_memory(data, combined=combined, tstart=tstart, tend=tend);
     if(combined){
       gow <- gow + geom_links(data, combined=TRUE, tstart=tstart, tend=tend);
     }
@@ -1870,7 +1870,7 @@ rename_memmanager <- function (data = NULL)
   return(data);
 }
 
-geom_memory <- function (data = NULL, combined = FALSE)
+geom_memory <- function (data = NULL, combined = FALSE, tstart=NULL, tend=NULL)
 {
     if (is.null(data)) stop("data is NULL when given to geom_memory");
 
@@ -1931,6 +1931,28 @@ geom_memory <- function (data = NULL, combined = FALSE)
                                 ymin=Position,
                                 ymax=Position+(2.0-0.4-Height)), linetype=1, color=border, size=0.4, alpha=0.5);
 
+
+    if(pjr(pajer$memory$state$total)){
+      select <- pjr_value(pajer$memory$state$select, "DriverCopy");
+      ms <- dfw %>% filter(Value == select);
+
+      #Calculate selected state % in time
+      total_time <- tend - tstart;
+      ms <- ms %>%
+          group_by (ResourceId, Node, Position) %>%
+          summarize(percent_time = round((sum(End-Start)/total_time)*100,2));
+
+      #ms <- data.frame(with(ms, table(Node, ResourceId)));
+      if(nrow(ms) != 0){
+          #ms[2] <- data.frame(lapply(ms[2], as.character), stringsAsFactors=FALSE);
+          #ms <- ms %>% left_join(col_pos, by=c("ResourceId" = "ResourceId"));
+          ms$Value <- select;
+          globalEndTime <- tend * 1.01;
+          ms$Position = ms$Position + 0.8;
+          ms$percent_time <- paste0(ms$percent_time, "%");
+          ret[[length(ret)+1]] <- geom_label(data=ms, x = globalEndTime, colour = "white", fontface = "bold", aes(y = Position, label=percent_time, fill = Value), alpha=1.0, show.legend = FALSE);
+      }
+    }
 
     loginfo("Finishing geom_memory");
 
@@ -2007,14 +2029,16 @@ geom_links <- function (data = NULL, combined = FALSE, tstart=NULL, tend=NULL)
     ret[[length(ret)+1]] <- geom_segment(data=dfl, aes(x = Start, xend = End, y = O_Position, yend = D_Position, color = Origin), arrow = arrow_g, alpha=1.0);
     selected_dfl <- dfl %>% filter(End > tstart) %>%  filter(Start < tend);
 
-    total_links <- data.frame(with(selected_dfl, table(Origin)))
-    if(nrow(total_links) != 0 && !combined){
-        total_links[1] <- data.frame(lapply(total_links[1], as.character), stringsAsFactors=FALSE);
-        total_links <- total_links %>% left_join(col_pos, by=c("Origin" = "ResourceId"));
+    if(pjr(pajer$memory$transfers$total)){
+      total_links <- data.frame(with(selected_dfl, table(Origin)))
+      if(nrow(total_links) != 0 & !combined){
+          total_links[1] <- data.frame(lapply(total_links[1], as.character), stringsAsFactors=FALSE);
+          total_links <- total_links %>% left_join(col_pos, by=c("Origin" = "ResourceId"));
 
-        globalEndTime <- tend * 1.01;
+          globalEndTime <- tend * 1.01;
 
-        ret[[length(ret)+1]] <- geom_label(data=total_links, x = globalEndTime, colour = "white", fontface = "bold", aes(y = Position, label=Freq, fill = Origin), alpha=1.0, show.legend = FALSE);
+          ret[[length(ret)+1]] <- geom_label(data=total_links, x = globalEndTime, colour = "white", fontface = "bold", aes(y = Position, label=Freq, fill = Origin), alpha=1.0, show.legend = FALSE);
+      }
     }
     loginfo("Finishing geom_links");
 

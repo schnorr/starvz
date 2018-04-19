@@ -403,13 +403,21 @@ the_reader_function <- function (directory = ".", app_states_fun = NULL, strict_
     # Read entities.csv and register the hierarchy (with Y coordinates)
     dfhie <- hl_y_paje_tree (where = directory);
 
+    # PMTools information
     dpmtb <- pmtools_bounds_csv_parser (where = directory);
 
     dpmts <- pmtools_states_csv_parser (where = directory, whichApplication = whichApplication, Y=dfhie, States = dfw);
 
+    # Data.rec
+    ddh <- data_handles_csv_parser (where = directory);
+
+    # Tasks.rec
+    dtasks <- tasks_csv_parser (where = directory);
+
     loginfo("Assembling the named list with the data from this case.");
 
-    data <- list(Origin=directory, State=dfw, Variable=dfv, Link=dfl, DAG=dfdag, Y=dfhie, ATree=dfa, pmtool=dpmtb, pmtool_states=dpmts);
+    data <- list(Origin=directory, State=dfw, Variable=dfv, Link=dfl, DAG=dfdag, Y=dfhie, ATree=dfa,
+                 pmtool=dpmtb, pmtool_states=dpmts, data_handles=ddh, tasks=dtasks$tasks, task_handles=dtasks$handles);
 
     # Calculate the GAPS from the DAG
     if (whichApplication == "cholesky"){
@@ -599,6 +607,110 @@ pmtools_states_csv_parser <- function (where = ".", whichApplication = NULL, Y =
     return(ret);
 }
 
+data_handles_csv_parser <- function (where = ".")
+{
+    entities.feather = paste0(where, "/data_handles.feather");
+    entities.csv = paste0(where, "/rec.data_handles.csv");
+
+    if (file.exists(entities.feather)){
+        loginfo(paste("Reading ", entities.feather));
+        pm <- read_feather(entities.feather);
+        loginfo(paste("Read of", entities.feather, "completed"));
+    }else if (file.exists(entities.csv)){
+        loginfo(paste("Reading ", entities.csv));
+        pm <- read_csv(entities.csv,
+                        trim_ws=TRUE,
+                        col_types=cols(
+                            Handle = col_character(),
+                            HomeNode = col_integer(),
+                            Size = col_integer(),
+                            Coordinates = col_character()
+                        ));
+
+        # Not supported in feather
+        # pm$Coordinates <- lapply(strsplit(pm$Coordinates, " "), as.integer);
+        loginfo(paste("Read of", entities.csv, "completed"));
+    }else{
+        loginfo(paste("Files", entities.feather, "or", entities.csv, "do not exist."));
+        return(NULL);
+    }
+    ret <- pm;
+
+    return(ret);
+}
+
+task_handles_parser <- function (where = ".")
+{
+    entities.feather = paste0(where, "/task_handles.feather");
+
+    if (file.exists(entities.feather)){
+        loginfo(paste("Reading ", entities.feather));
+        ret <- read_feather(entities.feather);
+        loginfo(paste("Read of", entities.feather, "completed"));
+        return(ret);
+    }
+
+    return(NULL);
+}
+
+tasks_csv_parser <- function (where = ".")
+{
+    entities.feather = paste0(where, "/tasks.feather");
+    entities.csv = paste0(where, "/rec.tasks.csv");
+
+    task_handles <- task_handles_parser(where = where);
+
+    if (file.exists(entities.feather)){
+        loginfo(paste("Reading ", entities.feather));
+        pm <- read_feather(entities.feather);
+        loginfo(paste("Read of", entities.feather, "completed"));
+    }else if (file.exists(entities.csv)){
+        loginfo(paste("Reading ", entities.csv));
+        pm <- read_csv(entities.csv,
+                        trim_ws=TRUE,
+                        col_types=cols(
+                            Control = col_character(),
+                            JobId = col_integer(),
+                            SubmitOrder = col_integer(),
+                            SubmitTime = col_double(),
+                            Handles = col_character(),
+                            MPIRank = col_integer(),
+                            DependsOn = col_character(),
+                            Tag = col_character(),
+                            Footprint = col_character(),
+                            Iteration = col_integer(),
+                            Name = col_character(),
+                            Model = col_character(),
+                            Priority = col_integer(),
+                            WorkerId = col_integer(),
+                            MemoryNode = col_integer(),
+                            StartTime = col_double(),
+                            EndTime = col_double(),
+                            Parameters = col_character(),
+                            Modes = col_character(),
+                            Sizes = col_character()
+                        ));
+        # sort the data by the submit order
+        pm <- pm[with(pm, order(SubmitOrder)), ]
+        # Tasks have multiple handles, get them in a different structure
+        handles_dep = pm %>% select(JobId) %>% mutate(Handles = strsplit(pm$Handles, " "),
+                                Modes = strsplit(pm$Modes, " "),
+                                Sizes = lapply(strsplit(pm$Sizes, " "), as.integer))
+        # unnest the lists
+        task_handles <- unnest(handles_dep);
+
+        # We will save the task_handle structre, we can remove these columns
+        pm <- pm %>% select(-Handles, -Modes, -Sizes)
+
+        loginfo(paste("Read of", entities.csv, "completed"));
+    }else{
+        loginfo(paste("Files", entities.feather, "or", entities.csv, "do not exist."));
+        return(NULL);
+    }
+
+    return( list(tasks = pm, handles=task_handles) );
+}
+
 
 hl_y_coordinates <- function (dfw = NULL, where = ".")
 {
@@ -722,7 +834,9 @@ dt_to_df_inner <- function (node)
 
 the_fast_reader_function <- function (directory = ".")
 {
-    names <- c("State", "Variable", "Link", "DAG", "Y", "ATree", "Gaps", "pmtool", "pmtool_states");
+    names <- c("State", "Variable", "Link", "DAG", "Y", "ATree", "Gaps", "pmtool",
+               "pmtool_states", "data_handles", "tasks", "task_handles");
+
     filenames <- gsub("^", "pre.", gsub("$", ".feather", tolower(names)));
 
     l1 <- list(Origin = directory);

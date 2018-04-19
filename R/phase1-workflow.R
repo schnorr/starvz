@@ -140,4 +140,30 @@ if (!is.null(data$pmtool_states)){
     loginfo(paste("Data for", filename, "has not been feathered because is empty."));
 }
 
+# Data Rec
+filename <- "pre.data_handles.feather";
+loginfo(filename);
+if (!is.null(data$data_handles)){
+    write_feather(data$data_handles, filename);
+}else{
+    loginfo(paste("Data for", filename, "has not been feathered because is empty."));
+}
+
+# Tasks Rec
+filename <- "pre.tasks.feather";
+loginfo(filename);
+if (!is.null(data$tasks)){
+    write_feather(data$tasks, filename);
+}else{
+    loginfo(paste("Data for", filename, "has not been feathered because is empty."));
+}
+
+filename <- "pre.task_handles.feather";
+loginfo(filename);
+if (!is.null(data$task_handles)){
+    write_feather(data$task_handles, filename);
+}else{
+    loginfo(paste("Data for", filename, "has not been feathered because is empty."));
+}
+
 loginfo("Pre-process finished correctly.");

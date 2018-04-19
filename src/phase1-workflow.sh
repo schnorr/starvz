@@ -50,7 +50,7 @@ if [ -x "$(command -v pmtool)" ] && [ -f "platform_file.rec" ]; then
 
   # Running pmtool with default-normal configuration
   echo "Execute pmtool"
-  pmtool -p platform_file.rec tasks.rec -d fast --threads --no-header -w -s pmtool_states.out > pmtool.out 2> /dev/null
+  pmtool -p platform_file.rec tasks.rec -d fast -a dmdas --threads --no-header -w -s pmtool_states.out > pmtool.out 2> /dev/null
 
   # Cleaning pmtools bounds.
   echo "Alg,Time" > $PMTOOLOUT
@@ -64,12 +64,25 @@ else
   echo "Lionel's pmtool or platform_file.rec file are not available, skipping it."
 fi
 
+# Coverting the data.rec and tasks.rec files
+if [ -x "$(command -v rec2csv)" ]; then
+  echo "Convert Rec files"
+  DATACSV="rec.data_handles.csv"
+  rec2csv -S Handle data.rec | sed 's/"//g' > $DATACSV
+
+  TASKSCSV="rec.tasks.csv"
+  rec2csv tasks.rec | sed 's/"//g' > $TASKSCSV
+else
+  # TODO: Read this files without the rec2csv tool?
+  echo "The library recutils is required to read the data.rec and tasks.rec files, skipping this step."
+fi
+
 rm -f activity.data distrib.data trace.html tasks.rec data.rec trace.rec
 
 echo "Convert from paje.sorted.trace to paje.csv"
 date
 
-pj_dump -o -n --user-defined --entity-hierarchy=entities.csv --type-hierarchy=types.csv paje.sorted.trace > paje.csv
+pj_dump -o -n --user-defined --entity-hierarchy=entities.csv --type-hierarchy=types.csv "paje.sorted.trace" > paje.csv
 rm -f paje.sorted.trace
 
 echo "Get states, links and variables in CSV"

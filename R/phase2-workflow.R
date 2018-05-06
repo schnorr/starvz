@@ -34,4 +34,4 @@ pajer <- config::get(file = pajer.config, config="exp7");
 
 png(name, width = 1000, height = 1500);
 print(grid.arrange(the_master_function(data)));
-dev.off();
+end <- dev.off();

@@ -36,7 +36,7 @@ input.directory = args[[1]];
 input.application = args[[2]];
 
 if (is.null(input.directory) ||
-    (input.application != "cholesky" && input.application != "qrmumps")){
+    (input.application != "cholesky" && input.application != "qrmumps" && input.application != "cfd")){
     usage();
 }
 
@@ -49,7 +49,11 @@ if (input.application == "cholesky"){
 }else if (input.application == "cholesky_pastix") {
     states.fun = cholesky_pastix_colors;
     states.filter.strict = FALSE;
+}else if (input.application == "cfd") {
+    states.fun = cfd_colors;
+    states.filter.strict = FALSE;
 }
+
 
 setwd(input.directory);
 

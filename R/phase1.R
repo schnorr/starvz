@@ -1129,6 +1129,13 @@ cholesky_colors <- function()
         Color = c("#e41a1c", "#377eb8", "#984ea3", "#4daf4a"));
 }
 
+cfd_colors <- function()
+{
+    tibble(
+        Kernel = c("fluid_bound", "diffuse_1", "diffuse_relax", "macCormack_commit", "macCormack_2", "macCormack_1", "obstacle_boundary_1", "conserve_1", "conserve_relax", "conserve_commit", "obstacle_velocity", "initial_state"),
+        Color = c("#e41a1c", "#377eb8", "#984ea3", "#4daf4a", "#ff7f00", "#ffff33", "#a65628", "#f781bf", "#ea1a1c", "#37beb8", "#4eaf4a", "#9a4ea3"));
+}
+
 scalfmm_colors <- function()
 {
     tibble(

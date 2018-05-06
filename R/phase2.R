@@ -1364,15 +1364,21 @@ the_master_function <- function(data = NULL)
     loginfo("Starting the master function");
 
     # Fail Checking
-    if(is.null(data$pmtool_states)){
+    if((pjr(pajer$pmtool$state$active) || pjr(pajer$pmtool$kiteration$active)) && is.null(data$pmtool_states)){
       print("Pmtool states config is active but the data is NULL")
       pajer$pmtool$state$active <<- FALSE;
       pajer$pmtool$kiteration$active <<- FALSE;
     }
 
-    if(is.null(data$pmtool)){
+    if(pjr(pajer$pmtool$bounds$active) && is.null(data$pmtool)){
       print("Pmtool bounds config is active but the data is NULL")
       pajer$pmtool$bounds$active <<- FALSE;
+    }
+
+    if(is.null(data$links)){
+      print("This data set dont have links, disabling some options")
+      pajer$memory$transfers$active <<- FALSE;
+      pajer$memory$combined <<- FALSE;
     }
 
     if (!is.null(pajer$time)){

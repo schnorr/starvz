@@ -57,92 +57,22 @@ if (input.application == "cholesky"){
 
 setwd(input.directory);
 
-data <- the_reader_function (directory = input.directory,
-                             app_states_fun = states.fun,
-                             strict_state_filter = states.filter.strict,
-                             whichApplication = input.application);
-
-loginfo("Let's start to write the pre-processed files as feather data");
-
-# State
-filename <- "pre.state.feather";
-loginfo(filename);
-if (!is.null(data$State)){
-    write_feather(data$State, filename);
-}else{
-    loginfo(paste("Data for", filename, "has not been feathered because is empty."));
-}
-
-# Variable
-filename <- "pre.variable.feather";
-loginfo(filename);
-if (!is.null(data$Variable)){
-    write_feather(data$Variable, filename);
-}else{
-    loginfo(paste("Data for", filename, "has not been feathered because is empty."));
-}
-
-# Link
-filename <- "pre.link.feather";
-loginfo(filename);
-if (!is.null(data$Link)){
-    write_feather(data$Link, filename);
-}else{
-    loginfo(paste("Data for", filename, "has not been feathered because is empty."));
-}
-
-# DAG
-filename <- "pre.dag.feather";
-loginfo(filename);
-if (!is.null(data$DAG)){
-    write_feather(data$DAG, filename);
-}else{
-    loginfo(paste("Data for", filename, "has not been feathered because is empty."));
-}
-
-# Y
-filename <- "pre.y.feather";
-loginfo(filename);
-if (!is.null(data$Y)){
-    write_feather(data$Y, filename);
-}else{
-    loginfo(paste("Data for", filename, "has not been feathered because is empty."));
-}
-
-# ATree
-filename <- "pre.atree.feather";
-loginfo(filename);
-if (!is.null(data$ATree)){
-    write_feather(data$ATree, filename);
-}else{
-    loginfo(paste("Data for", filename, "has not been feathered because is empty."));
-}
-
-# Gaps
-filename <- "pre.gaps.feather";
-loginfo(filename);
-if (!is.null(data$Gaps)){
-    write_feather(data$Gaps, filename);
-}else{
-    loginfo(paste("Data for", filename, "has not been feathered because is empty."));
-}
-
-# PMtool
-filename <- "pre.pmtool.feather";
-loginfo(filename);
-if (!is.null(data$pmtool)){
-    write_feather(data$pmtool, filename);
-}else{
-    loginfo(paste("Data for", filename, "has not been feathered because is empty."));
-}
-
-filename <- "pre.pmtool_states.feather";
-loginfo(filename);
-if (!is.null(data$pmtool_states)){
-    write_feather(data$pmtool_states, filename);
-}else{
-    loginfo(paste("Data for", filename, "has not been feathered because is empty."));
-}
+phase1_plan <- drake_plan(
+    rawDfw = read_state_csv(input.application, states.fun, states.filter.strict, input.directory),
+    zero = read_zero(rawDfw),
+    normalizedDfw = normalize_dfw(rawDfw, zero, input.application, states.fun, outlier_definition),
+    highlightedDfw = hl_y_coordinates(normalizedDfw, input.directory),
+    dfa = atree_load(input.directory),
+    dfap = build_dfap(dfa),
+    dfw = join_dfw_dfap(highlightedDfw, dfap),
+    dfv = read_vars_set_new_zero(input.directory, zero),
+    dfl = read_links(input.directory, zero),
+    dfdag = read_dag(input.directory, dfw, dfl),
+    dfhie = hl_y_paje_tree(input.directory),
+    dpmtb = pmtools_bounds_csv_parser(input.directory),
+    dpmts = pmtools_states_csv_parser(input.directory, input.application, dfhie, dfw),
+    data = save_feathers(dfw, dfv, dfl, dfdag, dfhie, dfa, dpmtb, dpmts)
+);
 
 # Data Rec
 filename <- "pre.data_handles.feather";

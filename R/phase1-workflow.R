@@ -71,33 +71,15 @@ phase1_plan <- drake_plan(
     dfhie = hl_y_paje_tree(input.directory),
     dpmtb = pmtools_bounds_csv_parser(input.directory),
     dpmts = pmtools_states_csv_parser(input.directory, input.application, dfhie, dfw),
-    data = save_feathers(dfw, dfv, dfl, dfdag, dfhie, dfa, dpmtb, dpmts)
+    ddh = data_handles_csv_parser(input.directory),
+    dtasks = tasks_csv_parser(input.directory),
+    data = aggregate_data(directory, dfw, dfv, dfl, dfdag, dfhie, dfa, dpmtb, dpmts, ddh, dtasks),
+    gaps = calculate_gaps(data),
+    success = save_feathers(data, gaps)
 );
 
-# Data Rec
-filename <- "pre.data_handles.feather";
-loginfo(filename);
-if (!is.null(data$data_handles)){
-    write_feather(data$data_handles, filename);
-}else{
-    loginfo(paste("Data for", filename, "has not been feathered because is empty."));
-}
-
-# Tasks Rec
-filename <- "pre.tasks.feather";
-loginfo(filename);
-if (!is.null(data$tasks)){
-    write_feather(data$tasks, filename);
-}else{
-    loginfo(paste("Data for", filename, "has not been feathered because is empty."));
-}
-
-filename <- "pre.task_handles.feather";
-loginfo(filename);
-if (!is.null(data$task_handles)){
-    write_feather(data$task_handles, filename);
-}else{
-    loginfo(paste("Data for", filename, "has not been feathered because is empty."));
-}
+plan_config <- drake_config(phase1_plan);
+clean(plan_config);
+make(plan_config);
 
 loginfo("Pre-process finished correctly.");

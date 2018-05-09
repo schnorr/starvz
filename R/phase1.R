@@ -15,235 +15,347 @@ if(file.exists(other.name)){
 
 # Code starts here - Do not remove this line
 
-read_state_csv <- function (where = ".",
-                            app_states_fun = NULL,
-                            outlier_fun = NULL,
-                            strict_state_filter = FALSE,
-                            whichApplication = NULL)
-{
-    # Check obligatory parameters
-    if(is.null(whichApplication)) stop("whichApplication is NULL, it should be provided");
-    if(is.null(app_states_fun)) stop("app_states_fun should be provided to read_state_csv");
-    if(!is.data.frame(app_states_fun())) stop("app_states_fun is not returning a data frame");
-    if(!all((app_states_fun() %>% names) == c("Kernel", "Color"))) stop("Expecting that app_states_fun returns a dataframe with two columns: Kernel, Color")
-    if(is.null(outlier_fun)) stop("outlier_fun should be provided to read_state_csv");
-
-    state.feather = paste0(where, "/paje.state.feather");
-    state.csv = paste0(where, "/paje.state.csv");
-    if(file.exists(state.feather)){
-        loginfo(paste("Reading ", state.feather));
-        dfw <- read_feather(state.feather);
-        loginfo(paste("Read of", state.feather, "completed"));
-    }else if(file.exists(state.csv)){
-        loginfo(paste("Reading ", state.csv));
-        dfw <- read_csv(file=state.csv,
-                        trim_ws=TRUE,
-                        progress=TRUE,
-                        col_types=cols(
-                            Nature = col_character(),
-                            ResourceId = col_character(),
-                            Type = col_character(),
-                            Start = col_double(),
-                            End = col_double(),
-                            Duration = col_double(),
-                            Depth = col_double(),
-                            Value = col_character(),
-                            Size = col_character(),
-                            Params = col_character(),
-                            Footprint = col_character(),
-                            Tag = col_character(),
-                            JobId = col_character(),
-                            GFlop = col_character(),
-                            SubmitOrder = col_character(),
-                            X = col_character(),
-                            Y = col_character(),
-                            Iteration = col_character(),
-                            Subiteration = col_character()
-                        ));
-        loginfo(paste("Read of", state.csv, "completed"));
-    }else{
-        stop(paste("Files", state.feather, "or", state.csv, "do not exist"));
-    }
-
+read_state_csv <- function(applicationName, app_states_fun, strict_state_filter, directory) {
+  if (is.null(applicationName) ||
+      is.null(app_states_fun) ||
+      !is.data.frame(app_states_fun()) ||
+      !all((app_states_fun() %>% names) == c('Kernel', 'Color'))) {
+    stop('A mandatory parameter is invalid.');
+  }
+  
+  state.csv = paste0(directory, '/paje.state.csv');
+  if (!file.exists(state.csv)) {
+    stop('States CSV file does not exist');
+  }
+  loginfo(paste('Reading', state.csv));
+  dfw <- read_csv(file = state.csv,
+                  trim_ws = TRUE,
+                  progress = TRUE,
+                  col_types = cols(
+                    Nature = col_character(),
+                    ResourceId = col_character(),
+                    Type = col_character(),
+                    Start = col_double(),
+                    End = col_double(),
+                    Duration = col_double(),
+                    Depth = col_double(),
+                    Value = col_character(),
+                    Size = col_character(),
+                    Params = col_character(),
+                    Footprint = col_character(),
+                    Tag = col_character(),
+                    JobId = col_character(),
+                    GFlop = col_character(),
+                    SubmitOrder = col_character(),
+                    X = col_character(),
+                    Y = col_character(),
+                    Iteration = col_character(),
+                    Subiteration = col_character()
+                  ));
+  if (nrow(dfw) == 0) stop('After reading states CSV, number of rows is zero.');
+  
+  dfw <- dfw %>% mutate(Value = as.factor(Value),
+                        GFlop = as.numeric(GFlop),
+                        X = as.integer(X),
+                        Y = as.integer(Y),
+                        Iteration = as.integer(Iteration),
+                        Subiteration = as.integer(Subiteration));
+  
+  # QRMumps: fix qrmumps kernels names so we have a clean color definition
+  if (applicationName == "qrmumps"){
     dfw <- dfw %>%
-        mutate(Value = as.factor(Value),
-               GFlop = as.numeric(GFlop),
-               X = as.integer(X),
-               Y = as.integer(Y),
-               Iteration = as.integer(Iteration),
-               Subiteration = as.integer(Subiteration));
+      mutate(Value = gsub("_perf.*", "", Value)) %>%
+      mutate(Value = gsub("qrm_", "", Value));
+    loginfo("Fix of qrmumps state naming completed.");
+  }
+  
+  # Split application and StarPU behavior
+  if (strict_state_filter) {
+    dfw <- dfw %>% mutate(Application = case_when(.$Value %in% (app_states_fun() %>% .$Kernel) ~ TRUE, TRUE ~ FALSE));
+  } else {
+    # If not strict, we mark useing app_states_fun() Kernel field as RE
+    state_condition = paste((app_states_fun() %>% .$Kernel), collapse = '|');
+    dfw <- dfw %>% mutate(Application = case_when(grepl(state_condition, .$Value) ~ TRUE, TRUE ~ FALSE));
+  }
+  if (nrow(dfw) == 0) stop('After application states check, number of rows is zero');
+  loginfo('App state filter completed');
+  
+  # remove all application states with NA
+  # StarPU is dumping two lines per application state (so, fix in R)
+  dfw <- dfw %>% dplyr::filter(Application == FALSE | !is.na(JobId));
+  
+  return(dfw);
+}
 
-    if ((dfw %>% nrow) == 0) stop("After reading states, number of rows is zero.");
+read_zero <- function(dfw) {
+  loginfo('Defining the ZERO timestamp');
+  return(dfw %>% 
+           dplyr::filter(Application == TRUE) %>% 
+           .$Start %>% 
+           min %>%
+           as.double);
+}
 
-    # QRMumps: fix qrmumps kernels names so we have a clean color definition
-    if (whichApplication == "qrmumps"){
-        dfw <- dfw %>%
-            mutate(Value = gsub("_perf.*", "", Value)) %>%
-            mutate(Value = gsub("qrm_", "", Value));
-        loginfo("Fix of qrmumps state naming completed.");
-    }
+normalize_dfw <- function(dfw, zero, applicationName, app_states_fun, outlier_definition) {
+  # Create three new columns (Node, Resource, ResourceType) - This is StarPU-specific
+  # But first, check if this is a multi-node trace (if there is a _, it is a multi-node trace)
+  # TODO This is a very weak test, should find something else instead
+  firstResourceId <- dfw %>% .$ResourceId %>% unique %>% sort %>% head(n=1);
+  if(grepl('CUDA|CPU', unlist(strsplit(firstResourceId, '_'))[2])) {
+    loginfo('This is a multi-node trace');
+    dfw <- dfw %>%
+      separate(ResourceId, into=c('Node', 'Resource'), remove=FALSE) %>%
+      mutate(Node = as.factor(Node)) %>%
+      mutate(ResourceType = as.factor(gsub('[[:digit:]]+', '', Resource)));
+  } else {
+    loginfo('This is a single-node trace');
+    dfw <- dfw %>%
+      mutate(Node = as.factor(0)) %>%
+      mutate(Resource = ResourceId) %>%
+      mutate(ResourceType = as.factor(gsub('[_[:digit:]]+', '', ResourceId)));
+  }
+  
+  loginfo('Define colors is starting now.');
+  dfcolors <- dfw %>%
+    select(Value) %>%
+    unique %>%
+    mutate(Value = as.character(Value), Color = NA) %>%
+    rbind(app_states_fun() %>% rename(Value = Kernel)) %>%
+    arrange(Value, Color) %>%
+    mutate(Color = na.locf(Color, na.rm = FALSE)) %>%
+    unique;
+  loginfo('Colors data.frame is defined.');
+  dfw <- dfw %>% left_join(dfcolors, by='Value');
+  loginfo('Left joining the colors has completed');
+  
+  # Specific cholesky colors: sufficiently harmless
+  if(applicationName == 'cholesky') {
+    loginfo('This is a cholesky application, colors are hardcoded');
+    dfw <- dfw %>%
+      mutate(Color = case_when(
+        grepl("potrf", .$Value) ~ "#e41a1c",
+        grepl("trsm", .$Value) ~ "#377eb8",
+        grepl("syrk", .$Value) ~ "#984ea3",
+        grepl("gemm", .$Value) ~ "#4daf4a",
+        TRUE ~ .$Color
+        ));
+  }
+  
+  # Detect outliers
+  if(applicationName == 'cholesky') {
+    loginfo('Attempting to detect outliers using a basic model.');
+    dfw <- dfw %>%
+      group_by(Value, ResourceType) %>%
+      mutate(Outlier = Duration > outlier_definition(Duration)) %>%
+      ungroup();
+  } else {
+    loginfo('No outlier detection; using NA in the corresponding column.');
+    dfw <- dfw %>% mutate(Outlier = NA);
+  }
+  
+  # Set times according to the new zero
+  dfw <- dfw %>% mutate(Start = Start - zero, End = End - zero);
+  
+  # Get rid of all the observations before zero
+  dfw <- dfw %>% dplyr::filter(Start >= 0);
+  
+  # The problem is that Vinicius traces do not have "Iteration" column
+  # We need to create it based on the Tag
+  if (dfw %>% filter(Application == TRUE) %>% slice(1) %>% .$Iteration %>% is.na){
+    dfw <- dfw %>%
+      mutate(Iteration = case_when(
+        grepl("potrf", .$Value) ~ as.integer(paste0("0x", substr(.$Tag, 14, 16))),
+        grepl("trsm", .$Value) ~ as.integer(paste0("0x", substr(.$Tag, 11, 13))),
+        grepl("syrk", .$Value) ~ as.integer(paste0("0x", substr(.$Tag, 8, 10))),
+        grepl("gemm", .$Value) ~ as.integer(paste0("0x", substr(.$Tag, 8, 10))),
+        TRUE ~ as.integer(-10)));
+  }
+  
+  # QRMumps case:
+  # When the trace is from qr_mumps (by Ian), the elimination tree
+  # node is encoded in the Tag field, we need to convert it to the
+  # appropriate ANode using the following code. We do that for all kind
+  # of traces, but the ANode column is only valid for the qr_mump traces.
+  if (applicationName == "qrmumps"){
+    dfw <- dfw %>% 
+      mutate(ANode = NA, 
+             ANode = as.character(strtoi(as.integer(paste0("0x", substr(.$Tag, 9, 16))))));
+  }
+  
+  return(dfw);
+}
 
-    # Split application and starpu behavior
-    if (strict_state_filter){
-        # If strict, states need to be exact
-        dfw <- dfw %>% mutate(Application = case_when(.$Value %in% (app_states_fun() %>% .$Kernel) ~ TRUE, TRUE ~ FALSE));
-    }else{
-        # If not strict, we mark using app_states_fun() Kernel field as RE
-        state_condition = paste((app_states_fun() %>% .$Kernel), collapse='|');
-        dfw <- dfw %>% mutate(Application = case_when(grepl(state_condition, .$Value) ~ TRUE, TRUE ~ FALSE));
-    }
-    if ((dfw %>% nrow) == 0) stop("After application states check, number of rows is zero.");
+hl_y_coordinates <- function (dfw = NULL, where = ".")
+{
+    if (is.null(dfw)) stop("The input data frame with states is NULL");
 
-    loginfo("App state filter completed");
+    # first part: read entities, calculate Y
+    workertreedf <- hl_y_paje_tree (where);
 
-    # remove all application states with NA
-    # StarPU is dumping two lines per application state (so, fix in R)
-    dfw <- dfw %>% filter(Application == FALSE | (Application == TRUE & !is.na(JobId)));
-
-    # Create three new columns (Node, Resource, ResourceType) - This is StarPU-specific
-    # But first, check if this is a multi-node trace (if there is a _, it is a multi-node trace)
-    # TODO This is a very weak test, should find something else instead
-    firstResourceId <- dfw %>% .$ResourceId %>% unique %>% sort %>% head(n=1);
-    if (grepl("CUDA|CPU", unlist(strsplit(firstResourceId, "_"))[2])){
-        loginfo("This is multi-node trace");
-        # This is the case for multi-node trace
-        dfw <- dfw %>%
-            separate(ResourceId, into=c("Node", "Resource"), remove=FALSE) %>%
-            mutate(Node = as.factor(Node)) %>%
-            mutate(ResourceType = as.factor(gsub('[[:digit:]]+', '', Resource)));
-    }else{
-        loginfo("This is a single-node trace...");
-        # This is the case for SINGLE node trace
-        dfw <- dfw %>%
-            mutate(Node = as.factor(0)) %>%
-            mutate(Resource = ResourceId) %>%
-            mutate(ResourceType = as.factor(gsub('[_[:digit:]]+', '', ResourceId)));
-        loginfo("Node, Resource, ResourceType definition is ready.");
-    }
-
-    loginfo("Define colors is starting right now.");
-
-    # Define colors
-    dfcolors <- dfw %>%
-        select(Value) %>%
-        unique %>%
-        mutate(Value = as.character(Value), Color = NA) %>%
-        rbind(app_states_fun() %>% rename(Value = Kernel)) %>%
-        arrange(Value, Color) %>%
-        mutate(Color = na.locf(Color, na.rm=FALSE)) %>%
-        unique;
-
-    loginfo("Colors data.frame is defined.");
-
-    dfw <- dfw %>% left_join(dfcolors, by="Value");
-
-    loginfo("Left joining the colors has completed.");
-
-    # Specific cholesky colors: sufficiently harmless
-    if (whichApplication == "cholesky"){
-        loginfo("This is a cholesky application, colors are hard-coded");
-        dfw <- dfw %>%
-            mutate(Color = case_when(
-                       grepl("potrf", .$Value) ~ "#e41a1c",
-                       grepl("trsm", .$Value) ~ "#377eb8",
-                       grepl("syrk", .$Value) ~ "#984ea3",
-                       grepl("gemm", .$Value) ~ "#4daf4a",
-                       TRUE ~ .$Color));
-    }
-
-    # Detect outliers
-    if (whichApplication == "cholesky"){
-        loginfo("Attempt to detect outliers using a basic model.");
-        dfw <- dfw %>%
-            group_by(Value, ResourceType) %>%
-            mutate(Outlier = ifelse(Duration > outlier_fun(Duration), TRUE, FALSE)) %>%
-            ungroup ();
-    }else{
-        loginfo("No outlier detection; use NA in the corresponding column.");
-        dfw <- dfw %>%
-            mutate(Outlier = NA);
-    }
-
-    loginfo("Define the ZERO timestamp.");
-
-    # Define the global ZERO (to be used with other trace date)
-    ZERO <<- dfw %>% filter(Application == TRUE) %>% .$Start %>% min;
-
-    # The new zero because of the long initialization phase
-    dfw <- dfw %>% mutate(Start = Start - ZERO, End = End - ZERO);
-
-    # Get rid of all observations before ZERO
-    dfw <- dfw %>% filter(Start >= 0);
-
-    # The problem is that Vinicius traces do not have "Iteration" column
-    # We need to create it based on the Tag
-    if (dfw %>% filter(Application == TRUE) %>% slice(1) %>% .$Iteration %>% is.na){
-        dfw <- dfw %>%
-            mutate(Iteration = case_when(
-                       grepl("potrf", .$Value) ~ as.integer(paste0("0x", substr(.$Tag, 14, 16))),
-                       grepl("trsm", .$Value) ~ as.integer(paste0("0x", substr(.$Tag, 11, 13))),
-                       grepl("syrk", .$Value) ~ as.integer(paste0("0x", substr(.$Tag, 8, 10))),
-                       grepl("gemm", .$Value) ~ as.integer(paste0("0x", substr(.$Tag, 8, 10))),
-                       TRUE ~ as.integer(-10)));
-    }
-
-    # QRMumps case:
-    # When the trace is from qr_mumps (by Ian), the elimination tree
-    # node is encoded in the Tag field, we need to convert it to the
-    # appropriate ANode using the following code. We do that for all kind
-    # of traces, but the ANode column is only valid for the qr_mump traces.
-    if (whichApplication == "qrmumps"){
-        dfw <- dfw %>% mutate(ANode = NA, ANode = as.character(strtoi(as.integer(paste0("0x", substr(.$Tag, 9, 16))))));
-    }
+    # second part: left join with Y
+    dfw <- dfw %>>%
+        # the left join to get new Y coordinates
+        left_join (workertreedf, by=c("ResourceId" = "Parent", "Type" = "Type", "Nature" = "Nature"));
 
     return(dfw);
 }
-read_vars_set_new_zero <- function (where = ".")
+
+hl_y_paje_tree <- function (where = ".")
 {
-    variable.feather = paste0(where, "/paje.variable.feather");
-    variable.csv = paste0(where, "/paje.variable.csv");
-    if(file.exists(variable.feather)){
-        loginfo(paste("Reading ", variable.feather));
-        dfv <- read_feather(variable.feather);
-        loginfo(paste("Read of", variable.feather, "completed"));
-    }else if(file.exists(variable.csv)){
-        loginfo(paste("Reading ", variable.csv));
-        dfv <- read_csv(variable.csv,
+    entities.feather = paste0(where, "/entities.feather");
+    entities.csv = paste0(where, "/entities.csv");
+
+    if (file.exists(entities.feather)){
+        loginfo(paste("Reading ", entities.feather));
+        dfe <- read_feather(entities.feather);
+        loginfo(paste("Read of", entities.feather, "completed"));
+    }else if (file.exists(entities.csv)){
+        loginfo(paste("Reading ", entities.csv));
+        dfe <- read_csv(entities.csv,
                         trim_ws=TRUE,
-                        progress=TRUE,
                         col_types=cols(
-                            Nature = col_character(),
-                            ResourceId = col_character(),
+                            Parent = col_character(),
+                            Name = col_character(),
                             Type = col_character(),
-                            Start = col_double(),
-                            End = col_double(),
-                            Duration = col_double(),
-                            Value = col_double()
+                            Nature = col_character()
                         ));
-        loginfo(paste("Read of", variable.csv, "completed"));
+        loginfo(paste("Read of", entities.csv, "completed"));
     }else{
-        stop(paste("Files", variable.feather, "or", variable.csv, "do not exist"));
+        loginfo(paste("Files", entities.feather, "or", entities.csv, "do not exist."));
+        return(NULL);
     }
 
-    dfv <- dfv %>%
-        # the new zero because of the long initialization phase
-        mutate(Start = Start - ZERO, End = End - ZERO) %>%
-        # filter all variables during negative timings
-        filter(Start >= 0, End >= 0) %>%
-        # create three new columns (Node, Resource, ResourceType)
-        # This is StarPU-specific
-        separate(ResourceId, into=c("Node", "Resource"), remove=FALSE) %>%
-        mutate(Node = as.factor(Node)) %>%
-        mutate(ResourceType = as.factor(gsub('[[:digit:]]+', '', Resource))) %>>%
-        # abbreviate names so they are smaller
-        # This does not work fine.
-        # mutate(Type = abbreviate(Type, minlength=10));
-        # manually rename variables names
-        mutate (Type = gsub("Number of Ready Tasks", "Ready", Type),
-                Type = gsub("Number of Submitted Uncompleted Tasks", "Submitted", Type),
-                Type = gsub("Bandwidth In \\(MB/s)", "B. In (MB/s)", Type),
-                Type = gsub("Bandwidth Out \\(MB/s)", "B. Out (MB/s)", Type));
-    return(dfv);
+    # first part: read entities, calculate Y
+    # If this file is read with readr's read_csv function, the data.tree does not like
+
+    if ((dfe %>% nrow) == 0) stop(paste("After reading the entities file, the number of rows is zero"));
+
+    workertree <- tree_filtering (dfe,
+                                  c("Link", "Event", "Variable"),
+                                  c("GFlops", "Memory Manager", "Scheduler State", "User Thread", "Thread State"));
+
+    # Customize heigth of each object
+    dfheights = data.frame(Type = c("Worker State", "Communication Thread State"), Height = c(1, 1));
+    # Customize padding between containers
+    dfpaddings = data.frame(Type = c("MPI Program"), Padding = c(2));
+
+    # Calculate the Y coordinates with what has left
+    workertree <- y_coordinates(workertree, dfheights, dfpaddings);
+
+    #print(workertree, "Type", "Nature", "H", "P", limit=200);
+    # Convert back to data frame
+    workertreedf <- dt_to_df (workertree);
+
+    if ((workertreedf %>% nrow) == 0) stop("After converting the tree back to DF, number of rows is zero.");
+
+    return(workertreedf);
+}
+
+tree_filtering <- function (dfe, natures, types)
+{
+    loginfo("Starting the tree filtering to create Y coordinates");
+
+    dfe %>%
+    # Mutate things to character since data.tree don't like factors
+    mutate (Type = as.character(Type), Nature = as.character(Nature)) %>%
+    # Filter things I can't filter using Prune (because Prune doesn't like grepl)
+    # Note that this might be pottentially dangerous and works only for StarPU traces
+    dplyr::filter (!grepl("InCtx", Parent), !grepl("InCtx", Name)) %>%
+    # Rename the reserved word root
+    mutate (Name = gsub("root", "ROOT", Name),
+            Parent = gsub("root", "ROOT", Parent)) %>%
+    # Remove a node named 0 whose parent is also named 0
+    filter (Name != 0 & Parent != 0) %>%
+    # Convert to data.frame to avoid compatibility problems between tibble and data.tree
+    as.data.frame() %>>%
+    # Remove all variables
+    #filter (Nature != "Variable") %>%
+    # Remove bogus scheduler (should use a new trace)
+    #filter (Name != "scheduler") %>%
+    # Convert to data.tree object
+    as.Node(mode="network") -> tree;
+    # Remove all nodes that are present in the natures list
+    if (!is.null(natures)){
+        tree <- tree %>>% (~ Prune(., function(node) !(node$Nature %in% natures)) );
+    }
+    # Remove all types that are present in the types list
+    if (!is.null(types)){
+        tree <- tree %>>% (~ Prune(., function(node) !(node$Type %in% types)) );
+    }
+
+    loginfo("Tree filtering completed.");
+
+    return(tree);
+}
+
+y_coordinates <- function (atree, heights, paddings)
+{
+    loginfo ("Starting y_coordinates");
+    defineHeightPosition <- function (node, dfhs, dfps, curPos)
+    {
+        node$P = curPos;
+        if(!is.null(node$Nature) && node$Nature == "State"){
+            node$H = dfhs %>% filter(Type == node$Type) %>% .$Height;
+            # This is a StarPU+MPI hack to make CUDA resources look larger
+            if (grepl("CUDA", node$parent$name)) node$H = node$H * 2;
+            curPos = curPos + node$H;
+        }else{
+            padding = 0;
+            if (!is.null(node$Type)){
+                padding = dfps %>% filter(Type == node$Type);
+                if (nrow(padding) == 0){
+                    padding = 0;
+                }else{
+                    padding = padding %>% .$Padding;
+                }
+            }
+
+            for (child in node$children){
+                curPos = defineHeightPosition (child, dfhs, dfps, (curPos+padding));
+
+            }
+            if(length(node$children)){
+                node$H = sum(sapply(node$children, function(child) child$H));
+            }else{
+                node$H = 0;
+            }
+        }
+        return(curPos);
+    }
+
+    atree$Set(H = NULL);
+    atree$Set(P = NULL);
+    defineHeightPosition(atree, heights, paddings, 0);
+    loginfo ("The call for y_coordinates has completed.");
+    return(atree);
+}
+
+dt_to_df <- function (node)
+{
+    loginfo ("Converting data.tree to data.frame");
+    ret <- dt_to_df_inner (node);
+    loginfo ("Conversion from data.tree to data.frame has completed.");
+    return(ret);
+}
+
+dt_to_df_inner <- function (node)
+{
+    cdf <- data.frame();
+    ndf <- data.frame();
+    if(!is.null(node$Nature) && node$Nature == "State"){
+        ndf <- data.frame(
+            Parent = node$parent$name,
+            Type = node$name,
+            Nature = node$Nature,
+            Height = node$H,
+            Position = node$P);
+    }else{
+        for (child in node$children){
+            cdf <- rbind(cdf, dt_to_df_inner(child));
+        }
+    }
+    ret <- rbind(ndf, cdf);
+    return(ret);
 }
 
 atree_load <- function(where = "."){
@@ -330,182 +442,195 @@ atree_to_df <- function (node)
     return(ndf);
 }
 
+build_dfap <- function(dfa) {
+  if (is.null(dfa)) return(NULL);
+  dfap <- dfa %>% 
+    select(-Parent, -Depth) %>%
+    rename(Height.ANode = Height, Position.ANode = Position);
+  return(dfap);
+}
 
-the_reader_function <- function (directory = ".", app_states_fun = NULL, strict_state_filter = FALSE, whichApplication = NULL)
+join_dfw_dfap <- function(dfw, dfap) {
+  if (is.null(dfap)) {
+    return(dfw);
+  } else {
+    return(left_join(dfw, dfap, by='ANode'));
+  }
+}
+
+read_vars_set_new_zero <- function (where = ".")
 {
-    # Logging configuration
-    basicConfig();
-    logForOrg <- function(record) { paste(record$levelname, record$logger, record$msg, sep=':') }
-    addHandler(writeToConsole, formatter=logForOrg);
-    removeHandler('basic.stdout');
-
-    # Start of reading procedure
-    if(is.null(app_states_fun)) stop("app_states_fun is obligatory for reading");
-
-    file_can_be_read <- function(filename)
-    {
-        if ((file.exists(filename)) & (file.size(filename) > 0)){
-            return(TRUE);
-        }else{
-            return(FALSE);
-        }
+    variable.feather = paste0(where, "/paje.variable.feather");
+    variable.csv = paste0(where, "/paje.variable.csv");
+    if(file.exists(variable.feather)){
+        loginfo(paste("Reading ", variable.feather));
+        dfv <- read_feather(variable.feather);
+        loginfo(paste("Read of", variable.feather, "completed"));
+    }else if(file.exists(variable.csv)){
+        loginfo(paste("Reading ", variable.csv));
+        dfv <- read_csv(variable.csv,
+                        trim_ws=TRUE,
+                        progress=TRUE,
+                        col_types=cols(
+                            Nature = col_character(),
+                            ResourceId = col_character(),
+                            Type = col_character(),
+                            Start = col_double(),
+                            End = col_double(),
+                            Duration = col_double(),
+                            Value = col_double()
+                        ));
+        loginfo(paste("Read of", variable.csv, "completed"));
+    }else{
+        stop(paste("Files", variable.feather, "or", variable.csv, "do not exist"));
     }
 
-    # Read the elimination tree
-    dfa <- atree_load(where = directory);
+    dfv <- dfv %>%
+        # the new zero because of the long initialization phase
+        mutate(Start = Start - ZERO, End = End - ZERO) %>%
+        # filter all variables during negative timings
+        dplyr::filter(Start >= 0, End >= 0) %>%
+        # create three new columns (Node, Resource, ResourceType)
+        # This is StarPU-specific
+        separate(ResourceId, into=c("Node", "Resource"), remove=FALSE) %>%
+        mutate(Node = as.factor(Node)) %>%
+        mutate(ResourceType = as.factor(gsub('[[:digit:]]+', '', Resource))) %>>%
+        # abbreviate names so they are smaller
+        # This does not work fine.
+        # mutate(Type = abbreviate(Type, minlength=10));
+        # manually rename variables names
+        mutate (Type = gsub("Number of Ready Tasks", "Ready", Type),
+                Type = gsub("Number of Submitted Uncompleted Tasks", "Submitted", Type),
+                Type = gsub("Bandwidth In \\(MB/s)", "B. In (MB/s)", Type),
+                Type = gsub("Bandwidth Out \\(MB/s)", "B. Out (MB/s)", Type));
+    return(dfv);
+}
 
-    # Read states
-    dfw <- read_state_csv (where = directory,
-                           app_states_fun=app_states_fun,
-                           outlier_fun=outlier_definition,
-                           strict_state_filter=strict_state_filter,
-                           whichApplication = whichApplication) %>%
-        hl_y_coordinates(where = directory);
-
-    # QRMumps case:
-    # If the ATree is available and loaded, we create new columns for each task
-    # to hold Y coordinates for the temporal elimination tree plot
-    if (!is.null(dfa)){
-        dfap <- dfa %>% select(-Parent, -Depth) %>% rename(Height.ANode = Height, Position.ANode = Position);
-        dfw <- dfw %>% left_join(dfap, by="ANode");
-        dfap <- NULL;
+read_links <- function (where = ".")
+{
+    link.feather = paste0(where, "/paje.link.feather");
+    link.csv = paste0(where, "/paje.link.csv");
+    if(file.exists(link.feather)){
+        loginfo(paste("Reading ", link.feather));
+        dfl <- read_feather(link.feather) %>%
+            mutate(Size = as.integer(Size));
+        loginfo(paste("Read of", link.feather, "completed"));
+    }else if(file.exists(link.csv)){
+        loginfo(paste("Reading ", link.csv));
+        dfl <- read_csv(link.csv,
+                        trim_ws=TRUE,
+                        progress=TRUE,
+                        col_types=cols(
+                            Nature = col_character(),
+                            Container = col_character(),
+                            Type = col_character(),
+                            Start = col_double(),
+                            End = col_double(),
+                            Duration = col_double(),
+                            Size = col_integer(),
+                            Origin = col_character(),
+                            Dest = col_character(),
+                            Key = col_character()
+                        ));
+        loginfo(paste("Read of", link.csv, "completed"));
+    }else{
+        loginfo(paste("Files", link.feather, "or", link.csv, "do not exist"));
+        return(NULL);
     }
 
-    if(dfw %>% nrow == 0) stop("After reading states, number of rows is zero.");
-
-    # Read variables
-    dfv <- read_vars_set_new_zero(where = directory);
+    # Check if number of lines is greater than zero
+    if ((dfl %>% nrow) == 0){
+        logwarn("After attempt to read links, number of rows is zero");
+        return(NULL);
+    }
 
     # Read links
-    dfl <- read_links (where = directory);
+    dfl <- dfl %>%
+        # the new zero because of the long initialization phase
+        mutate(Start = Start - ZERO, End = End - ZERO) %>%
+        # filter all variables during negative timings
+        dplyr::filter(Start >= 0, End >= 0);
 
-    # Read DAG
-    dfdag <- read_dag (where = directory, dfw, dfl);
-    if (is.null(dfdag)){
-        # If dag is not available, try Vinicius DAG
-        dagVinCSV <- paste0(directory, "/dag_vinicius.csv");
-        loginfo(paste("Reading DAG", dagVinCSV));
-
-        # Check if this a DAG from Vinicius
-        if (file_can_be_read(dagVinCSV)){
-            dfdag <- read_csv(dagVinCSV, trim_ws=TRUE, col_names=TRUE) %>%
-                mutate(Dependent = strsplit(Dependent, " ")) %>%
-                unnest(Dependent) %>%
-                merge(., (dfw), #%>% filter(Application == TRUE))
-                      by.x="JobId", by.y="JobId", all=TRUE) %>%
-                mutate(Cost = ifelse(is.na(Duration), 0, -Duration)) %>%
-                as_tibble();
-        }else{
-            dfdag <- NULL;
-        }
-    }
-
-    # Read entities.csv and register the hierarchy (with Y coordinates)
-    dfhie <- hl_y_paje_tree (where = directory);
-
-    # PMTools information
-    dpmtb <- pmtools_bounds_csv_parser (where = directory);
-
-    dpmts <- pmtools_states_csv_parser (where = directory, whichApplication = whichApplication, Y=dfhie, States = dfw);
-
-    # Data.rec
-    ddh <- data_handles_csv_parser (where = directory);
-
-    # Tasks.rec
-    dtasks <- tasks_csv_parser (where = directory);
-
-    loginfo("Assembling the named list with the data from this case.");
-
-    data <- list(Origin=directory, State=dfw, Variable=dfv, Link=dfl, DAG=dfdag, Y=dfhie, ATree=dfa,
-                 pmtool=dpmtb, pmtool_states=dpmts, data_handles=ddh, tasks=dtasks$tasks, task_handles=dtasks$handles);
-
-    # Calculate the GAPS from the DAG
-    if (whichApplication == "cholesky"){
-        data$Gaps <- gaps(data);
-    }else{
-        data$Gaps <- NULL;
-    }
-
-    return(data);
+    return(dfl);
 }
 
-hl_y_paje_tree <- function (where = ".")
+read_dag <- function (where = ".", dfw = NULL, dfl = NULL)
 {
-    entities.feather = paste0(where, "/entities.feather");
-    entities.csv = paste0(where, "/entities.csv");
-
-    if (file.exists(entities.feather)){
-        loginfo(paste("Reading ", entities.feather));
-        dfe <- read_feather(entities.feather);
-        loginfo(paste("Read of", entities.feather, "completed"));
-    }else if (file.exists(entities.csv)){
-        loginfo(paste("Reading ", entities.csv));
-        dfe <- read_csv(entities.csv,
-                        trim_ws=TRUE,
-                        col_types=cols(
-                            Parent = col_character(),
-                            Name = col_character(),
-                            Type = col_character(),
-                            Nature = col_character()
-                        ));
-        loginfo(paste("Read of", entities.csv, "completed"));
+    dag.feather = paste0(where, "/dag.feather");
+    dag.csv = paste0(where, "/dag.csv");
+    if(file.exists(dag.feather)){
+        loginfo(paste("Reading ", dag.feather));
+        dfdag <- read_feather(dag.feather);
+        loginfo(paste("Read of", dag.feather, "completed"));
+    }else if(file.exists(dag.csv)){
+        loginfo(paste("Reading ", dag.csv));
+        dfdag <- read_csv(dag.csv,
+                          trim_ws=TRUE,
+                          progress=TRUE,
+                          col_types=cols(
+                              Node = col_integer(),
+                              DependsOn = col_integer()
+                          ));
+        loginfo(paste("Read of", dag.csv, "completed"));
     }else{
-        loginfo(paste("Files", entities.feather, "or", entities.csv, "do not exist."));
+        logwarn(paste("Files", dag.feather, "or", dag.csv, "do not exist"));
         return(NULL);
     }
 
-    # first part: read entities, calculate Y
-    # If this file is read with readr's read_csv function, the data.tree does not like
+    # Read the DAG in the CSV format, do some clean-ups
+    dfdag <- dfdag %>%
+        # Put in the right order
+        select(JobId, Dependent) %>%
+        # Communication task ids have too much information, clean-up both columns (JobId, Dependent)
+        mutate(JobId = gsub("mpi_.*_", "mpicom_", JobId)) %>%
+        mutate(Dependent = gsub("mpi_.*_", "mpicom_", Dependent));
 
-    if ((dfe %>% nrow) == 0) stop(paste("After reading the entities file, the number of rows is zero"));
+    # Check dfw existence
+    stopifnot(!is.null(dfw));
 
-    workertree <- tree_filtering (dfe,
-                                  c("Link", "Event", "Variable"),
-                                  c("GFlops", "Memory Manager", "Scheduler State", "User Thread", "Thread State"));
+    loginfo("Merge state data with the DAG");
 
-    # Customize heigth of each object
-    dfheights = data.frame(Type = c("Worker State", "Communication Thread State"), Height = c(1, 1));
-    # Customize padding between containers
-    dfpaddings = data.frame(Type = c("MPI Program"), Padding = c(2));
+    # Do the two merges (states and links)
+    dfdags <- dfdag %>%
+        # Get only non-MPI tasks JobIds
+        filter(!grepl("mpicom", JobId)) %>%
+        # Merge task information from the trace (states: dfw)
+        full_join((dfw %>% filter(Application == TRUE)), by="JobId");
 
-    # Calculate the Y coordinates with what has left
-    workertree <- y_coordinates(workertree, dfheights, dfpaddings);
+    loginfo("Merge state data with the DAG completed");
 
-    #print(workertree, "Type", "Nature", "H", "P", limit=200);
-    # Convert back to data frame
-    workertreedf <- dt_to_df (workertree);
+    # Check dfl existence
+    if (!is.null(dfl)){
+        loginfo("Get MPI tasks (links) to enrich the DAG");
 
-    if ((workertreedf %>% nrow) == 0) stop("After converting the tree back to DF, number of rows is zero.");
+        dfdagl <- dfdag %>%
+            # Get only MPI tasks JobIds
+            filter(grepl("mpicom", JobId)) %>%
+            # Merge MPI communicaton task information from the trace (links: dfl)
+            full_join(dfl, by=c("JobId" = "Key")) %>%
+            # Align columns with state-based tasks
+            # 1. Remove columns
+            select(-Container, -Origin) %>%
+            # 2. Change types
+            mutate(Size = as.character(Size)) %>%
+            # 3. Dest becomes ResourceId for these MPI tasks
+            rename(ResourceId = Dest) %>%
+            separate(ResourceId, into=c("Node", "Resource"), remove=FALSE) %>%
+            mutate(Node = as.factor(Node)) %>%
+            mutate(ResourceType = as.factor(gsub('[[:digit:]]+', '', Resource)));
+        dfdag <- dfdags %>% bind_rows(dfdagl);
 
-    return(workertreedf);
-}
-
-pmtools_bounds_csv_parser <- function (where = ".")
-{
-    entities.feather = paste0(where, "/pmtool.feather");
-    entities.csv = paste0(where, "/pmtool.csv");
-
-    if (file.exists(entities.feather)){
-        loginfo(paste("Reading ", entities.feather));
-        pm <- read_feather(entities.feather);
-        loginfo(paste("Read of", entities.feather, "completed"));
-    }else if (file.exists(entities.csv)){
-        loginfo(paste("Reading ", entities.csv));
-        pm <- read_csv(entities.csv,
-                        trim_ws=TRUE,
-                        col_types=cols(
-                            Alg = col_character(),
-                            Time = col_double()
-                        ));
-        # pmtools gives time in microsecounds
-        pm[[2]] <- pm[[2]]/1000
-        loginfo(paste("Read of", entities.csv, "completed"));
+        loginfo("Merge link data with the DAG completed");
     }else{
-        loginfo(paste("Files", entities.feather, "or", entities.csv, "do not exist."));
-        return(NULL);
+        dfdag <- dfdags;
     }
-    ret <- pm;
-    return(ret);
+
+    # Finally, bind everything together, calculate cost to CPB
+    dfdag <- dfdag %>%
+        # Calculate the cost as the inverse of the duration (so boost's CPB code can work)
+        mutate(Cost = ifelse(is.na(Duration), 0, -Duration)) %>%
+        # Force the result as tibble for performance reasons
+        as_tibble();
 }
 
 pmtools_states_csv_parser <- function (where = ".", whichApplication = NULL, Y = NULL, States = NULL)
@@ -607,6 +732,34 @@ pmtools_states_csv_parser <- function (where = ".", whichApplication = NULL, Y =
     return(ret);
 }
 
+pmtools_bounds_csv_parser <- function (where = ".")
+{
+    entities.feather = paste0(where, "/pmtool.feather");
+    entities.csv = paste0(where, "/pmtool.csv");
+
+    if (file.exists(entities.feather)){
+        loginfo(paste("Reading ", entities.feather));
+        pm <- read_feather(entities.feather);
+        loginfo(paste("Read of", entities.feather, "completed"));
+    }else if (file.exists(entities.csv)){
+        loginfo(paste("Reading ", entities.csv));
+        pm <- read_csv(entities.csv,
+                        trim_ws=TRUE,
+                        col_types=cols(
+                            Alg = col_character(),
+                            Time = col_double()
+                        ));
+        # pmtools gives time in microsecounds
+        pm[[2]] <- pm[[2]]/1000
+        loginfo(paste("Read of", entities.csv, "completed"));
+    }else{
+        loginfo(paste("Files", entities.feather, "or", entities.csv, "do not exist."));
+        return(NULL);
+    }
+    ret <- pm;
+    return(ret);
+}
+
 data_handles_csv_parser <- function (where = ".")
 {
     entities.feather = paste0(where, "/data_handles.feather");
@@ -637,20 +790,6 @@ data_handles_csv_parser <- function (where = ".")
     ret <- pm;
 
     return(ret);
-}
-
-task_handles_parser <- function (where = ".")
-{
-    entities.feather = paste0(where, "/task_handles.feather");
-
-    if (file.exists(entities.feather)){
-        loginfo(paste("Reading ", entities.feather));
-        ret <- read_feather(entities.feather);
-        loginfo(paste("Read of", entities.feather, "completed"));
-        return(ret);
-    }
-
-    return(NULL);
 }
 
 tasks_csv_parser <- function (where = ".")
@@ -711,125 +850,18 @@ tasks_csv_parser <- function (where = ".")
     return( list(tasks = pm, handles=task_handles) );
 }
 
-
-hl_y_coordinates <- function (dfw = NULL, where = ".")
+task_handles_parser <- function (where = ".")
 {
-    if (is.null(dfw)) stop("The input data frame with states is NULL");
+    entities.feather = paste0(where, "/task_handles.feather");
 
-    # first part: read entities, calculate Y
-    workertreedf <- hl_y_paje_tree (where);
-
-    # second part: left join with Y
-    dfw <- dfw %>>%
-        # the left join to get new Y coordinates
-        left_join (workertreedf, by=c("ResourceId" = "Parent", "Type" = "Type", "Nature" = "Nature"));
-
-    return(dfw);
-}
-
-tree_filtering <- function (dfe, natures, types)
-{
-    loginfo("Starting the tree filtering to create Y coordinates");
-
-    dfe %>%
-    # Mutate things to character since data.tree don't like factors
-    mutate (Type = as.character(Type), Nature = as.character(Nature)) %>%
-    # Filter things I can't filter using Prune (because Prune doesn't like grepl)
-    # Note that this might be pottentially dangerous and works only for StarPU traces
-    filter (!grepl("InCtx", Parent), !grepl("InCtx", Name)) %>%
-    # Rename the reserved word root
-    mutate (Name = gsub("root", "ROOT", Name),
-            Parent = gsub("root", "ROOT", Parent)) %>%
-    # Remove a node named 0 whose parent is also named 0
-    filter (Name != 0 & Parent != 0) %>%
-    # Convert to data.frame to avoid compatibility problems between tibble and data.tree
-    as.data.frame() %>>%
-    # Remove all variables
-    #filter (Nature != "Variable") %>%
-    # Remove bogus scheduler (should use a new trace)
-    #filter (Name != "scheduler") %>%
-    # Convert to data.tree object
-    as.Node(mode="network") -> tree;
-    # Remove all nodes that are present in the natures list
-    if (!is.null(natures)){
-        tree <- tree %>>% (~ Prune(., function(node) !(node$Nature %in% natures)) );
-    }
-    # Remove all types that are present in the types list
-    if (!is.null(types)){
-        tree <- tree %>>% (~ Prune(., function(node) !(node$Type %in% types)) );
+    if (file.exists(entities.feather)){
+        loginfo(paste("Reading ", entities.feather));
+        ret <- read_feather(entities.feather);
+        loginfo(paste("Read of", entities.feather, "completed"));
+        return(ret);
     }
 
-    loginfo("Tree filtering completed.");
-
-    return(tree);
-}
-y_coordinates <- function (atree, heights, paddings)
-{
-    loginfo ("Starting y_coordinates");
-    defineHeightPosition <- function (node, dfhs, dfps, curPos)
-    {
-        node$P = curPos;
-        if(!is.null(node$Nature) && node$Nature == "State"){
-            node$H = dfhs %>% filter(Type == node$Type) %>% .$Height;
-            # This is a StarPU+MPI hack to make CUDA resources look larger
-            if (grepl("CUDA", node$parent$name)) node$H = node$H * 2;
-            curPos = curPos + node$H;
-        }else{
-            padding = 0;
-            if (!is.null(node$Type)){
-                padding = dfps %>% filter(Type == node$Type);
-                if (nrow(padding) == 0){
-                    padding = 0;
-                }else{
-                    padding = padding %>% .$Padding;
-                }
-            }
-
-            for (child in node$children){
-                curPos = defineHeightPosition (child, dfhs, dfps, (curPos+padding));
-
-            }
-            if(length(node$children)){
-                node$H = sum(sapply(node$children, function(child) child$H));
-            }else{
-                node$H = 0;
-            }
-        }
-        return(curPos);
-    }
-
-    atree$Set(H = NULL);
-    atree$Set(P = NULL);
-    defineHeightPosition(atree, heights, paddings, 0);
-    loginfo ("The call for y_coordinates has completed.");
-    return(atree);
-}
-dt_to_df <- function (node)
-{
-    loginfo ("Converting data.tree to data.frame");
-    ret <- dt_to_df_inner (node);
-    loginfo ("Conversion from data.tree to data.frame has completed.");
-    return(ret);
-}
-
-dt_to_df_inner <- function (node)
-{
-    cdf <- data.frame();
-    ndf <- data.frame();
-    if(!is.null(node$Nature) && node$Nature == "State"){
-        ndf <- data.frame(
-            Parent = node$parent$name,
-            Type = node$name,
-            Nature = node$Nature,
-            Height = node$H,
-            Position = node$P);
-    }else{
-        for (child in node$children){
-            cdf <- rbind(cdf, dt_to_df_inner(child));
-        }
-    }
-    ret <- rbind(ndf, cdf);
-    return(ret);
+    return(NULL);
 }
 
 the_fast_reader_function <- function (directory = ".")
@@ -851,6 +883,19 @@ the_fast_reader_function <- function (directory = ".")
     });
     names(l2) <- names;
     c(l1, l2);
+}
+
+aggregate_data <- function(directory, dfw, dfv, dfl, dfdag, dfhie, dfa, dpmtb, dpmts, ddh, dtasks) {
+    return (list(Origin=directory, State=dfw, Variable=dfv, Link=dfl, DAG=dfdag, Y=dfhie, ATree=dfa,
+                 pmtool=dpmtb, pmtool_states=dpmts, data_handles=ddh, tasks=dtasks$tasks, task_handles=dtasks$handles));
+}
+
+calculate_gaps <- function(applicationName, aggregatedData) {
+    if(applicationName == 'cholesky') {
+        return(gaps(data));
+    } else {
+        return(NULL)
+    }
 }
 
 gaps.f_backward <- function (data)
@@ -981,132 +1026,114 @@ gaps <- function (data)
 
     return(bind_rows(data.z.dag, data.b.dag, data.f.dag));
 }
-read_links <- function (where = ".")
-{
-    link.feather = paste0(where, "/paje.link.feather");
-    link.csv = paste0(where, "/paje.link.csv");
-    if(file.exists(link.feather)){
-        loginfo(paste("Reading ", link.feather));
-        dfl <- read_feather(link.feather) %>%
-            mutate(Size = as.integer(Size));
-        loginfo(paste("Read of", link.feather, "completed"));
-    }else if(file.exists(link.csv)){
-        loginfo(paste("Reading ", link.csv));
-        dfl <- read_csv(link.csv,
-                        trim_ws=TRUE,
-                        progress=TRUE,
-                        col_types=cols(
-                            Nature = col_character(),
-                            Container = col_character(),
-                            Type = col_character(),
-                            Start = col_double(),
-                            End = col_double(),
-                            Duration = col_double(),
-                            Size = col_integer(),
-                            Origin = col_character(),
-                            Dest = col_character(),
-                            Key = col_character()
-                        ));
-        loginfo(paste("Read of", link.csv, "completed"));
+
+save_feathers <- function(data, gaps) {
+    # State
+    filename <- "pre.state.feather";
+    loginfo(filename);
+    if (!is.null(data$State)){
+        write_feather(data$State, filename);
     }else{
-        loginfo(paste("Files", link.feather, "or", link.csv, "do not exist"));
-        return(NULL);
+        loginfo(paste("Data for", filename, "has not been feathered because is empty."));
     }
 
-    # Check if number of lines is greater than zero
-    if ((dfl %>% nrow) == 0){
-        logwarn("After attempt to read links, number of rows is zero");
-        return(NULL);
+    # Variable
+    filename <- "pre.variable.feather";
+    loginfo(filename);
+    if (!is.null(data$Variable)){
+        write_feather(data$Variable, filename);
+    }else{
+        loginfo(paste("Data for", filename, "has not been feathered because is empty."));
     }
 
-    # Read links
-    dfl <- dfl %>%
-        # the new zero because of the long initialization phase
-        mutate(Start = Start - ZERO, End = End - ZERO) %>%
-        # filter all variables during negative timings
-        filter(Start >= 0, End >= 0);
+    # Link
+    filename <- "pre.link.feather";
+    loginfo(filename);
+    if (!is.null(data$Link)){
+        write_feather(data$Link, filename);
+    }else{
+        loginfo(paste("Data for", filename, "has not been feathered because is empty."));
+    }
 
-    return(dfl);
+    # DAG
+    filename <- "pre.dag.feather";
+    loginfo(filename);
+    if (!is.null(data$DAG)){
+        write_feather(data$DAG, filename);
+    }else{
+        loginfo(paste("Data for", filename, "has not been feathered because is empty."));
+    }
+
+    # Y
+    filename <- "pre.y.feather";
+    loginfo(filename);
+    if (!is.null(data$Y)){
+        write_feather(data$Y, filename);
+    }else{
+        loginfo(paste("Data for", filename, "has not been feathered because is empty."));
+    }
+
+    # ATree
+    filename <- "pre.atree.feather";
+    loginfo(filename);
+    if (!is.null(data$ATree)){
+        write_feather(data$ATree, filename);
+    }else{
+        loginfo(paste("Data for", filename, "has not been feathered because is empty."));
+    }
+
+    # Gaps
+    filename <- "pre.gaps.feather";
+    loginfo(filename);
+    if (!is.null(gaps)){
+        write_feather(gaps, filename);
+    }else{
+        loginfo(paste("Data for", filename, "has not been feathered because is empty."));
+    }
+
+    # PMtool
+    filename <- "pre.pmtool.feather";
+    loginfo(filename);
+    if (!is.null(data$pmtool)){
+        write_feather(data$pmtool, filename);
+    }else{
+        loginfo(paste("Data for", filename, "has not been feathered because is empty."));
+    }
+
+    filename <- "pre.pmtool_states.feather";
+    loginfo(filename);
+    if (!is.null(data$pmtool_states)){
+        write_feather(data$pmtool_states, filename);
+    }else{
+        loginfo(paste("Data for", filename, "has not been feathered because is empty."));
+    }
+
+    # Data Rec
+    filename <- "pre.data_handles.feather";
+    loginfo(filename);
+    if (!is.null(data$data_handles)){
+        write_feather(data$data_handles, filename);
+    }else{
+        loginfo(paste("Data for", filename, "has not been feathered because is empty."));
+    }
+
+    # Tasks Rec
+    filename <- "pre.tasks.feather";
+    loginfo(filename);
+    if (!is.null(data$tasks)){
+        write_feather(data$tasks, filename);
+    }else{
+        loginfo(paste("Data for", filename, "has not been feathered because is empty."));
+    }
+
+    filename <- "pre.task_handles.feather";
+    loginfo(filename);
+    if (!is.null(data$task_handles)){
+        write_feather(data$task_handles, filename);
+    }else{
+        loginfo(paste("Data for", filename, "has not been feathered because is empty."));
+    }
 }
-read_dag <- function (where = ".", dfw = NULL, dfl = NULL)
-{
-    dag.feather = paste0(where, "/dag.feather");
-    dag.csv = paste0(where, "/dag.csv");
-    if(file.exists(dag.feather)){
-        loginfo(paste("Reading ", dag.feather));
-        dfdag <- read_feather(dag.feather);
-        loginfo(paste("Read of", dag.feather, "completed"));
-    }else if(file.exists(dag.csv)){
-        loginfo(paste("Reading ", dag.csv));
-        dfdag <- read_csv(dag.csv,
-                          trim_ws=TRUE,
-                          progress=TRUE,
-                          col_types=cols(
-                              Node = col_integer(),
-                              DependsOn = col_integer()
-                          ));
-        loginfo(paste("Read of", dag.csv, "completed"));
-    }else{
-        logwarn(paste("Files", dag.feather, "or", dag.csv, "do not exist"));
-        return(NULL);
-    }
-
-    # Read the DAG in the CSV format, do some clean-ups
-    dfdag <- dfdag %>%
-        # Put in the right order
-        select(JobId, Dependent) %>%
-        # Communication task ids have too much information, clean-up both columns (JobId, Dependent)
-        mutate(JobId = gsub("mpi_.*_", "mpicom_", JobId)) %>%
-        mutate(Dependent = gsub("mpi_.*_", "mpicom_", Dependent));
-
-    # Check dfw existence
-    stopifnot(!is.null(dfw));
-
-    loginfo("Merge state data with the DAG");
-
-    # Do the two merges (states and links)
-    dfdags <- dfdag %>%
-        # Get only non-MPI tasks JobIds
-        filter(!grepl("mpicom", JobId)) %>%
-        # Merge task information from the trace (states: dfw)
-        full_join((dfw %>% filter(Application == TRUE)), by="JobId");
-
-    loginfo("Merge state data with the DAG completed");
-
-    # Check dfl existence
-    if (!is.null(dfl)){
-        loginfo("Get MPI tasks (links) to enrich the DAG");
-
-        dfdagl <- dfdag %>%
-            # Get only MPI tasks JobIds
-            filter(grepl("mpicom", JobId)) %>%
-            # Merge MPI communicaton task information from the trace (links: dfl)
-            full_join(dfl, by=c("JobId" = "Key")) %>%
-            # Align columns with state-based tasks
-            # 1. Remove columns
-            select(-Container, -Origin) %>%
-            # 2. Change types
-            mutate(Size = as.character(Size)) %>%
-            # 3. Dest becomes ResourceId for these MPI tasks
-            rename(ResourceId = Dest) %>%
-            separate(ResourceId, into=c("Node", "Resource"), remove=FALSE) %>%
-            mutate(Node = as.factor(Node)) %>%
-            mutate(ResourceType = as.factor(gsub('[[:digit:]]+', '', Resource)));
-        dfdag <- dfdags %>% bind_rows(dfdagl);
-
-        loginfo("Merge link data with the DAG completed");
-    }else{
-        dfdag <- dfdags;
-    }
-
-    # Finally, bind everything together, calculate cost to CPB
-    dfdag <- dfdag %>%
-        # Calculate the cost as the inverse of the duration (so boost's CPB code can work)
-        mutate(Cost = ifelse(is.na(Duration), 0, -Duration)) %>%
-        # Force the result as tibble for performance reasons
-        as_tibble();
-}
-
 
 starpu_states <- function()
 {
@@ -1182,4 +1209,102 @@ cholesky_pastix_colors <- function()
 
 outlier_definition <- function(x) {
     (quantile(x)["75%"] + (quantile(x)["75%"] - quantile(x)["25%"]) * 1.5)
+}
+
+the_reader_function <- function (directory = ".", app_states_fun = NULL, strict_state_filter = FALSE, whichApplication = NULL)
+{
+    # Logging configuration
+    basicConfig();
+    logForOrg <- function(record) { paste(record$levelname, record$logger, record$msg, sep=':') }
+    addHandler(writeToConsole, formatter=logForOrg);
+    removeHandler('basic.stdout');
+
+    # Start of reading procedure
+    if(is.null(app_states_fun)) stop("app_states_fun is obligatory for reading");
+
+    file_can_be_read <- function(filename)
+    {
+        if ((file.exists(filename)) & (file.size(filename) > 0)){
+            return(TRUE);
+        }else{
+            return(FALSE);
+        }
+    }
+
+    # Read the elimination tree
+    dfa <- atree_load(where = directory);
+
+    # Read states
+    dfw <- read_state_csv (where = directory,
+                           app_states_fun=app_states_fun,
+                           outlier_fun=outlier_definition,
+                           strict_state_filter=strict_state_filter,
+                           whichApplication = whichApplication) %>%
+        hl_y_coordinates(where = directory);
+
+    # QRMumps case:
+    # If the ATree is available and loaded, we create new columns for each task
+    # to hold Y coordinates for the temporal elimination tree plot
+    if (!is.null(dfa)){
+        dfap <- dfa %>% select(-Parent, -Depth) %>% rename(Height.ANode = Height, Position.ANode = Position);
+        dfw <- dfw %>% left_join(dfap, by="ANode");
+        dfap <- NULL;
+    }
+
+    if(dfw %>% nrow == 0) stop("After reading states, number of rows is zero.");
+
+    # Read variables
+    dfv <- read_vars_set_new_zero(where = directory);
+
+    # Read links
+    dfl <- read_links (where = directory);
+
+    # Read DAG
+    dfdag <- read_dag (where = directory, dfw, dfl);
+    if (is.null(dfdag)){
+        # If dag is not available, try Vinicius DAG
+        dagVinCSV <- paste0(directory, "/dag_vinicius.csv");
+        loginfo(paste("Reading DAG", dagVinCSV));
+
+        # Check if this a DAG from Vinicius
+        if (file_can_be_read(dagVinCSV)){
+            dfdag <- read_csv(dagVinCSV, trim_ws=TRUE, col_names=TRUE) %>%
+                mutate(Dependent = strsplit(Dependent, " ")) %>%
+                unnest(Dependent) %>%
+                merge(., (dfw), #%>% filter(Application == TRUE))
+                      by.x="JobId", by.y="JobId", all=TRUE) %>%
+                mutate(Cost = ifelse(is.na(Duration), 0, -Duration)) %>%
+                as_tibble();
+        }else{
+            dfdag <- NULL;
+        }
+    }
+
+    # Read entities.csv and register the hierarchy (with Y coordinates)
+    dfhie <- hl_y_paje_tree (where = directory);
+
+    # PMTools information
+    dpmtb <- pmtools_bounds_csv_parser (where = directory);
+
+    dpmts <- pmtools_states_csv_parser (where = directory, whichApplication = whichApplication, Y=dfhie, States = dfw);
+
+    # Data.rec
+    ddh <- data_handles_csv_parser (where = directory);
+
+    # Tasks.rec
+    dtasks <- tasks_csv_parser (where = directory);
+
+    loginfo("Assembling the named list with the data from this case.");
+
+    data <- list(Origin=directory, State=dfw, Variable=dfv, Link=dfl, DAG=dfdag, Y=dfhie, ATree=dfa,
+                 pmtool=dpmtb, pmtool_states=dpmts, data_handles=ddh, tasks=dtasks$tasks, task_handles=dtasks$handles);
+
+    # Calculate the GAPS from the DAG
+    if (whichApplication == "cholesky"){
+        data$Gaps <- gaps(data);
+    }else{
+        data$Gaps <- NULL;
+    }
+
+    return(data);
 }

@@ -54,8 +54,12 @@ if (input.application == "cholesky"){
     states.filter.strict = FALSE;
 }
 
-
 setwd(input.directory);
+
+basicConfig();
+logForOrg <- function(record) { paste(record$levelname, record$logger, record$msg, sep=':') }
+addHandler(writeToConsole, formatter=logForOrg);
+removeHandler('basic.stdout');
 
 phase1_plan <- drake_plan(
     rawDfw = read_state_csv(input.application, states.fun, states.filter.strict, input.directory),
@@ -79,7 +83,5 @@ phase1_plan <- drake_plan(
 );
 
 plan_config <- drake_config(phase1_plan);
-clean(plan_config);
-make(plan_config);
 
 loginfo("Pre-process finished correctly.");

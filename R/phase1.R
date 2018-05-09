@@ -458,7 +458,7 @@ join_dfw_dfap <- function(dfw, dfap) {
   }
 }
 
-read_vars_set_new_zero <- function (where = ".")
+read_vars_set_new_zero <- function (where = ".", zero)
 {
     variable.feather = paste0(where, "/paje.variable.feather");
     variable.csv = paste0(where, "/paje.variable.csv");
@@ -487,7 +487,7 @@ read_vars_set_new_zero <- function (where = ".")
 
     dfv <- dfv %>%
         # the new zero because of the long initialization phase
-        mutate(Start = Start - ZERO, End = End - ZERO) %>%
+        mutate(Start = Start - zero, End = End - zero) %>%
         # filter all variables during negative timings
         dplyr::filter(Start >= 0, End >= 0) %>%
         # create three new columns (Node, Resource, ResourceType)
@@ -506,7 +506,7 @@ read_vars_set_new_zero <- function (where = ".")
     return(dfv);
 }
 
-read_links <- function (where = ".")
+read_links <- function (where = ".", zero)
 {
     link.feather = paste0(where, "/paje.link.feather");
     link.csv = paste0(where, "/paje.link.csv");
@@ -547,7 +547,7 @@ read_links <- function (where = ".")
     # Read links
     dfl <- dfl %>%
         # the new zero because of the long initialization phase
-        mutate(Start = Start - ZERO, End = End - ZERO) %>%
+        mutate(Start = Start - zero, End = End - zero) %>%
         # filter all variables during negative timings
         dplyr::filter(Start >= 0, End >= 0);
 
@@ -892,7 +892,7 @@ aggregate_data <- function(directory, dfw, dfv, dfl, dfdag, dfhie, dfa, dpmtb, d
 
 calculate_gaps <- function(applicationName, aggregatedData) {
     if(applicationName == 'cholesky') {
-        return(gaps(data));
+        return(gaps(aggregatedData));
     } else {
         return(NULL)
     }

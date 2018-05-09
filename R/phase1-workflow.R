@@ -77,11 +77,14 @@ phase1_plan <- drake_plan(
     dpmts = pmtools_states_csv_parser(input.directory, input.application, dfhie, dfw),
     ddh = data_handles_csv_parser(input.directory),
     dtasks = tasks_csv_parser(input.directory),
-    data = aggregate_data(directory, dfw, dfv, dfl, dfdag, dfhie, dfa, dpmtb, dpmts, ddh, dtasks),
-    gaps = calculate_gaps(data),
-    success = save_feathers(data, gaps)
+    aggregatedData = aggregate_data(input.directory, dfw, dfv, dfl, dfdag, dfhie, dfa, dpmtb, dpmts, ddh, dtasks),
+    computedGaps = calculate_gaps(input.application, aggregatedData)
 );
 
 plan_config <- drake_config(phase1_plan);
+clean(plan_config);
+make(phase1_plan);
+loadd(aggregatedData, computedGaps);
+save_feathers(aggregatedData, computedGaps);
 
 loginfo("Pre-process finished correctly.");

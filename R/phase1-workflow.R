@@ -65,26 +65,24 @@ phase1_plan <- drake_plan(
     rawDfw = read_state_csv(input.application, states.fun, states.filter.strict, input.directory),
     zero = read_zero(rawDfw),
     normalizedDfw = normalize_dfw(rawDfw, zero, input.application, states.fun, outlier_definition),
-    highlightedDfw = hl_y_coordinates(normalizedDfw, input.directory),
+    dfhie = hl_y_paje_tree(input.directory),
+    highlightedDfw = hl_y_coordinates(normalizedDfw, dfhie),
     dfa = atree_load(input.directory),
     dfap = build_dfap(dfa),
     dfw = join_dfw_dfap(highlightedDfw, dfap),
     dfv = read_vars_set_new_zero(input.directory, zero),
     dfl = read_links(input.directory, zero),
     dfdag = read_dag(input.directory, dfw, dfl),
-    dfhie = hl_y_paje_tree(input.directory),
     dpmtb = pmtools_bounds_csv_parser(input.directory),
     dpmts = pmtools_states_csv_parser(input.directory, input.application, dfhie, dfw),
     ddh = data_handles_csv_parser(input.directory),
     dtasks = tasks_csv_parser(input.directory),
-    aggregatedData = aggregate_data(input.directory, dfw, dfv, dfl, dfdag, dfhie, dfa, dpmtb, dpmts, ddh, dtasks),
-    computedGaps = calculate_gaps(input.application, aggregatedData)
+    computedGaps = calculate_gaps(input.application, dfw, dfdag, dfl)
 );
 
 plan_config <- drake_config(phase1_plan);
 clean(plan_config);
-make(phase1_plan);
-loadd(aggregatedData, computedGaps);
-save_feathers(aggregatedData, computedGaps);
+jobs <- max_useful_jobs(plan_config);
+make(phase1_plan, j = jobs);
 
 loginfo("Pre-process finished correctly.");

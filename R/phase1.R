@@ -84,10 +84,13 @@ read_state_csv <- function(applicationName, app_states_fun, strict_state_filter,
   # StarPU is dumping two lines per application state (so, fix in R)
   dfw <- dfw %>% dplyr::filter(Application == FALSE | !is.na(JobId));
   
-  return(dfw);
+  filename <- './tmp-rawDfw.feather';
+  write_feather(dfw, filename);
+  return(filename);
 }
 
-read_zero <- function(dfw) {
+read_zero <- function(dfwFilename) {
+  dfw <- read_feather(dfwFilename);
   loginfo('Defining the ZERO timestamp');
   return(dfw %>% 
            dplyr::filter(Application == TRUE) %>% 
@@ -96,7 +99,8 @@ read_zero <- function(dfw) {
            as.double);
 }
 
-normalize_dfw <- function(dfw, zero, applicationName, app_states_fun, outlier_definition) {
+normalize_dfw <- function(dfwFilename, zero, applicationName, app_states_fun, outlier_definition) {
+  dfw <- read_feather(dfwFilename)
   # Create three new columns (Node, Resource, ResourceType) - This is StarPU-specific
   # But first, check if this is a multi-node trace (if there is a _, it is a multi-node trace)
   # TODO This is a very weak test, should find something else instead
@@ -182,22 +186,25 @@ normalize_dfw <- function(dfw, zero, applicationName, app_states_fun, outlier_de
              ANode = as.character(strtoi(as.integer(paste0("0x", substr(.$Tag, 9, 16))))));
   }
   
-  return(dfw);
+  filename <- 'tmp-normalizedDfw.feather';
+  write_feather(dfw, filename);
+  return(filename);
 }
 
-hl_y_coordinates <- function (dfw = NULL, where = ".")
+hl_y_coordinates <- function (dfwFilename = NULL, dfhieFilename = NULL)
 {
+    dfw <- read_feather(dfwFilename);
+    dfhie <- read_feather(dfhieFilename);
     if (is.null(dfw)) stop("The input data frame with states is NULL");
 
-    # first part: read entities, calculate Y
-    workertreedf <- hl_y_paje_tree (where);
-
-    # second part: left join with Y
+    # left join with Y
     dfw <- dfw %>>%
         # the left join to get new Y coordinates
-        left_join (workertreedf, by=c("ResourceId" = "Parent", "Type" = "Type", "Nature" = "Nature"));
+        left_join (dfhie, by=c("ResourceId" = "Parent", "Type" = "Type", "Nature" = "Nature"));
 
-    return(dfw);
+    filename <- 'tmp-highlightedDfw.feather';
+    write_feather(dfw, filename);
+    return(filename);
 }
 
 hl_y_paje_tree <- function (where = ".")
@@ -248,7 +255,9 @@ hl_y_paje_tree <- function (where = ".")
 
     if ((workertreedf %>% nrow) == 0) stop("After converting the tree back to DF, number of rows is zero.");
 
-    return(workertreedf);
+    filename <- 'pre.y.feather';
+    write_feather(workertreedf, filename);
+    return(filename);
 }
 
 tree_filtering <- function (dfe, natures, types)
@@ -396,7 +405,10 @@ atree_load <- function(where = "."){
         atree_to_df %>%
         # Mark intermediary nodes
         mutate(Intermediary = case_when(.$ANode %in% intermediary_nodes ~ TRUE, TRUE ~ FALSE)) -> df;
-    return(df);
+    
+    filename <- 'pre.atree.feather';
+    write_feather(df, filename);
+    return(filename);
 }
 
 # This function gets a data.tree object and calculate three properties
@@ -442,20 +454,30 @@ atree_to_df <- function (node)
     return(ndf);
 }
 
-build_dfap <- function(dfa) {
-  if (is.null(dfa)) return(NULL);
-  dfap <- dfa %>% 
-    select(-Parent, -Depth) %>%
-    rename(Height.ANode = Height, Position.ANode = Position);
-  return(dfap);
+build_dfap <- function(dfaFilename) {
+    if (is.null(dfaFilename)) return(NULL);
+    dfa <- read_feather(dfaFilename);
+    if (is.null(dfa)) return(NULL);
+    dfap <- dfa %>% 
+        select(-Parent, -Depth) %>%
+        rename(Height.ANode = Height, Position.ANode = Position);
+    
+    filename <- 'tmp-dfap.feather';
+    write_feather(dfap, filename);
+    return(filename);
 }
 
-join_dfw_dfap <- function(dfw, dfap) {
-  if (is.null(dfap)) {
-    return(dfw);
-  } else {
-    return(left_join(dfw, dfap, by='ANode'));
-  }
+join_dfw_dfap <- function(dfwFilename, dfapFilename) {
+    dfw <- read_feather(dfwFilename);
+    dfap <- if (is.null(dfapFilename)) NULL else read_feather(dfapFilename);
+    if (is.null(dfap)) {
+        finalDfw <- dfw;
+    } else {
+        finalDfw <- left_join(dfw, dfap, by='ANode');
+    }
+    filename <- 'pre.state.feather';
+    write_feather(finalDfw, filename);
+    return(filename);
 }
 
 read_vars_set_new_zero <- function (where = ".", zero)
@@ -503,7 +525,9 @@ read_vars_set_new_zero <- function (where = ".", zero)
                 Type = gsub("Number of Submitted Uncompleted Tasks", "Submitted", Type),
                 Type = gsub("Bandwidth In \\(MB/s)", "B. In (MB/s)", Type),
                 Type = gsub("Bandwidth Out \\(MB/s)", "B. Out (MB/s)", Type));
-    return(dfv);
+    filename <- 'pre.variable.feather';
+    write_feather(dfv, filename);
+    return(filename);
 }
 
 read_links <- function (where = ".", zero)
@@ -551,11 +575,14 @@ read_links <- function (where = ".", zero)
         # filter all variables during negative timings
         dplyr::filter(Start >= 0, End >= 0);
 
-    return(dfl);
+    filename <- 'pre.link.feather';
+    write_feather(dfl, filename);
+    return(filename);
 }
-
-read_dag <- function (where = ".", dfw = NULL, dfl = NULL)
+read_dag <- function (where = ".", dfwFilename = NULL, dflFilename = NULL)
 {
+    dfw <- if(is.null(dfwFilename)) NULL else read_feather(dfwFilename);
+    dfl <- if(is.null(dflFilename)) NULL else read_feather(dflFilename);
     dag.feather = paste0(where, "/dag.feather");
     dag.csv = paste0(where, "/dag.csv");
     if(file.exists(dag.feather)){
@@ -631,10 +658,17 @@ read_dag <- function (where = ".", dfw = NULL, dfl = NULL)
         mutate(Cost = ifelse(is.na(Duration), 0, -Duration)) %>%
         # Force the result as tibble for performance reasons
         as_tibble();
+    
+    filename <- 'pre.dag.feather';
+    write_feather(dfdag, filename);
+    return(filename);
 }
 
-pmtools_states_csv_parser <- function (where = ".", whichApplication = NULL, Y = NULL, States = NULL)
+pmtools_states_csv_parser <- function (where = ".", whichApplication = NULL, dfhieFilename = NULL, dfwFilename = NULL)
 {
+    Y <- if(is.null(dfhieFilename)) NULL else read_feather(dfhieFilename);
+    States <- if(is.null(dfwFilename)) NULL else read_feather(dfwFilename);
+
     entities.feather = paste0(where, "/pmtool_states.feather");
     entities.csv = paste0(where, "/pmtool_states.csv");
 
@@ -728,8 +762,10 @@ pmtools_states_csv_parser <- function (where = ".", whichApplication = NULL, Y =
         loginfo(paste("Files", entities.feather, "or", entities.csv, "do not exist."));
         return(NULL);
     }
-    ret <- pm;
-    return(ret);
+
+    filename <- 'pre.pmtool_states.feather';
+    write_feather(pm, filename);
+    return(filename);
 }
 
 pmtools_bounds_csv_parser <- function (where = ".")
@@ -756,8 +792,10 @@ pmtools_bounds_csv_parser <- function (where = ".")
         loginfo(paste("Files", entities.feather, "or", entities.csv, "do not exist."));
         return(NULL);
     }
-    ret <- pm;
-    return(ret);
+
+    filename <- 'pre.pmtool.feather';
+    write_feather(pm, filename);
+    return(filename);
 }
 
 data_handles_csv_parser <- function (where = ".")
@@ -787,9 +825,10 @@ data_handles_csv_parser <- function (where = ".")
         loginfo(paste("Files", entities.feather, "or", entities.csv, "do not exist."));
         return(NULL);
     }
-    ret <- pm;
-
-    return(ret);
+    
+    filename <- 'pre.data_handles.feather';
+    write_feather(pm, filename);
+    return(filename);
 }
 
 tasks_csv_parser <- function (where = ".")
@@ -847,7 +886,11 @@ tasks_csv_parser <- function (where = ".")
         return(NULL);
     }
 
-    return( list(tasks = pm, handles=task_handles) );
+    tasksFilename <- 'pre.tasks.feather';
+    write_feather(pm, tasksFilename);
+    handlesFilename <- 'pre.task_handles.feather';
+    write_feather(task_handles, handlesFilename);
+    return(list(tasks = tasksFilename, handles = handlesFilename));
 }
 
 task_handles_parser <- function (where = ".")
@@ -890,9 +933,9 @@ aggregate_data <- function(directory, dfw, dfv, dfl, dfdag, dfhie, dfa, dpmtb, d
                  pmtool=dpmtb, pmtool_states=dpmts, data_handles=ddh, tasks=dtasks$tasks, task_handles=dtasks$handles));
 }
 
-calculate_gaps <- function(applicationName, aggregatedData) {
+calculate_gaps <- function(applicationName, dfwFilename, dfdagFilename, dflFilename) {
     if(applicationName == 'cholesky') {
-        return(gaps(aggregatedData));
+        return(gaps(dfwFilename, dfdagFilename, dflFilename));
     } else {
         return(NULL)
     }
@@ -966,9 +1009,13 @@ gaps.f_forward <- function (data)
     return(f2(data$DAG, seedchain));
 }
 
-gaps <- function (data)
+gaps <- function (dfwFilename, dfdagFilename, dflFilename)
 {
     loginfo("Starting the gaps calculation.");
+    dfw <- read_feather(dfwFilename);
+    dfdag <- read_feather(dfdagFilename);
+    dfl <- read_feather(dflFilename);
+    data <- list(State = dfw, DAG = dfdag, Link = dfl);
 
     if(is.null(data$DAG)) return(NULL);
     if(is.null(data$State)) return(NULL);
@@ -1024,7 +1071,11 @@ gaps <- function (data)
 
     loginfo("The gaps calculation has completed.");
 
-    return(bind_rows(data.z.dag, data.b.dag, data.f.dag));
+    gaps <- bind_rows(data.z.dag, data.b.dag, data.f.dag);
+
+    filename <- 'pre.gaps.feather';
+    write_feather(gaps, filename);
+    return(filename);
 }
 
 save_feathers <- function(data, gaps) {

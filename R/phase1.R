@@ -15,44 +15,13 @@ if(file.exists(other.name)){
 
 # Code starts here - Do not remove this line
 
-read_state_csv <- function(applicationName, app_states_fun, strict_state_filter, directory) {
+read_state_csv <- function(applicationName, app_states_fun, strict_state_filter, dfw) {
   if (is.null(applicationName) ||
       is.null(app_states_fun) ||
       !is.data.frame(app_states_fun()) ||
       !all((app_states_fun() %>% names) == c('Kernel', 'Color'))) {
     stop('A mandatory parameter is invalid.');
   }
-  
-  state.csv = paste0(directory, '/paje.state.csv');
-  if (!file.exists(state.csv)) {
-    stop('States CSV file does not exist');
-  }
-  loginfo(paste('Reading', state.csv));
-  dfw <- read_csv(file = state.csv,
-                  trim_ws = TRUE,
-                  progress = TRUE,
-                  col_types = cols(
-                    Nature = col_character(),
-                    ResourceId = col_character(),
-                    Type = col_character(),
-                    Start = col_double(),
-                    End = col_double(),
-                    Duration = col_double(),
-                    Depth = col_double(),
-                    Value = col_character(),
-                    Size = col_character(),
-                    Params = col_character(),
-                    Footprint = col_character(),
-                    Tag = col_character(),
-                    JobId = col_character(),
-                    GFlop = col_character(),
-                    SubmitOrder = col_character(),
-                    X = col_character(),
-                    Y = col_character(),
-                    Iteration = col_character(),
-                    Subiteration = col_character()
-                  ));
-  if (nrow(dfw) == 0) stop('After reading states CSV, number of rows is zero.');
   
   dfw <- dfw %>% mutate(Value = as.factor(Value),
                         GFlop = as.numeric(GFlop),
@@ -89,8 +58,7 @@ read_state_csv <- function(applicationName, app_states_fun, strict_state_filter,
   return(filename);
 }
 
-read_zero <- function(dfwFilename) {
-  dfw <- read_feather(dfwFilename);
+read_zero <- function(dfw) {
   loginfo('Defining the ZERO timestamp');
   return(dfw %>% 
            dplyr::filter(Application == TRUE) %>% 
@@ -99,8 +67,7 @@ read_zero <- function(dfwFilename) {
            as.double);
 }
 
-normalize_dfw <- function(dfwFilename, zero, applicationName, app_states_fun, outlier_definition) {
-  dfw <- read_feather(dfwFilename)
+normalize_dfw <- function(dfw, zero, applicationName, app_states_fun, outlier_definition) {
   # Create three new columns (Node, Resource, ResourceType) - This is StarPU-specific
   # But first, check if this is a multi-node trace (if there is a _, it is a multi-node trace)
   # TODO This is a very weak test, should find something else instead
@@ -186,17 +153,12 @@ normalize_dfw <- function(dfwFilename, zero, applicationName, app_states_fun, ou
              ANode = as.character(strtoi(as.integer(paste0("0x", substr(.$Tag, 9, 16))))));
   }
   
-  filename <- 'tmp-normalizedDfw.feather';
-  write_feather(dfw, filename);
-  return(filename);
+  return(dfw);
 }
 
-hl_y_coordinates <- function (dfwFilename = NULL, dfhieFilename = NULL)
+hl_y_coordinates <- function (dfw = NULL, dfhie = NULL)
 {
-    dfw <- read_feather(dfwFilename);
-    dfhie <- read_feather(dfhieFilename);
     if (is.null(dfw)) stop("The input data frame with states is NULL");
-
     # left join with Y
     dfw <- dfw %>>%
         # the left join to get new Y coordinates
@@ -207,36 +169,9 @@ hl_y_coordinates <- function (dfwFilename = NULL, dfhieFilename = NULL)
     return(filename);
 }
 
-hl_y_paje_tree <- function (where = ".")
+hl_y_paje_tree <- function (dfe)
 {
-    entities.feather = paste0(where, "/entities.feather");
-    entities.csv = paste0(where, "/entities.csv");
-
-    if (file.exists(entities.feather)){
-        loginfo(paste("Reading ", entities.feather));
-        dfe <- read_feather(entities.feather);
-        loginfo(paste("Read of", entities.feather, "completed"));
-    }else if (file.exists(entities.csv)){
-        loginfo(paste("Reading ", entities.csv));
-        dfe <- read_csv(entities.csv,
-                        trim_ws=TRUE,
-                        col_types=cols(
-                            Parent = col_character(),
-                            Name = col_character(),
-                            Type = col_character(),
-                            Nature = col_character()
-                        ));
-        loginfo(paste("Read of", entities.csv, "completed"));
-    }else{
-        loginfo(paste("Files", entities.feather, "or", entities.csv, "do not exist."));
-        return(NULL);
-    }
-
     # first part: read entities, calculate Y
-    # If this file is read with readr's read_csv function, the data.tree does not like
-
-    if ((dfe %>% nrow) == 0) stop(paste("After reading the entities file, the number of rows is zero"));
-
     workertree <- tree_filtering (dfe,
                                   c("Link", "Event", "Variable"),
                                   c("GFlops", "Memory Manager", "Scheduler State", "User Thread", "Thread State"));
@@ -255,9 +190,7 @@ hl_y_paje_tree <- function (where = ".")
 
     if ((workertreedf %>% nrow) == 0) stop("After converting the tree back to DF, number of rows is zero.");
 
-    filename <- 'pre.y.feather';
-    write_feather(workertreedf, filename);
-    return(filename);
+    return(workertreedf);
 }
 
 tree_filtering <- function (dfe, natures, types)
@@ -367,32 +300,12 @@ dt_to_df_inner <- function (node)
     return(ret);
 }
 
-atree_load <- function(where = "."){
-    atree.feather = paste0(where, "/atree.feather");
-    atree.csv = paste0(where, "/atree.csv");
-
-    if (file.exists(atree.feather)){
-        loginfo(paste("Reading ", atree.feather));
-        df <- read_feather(atree.feather);
-    }else if (file.exists(atree.csv)){
-        loginfo(paste("Reading ", atree.csv));
-        df <- read_csv(file=atree.csv,
-                       trim_ws=TRUE,
-                       progress=TRUE,
-                       col_types=cols(
-                           Node = col_integer(),
-                           DependsOn = col_integer()
-                       ));
-    }else{
-        loginfo(paste("Files", atree.feather, "or", atree.csv, "do not exist."));
-        return(NULL);
-    }
-
-    intermediary_nodes <- df %>% select(Node) %>% .$Node %>% unique;
+atree_load <- function(dfa){
+    intermediary_nodes <- dfa %>% select(Node) %>% .$Node %>% unique;
 
     loginfo(paste("Calculating graphical properties of the elimination tree"));
 
-    df %>%
+    dfa %>%
         # Mutate things to character since data.tree don't like anything else
         mutate(Node = as.character(Node), DependsOn = as.character(DependsOn)) %>%
         # Convert to data.frame to avoid compatibility issues between tibble and data.tree
@@ -404,11 +317,9 @@ atree_load <- function(where = "."){
         # Convert back to data frame
         atree_to_df %>%
         # Mark intermediary nodes
-        mutate(Intermediary = case_when(.$ANode %in% intermediary_nodes ~ TRUE, TRUE ~ FALSE)) -> df;
+        mutate(Intermediary = case_when(.$ANode %in% intermediary_nodes ~ TRUE, TRUE ~ FALSE)) -> dfa;
     
-    filename <- 'pre.atree.feather';
-    write_feather(df, filename);
-    return(filename);
+    return(dfa);
 }
 
 # This function gets a data.tree object and calculate three properties
@@ -454,59 +365,23 @@ atree_to_df <- function (node)
     return(ndf);
 }
 
-build_dfap <- function(dfaFilename) {
-    if (is.null(dfaFilename)) return(NULL);
-    dfa <- read_feather(dfaFilename);
+build_dfap <- function(dfa) {
     if (is.null(dfa)) return(NULL);
     dfap <- dfa %>% 
         select(-Parent, -Depth) %>%
         rename(Height.ANode = Height, Position.ANode = Position);
     
-    filename <- 'tmp-dfap.feather';
-    write_feather(dfap, filename);
-    return(filename);
+    return(dfap);
 }
 
-join_dfw_dfap <- function(dfwFilename, dfapFilename) {
-    dfw <- read_feather(dfwFilename);
-    dfap <- if (is.null(dfapFilename)) NULL else read_feather(dfapFilename);
-    if (is.null(dfap)) {
-        finalDfw <- dfw;
-    } else {
-        finalDfw <- left_join(dfw, dfap, by='ANode');
+join_dfw_dfap <- function(dfw, dfap) {
+    if (!is.null(dfap)) {
+        dfw <- left_join(dfw, dfap, by='ANode');
     }
-    filename <- 'pre.state.feather';
-    write_feather(finalDfw, filename);
-    return(filename);
+    return(dfw);
 }
 
-read_vars_set_new_zero <- function (where = ".", zero)
-{
-    variable.feather = paste0(where, "/paje.variable.feather");
-    variable.csv = paste0(where, "/paje.variable.csv");
-    if(file.exists(variable.feather)){
-        loginfo(paste("Reading ", variable.feather));
-        dfv <- read_feather(variable.feather);
-        loginfo(paste("Read of", variable.feather, "completed"));
-    }else if(file.exists(variable.csv)){
-        loginfo(paste("Reading ", variable.csv));
-        dfv <- read_csv(variable.csv,
-                        trim_ws=TRUE,
-                        progress=TRUE,
-                        col_types=cols(
-                            Nature = col_character(),
-                            ResourceId = col_character(),
-                            Type = col_character(),
-                            Start = col_double(),
-                            End = col_double(),
-                            Duration = col_double(),
-                            Value = col_double()
-                        ));
-        loginfo(paste("Read of", variable.csv, "completed"));
-    }else{
-        stop(paste("Files", variable.feather, "or", variable.csv, "do not exist"));
-    }
-
+read_vars_set_new_zero <- function (dfv, zero)
     dfv <- dfv %>%
         # the new zero because of the long initialization phase
         mutate(Start = Start - zero, End = End - zero) %>%
@@ -525,49 +400,11 @@ read_vars_set_new_zero <- function (where = ".", zero)
                 Type = gsub("Number of Submitted Uncompleted Tasks", "Submitted", Type),
                 Type = gsub("Bandwidth In \\(MB/s)", "B. In (MB/s)", Type),
                 Type = gsub("Bandwidth Out \\(MB/s)", "B. Out (MB/s)", Type));
-    filename <- 'pre.variable.feather';
-    write_feather(dfv, filename);
-    return(filename);
+    return(dfv);
 }
 
-read_links <- function (where = ".", zero)
+read_links <- function (dfl, zero)
 {
-    link.feather = paste0(where, "/paje.link.feather");
-    link.csv = paste0(where, "/paje.link.csv");
-    if(file.exists(link.feather)){
-        loginfo(paste("Reading ", link.feather));
-        dfl <- read_feather(link.feather) %>%
-            mutate(Size = as.integer(Size));
-        loginfo(paste("Read of", link.feather, "completed"));
-    }else if(file.exists(link.csv)){
-        loginfo(paste("Reading ", link.csv));
-        dfl <- read_csv(link.csv,
-                        trim_ws=TRUE,
-                        progress=TRUE,
-                        col_types=cols(
-                            Nature = col_character(),
-                            Container = col_character(),
-                            Type = col_character(),
-                            Start = col_double(),
-                            End = col_double(),
-                            Duration = col_double(),
-                            Size = col_integer(),
-                            Origin = col_character(),
-                            Dest = col_character(),
-                            Key = col_character()
-                        ));
-        loginfo(paste("Read of", link.csv, "completed"));
-    }else{
-        loginfo(paste("Files", link.feather, "or", link.csv, "do not exist"));
-        return(NULL);
-    }
-
-    # Check if number of lines is greater than zero
-    if ((dfl %>% nrow) == 0){
-        logwarn("After attempt to read links, number of rows is zero");
-        return(NULL);
-    }
-
     # Read links
     dfl <- dfl %>%
         # the new zero because of the long initialization phase
@@ -579,31 +416,8 @@ read_links <- function (where = ".", zero)
     write_feather(dfl, filename);
     return(filename);
 }
-read_dag <- function (where = ".", dfwFilename = NULL, dflFilename = NULL)
+read_dag <- function (dfdag, dfw = NULL, dfl = NULL)
 {
-    dfw <- if(is.null(dfwFilename)) NULL else read_feather(dfwFilename);
-    dfl <- if(is.null(dflFilename)) NULL else read_feather(dflFilename);
-    dag.feather = paste0(where, "/dag.feather");
-    dag.csv = paste0(where, "/dag.csv");
-    if(file.exists(dag.feather)){
-        loginfo(paste("Reading ", dag.feather));
-        dfdag <- read_feather(dag.feather);
-        loginfo(paste("Read of", dag.feather, "completed"));
-    }else if(file.exists(dag.csv)){
-        loginfo(paste("Reading ", dag.csv));
-        dfdag <- read_csv(dag.csv,
-                          trim_ws=TRUE,
-                          progress=TRUE,
-                          col_types=cols(
-                              Node = col_integer(),
-                              DependsOn = col_integer()
-                          ));
-        loginfo(paste("Read of", dag.csv, "completed"));
-    }else{
-        logwarn(paste("Files", dag.feather, "or", dag.csv, "do not exist"));
-        return(NULL);
-    }
-
     # Read the DAG in the CSV format, do some clean-ups
     dfdag <- dfdag %>%
         # Put in the right order
@@ -659,53 +473,23 @@ read_dag <- function (where = ".", dfwFilename = NULL, dflFilename = NULL)
         # Force the result as tibble for performance reasons
         as_tibble();
     
-    filename <- 'pre.dag.feather';
-    write_feather(dfdag, filename);
-    return(filename);
+    return(dfdag);
 }
 
-pmtools_states_csv_parser <- function (where = ".", whichApplication = NULL, dfhieFilename = NULL, dfwFilename = NULL)
+pmtools_states_csv_parser <- function (dpmts, whichApplication = NULL, Y = NULL, States = NULL)
 {
-    Y <- if(is.null(dfhieFilename)) NULL else read_feather(dfhieFilename);
-    States <- if(is.null(dfwFilename)) NULL else read_feather(dfwFilename);
+    if(!is.null(dpmts)) {
+        dpmts[[6]] <- dpmts[[6]]/1000
+        dpmts[[7]] <- dpmts[[7]]/1000
+        dpmts[[8]] <- dpmts[[8]]/1000
 
-    entities.feather = paste0(where, "/pmtool_states.feather");
-    entities.csv = paste0(where, "/pmtool_states.csv");
+        names(dpmts)[names(dpmts) == 'taskType'] <- 'Value'
+        names(dpmts)[names(dpmts) == 'start'] <- 'Start'
+        names(dpmts)[names(dpmts) == 'end'] <- 'End'
+        names(dpmts)[names(dpmts) == 'duration'] <- 'Duration'
+        names(dpmts)[names(dpmts) == 'worker'] <- 'ResourceId'
 
-    if (file.exists(entities.feather)){
-        loginfo(paste("Reading ", entities.feather));
-        pm <- read_feather(entities.feather);
-        loginfo(paste("Read of", entities.feather, "completed"));
-    }else if (file.exists(entities.csv)){
-        loginfo(paste("Reading ", entities.csv));
-
-        #sched Tid   worker taskType JobId start duration end
-
-        pm <- read_csv(entities.csv,
-                        trim_ws=TRUE,
-                        col_types=cols(
-                            sched = col_character(),
-                            Tid = col_integer(),
-                            worker = col_integer(),
-                            taskType = col_character(),
-                            JobId = col_character(),
-                            start = col_double(),
-                            duration = col_double(),
-                            end = col_double()
-                        ));
-        #pmtools states gives time in milisecounds
-
-        pm[[6]] <- pm[[6]]/1000
-        pm[[7]] <- pm[[7]]/1000
-        pm[[8]] <- pm[[8]]/1000
-
-        names(pm)[names(pm) == 'taskType'] <- 'Value'
-        names(pm)[names(pm) == 'start'] <- 'Start'
-        names(pm)[names(pm) == 'end'] <- 'End'
-        names(pm)[names(pm) == 'duration'] <- 'Duration'
-        names(pm)[names(pm) == 'worker'] <- 'ResourceId'
-
-        pm <- separate(data = pm, col = JobId, into = c("JobId", "Tag"), sep = "\\:")
+        dpmts <- separate(data = dpmts, col = JobId, into = c("JobId", "Tag"), sep = "\\:")
 
         fileName <- "platform_file.rec"
         conn <- file(fileName,open="r")
@@ -739,15 +523,15 @@ pmtools_states_csv_parser <- function (where = ".", whichApplication = NULL, dfh
         	}
         }
 
-        pm[[3]] <- devices[pm[[3]]+1]
+        dpmts[[3]] <- devices[dpmts[[3]]+1]
 
-        pm <- pm %>% left_join((Y %>% select(-Type, -Nature)), by=c("ResourceId" = "Parent"))
+        dpmts <- dpmts %>% left_join((Y %>% select(-Type, -Nature)), by=c("ResourceId" = "Parent"))
         #print(States)
-        #print(pm)
-        pm <- pm %>% left_join((States %>% select(Iteration, JobId)), by=c("JobId" = "JobId"))
+        #print(dpmts)
+        dpmts <- dpmts %>% left_join((States %>% select(Iteration, JobId)), by=c("JobId" = "JobId"))
 
         if (whichApplication == "cholesky"){
-            pm <- pm %>%
+            dpmts <- dpmts %>%
                 mutate(Color = case_when(
                            Value=="dpotrf" ~ "#e41a1c",
                            Value=="dtrsm" ~ "#377eb8",
@@ -756,46 +540,19 @@ pmtools_states_csv_parser <- function (where = ".", whichApplication = NULL, dfh
                            TRUE ~ "#000"));
         }
 
-        #print(pm)
-        loginfo(paste("Read of", entities.csv, "completed"));
+        #print(dpmts)
     }else{
-        loginfo(paste("Files", entities.feather, "or", entities.csv, "do not exist."));
-        return(NULL);
+        dpmts <- NULL;
     }
-
-    filename <- 'pre.pmtool_states.feather';
-    write_feather(pm, filename);
-    return(filename);
+    return(dpmts);
 }
 
-pmtools_bounds_csv_parser <- function (where = ".")
-{
-    entities.feather = paste0(where, "/pmtool.feather");
-    entities.csv = paste0(where, "/pmtool.csv");
-
-    if (file.exists(entities.feather)){
-        loginfo(paste("Reading ", entities.feather));
-        pm <- read_feather(entities.feather);
-        loginfo(paste("Read of", entities.feather, "completed"));
-    }else if (file.exists(entities.csv)){
-        loginfo(paste("Reading ", entities.csv));
-        pm <- read_csv(entities.csv,
-                        trim_ws=TRUE,
-                        col_types=cols(
-                            Alg = col_character(),
-                            Time = col_double()
-                        ));
+pmtools_bounds_csv_parser <- function (dpmtb) {
+    if (!is.null(dpmtb)) {
         # pmtools gives time in microsecounds
-        pm[[2]] <- pm[[2]]/1000
-        loginfo(paste("Read of", entities.csv, "completed"));
-    }else{
-        loginfo(paste("Files", entities.feather, "or", entities.csv, "do not exist."));
-        return(NULL);
+        dpmtb[[2]] <- dpmtb[[2]]/1000
     }
-
-    filename <- 'pre.pmtool.feather';
-    write_feather(pm, filename);
-    return(filename);
+    return (dpmtb);
 }
 
 data_handles_csv_parser <- function (where = ".")

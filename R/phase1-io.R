@@ -199,7 +199,7 @@ read_pmtools_states <- function(directory = '.') {
                             duration = col_double(),
                             end = col_double()
                         ));
-        #pmtools states gives time in milisecounds
+        #pmtools states gives time in miliseconds
         loginfo(paste("Read of", pmtools_states.csv, "completed"));
     }else {
         logwarn(paste("Files", pmtools_states.feather, "or", pmtools_states.csv, "do not exist"));
@@ -233,4 +233,86 @@ read_pmtools_bounds <- function(directory = '.') {
     filename <- 'pre.pmtool.feather';
     write_feather(pm, filename);
     return(filename);
+}
+
+read_data_handles <- function(directory = '.') {
+    data_handles.feather = paste0(directory, "/data_handles.feather");
+    data_handles.csv = paste0(directory, "/rec.data_handles.csv");
+
+    if (file.exists(data_handles.feather)){
+        loginfo(paste("Reading ", data_handles.feather));
+        ddh <- read_feather(data_handles.feather);
+        loginfo(paste("Read of", data_handles.feather, "completed"));
+    }else if (file.exists(data_handles.csv)){
+        loginfo(paste("Reading ", data_handles.csv));
+        ddh <- read_csv(data_handles.csv,
+                        trim_ws=TRUE,
+                        col_types=cols(
+                            Handle = col_character(),
+                            HomeNode = col_integer(),
+                            Size = col_integer(),
+                            Coordinates = col_character()
+                        ));
+
+        # Not supported in feather
+        # pm$Coordinates <- lapply(strsplit(pm$Coordinates, " "), as.integer);
+        loginfo(paste("Read of", data_handles.csv, "completed"));
+    }else{
+        loginfo(paste("Files", data_handles.feather, "or", data_handles.csv, "do not exist."));
+        return(NULL);
+    }
+    return(ddh);
+}
+
+read_tasks_handles <- function(directory = '.') {
+    task_handles.feather = paste0(where, "/task_handles.feather");
+
+    if (!file.exists(task_handles.feather)){
+        return(NULL)
+    }
+    loginfo(paste("Reading ", task_handles.feather));
+    task_handles <- read_feather(task_handles.feather);
+    loginfo(paste("Read of", task_handles.feather, "completed"));
+    return(task_handles);
+}
+
+read_tasks <- function(directory = '.') {
+    tasks.feather = paste0(directory, "/tasks.feather");
+    tasks.csv = paste0(directory, "/rec.tasks.csv");
+
+    if (file.exists(tasks.feather)){
+        loginfo(paste("Reading ", tasks.feather));
+        tasks <- read_feather(tasks.feather);
+        loginfo(paste("Read of", tasks.feather, "completed"));
+    }else if (file.exists(tasks.csv)){
+        loginfo(paste("Reading ", tasks.csv));
+        tasks <- read_csv(tasks.csv,
+                        trim_ws=TRUE,
+                        col_types=cols(
+                            Control = col_character(),
+                            JobId = col_integer(),
+                            SubmitOrder = col_integer(),
+                            SubmitTime = col_double(),
+                            Handles = col_character(),
+                            MPIRank = col_integer(),
+                            DependsOn = col_character(),
+                            Tag = col_character(),
+                            Footprint = col_character(),
+                            Iteration = col_integer(),
+                            Name = col_character(),
+                            Model = col_character(),
+                            Priority = col_integer(),
+                            WorkerId = col_integer(),
+                            MemoryNode = col_integer(),
+                            StartTime = col_double(),
+                            EndTime = col_double(),
+                            Parameters = col_character(),
+                            Modes = col_character(),
+                            Sizes = col_character()
+                        ));
+    } else {
+        loginfo(paste("Files", tasks.feather, "or", tasks.csv, "do not exist."));
+        return(NULL);
+    }
+    return(tasks);
 }

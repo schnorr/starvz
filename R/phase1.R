@@ -555,113 +555,26 @@ pmtools_bounds_csv_parser <- function (dpmtb) {
     return (dpmtb);
 }
 
-data_handles_csv_parser <- function (where = ".")
+data_handles_csv_parser <- function (ddh)
 {
-    entities.feather = paste0(where, "/data_handles.feather");
-    entities.csv = paste0(where, "/rec.data_handles.csv");
+    return(ddh);
+}
 
-    if (file.exists(entities.feather)){
-        loginfo(paste("Reading ", entities.feather));
-        pm <- read_feather(entities.feather);
-        loginfo(paste("Read of", entities.feather, "completed"));
-    }else if (file.exists(entities.csv)){
-        loginfo(paste("Reading ", entities.csv));
-        pm <- read_csv(entities.csv,
-                        trim_ws=TRUE,
-                        col_types=cols(
-                            Handle = col_character(),
-                            HomeNode = col_integer(),
-                            Size = col_integer(),
-                            Coordinates = col_character()
-                        ));
+tasks_csv_parser <- function (tasks, task_handles) {
+    # sort the data by the submit order
+    tasks <- tasks[with(tasks, order(SubmitOrder)), ]
+    # Tasks have multiple handles, get them in a different structure
+    handles_dep = tasks %>% select(JobId) %>% mutate(Handles = strsplit(tasks$Handles, " "),
+                            Modes = strsplit(tasks$Modes, " "),
+                            Sizes = lapply(strsplit(tasks$Sizes, " "), as.integer));
 
-        # Not supported in feather
-        # pm$Coordinates <- lapply(strsplit(pm$Coordinates, " "), as.integer);
-        loginfo(paste("Read of", entities.csv, "completed"));
-    }else{
-        loginfo(paste("Files", entities.feather, "or", entities.csv, "do not exist."));
-        return(NULL);
-    }
+    # We will save the task_handle structre, we can remove these columns
+    tasks <- tasks %>% select(-Handles, -Modes, -Sizes)
     
-    filename <- 'pre.data_handles.feather';
-    write_feather(pm, filename);
-    return(filename);
-}
+    # unnest the lists
+    task_handles <- unnest(handles_dep);
 
-tasks_csv_parser <- function (where = ".")
-{
-    entities.feather = paste0(where, "/tasks.feather");
-    entities.csv = paste0(where, "/rec.tasks.csv");
-
-    task_handles <- task_handles_parser(where = where);
-
-    if (file.exists(entities.feather)){
-        loginfo(paste("Reading ", entities.feather));
-        pm <- read_feather(entities.feather);
-        loginfo(paste("Read of", entities.feather, "completed"));
-    }else if (file.exists(entities.csv)){
-        loginfo(paste("Reading ", entities.csv));
-        pm <- read_csv(entities.csv,
-                        trim_ws=TRUE,
-                        col_types=cols(
-                            Control = col_character(),
-                            JobId = col_integer(),
-                            SubmitOrder = col_integer(),
-                            SubmitTime = col_double(),
-                            Handles = col_character(),
-                            MPIRank = col_integer(),
-                            DependsOn = col_character(),
-                            Tag = col_character(),
-                            Footprint = col_character(),
-                            Iteration = col_integer(),
-                            Name = col_character(),
-                            Model = col_character(),
-                            Priority = col_integer(),
-                            WorkerId = col_integer(),
-                            MemoryNode = col_integer(),
-                            StartTime = col_double(),
-                            EndTime = col_double(),
-                            Parameters = col_character(),
-                            Modes = col_character(),
-                            Sizes = col_character()
-                        ));
-        # sort the data by the submit order
-        pm <- pm[with(pm, order(SubmitOrder)), ]
-        # Tasks have multiple handles, get them in a different structure
-        handles_dep = pm %>% select(JobId) %>% mutate(Handles = strsplit(pm$Handles, " "),
-                                Modes = strsplit(pm$Modes, " "),
-                                Sizes = lapply(strsplit(pm$Sizes, " "), as.integer))
-        # unnest the lists
-        task_handles <- unnest(handles_dep);
-
-        # We will save the task_handle structre, we can remove these columns
-        pm <- pm %>% select(-Handles, -Modes, -Sizes)
-
-        loginfo(paste("Read of", entities.csv, "completed"));
-    }else{
-        loginfo(paste("Files", entities.feather, "or", entities.csv, "do not exist."));
-        return(NULL);
-    }
-
-    tasksFilename <- 'pre.tasks.feather';
-    write_feather(pm, tasksFilename);
-    handlesFilename <- 'pre.task_handles.feather';
-    write_feather(task_handles, handlesFilename);
-    return(list(tasks = tasksFilename, handles = handlesFilename));
-}
-
-task_handles_parser <- function (where = ".")
-{
-    entities.feather = paste0(where, "/task_handles.feather");
-
-    if (file.exists(entities.feather)){
-        loginfo(paste("Reading ", entities.feather));
-        ret <- read_feather(entities.feather);
-        loginfo(paste("Read of", entities.feather, "completed"));
-        return(ret);
-    }
-
-    return(NULL);
+    return(list(tasks = tasks, handles = task_handles));
 }
 
 the_fast_reader_function <- function (directory = ".")

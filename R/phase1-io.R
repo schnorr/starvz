@@ -1,6 +1,8 @@
+library(logging);
 library(tidyverse);
+library(feather);
 
-read_state <- function (directory) {
+read_state <- function (directory = '.') {
     state.csv <- paste0(directory, '/paje.state.csv');
     if (!file.exists(state.csv)) {
         stop('States CSV file does not exist');
@@ -174,6 +176,30 @@ read_dag_io <- function(directory = '.') {
     return(dfdag);
 }
 
+read_pmtools_bounds <- function(directory = '.') {
+    pmtools_bounds.feather = paste0(directory, "/pmtool.feather");
+    pmtools_bounds.csv = paste0(directory, "/pmtool.csv");
+
+    if (file.exists(pmtools_bounds.feather)){
+        loginfo(paste("Reading ", pmtools_bounds.feather));
+        dpmtb<- read_feather(pmtools_bounds.feather);
+        loginfo(paste("Read of", pmtools_bounds.feather, "completed"));
+    }else if (file.exists(pmtools_bounds.csv)){
+        loginfo(paste("Reading ", pmtools_bounds.csv));
+        dpmtb<- read_csv(pmtools_bounds.csv,
+                        trim_ws=TRUE,
+                        col_types=cols(
+                            Alg = col_character(),
+                            Time = col_double()
+                        ));
+        loginfo(paste("Read of", pmtools_bounds.csv, "completed"));
+    }else{
+        loginfo(paste("Files", pmtools_bounds.feather, "or", pmtools_bounds.csv, "do not exist."));
+        return(NULL);
+    }
+    return(dpmtb);
+}
+
 read_pmtools_states <- function(directory = '.') {
     pmtools_states.feather = paste0(directory, "/pmtool_states.feather");
     pmtools_states.csv = paste0(directory, "/pmtool_states.csv");
@@ -208,33 +234,6 @@ read_pmtools_states <- function(directory = '.') {
     return(dpmts)
 }
 
-read_pmtools_bounds <- function(directory = '.') {
-    pmtools_bounds.feather = paste0(where, "/pmtool.feather");
-    pmtools_bounds.csv = paste0(where, "/pmtool.csv");
-
-    if (file.exists(pmtools_bounds.feather)){
-        loginfo(paste("Reading ", pmtools_bounds.feather));
-        dpmtb<- read_feather(pmtools_bounds.feather);
-        loginfo(paste("Read of", pmtools_bounds.feather, "completed"));
-    }else if (file.exists(pmtools_bounds.csv)){
-        loginfo(paste("Reading ", pmtools_bounds.csv));
-        dpmtb<- read_csv(pmtools_bounds.csv,
-                        trim_ws=TRUE,
-                        col_types=cols(
-                            Alg = col_character(),
-                            Time = col_double()
-                        ));
-        loginfo(paste("Read of", pmtools_bounds.csv, "completed"));
-    }else{
-        loginfo(paste("Files", pmtools_bounds.feather, "or", pmtools_bounds.csv, "do not exist."));
-        return(NULL);
-    }
-
-    filename <- 'pre.pmtool.feather';
-    write_feather(pm, filename);
-    return(filename);
-}
-
 read_data_handles <- function(directory = '.') {
     data_handles.feather = paste0(directory, "/data_handles.feather");
     data_handles.csv = paste0(directory, "/rec.data_handles.csv");
@@ -265,7 +264,7 @@ read_data_handles <- function(directory = '.') {
 }
 
 read_tasks_handles <- function(directory = '.') {
-    task_handles.feather = paste0(where, "/task_handles.feather");
+    task_handles.feather = paste0(directory, "/task_handles.feather");
 
     if (!file.exists(task_handles.feather)){
         return(NULL)
@@ -315,4 +314,112 @@ read_tasks <- function(directory = '.') {
         return(NULL);
     }
     return(tasks);
+}
+
+save_feathers <- function(data, gaps) {
+    # State
+    filename <- "pre.state.feather";
+    loginfo(filename);
+    if (!is.null(data$State)){
+        write_feather(data$State, filename);
+    }else{
+        loginfo(paste("Data for", filename, "has not been feathered because is empty."));
+    }
+
+    # Variable
+    filename <- "pre.variable.feather";
+    loginfo(filename);
+    if (!is.null(data$Variable)){
+        write_feather(data$Variable, filename);
+    }else{
+        loginfo(paste("Data for", filename, "has not been feathered because is empty."));
+    }
+
+    # Link
+    filename <- "pre.link.feather";
+    loginfo(filename);
+    if (!is.null(data$Link)){
+        write_feather(data$Link, filename);
+    }else{
+        loginfo(paste("Data for", filename, "has not been feathered because is empty."));
+    }
+
+    # DAG
+    filename <- "pre.dag.feather";
+    loginfo(filename);
+    if (!is.null(data$DAG)){
+        write_feather(data$DAG, filename);
+    }else{
+        loginfo(paste("Data for", filename, "has not been feathered because is empty."));
+    }
+
+    # Y
+    filename <- "pre.y.feather";
+    loginfo(filename);
+    if (!is.null(data$Y)){
+        write_feather(data$Y, filename);
+    }else{
+        loginfo(paste("Data for", filename, "has not been feathered because is empty."));
+    }
+
+    # ATree
+    filename <- "pre.atree.feather";
+    loginfo(filename);
+    if (!is.null(data$ATree)){
+        write_feather(data$ATree, filename);
+    }else{
+        loginfo(paste("Data for", filename, "has not been feathered because is empty."));
+    }
+
+    # Gaps
+    filename <- "pre.gaps.feather";
+    loginfo(filename);
+    if (!is.null(gaps)){
+        write_feather(gaps, filename);
+    }else{
+        loginfo(paste("Data for", filename, "has not been feathered because is empty."));
+    }
+
+    # PMtool
+    filename <- "pre.pmtool.feather";
+    loginfo(filename);
+    if (!is.null(data$pmtool)){
+        write_feather(data$pmtool, filename);
+    }else{
+        loginfo(paste("Data for", filename, "has not been feathered because is empty."));
+    }
+
+    filename <- "pre.pmtool_states.feather";
+    loginfo(filename);
+    if (!is.null(data$pmtool_states)){
+        write_feather(data$pmtool_states, filename);
+    }else{
+        loginfo(paste("Data for", filename, "has not been feathered because is empty."));
+    }
+
+    # Data Rec
+    filename <- "pre.data_handles.feather";
+    loginfo(filename);
+    if (!is.null(data$data_handles)){
+        write_feather(data$data_handles, filename);
+    }else{
+        loginfo(paste("Data for", filename, "has not been feathered because is empty."));
+    }
+
+    # Tasks Rec
+    filename <- "pre.tasks.feather";
+    loginfo(filename);
+    if (!is.null(data$tasks)){
+        write_feather(data$tasks, filename);
+    }else{
+        loginfo(paste("Data for", filename, "has not been feathered because is empty."));
+    }
+
+    filename <- "pre.task_handles.feather";
+    loginfo(filename);
+    if (!is.null(data$task_handles)){
+        write_feather(data$task_handles, filename);
+    }else{
+        loginfo(paste("Data for", filename, "has not been feathered because is empty."));
+    }
 }

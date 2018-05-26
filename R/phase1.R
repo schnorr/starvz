@@ -1,21 +1,6 @@
-# see:
-# https://stackoverflow.com/questions/1815606/rscript-determine-path-of-the-executing-script (Suppressingfire answer)
-initial.options <- commandArgs(trailingOnly = FALSE)
-file.arg.name <- "--file="
-script.name <- sub(file.arg.name, "", initial.options[grep(file.arg.name, initial.options)])
-script.basename <- dirname(script.name)
-other.name <- paste(sep="/", script.basename, "deps.R")
-print(paste("Sourcing",other.name,"from",script.name))
-
-if(file.exists(other.name)){
-  source(other.name)
-}else{
-  source("deps.R")
-}
-
 # Code starts here - Do not remove this line
 
-read_state_csv <- function(applicationName, app_states_fun, strict_state_filter, dfw) {
+manipulate_state_csv <- function(applicationName, app_states_fun, strict_state_filter, dfw) {
   if (is.null(applicationName) ||
       is.null(app_states_fun) ||
       !is.data.frame(app_states_fun()) ||
@@ -53,12 +38,10 @@ read_state_csv <- function(applicationName, app_states_fun, strict_state_filter,
   # StarPU is dumping two lines per application state (so, fix in R)
   dfw <- dfw %>% dplyr::filter(Application == FALSE | !is.na(JobId));
   
-  filename <- './tmp-rawDfw.feather';
-  write_feather(dfw, filename);
-  return(filename);
+  return(dfw);
 }
 
-read_zero <- function(dfw) {
+manipulate_zero <- function(dfw) {
   loginfo('Defining the ZERO timestamp');
   return(dfw %>% 
            dplyr::filter(Application == TRUE) %>% 
@@ -164,9 +147,7 @@ hl_y_coordinates <- function (dfw = NULL, dfhie = NULL)
         # the left join to get new Y coordinates
         left_join (dfhie, by=c("ResourceId" = "Parent", "Type" = "Type", "Nature" = "Nature"));
 
-    filename <- 'tmp-highlightedDfw.feather';
-    write_feather(dfw, filename);
-    return(filename);
+    return(dfw);
 }
 
 hl_y_paje_tree <- function (dfe)
@@ -300,7 +281,8 @@ dt_to_df_inner <- function (node)
     return(ret);
 }
 
-atree_load <- function(dfa){
+manipulate_atree <- function(dfa){
+    if (is.null(dfa)) return(NULL);
     intermediary_nodes <- dfa %>% select(Node) %>% .$Node %>% unique;
 
     loginfo(paste("Calculating graphical properties of the elimination tree"));
@@ -381,7 +363,7 @@ join_dfw_dfap <- function(dfw, dfap) {
     return(dfw);
 }
 
-read_vars_set_new_zero <- function (dfv, zero)
+manipulate_vars_set_new_zero <- function (dfv, zero) {
     dfv <- dfv %>%
         # the new zero because of the long initialization phase
         mutate(Start = Start - zero, End = End - zero) %>%
@@ -403,7 +385,7 @@ read_vars_set_new_zero <- function (dfv, zero)
     return(dfv);
 }
 
-read_links <- function (dfl, zero)
+manipulate_links <- function (dfl, zero)
 {
     # Read links
     dfl <- dfl %>%
@@ -411,12 +393,11 @@ read_links <- function (dfl, zero)
         mutate(Start = Start - zero, End = End - zero) %>%
         # filter all variables during negative timings
         dplyr::filter(Start >= 0, End >= 0);
-
-    filename <- 'pre.link.feather';
-    write_feather(dfl, filename);
-    return(filename);
+    
+    return(dfl);
 }
-read_dag <- function (dfdag, dfw = NULL, dfl = NULL)
+
+manipulate_dag <- function (dfdag, dfw = NULL, dfl = NULL)
 {
     # Read the DAG in the CSV format, do some clean-ups
     dfdag <- dfdag %>%
@@ -434,7 +415,7 @@ read_dag <- function (dfdag, dfw = NULL, dfl = NULL)
     # Do the two merges (states and links)
     dfdags <- dfdag %>%
         # Get only non-MPI tasks JobIds
-        filter(!grepl("mpicom", JobId)) %>%
+        dplyr::filter(!grepl("mpicom", JobId)) %>%
         # Merge task information from the trace (states: dfw)
         full_join((dfw %>% filter(Application == TRUE)), by="JobId");
 
@@ -476,7 +457,15 @@ read_dag <- function (dfdag, dfw = NULL, dfl = NULL)
     return(dfdag);
 }
 
-pmtools_states_csv_parser <- function (dpmts, whichApplication = NULL, Y = NULL, States = NULL)
+manipulate_pmtools_bounds <- function (dpmtb) {
+    if (!is.null(dpmtb)) {
+        # pmtools gives time in microseconds
+        dpmtb[[2]] <- dpmtb[[2]]/1000
+    }
+    return (dpmtb);
+}
+
+manipulate_pmtools_states <- function (dpmts, whichApplication = NULL, Y = NULL, States = NULL)
 {
     if(!is.null(dpmts)) {
         dpmts[[6]] <- dpmts[[6]]/1000
@@ -547,20 +536,12 @@ pmtools_states_csv_parser <- function (dpmts, whichApplication = NULL, Y = NULL,
     return(dpmts);
 }
 
-pmtools_bounds_csv_parser <- function (dpmtb) {
-    if (!is.null(dpmtb)) {
-        # pmtools gives time in microsecounds
-        dpmtb[[2]] <- dpmtb[[2]]/1000
-    }
-    return (dpmtb);
-}
-
-data_handles_csv_parser <- function (ddh)
+manipulate_data_handles <- function (ddh)
 {
     return(ddh);
 }
 
-tasks_csv_parser <- function (tasks, task_handles) {
+manipulate_tasks <- function (tasks, task_handles) {
     # sort the data by the submit order
     tasks <- tasks[with(tasks, order(SubmitOrder)), ]
     # Tasks have multiple handles, get them in a different structure
@@ -603,9 +584,9 @@ aggregate_data <- function(directory, dfw, dfv, dfl, dfdag, dfhie, dfa, dpmtb, d
                  pmtool=dpmtb, pmtool_states=dpmts, data_handles=ddh, tasks=dtasks$tasks, task_handles=dtasks$handles));
 }
 
-calculate_gaps <- function(applicationName, dfwFilename, dfdagFilename, dflFilename) {
+calculate_gaps <- function(applicationName, dfw, dfdag, dfl) {
     if(applicationName == 'cholesky') {
-        return(gaps(dfwFilename, dfdagFilename, dflFilename));
+        return(gaps(dfw, dfdag, dfl));
     } else {
         return(NULL)
     }
@@ -679,12 +660,9 @@ gaps.f_forward <- function (data)
     return(f2(data$DAG, seedchain));
 }
 
-gaps <- function (dfwFilename, dfdagFilename, dflFilename)
+gaps <- function (dfw, dfdag, dfl)
 {
     loginfo("Starting the gaps calculation.");
-    dfw <- read_feather(dfwFilename);
-    dfdag <- read_feather(dfdagFilename);
-    dfl <- read_feather(dflFilename);
     data <- list(State = dfw, DAG = dfdag, Link = dfl);
 
     if(is.null(data$DAG)) return(NULL);
@@ -743,117 +721,7 @@ gaps <- function (dfwFilename, dfdagFilename, dflFilename)
 
     gaps <- bind_rows(data.z.dag, data.b.dag, data.f.dag);
 
-    filename <- 'pre.gaps.feather';
-    write_feather(gaps, filename);
-    return(filename);
-}
-
-save_feathers <- function(data, gaps) {
-    # State
-    filename <- "pre.state.feather";
-    loginfo(filename);
-    if (!is.null(data$State)){
-        write_feather(data$State, filename);
-    }else{
-        loginfo(paste("Data for", filename, "has not been feathered because is empty."));
-    }
-
-    # Variable
-    filename <- "pre.variable.feather";
-    loginfo(filename);
-    if (!is.null(data$Variable)){
-        write_feather(data$Variable, filename);
-    }else{
-        loginfo(paste("Data for", filename, "has not been feathered because is empty."));
-    }
-
-    # Link
-    filename <- "pre.link.feather";
-    loginfo(filename);
-    if (!is.null(data$Link)){
-        write_feather(data$Link, filename);
-    }else{
-        loginfo(paste("Data for", filename, "has not been feathered because is empty."));
-    }
-
-    # DAG
-    filename <- "pre.dag.feather";
-    loginfo(filename);
-    if (!is.null(data$DAG)){
-        write_feather(data$DAG, filename);
-    }else{
-        loginfo(paste("Data for", filename, "has not been feathered because is empty."));
-    }
-
-    # Y
-    filename <- "pre.y.feather";
-    loginfo(filename);
-    if (!is.null(data$Y)){
-        write_feather(data$Y, filename);
-    }else{
-        loginfo(paste("Data for", filename, "has not been feathered because is empty."));
-    }
-
-    # ATree
-    filename <- "pre.atree.feather";
-    loginfo(filename);
-    if (!is.null(data$ATree)){
-        write_feather(data$ATree, filename);
-    }else{
-        loginfo(paste("Data for", filename, "has not been feathered because is empty."));
-    }
-
-    # Gaps
-    filename <- "pre.gaps.feather";
-    loginfo(filename);
-    if (!is.null(gaps)){
-        write_feather(gaps, filename);
-    }else{
-        loginfo(paste("Data for", filename, "has not been feathered because is empty."));
-    }
-
-    # PMtool
-    filename <- "pre.pmtool.feather";
-    loginfo(filename);
-    if (!is.null(data$pmtool)){
-        write_feather(data$pmtool, filename);
-    }else{
-        loginfo(paste("Data for", filename, "has not been feathered because is empty."));
-    }
-
-    filename <- "pre.pmtool_states.feather";
-    loginfo(filename);
-    if (!is.null(data$pmtool_states)){
-        write_feather(data$pmtool_states, filename);
-    }else{
-        loginfo(paste("Data for", filename, "has not been feathered because is empty."));
-    }
-
-    # Data Rec
-    filename <- "pre.data_handles.feather";
-    loginfo(filename);
-    if (!is.null(data$data_handles)){
-        write_feather(data$data_handles, filename);
-    }else{
-        loginfo(paste("Data for", filename, "has not been feathered because is empty."));
-    }
-
-    # Tasks Rec
-    filename <- "pre.tasks.feather";
-    loginfo(filename);
-    if (!is.null(data$tasks)){
-        write_feather(data$tasks, filename);
-    }else{
-        loginfo(paste("Data for", filename, "has not been feathered because is empty."));
-    }
-
-    filename <- "pre.task_handles.feather";
-    loginfo(filename);
-    if (!is.null(data$task_handles)){
-        write_feather(data$task_handles, filename);
-    }else{
-        loginfo(paste("Data for", filename, "has not been feathered because is empty."));
-    }
+    return(gaps);
 }
 
 starpu_states <- function()

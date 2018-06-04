@@ -2,6 +2,22 @@ library(logging);
 library(tidyverse);
 library(feather);
 
+resolve_io_function <- function(targetDf, directory = ".") {
+    switch(targetDf,
+        "dfw" = read_state(directory),
+        "dfe" = read_entities(directory),
+        "dfa" = read_atree(directory),
+        "dfv" = read_variables(directory),
+        "dfl" = read_links_io(directory),
+        "dfdag" = read_dag_io(directory),
+        "dpmtb" = read_pmtools_bounds(directory),
+        "dpmts" = read_pmtools_states(directory),
+        "ddh" = read_data_handles(directory),
+        "task_handles" = read_tasks_handles(directory),
+        "tasks" = read_tasks(directory)
+    );
+}
+
 read_state <- function (directory = '.') {
     state.csv <- paste0(directory, '/paje.state.csv');
     if (!file.exists(state.csv)) {

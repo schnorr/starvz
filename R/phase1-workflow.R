@@ -65,26 +65,8 @@ logForOrg <- function(record) { paste(record$levelname, record$logger, record$ms
 addHandler(writeToConsole, formatter=logForOrg);
 removeHandler('basic.stdout');
 
-phase1_plan <- drake_plan(
-    dfw = read_state(input.directory),
-    dfe = read_entities(input.directory),
-    dfa = read_atree(input.directory),
-    dfv = read_variables(input.directory),
-    dfl = read_links_io(input.directory),
-    dfdag = read_dag_io(input.directory),
-    dpmtb = read_pmtools_bounds(input.directory),
-    dpmts = read_pmtools_states(input.directory),
-    ddh = read_data_handles(input.directory),
-    task_handles = read_tasks_handles(input.directory),
-    tasks = read_tasks(input.directory)
-);
-
-plan_config <- drake_config(phase1_plan);
-vis_drake_graph(plan_config);
-clean(plan_config);
-jobs <- max_useful_jobs(plan_config);
-loadd(dfw, dfe, dfa, dfv, dfl, dfdag, dpmtb, dpmts, ddh, task_handles, tasks);
-make(phase1_plan, j = jobs);
+targets <- c('dfw', 'dfe', 'dfa', 'dfv', 'dfl', 'dfdag', 'dpmtb', 'dpmts', 'ddh', 'task_handles', 'tasks');
+data <- lapply(targets, resolve_io_function);
 
 # Data manipulation
 dfw <- manipulate_state_csv(input.application, states.fun, states.filter.strict, dfw);

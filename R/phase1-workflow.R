@@ -7,6 +7,10 @@ file.arg.name <- "--file="
 script.name <- sub(file.arg.name, "", initial.options[grep(file.arg.name, initial.options)])
 script.basename <- dirname(script.name)
 
+other.name <- paste(sep='/', script.basename, 'deps.R');
+print(paste('Sourcing',other.name,'from',script.name));
+source(other.name);
+
 other.name <- paste(sep="/", script.basename, "phase1.R");
 print(paste("Sourcing",other.name,"from",script.name));
 source(other.name);
@@ -65,29 +69,35 @@ logForOrg <- function(record) { paste(record$levelname, record$logger, record$ms
 addHandler(writeToConsole, formatter=logForOrg);
 removeHandler('basic.stdout');
 
+coresCount = detectCores()-1;
+cluster = makeCluster(coresCount, type="FORK");
+
 targets <- c('dfw', 'dfe', 'dfa', 'dfv', 'dfl', 'dfdag', 'dpmtb', 'dpmts', 'ddh', 'task_handles', 'tasks');
-data <- lapply(targets, resolve_io_function);
+data <- parLapply(cluster, targets, resolve_io_function);
+names(data) <- targets
+
+stopCluster(cluster);
 
 # Data manipulation
-dfw <- manipulate_state_csv(input.application, states.fun, states.filter.strict, dfw);
-zero <- manipulate_zero(dfw);
-dfw <- normalize_dfw(dfw, zero, input.application, states.fun, outlier_definition);
-dfhie <- hl_y_paje_tree(dfe);
-highlightedDfw <- hl_y_coordinates(dfw, dfhie);
-dfa <- manipulate_atree(dfa);
-dfap <- build_dfap(dfa);
-dfw <- join_dfw_dfap(dfw, dfap);
-dfw <- manipulate_vars_set_new_zero(dfv, zero);
-dfl <- manipulate_links(dfl, zero);
-dfdag <- manipulate_dag(dfdag, dfw, dfl);
-dpmtb <- manipulate_pmtools_bounds(dpmtb);
-dpmts <- manipulate_pmtools_states(dpmts, input.application, dfhie, dfw);
-ddh <- manipulate_data_handles(ddh);
-dtasks <- manipulate_tasks(tasks, task_handles);
-gaps <- calculate_gaps(input.application, dfw, dfdag, dfl);
-data <- aggregate_data(input.application, dfw, dfv, dfl, dfdag, dfhie, dfa, dpmtb, dpmts, ddh, dtasks);
+#dfw <- manipulate_state_csv(input.application, states.fun, states.filter.strict, dfw);
+#zero <- manipulate_zero(dfw);
+#dfw <- normalize_dfw(dfw, zero, input.application, states.fun, outlier_definition);
+#dfhie <- hl_y_paje_tree(dfe);
+#highlightedDfw <- hl_y_coordinates(dfw, dfhie);
+#dfa <- manipulate_atree(dfa);
+#dfap <- build_dfap(dfa);
+# dfw <- join_dfw_dfap(dfw, dfap);
+# dfw <- manipulate_vars_set_new_zero(dfv, zero);
+# dfl <- manipulate_links(dfl, zero);
+# dfdag <- manipulate_dag(dfdag, dfw, dfl);
+# dpmtb <- manipulate_pmtools_bounds(dpmtb);
+# dpmts <- manipulate_pmtools_states(dpmts, input.application, dfhie, dfw);
+# ddh <- manipulate_data_handles(ddh);
+# dtasks <- manipulate_tasks(tasks, task_handles);
+# gaps <- calculate_gaps(input.application, dfw, dfdag, dfl);
+# data <- aggregate_data(input.application, dfw, dfv, dfl, dfdag, dfhie, dfa, dpmtb, dpmts, ddh, dtasks);
 
-# Saving data
-save_feathers(data, gaps);
+# # Saving data
+# save_feathers(data, gaps);
 
-loginfo("Pre-process finished correctly.");
+# loginfo("Pre-process finished correctly.");

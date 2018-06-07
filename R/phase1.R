@@ -8,13 +8,6 @@ manipulate_state_csv <- function(applicationName, app_states_fun, strict_state_f
     stop('A mandatory parameter is invalid.');
   }
   
-  dfw <- dfw %>% mutate(Value = as.factor(Value),
-                        GFlop = as.numeric(GFlop),
-                        X = as.integer(X),
-                        Y = as.integer(Y),
-                        Iteration = as.integer(Iteration),
-                        Subiteration = as.integer(Subiteration));
-  
   # QRMumps: fix qrmumps kernels names so we have a clean color definition
   if (applicationName == "qrmumps"){
     dfw <- dfw %>%

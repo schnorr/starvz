@@ -1,5 +1,4 @@
 library(logging);
-library(tidyverse);
 library(feather);
 
 resolve_io_function <- function(targetDf, directory = ".") {
@@ -24,30 +23,28 @@ read_state <- function (directory = '.') {
         stop('States CSV file does not exist');
     }
     loginfo(paste('Reading', state.csv));
-    dfw <- read_csv(file = state.csv,
-                  trim_ws = TRUE,
-                  progress = TRUE,
-                  col_types = cols(
-                    Nature = col_character(),
-                    ResourceId = col_character(),
-                    Type = col_character(),
-                    Start = col_double(),
-                    End = col_double(),
-                    Duration = col_double(),
-                    Depth = col_double(),
-                    Value = col_character(),
-                    Size = col_character(),
-                    Params = col_character(),
-                    Footprint = col_character(),
-                    Tag = col_character(),
-                    JobId = col_character(),
-                    GFlop = col_character(),
-                    SubmitOrder = col_character(),
-                    X = col_character(),
-                    Y = col_character(),
-                    Iteration = col_character(),
-                    Subiteration = col_character()
-                  ));
+    dfw <- fread(file=state.csv, sep=",", header=TRUE, data.table=FALSE);
+    dfw <- dfw %>% mutate(
+        Nature = as.character(Nature),
+        ResourceId = as.character(ResourceId),
+        Type = as.character(Type),
+        Start = as.double(Start),
+        End = as.double(End),
+        Duration = as.double(Duration),
+        Depth = as.double(Depth),
+        Value = as.factor(Value),
+        Size = as.character(Size),
+        Params = as.character(Params),
+        Footprint = as.character(Footprint),
+        Tag = as.character(Tag),
+        JobId = as.character(JobId),
+        GFlop = as.numeric(GFlop),
+        SubmitOrder = as.character(SubmitOrder),
+        X = as.integer(X),
+        Y = as.integer(Y),
+        Iteration = as.integer(Iteration),
+        Subiteration = as.integer(Subiteration)
+    );
   if (nrow(dfw) == 0) stop('After reading states CSV, number of rows is zero.');
   return(dfw);
 };
@@ -62,14 +59,13 @@ read_entities <- function(directory = '.') {
         loginfo(paste("Read of", entities.feather, "completed"));
     }else if (file.exists(entities.csv)){
         loginfo(paste("Reading ", entities.csv));
-        dfe <- read_csv(entities.csv,
-                        trim_ws=TRUE,
-                        col_types=cols(
-                            Parent = col_character(),
-                            Name = col_character(),
-                            Type = col_character(),
-                            Nature = col_character()
-                        ));
+        dfe <- fread(file=entities.csv, sep=",", header=TRUE, data.table=FALSE);
+        dfe <- dfe %>% mutate(
+            Parent = as.character(Parent),
+            Name = as.character(Name),
+            Type = as.character(Type),
+            Nature = as.character(Nature)
+        );
         loginfo(paste("Read of", entities.csv, "completed"));
     }else{
         loginfo(paste("Files", entities.feather, "or", entities.csv, "do not exist."));
@@ -88,13 +84,11 @@ read_atree <- function(directory = '.') {
         dfa <- read_feather(atree.feather);
     }else if (file.exists(atree.csv)){
         loginfo(paste("Reading ", atree.csv));
-        dfa <- read_csv(file=atree.csv,
-                       trim_ws=TRUE,
-                       progress=TRUE,
-                       col_types=cols(
-                           Node = col_integer(),
-                           DependsOn = col_integer()
-                       ));
+        dfa <- fread(file=atree.csv, sep=",", header=TRUE, data.table=FALSE);
+        dfa <- dfa %>% mutate(
+            Node = as.integer(Node),
+            DependsOn = as.integer(DependsOn)
+        );
     }else{
         loginfo(paste("Files", atree.feather, "or", atree.csv, "do not exist."));
         return(NULL);
@@ -111,18 +105,16 @@ read_variables <- function(directory = '.') {
         loginfo(paste("Read of", variable.feather, "completed"));
     }else if(file.exists(variable.csv)){
         loginfo(paste("Reading ", variable.csv));
-        dfv <- read_csv(variable.csv,
-                        trim_ws=TRUE,
-                        progress=TRUE,
-                        col_types=cols(
-                            Nature = col_character(),
-                            ResourceId = col_character(),
-                            Type = col_character(),
-                            Start = col_double(),
-                            End = col_double(),
-                            Duration = col_double(),
-                            Value = col_double()
-                        ));
+        dfv <- fread(file=variable.csv, sep=",", header=TRUE, data.table=FALSE);
+        dfv <- dfv %>% mutate(
+            Nature = as.character(Nature),
+            ResourceId = as.character(ResourceId),
+            Type = as.character(Type),
+            Start = as.double(Start),
+            End = as.double(End),
+            Duration = as.double(Duration),
+            Value = as.double(Value)
+        );
         loginfo(paste("Read of", variable.csv, "completed"));
     }else{
         stop(paste("Files", variable.feather, "or", variable.csv, "do not exist"));
@@ -140,21 +132,19 @@ read_links_io <- function(directory = '.') {
         loginfo(paste("Read of", link.feather, "completed"));
     }else if(file.exists(link.csv)){
         loginfo(paste("Reading ", link.csv));
-        dfl <- read_csv(link.csv,
-                        trim_ws=TRUE,
-                        progress=TRUE,
-                        col_types=cols(
-                            Nature = col_character(),
-                            Container = col_character(),
-                            Type = col_character(),
-                            Start = col_double(),
-                            End = col_double(),
-                            Duration = col_double(),
-                            Size = col_integer(),
-                            Origin = col_character(),
-                            Dest = col_character(),
-                            Key = col_character()
-                        ));
+        dfl <- fread(file=link.csv, sep=",", header=TRUE, data.table=FALSE);
+        dfl <- dfl %>% mutate(
+            Nature = as.character(Nature),
+            Container = as.character(Container),
+            Type = as.character(Type),
+            Start = as.double(Start),
+            End = as.double(End),
+            Duration = as.double(Duration),
+            Size = as.integer(Size),
+            Origin = as.character(Origin),
+            Dest = as.character(Dest),
+            Key = as.character(Key)
+        );
         loginfo(paste("Read of", link.csv, "completed"));
     }else{
         loginfo(paste("Files", link.feather, "or", link.csv, "do not exist"));
@@ -177,13 +167,11 @@ read_dag_io <- function(directory = '.') {
         loginfo(paste("Read of", dag.feather, "completed"));
     }else if(file.exists(dag.csv)){
         loginfo(paste("Reading ", dag.csv));
-        dfdag <- read_csv(dag.csv,
-                          trim_ws=TRUE,
-                          progress=TRUE,
-                          col_types=cols(
-                              Node = col_integer(),
-                              DependsOn = col_integer()
-                          ));
+        dfdag <- fread(file=dag.csv, sep=",", header=TRUE, data.table=FALSE);
+        dfdag <- dfdag %>% mutate(
+            Node = as.integer(Node),
+            DependsOn = as.integer(DependsOn)
+        );
         loginfo(paste("Read of", dag.csv, "completed"));
     }else{
         logwarn(paste("Files", dag.feather, "or", dag.csv, "do not exist"));
@@ -202,12 +190,11 @@ read_pmtools_bounds <- function(directory = '.') {
         loginfo(paste("Read of", pmtools_bounds.feather, "completed"));
     }else if (file.exists(pmtools_bounds.csv)){
         loginfo(paste("Reading ", pmtools_bounds.csv));
-        dpmtb<- read_csv(pmtools_bounds.csv,
-                        trim_ws=TRUE,
-                        col_types=cols(
-                            Alg = col_character(),
-                            Time = col_double()
-                        ));
+        dpmtb <- fread(file=pmtools_bounds.csv, sep=",", header=TRUE, data.table=FALSE);
+        dpmtb <- dpmtb %>% mutate(
+            Alg = as.character(Alg),
+            Time = as.double(Time)
+        );
         loginfo(paste("Read of", pmtools_bounds.csv, "completed"));
     }else{
         loginfo(paste("Files", pmtools_bounds.feather, "or", pmtools_bounds.csv, "do not exist."));
@@ -227,20 +214,17 @@ read_pmtools_states <- function(directory = '.') {
     }else if (file.exists(pmtools_states.csv)){
         loginfo(paste("Reading ", pmtools_states.csv));
 
-        #sched Tid   worker taskType JobId start duration end
-
-        dpmts <- read_csv(pmtools_states.csv,
-                        trim_ws=TRUE,
-                        col_types=cols(
-                            sched = col_character(),
-                            Tid = col_integer(),
-                            worker = col_integer(),
-                            taskType = col_character(),
-                            JobId = col_character(),
-                            start = col_double(),
-                            duration = col_double(),
-                            end = col_double()
-                        ));
+        dpmts <- fread(file=pmtools_states.csv, sep=",", header=TRUE, data.table=FALSE);
+        dpmts <- dpmts %>% mutate(
+            shced = as.character(sced),
+            Tid = as.integer(Tid),
+            worker = as.integer(worker),
+            taskType = as.character(taskType),
+            JobId = as.character(JobId),
+            start = as.double(start),
+            duration = as.double(duration),
+            end = as.double(end)
+        );
         #pmtools states gives time in miliseconds
         loginfo(paste("Read of", pmtools_states.csv, "completed"));
     }else {
@@ -260,15 +244,13 @@ read_data_handles <- function(directory = '.') {
         loginfo(paste("Read of", data_handles.feather, "completed"));
     }else if (file.exists(data_handles.csv)){
         loginfo(paste("Reading ", data_handles.csv));
-        ddh <- read_csv(data_handles.csv,
-                        trim_ws=TRUE,
-                        col_types=cols(
-                            Handle = col_character(),
-                            HomeNode = col_integer(),
-                            Size = col_integer(),
-                            Coordinates = col_character()
-                        ));
-
+        ddh <- fread(file=data_handles.csv, sep=",", header=TRUE, data.table=FALSE);
+        ddh <- ddh %>% mutate(
+            Handle = as.character(Handle),
+            HomeNode = as.integer(HomeNode),
+            Size = as.integer(Size),
+            Coordinates = as.character(Coordinates)
+        );
         # Not supported in feather
         # pm$Coordinates <- lapply(strsplit(pm$Coordinates, " "), as.integer);
         loginfo(paste("Read of", data_handles.csv, "completed"));
@@ -301,30 +283,29 @@ read_tasks <- function(directory = '.') {
         loginfo(paste("Read of", tasks.feather, "completed"));
     }else if (file.exists(tasks.csv)){
         loginfo(paste("Reading ", tasks.csv));
-        tasks <- read_csv(tasks.csv,
-                        trim_ws=TRUE,
-                        col_types=cols(
-                            Control = col_character(),
-                            JobId = col_integer(),
-                            SubmitOrder = col_integer(),
-                            SubmitTime = col_double(),
-                            Handles = col_character(),
-                            MPIRank = col_integer(),
-                            DependsOn = col_character(),
-                            Tag = col_character(),
-                            Footprint = col_character(),
-                            Iteration = col_integer(),
-                            Name = col_character(),
-                            Model = col_character(),
-                            Priority = col_integer(),
-                            WorkerId = col_integer(),
-                            MemoryNode = col_integer(),
-                            StartTime = col_double(),
-                            EndTime = col_double(),
-                            Parameters = col_character(),
-                            Modes = col_character(),
-                            Sizes = col_character()
-                        ));
+        tasks <- fread(file=tasks.csv, sep=",", header=TRUE, data.table=FALSE);
+        tasks <- tasks %>% mutate(
+            Control = as.character(Control),
+            JobId = as.integer(JobId),
+            SubmitOrder = as.integer(SubmitOrder),
+            SubmitTime = as.double(SubmitTime),
+            Handles = as.character(Handles),
+            MPIRank = as.integer(MPIRank),
+            DependsOn = as.character(DependsOn),
+            Tag = as.character(Tag),
+            Footprint = as.character(Footprint),
+            Iteration = as.integer(Iteration),
+            Name = as.character(Name),
+            Model = as.character(Model),
+            Priority = as.integer(Priority),
+            WorkerId = as.integer(WorkerId),
+            MemoryNode = as.integer(MemoryNode),
+            StartTime = as.double(StartTime),
+            EndTime = as.double(EndTime),
+            Parameters = as.character(Parameters),
+            Modes = as.character(Modes),
+            Sizes = as.character(Sizes)
+        );
     } else {
         loginfo(paste("Files", tasks.feather, "or", tasks.csv, "do not exist."));
         return(NULL);

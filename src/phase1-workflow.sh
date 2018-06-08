@@ -64,7 +64,7 @@ else
   echo "Lionel's pmtool or platform_file.rec file are not available, skipping it."
 fi
 
-# Coverting the data.rec and tasks.rec files
+# Converting the data.rec and tasks.rec files
 if [ -x "$(command -v rec2csv)" ]; then
   echo "Convert Rec files"
   DATACSV="rec.data_handles.csv"

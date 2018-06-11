@@ -69,14 +69,9 @@ logForOrg <- function(record) { paste(record$levelname, record$logger, record$ms
 addHandler(writeToConsole, formatter=logForOrg);
 removeHandler('basic.stdout');
 
-coresCount = detectCores()-1;
-cluster = makeCluster(coresCount, type="FORK");
-
 targets <- c('dfw', 'dfe', 'dfa', 'dfv', 'dfl', 'dfdag', 'dpmtb', 'dpmts', 'ddh', 'task_handles', 'tasks');
-data <- parLapply(cluster, targets, resolve_io_function);
+data <- lapply(targets, resolve_io_function);
 names(data) <- targets
-
-stopCluster(cluster);
 
 # Data manipulation
 #dfw <- manipulate_state_csv(input.application, states.fun, states.filter.strict, dfw);

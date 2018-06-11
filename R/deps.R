@@ -2,12 +2,12 @@ suppressMessages(
     c(
         library(cowplot),
         library(data.tree),
+        library(data.table),
         library(feather),
         library(gridExtra),
         library(logging),
         library(lpSolve),
         library(magrittr),
-        library(parallel),
         library(pipeR),
         library(RColorBrewer),
         library(Rcpp),

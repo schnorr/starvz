@@ -18,12 +18,12 @@ resolve_io_function <- function(targetDf, directory = ".") {
 }
 
 read_state <- function (directory = '.') {
-    state.csv <- paste0(directory, '/paje.state.csv');
+    state.csv <- paste0(directory, '/paje.state.csv.gz');
     if (!file.exists(state.csv)) {
         stop('States CSV file does not exist');
     }
     loginfo(paste('Reading', state.csv));
-    dfw <- fread(file=state.csv, sep=",", header=TRUE, fill=TRUE, data.table=FALSE);
+    dfw <- fread(input=paste0('zcat < ',state.csv), sep=",", header=TRUE, fill=TRUE, data.table=FALSE);
     dfw <- dfw %>% mutate(
         Nature = as.character(Nature),
         ResourceId = as.character(ResourceId),
@@ -50,8 +50,8 @@ read_state <- function (directory = '.') {
 };
 
 read_entities <- function(directory = '.') {
-    entities.feather = paste0(directory, "/entities.feather");
-    entities.csv = paste0(directory, "/entities.csv");
+    entities.feather <- paste0(directory, "/entities.feather");
+    entities.csv <- paste0(directory, "/entities.csv.gz");
 
     if (file.exists(entities.feather)){
         loginfo(paste("Reading ", entities.feather));
@@ -59,7 +59,7 @@ read_entities <- function(directory = '.') {
         loginfo(paste("Read of", entities.feather, "completed"));
     }else if (file.exists(entities.csv)){
         loginfo(paste("Reading ", entities.csv));
-        dfe <- fread(file=entities.csv, sep=",", header=TRUE, fill=TRUE, data.table=FALSE);
+        dfe <- fread(input=paste0('zcat < ',entities.csv), sep=",", header=TRUE, fill=TRUE, data.table=FALSE);
         dfe <- dfe %>% mutate(
             Parent = as.character(Parent),
             Name = as.character(Name),
@@ -77,14 +77,14 @@ read_entities <- function(directory = '.') {
 
 read_atree <- function(directory = '.') {
     atree.feather = paste0(directory, "/atree.feather");
-    atree.csv = paste0(directory, "/atree.csv");
+    atree.csv <- paste0(directory, "/atree.csv.gz");
 
     if (file.exists(atree.feather)){
         loginfo(paste("Reading ", atree.feather));
         dfa <- read_feather(atree.feather);
     }else if (file.exists(atree.csv)){
         loginfo(paste("Reading ", atree.csv));
-        dfa <- fread(file=atree.csv, sep=",", header=TRUE, fill=TRUE, data.table=FALSE);
+        dfa <- fread(input=paste0('zcat < ',atree.csv), sep=",", header=TRUE, fill=TRUE, data.table=FALSE);
         dfa <- dfa %>% mutate(
             Node = as.integer(Node),
             DependsOn = as.integer(DependsOn)
@@ -98,14 +98,14 @@ read_atree <- function(directory = '.') {
 
 read_variables <- function(directory = '.') {
     variable.feather = paste0(directory, "/paje.variable.feather");
-    variable.csv = paste0(directory, "/paje.variable.csv");
+    variable.csv <- paste0(directory, "/paje.variable.csv.gz");
     if(file.exists(variable.feather)){
         loginfo(paste("Reading ", variable.feather));
         dfv <- read_feather(variable.feather);
         loginfo(paste("Read of", variable.feather, "completed"));
     }else if(file.exists(variable.csv)){
         loginfo(paste("Reading ", variable.csv));
-        dfv <- fread(file=variable.csv, sep=",", header=TRUE, fill=TRUE, data.table=FALSE);
+        dfv <- fread(input=paste0('zcat < ',variable.csv), sep=",", header=TRUE, fill=TRUE, data.table=FALSE);
         dfv <- dfv %>% mutate(
             Nature = as.character(Nature),
             ResourceId = as.character(ResourceId),
@@ -124,7 +124,7 @@ read_variables <- function(directory = '.') {
 
 read_links_io <- function(directory = '.') {
     link.feather = paste0(directory, "/paje.link.feather");
-    link.csv = paste0(directory, "/paje.link.csv");
+    link.csv <- paste0(directory, "/paje.link.csv.gz");
     if(file.exists(link.feather)){
         loginfo(paste("Reading ", link.feather));
         dfl <- read_feather(link.feather) %>%
@@ -132,7 +132,7 @@ read_links_io <- function(directory = '.') {
         loginfo(paste("Read of", link.feather, "completed"));
     }else if(file.exists(link.csv)){
         loginfo(paste("Reading ", link.csv));
-        dfl <- fread(file=link.csv, sep=",", header=TRUE, fill=TRUE, data.table=FALSE);
+        dfl <- fread(input=paste0('zcat < ',link.csv), sep=",", header=TRUE, fill=TRUE, data.table=FALSE);
         dfl <- dfl %>% mutate(
             Nature = as.character(Nature),
             Container = as.character(Container),
@@ -160,14 +160,14 @@ read_links_io <- function(directory = '.') {
 
 read_dag_io <- function(directory = '.') {
     dag.feather = paste0(directory, "/dag.feather");
-    dag.csv = paste0(directory, "/dag.csv");
+    dag.csv <- paste0(directory, "/dag.csv.gz");
     if(file.exists(dag.feather)){
         loginfo(paste("Reading ", dag.feather));
         dfdag <- read_feather(dag.feather);
         loginfo(paste("Read of", dag.feather, "completed"));
     }else if(file.exists(dag.csv)){
         loginfo(paste("Reading ", dag.csv));
-        dfdag <- fread(file=dag.csv, sep=",", header=TRUE, fill=TRUE, data.table=FALSE);
+        dfdag <- fread(input=paste0('zcat < ',dag.csv), sep=",", header=TRUE, fill=TRUE, data.table=FALSE);
         # TODO: This does not seem to work. Check with Lucas why the header names are different in the CSV file.
         # dfdag <- dfdag %>% mutate(
         #     Node = as.integer(Node),
@@ -183,7 +183,7 @@ read_dag_io <- function(directory = '.') {
 
 read_pmtools_bounds <- function(directory = '.') {
     pmtools_bounds.feather = paste0(directory, "/pmtool.feather");
-    pmtools_bounds.csv = paste0(directory, "/pmtool.csv");
+    pmtools_bounds.csv <- paste0(directory, "/pmtool.csv.gz");
 
     if (file.exists(pmtools_bounds.feather)){
         loginfo(paste("Reading ", pmtools_bounds.feather));
@@ -191,7 +191,7 @@ read_pmtools_bounds <- function(directory = '.') {
         loginfo(paste("Read of", pmtools_bounds.feather, "completed"));
     }else if (file.exists(pmtools_bounds.csv)){
         loginfo(paste("Reading ", pmtools_bounds.csv));
-        dpmtb <- fread(file=pmtools_bounds.csv, sep=",", header=TRUE, fill=TRUE, data.table=FALSE);
+        dpmtb <- fread(input=paste0('zcat < ',pmtools_bounds.csv), sep=",", header=TRUE, fill=TRUE, data.table=FALSE);
         dpmtb <- dpmtb %>% mutate(
             Alg = as.character(Alg),
             Time = as.double(Time)
@@ -206,7 +206,7 @@ read_pmtools_bounds <- function(directory = '.') {
 
 read_pmtools_states <- function(directory = '.') {
     pmtools_states.feather = paste0(directory, "/pmtool_states.feather");
-    pmtools_states.csv = paste0(directory, "/pmtool_states.csv");
+    pmtools_states.csv <- paste0(directory, "/pmtool_states.csv.gz");
 
     if (file.exists(pmtools_states.feather)){
         loginfo(paste("Reading ", pmtools_states.feather));
@@ -215,7 +215,7 @@ read_pmtools_states <- function(directory = '.') {
     }else if (file.exists(pmtools_states.csv)){
         loginfo(paste("Reading ", pmtools_states.csv));
 
-        dpmts <- fread(file=pmtools_states.csv, sep=",", header=TRUE, fill=TRUE, data.table=FALSE);
+        dpmts <- fread(input=paste0('zcat < ',pmtools_states.csv), sep=",", header=TRUE, fill=TRUE, data.table=FALSE);
         dpmts <- dpmts %>% mutate(
             shced = as.character(sced),
             Tid = as.integer(Tid),
@@ -237,7 +237,7 @@ read_pmtools_states <- function(directory = '.') {
 
 read_data_handles <- function(directory = '.') {
     data_handles.feather = paste0(directory, "/data_handles.feather");
-    data_handles.csv = paste0(directory, "/rec.data_handles.csv");
+    data_handles.csv <- paste0(directory, "/rec.data_handles.csv.gz");
 
     if (file.exists(data_handles.feather)){
         loginfo(paste("Reading ", data_handles.feather));
@@ -245,7 +245,7 @@ read_data_handles <- function(directory = '.') {
         loginfo(paste("Read of", data_handles.feather, "completed"));
     }else if (file.exists(data_handles.csv)){
         loginfo(paste("Reading ", data_handles.csv));
-        ddh <- fread(file=data_handles.csv, sep=",", header=TRUE, fill=TRUE, data.table=FALSE);
+        ddh <- fread(input=paste0('zcat < ',data_handles.csv), sep=",", header=TRUE, fill=TRUE, data.table=FALSE);
         ddh <- ddh %>% mutate(
             Handle = as.character(Handle),
             HomeNode = as.integer(HomeNode),
@@ -276,7 +276,7 @@ read_tasks_handles <- function(directory = '.') {
 
 read_tasks <- function(directory = '.') {
     tasks.feather = paste0(directory, "/tasks.feather");
-    tasks.csv = paste0(directory, "/rec.tasks.csv");
+    tasks.csv <- paste0(directory, "/rec.tasks.csv.gz");
 
     if (file.exists(tasks.feather)){
         loginfo(paste("Reading ", tasks.feather));
@@ -284,7 +284,7 @@ read_tasks <- function(directory = '.') {
         loginfo(paste("Read of", tasks.feather, "completed"));
     }else if (file.exists(tasks.csv)){
         loginfo(paste("Reading ", tasks.csv));
-        tasks <- fread(file=tasks.csv, sep=",", header=TRUE, fill=TRUE, data.table=FALSE);
+        tasks <- fread(input=paste0('zcat < ',tasks.csv), sep=",", header=TRUE, fill=TRUE, data.table=FALSE);
         tasks <- tasks %>% mutate(
             Control = as.character(Control),
             JobId = as.integer(JobId),

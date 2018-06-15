@@ -669,7 +669,7 @@ st_time_aggregation_plot <- function (data = NULL, dfw_agg = NULL, StarPU.View =
 
     if (!StarPU.View){
         # Y Label
-        gow <- gow + ylab("Application Workers");
+        gow <- gow + ylab(ifelse(pjr(pajer$ignore_ylabel), "", "Application Workers"));
 
         # The per-node ABE
         if (pjr(pajer$st$abe$active)) gow = gow + geom_abe(data);
@@ -698,7 +698,7 @@ st_time_aggregation_plot <- function (data = NULL, dfw_agg = NULL, StarPU.View =
         }
     }else{
         # Y Label
-        gow <- gow + ylab("StarPU Workers");
+        gow <- gow + ylab(ifelse(pjr(pajer$ignore_ylabel), "", "StarPU Workers"));
 
         # add some color palette for StarPU States
         gow = gow + scale_fill_brewer(palette = "Set1");
@@ -734,7 +734,7 @@ k_chart <- function (dfw = NULL)
         scale_fill_manual(values = choleskyColors) +
         theme_bw(base_size=12) +
         xlab("Time [ms]") +
-        ylab("Cholesky\nIteration") +
+        ylab(ifelse(pjr(pajer$ignore_ylabel), "", "Iteration")) +
         default_theme() +
         # Keep the alpha = 1 even if we use an alpha below
         guides(fill = guide_legend(override.aes = list(alpha=1))) +
@@ -779,7 +779,7 @@ k_chart_pmtool <- function (dfw = NULL)
         scale_fill_manual(values = choleskyColors) +
         theme_bw(base_size=12) +
         xlab("Time [ms]") +
-        ylab("PMTool\nIteration") +
+        ylab(ifelse(pjr(pajer$ignore_ylabel), "", "PMTool\nIteration")) +
         default_theme() +
         # Keep the alpha = 1 even if we use an alpha below
         guides(fill = guide_legend(override.aes = list(alpha=1))) +
@@ -869,7 +869,7 @@ var_cumulative_chart <- function (dfv = NULL)
         ggplot(aes(x=Start, y=Value, fill=Node)) +
         geom_area() +
         xlab ("Time [ms]") +
-        ylab (variable) +
+        ylab(ifelse(pjr(pajer$ignore_ylabel), "", variable)) +
         theme_bw(base_size = 12) +
         theme (
             plot.margin = unit(c(0,0,0,0), "cm"),
@@ -893,7 +893,7 @@ var_simple_chart <- function (dfv = NULL, ylabel = NA)
         xlab ("Time [ms]") +
         coord_cartesian(xlim=c(0, max(dfv$End))) +
         ylim (0, NA) +
-        ylab (ylabel) +
+        ylab(ifelse(pjr(pajer$ignore_ylabel), "", ylabel)) +
         theme_bw(base_size = 12) +
         scale_fill_brewer(palette = "Set1") +
         theme (
@@ -921,7 +921,7 @@ var_integration_chart <- function (dfv = NULL, ylabel = NA, step = 250, facettin
         geom_line() +
         coord_cartesian(xlim=c(0, max(dfv$End))) +
         ylim (0, NA) +
-        ylab (ylabel) +
+        ylab(ifelse(pjr(pajer$ignore_ylabel), "", ylabel)) +
         scale_fill_brewer(palette = "Set1") -> result;
     if (facetting){
         result <- result +
@@ -951,7 +951,7 @@ var_integration_segment_chart <- function (dfv = NULL, ylabel = NA, step = 250, 
         summarize(Value = sum(Value), N=n()) %>%
         rename(ResourceId = Node) %>%
         ungroup() %>%
-        var_chart(., ylabel=ylabel) -> result;
+        var_chart(., ylabel=ifelse(pjr(pajer$ignore_ylabel), "", ylabel)) -> result;
     if (facetting){
         result <- result +
             facet_wrap(~ResourceType, ncol=1, scales="free_y") + #, strip.position="right") + # cowplot can't align this
@@ -1492,7 +1492,7 @@ the_master_function <- function(data = NULL)
         facetted <- pjr_value(pajer$gflops$facet, TRUE);
         gogfv <- dfv %>%
             filter(Type == "GFlops") %>%
-            var_integration_segment_chart (., ylabel="GFlops", step = aggStep, facetting = facetted) + tScale;
+            var_integration_segment_chart (., ylabel=ifelse(pjr(pajer$ignore_ylabel), "", "GFlops"), step = aggStep, facetting = facetted) + tScale;
 
         # adjust GFlops scale
         if (pjr_value(pajer$gflops$limit, FALSE)){
@@ -1510,7 +1510,7 @@ the_master_function <- function(data = NULL)
         loginfo("Creating the Used Memory plot");
         goguv <- dfv %>%
             filter(grepl("MEMMANAGER", ResourceId), grepl("Used", Type)) %>%
-            var_chart(ylabel="Used Mem.\n(MB/s)") + tScale;
+            var_chart(ylabel=ifelse(pjr(pajer$ignore_ylabel), "", "Used Mem.\n(MB/s)")) + tScale;
         if (!pjr(pajer$usedmemory$legend)){
             goguv <- goguv + theme(legend.position="none");
         }
@@ -1527,7 +1527,7 @@ the_master_function <- function(data = NULL)
             pajer$mpibandwidth$active <<- FALSE;
         }else{
             gomov <- mpi_out %>%
-                var_integration_segment_chart(., ylabel="MPI\n(MB/s)", step=aggStep) + tScale;
+                var_integration_segment_chart(., ylabel=ifelse(pjr(pajer$ignore_ylabel), "", "MPI\n(MB/s)"), step=aggStep) + tScale;
             if (!pjr(pajer$mpibandwidth$legend)){
                 gomov <- gomov + theme(legend.position="none");
             }
@@ -1540,7 +1540,7 @@ the_master_function <- function(data = NULL)
         loginfo("Creating the MPI concurrent ops plot");
         aggStep <- pjr_value(pajer$mpiconcurrent$step, globalAggStep);
         gompiconc <- data %>% concurrent_mpi() %>%
-            var_integration_segment_chart(., ylabel="Concurrent\nMPI Tasks", step=aggStep) + tScale;
+            var_integration_segment_chart(., ylabel=ifelse(pjr(pajer$ignore_ylabel), "", "Concurrent\nMPI Tasks"), step=aggStep) + tScale;
         if (!pjr(pajer$mpiconcurrent$legend)){
             gompiconc <- gompiconc + theme(legend.position="none");
         }
@@ -1570,7 +1570,7 @@ the_master_function <- function(data = NULL)
                 group_by(Type, Node, ResourceType, Start, End, Duration) %>%
                 summarize(Value = sum(Value), N=n()) %>%
                 rename(ResourceId = Node) %>%
-                var_chart(ylabel = "GPU\n(MB/s)") + tScale;
+                var_chart(ylabel = ifelse(pjr(pajer$ignore_ylabel), "", "GPU\n(MB/s)")) + tScale;
         }else{
             gogov <- dfv %>%
                 # Get only GPU memory banwidth (out)
@@ -1578,7 +1578,7 @@ the_master_function <- function(data = NULL)
                 # Remove the MANAGER0, which is CPU-only
                 # TODO: After the logical OR there is a support for single-node StarPU traces
                 filter(Resource != "MEMMANAGER0" | Node != "MEMMANAGER0") %>%
-                var_integration_segment_chart(., ylabel="GPU\n(MB/s)", step=aggStep) + tScale;
+                var_integration_segment_chart(., ylabel=ifelse(pjr(pajer$ignore_ylabel), "", "GPU\n(MB/s)"), step=aggStep) + tScale;
         }
         if (!pjr(pajer$gpubandwidth$legend)){
             gogov <- gogov + theme(legend.position="none");
@@ -1721,7 +1721,7 @@ atree_temporal_chart <- function(data = NULL, globalEndTime = NULL)
         # Plot
         ggplot() +
         default_theme() +
-        ylab("Task Location") +
+        ylab(ifelse(pjr(pajer$ignore_ylabel), "", "Task Location")) +
         scale_y_continuous(breaks=NULL, labels=NULL) +
         scale_fill_manual(values = namedcolors) +
         geom_rect(aes(fill=as.factor(Value),
@@ -1829,7 +1829,7 @@ geom_states <- function (data = NULL, Show.Outliers = FALSE, StarPU = FALSE)
     yconfm <- yconf(dfw);
     ret[[length(ret)+1]] <- scale_y_continuous(breaks = yconfm$Position+(yconfm$Height/3), labels=yconfm$ResourceId, expand=c(pjr_value(pajer$expand, 0.05),0));
     # Y label
-    ret[[length(ret)+1]] <- ylab(ifelse(StarPU, "StarPU Workers", "Application Workers"));
+    ret[[length(ret)+1]] <- ylab(ifelse(pjr(pajer$ignore_ylabel), "", ifelse(StarPU, "StarPU Workers", "Application Workers")));
 
     # Add states
     ret[[length(ret)+1]] <-
@@ -1899,7 +1899,7 @@ geom_memory <- function (data = NULL, combined = FALSE, tstart=NULL, tend=NULL)
 
     ret[[length(ret)+1]] <- scale_y_continuous(breaks = yconfm$Position+(yconfm$Height/3), labels=yconfm$ResourceId, expand=c(pjr_value(pajer$expand, 0.05),0));
     # Y label
-    ret[[length(ret)+1]] <- ylab("Memory State");
+    ret[[length(ret)+1]] <- ylab(ifelse(pjr(pajer$ignore_ylabel), "", "Memory State"));
 
     border <- NA;
 
@@ -2003,7 +2003,7 @@ geom_links <- function (data = NULL, combined = FALSE, tstart=NULL, tend=NULL)
       #ret[[length(ret)+1]] <- scale_fill_manual(values = extract_colors(dfw));
 
       # Y label
-      ret[[length(ret)+1]] <- ylab("Transfers");
+      ret[[length(ret)+1]] <- ylab(ifelse(pjr(pajer$ignore_ylabel), "", "Transfers"));
       stride <- 0.0;
     }
     dfl$O_Position = dfl$O_Position + stride;
@@ -2056,7 +2056,7 @@ geom_pmtool_states <- function (data = NULL)
     yconfm <- yconf(gg);
     ret[[length(ret)+1]] <- scale_y_continuous(breaks = yconfm$Position+(yconfm$Height/3), labels=yconfm$ResourceId, expand=c(pjr_value(pajer$expand, 0.05),0));
     # Y label
-    ret[[length(ret)+1]] <- ylab("Pmtool Workers");
+    ret[[length(ret)+1]] <- ylab(ifelse(pjr(pajer$ignore_ylabel), "", "Pmtool Workers"));
 
     # Add states
     ret[[length(ret)+1]] <-
@@ -2102,7 +2102,7 @@ geom_mpistates <- function (data = NULL)
     ret[[length(ret)+1]] <- scale_fill_brewer(palette = "Dark2");
 
     # Y label
-    ret[[length(ret)+1]] <- ylab("MPI\nThread");
+    ret[[length(ret)+1]] <- ylab(ifelse(pjr(pajer$ignore_ylabel), "", "MPI\nThread"));
 
     # Y axis breaks and their labels
     yconfm <- yconf(dfw);
@@ -2714,7 +2714,7 @@ st_time_aggregation_vinicius_plot <- function (data = NULL)
         xlab("Time [ms]");
 
     # Y Label
-    gow <- gow + ylab("Application Workers");
+    gow <- gow + ylab(ifelse(pjr(pajer$ignore_ylabel), "", "Application Workers"));
 
     # The per-node ABE
     if (pjr(pajer$st$abe$active)) gow = gow + geom_abe(data);

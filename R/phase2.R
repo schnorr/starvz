@@ -707,55 +707,7 @@ st_time_aggregation_plot <- function (data = NULL, dfw_agg = NULL, StarPU.View =
     loginfo("Exit Agg");
     return(gow);
 }
-k_chart <- function (dfw)
-{
-    dfw %>%
-        filter(Value == "spotrf") %>%
-        mutate(k = as.integer(paste0("0x", substr(Tag, 14, 16)))) -> dft1;
-    dfw %>%
-        filter(Value %in% c("ssyrk", "strsm")) %>%
-        mutate(k = as.integer(paste0("0x", substr(Tag, 8, 10)))) -> dft2;
-    dfw %>%
-        filter(Value == "sgemm") %>%
-        mutate(k = as.integer(paste0("0x", substr(Tag, 8, 10)))) -> dft3;
-    dfwijk <- rbind(dft1, dft2, dft3);
-    dfwijk %>%
-        group_by(k) %>%
-        summarize(Start = min(Start), End=max(End), Duration=End-Start) %>%
-        ggplot() +
-        theme_bw(base_size=12) +
-        xlab("Time [ms]") +
-        ylab("Iteration") +
-        scale_y_reverse() +
-        geom_errorbarh(aes(x=(Start+((End-Start)/2)), xmin=Start, xmax=End, y=k)) +
-        theme (
-            plot.margin = unit(c(0,0,0,0), "cm"),
-            legend.margin = unit(0, "mm"),
-            panel.grid = element_blank(),
-            legend.position = "top",
-            legend.title = element_blank()) -> goijk;
-    return(goijk);
-}
-k_chart <- function (dfw)
-{
-    dfw %>%
-        filter(Application == TRUE) %>%
-        group_by(Iteration) %>%
-        summarize(Start = min(Start), End=max(End), Duration=End-Start) %>%
-        ggplot() +
-        theme_bw(base_size=12) +
-        xlab("Time [ms]") +
-        ylab("Iteration") +
-        scale_y_reverse() +
-        geom_errorbarh(aes(x=(Start+((End-Start)/2)), xmin=Start, xmax=End, y=Iteration)) +
-        theme (
-            plot.margin = unit(c(0,0,0,0), "cm"),
-            legend.margin = unit(0, "mm"),
-            panel.grid = element_blank(),
-            legend.position = "top",
-            legend.title = element_blank()) -> goijk;
-    return(goijk);
-}
+
 k_chart <- function (dfw = NULL)
 {
     if (is.null(dfw)) stop("dfw provided to k_chart is NULL");

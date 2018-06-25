@@ -74,23 +74,23 @@ data <- lapply(targets, resolve_io_function);
 names(data) <- targets
 
 # Data manipulation
-#dfw <- manipulate_state_csv(input.application, states.fun, states.filter.strict, dfw);
-#zero <- manipulate_zero(dfw);
-#dfw <- normalize_dfw(dfw, zero, input.application, states.fun, outlier_definition);
-#dfhie <- hl_y_paje_tree(dfe);
-#highlightedDfw <- hl_y_coordinates(dfw, dfhie);
-#dfa <- manipulate_atree(dfa);
-#dfap <- build_dfap(dfa);
-# dfw <- join_dfw_dfap(dfw, dfap);
-# dfw <- manipulate_vars_set_new_zero(dfv, zero);
-# dfl <- manipulate_links(dfl, zero);
-# dfdag <- manipulate_dag(dfdag, dfw, dfl);
-# dpmtb <- manipulate_pmtools_bounds(dpmtb);
-# dpmts <- manipulate_pmtools_states(dpmts, input.application, dfhie, dfw);
-# ddh <- manipulate_data_handles(ddh);
-# dtasks <- manipulate_tasks(tasks, task_handles);
-# gaps <- calculate_gaps(input.application, dfw, dfdag, dfl);
-# data <- aggregate_data(input.application, dfw, dfv, dfl, dfdag, dfhie, dfa, dpmtb, dpmts, ddh, dtasks);
+dfw <- manipulate_state_csv(input.application, states.fun, states.filter.strict, data$dfw);
+zero <- manipulate_zero(dfw);
+dfw <- normalize_dfw(dfw, zero, input.application, states.fun, outlier_definition);
+dfhie <- hl_y_paje_tree(data$dfe);
+highlightedDfw <- hl_y_coordinates(dfw, dfhie);
+dfa <- manipulate_atree(data$dfa);
+dfap <- build_dfap(dfa);
+dfw <- join_dfw_dfap(dfw, dfap);
+dfw <- manipulate_vars_set_new_zero(data$dfv, zero);
+dfl <- manipulate_links(data$dfl, zero);
+dfdag <- manipulate_dag(data$dfdag, dfw, dfl);
+dpmtb <- manipulate_pmtools_bounds(data$dpmtb);
+dpmts <- manipulate_pmtools_states(data$dpmts, input.application, dfhie, dfw);
+ddh <- manipulate_data_handles(data$ddh);
+dtasks <- manipulate_tasks(data$tasks, data$task_handles);
+gaps <- calculate_gaps(input.application, dfw, dfdag, dfl);
+data <- aggregate_data(input.application, dfw, dfv, dfl, dfdag, dfhie, dfa, dpmtb, dpmts, ddh, dtasks);
 
 # # Saving data
 # save_feathers(data, gaps);

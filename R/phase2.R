@@ -1339,7 +1339,9 @@ the_master_function <- function(data = NULL)
     if(is.null(pajer)) return(NULL);
 
     # Activate logs
-    # addHandler(writeToConsole)
+    if(pjr(pajer$log)){
+        addHandler(writeToConsole)
+    }
 
     # Get data
     directory <- data$Origin;

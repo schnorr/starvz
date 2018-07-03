@@ -1005,7 +1005,7 @@ hl_per_node_ABE <- function (dfw = NULL)
 {
     if(is.null(dfw)) stop("Input data frame is NULL");
 
-    print("hl_per_node_ABE starts");
+    loginfo("hl_per_node_ABE starts");
 
     dftemp <- dfw %>%
         filter(Application == TRUE) %>%
@@ -1020,7 +1020,7 @@ hl_per_node_ABE <- function (dfw = NULL)
         summarize(MinPosition = min(Position), MaxPosition = max(Position)+min(Height)/2) %>%
         left_join(pernodeABE, by="Node");
 
-    print("hl_per_node_ABE ends");
+    loginfo("hl_per_node_ABE ends");
 
     return(pernodeABE);
 }
@@ -1235,7 +1235,7 @@ starpu_mpi_grid_arrange <- function(atree, st, st_pm, st_mm, transf, starpu, ijk
     }
 
     # Customized legend position
-    print("Customized legend position, plot list preparation");
+    loginfo("Customized legend position, plot list preparation");
 
     if (pjr(pajer$atree$active)){
         P[[length(P)+1]] <- atree;
@@ -1307,7 +1307,7 @@ starpu_mpi_grid_arrange <- function(atree, st, st_pm, st_mm, transf, starpu, ijk
     }
 
     # Add empty X and horizontal legend to all plots
-    print("Add empty X and horizontal legend");
+    loginfo("Add empty X and horizontal legend");
     # Empty the X axis of all + add horizontal direction for legends
     emptyx <- theme (axis.text.x = element_blank(), axis.title.x = element_blank());
     leghor <- theme (legend.direction = "horizontal", legend.background = element_rect(fill = "white"));
@@ -1316,7 +1316,7 @@ starpu_mpi_grid_arrange <- function(atree, st, st_pm, st_mm, transf, starpu, ijk
     # Vanilla configuration
     if (pjr_value(pajer$vanilla$horizontal, FALSE) == FALSE){
         # Add time scale on last plot
-        print("Add time scale on last plot");
+        loginfo("Add time scale on last plot");
         notemptyx <- theme (axis.text.x = element_text(), axis.title.x = element_text());
         P[[length(P)]] <- P[[length(P)]] + notemptyx;
     }
@@ -1328,7 +1328,7 @@ starpu_mpi_grid_arrange <- function(atree, st, st_pm, st_mm, transf, starpu, ijk
     }
 
     # Preparation for cowplot's plot_grid
-    print("Call cowplot's plot_grid function");
+    loginfo("Call cowplot's plot_grid function");
     g <- plot_grid(plotlist = P, align="v", ncol = 1, rel_heights = unlist(H));
     return(g);
 }
@@ -2294,9 +2294,9 @@ geom_makespan <- function(data = NULL)
     bsize = pjr_value(pajer$base_size, 22);
 
     tend = dfw %>% filter(Application == TRUE) %>% pull(End) %>% max;
-    print(paste("makespan is", tend));
+    loginfo(paste("makespan is", tend));
     height = dfw %>% select(Position) %>% na.omit %>% pull(Position) %>% max;
-    print(paste("max height for makespan is", height));
+    loginfo(paste("max height for makespan is", height));
     ret <- geom_text(data=data.frame(), x=tend, y=height*.5, aes(label=round(tend,0)), angle=90, size=bsize/4);
     return(ret);
 }
@@ -2309,9 +2309,9 @@ geom_makespan_pmtool <- function(data = NULL)
     bsize = pjr_value(pajer$base_size, 22);
 
     tend = dfw %>% filter(sched == pajer$pmtool$state$sched) %>% pull(End) %>% max;
-    print(paste("makespan pm tool is", tend));
+    loginfo(paste("makespan pm tool is", tend));
     height = dfw %>% select(Position) %>% na.omit %>% pull(Position) %>% max;
-    print(paste("max height for makespan is", height));
+    loginfo(paste("max height for makespan is", height));
     ret <- geom_text(data=data.frame(), x=tend, y=height*.5, aes(label=round(tend,0)), angle=90, size=bsize/4);
     return(ret);
 }
@@ -2332,7 +2332,6 @@ geom_cpb <- function (data = NULL)
         tile_size = pajer$st$cpb_mpi$tile_size;
         bandwidth = pajer$st$cpb_mpi$bandwidth;
         cpbmpit = cpbs$CPB + cpbs$NMPI * (tile_size*tile_size*8) / bandwidth / 1000000;
-        print(paste(data$Origin, cpbs$NMPI, cpbmpit));
         ret <- c(ret, geom_cpb_internal(data, cpbs$CPBMPI, "CPB-MPI:"));
         if (pjr_value(pajer$st$cpb_mpi$theoretical)){
             ret <- c(ret, geom_cpb_internal(data, cpbmpit, "CPB-MPI*:"));
@@ -2515,7 +2514,7 @@ state_mpi_chart <- function (data = NULL)
         # Add states and outliers if requested
         geom_mpistates(data);
 
-    print("Exit of state_mpi_chart");
+    loginfo("Exit of state_mpi_chart");
     return(gow);
 }
 concurrent_mpi <- function(data = NULL)

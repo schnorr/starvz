@@ -1915,12 +1915,6 @@ geom_states <- function (data = NULL, Show.Outliers = FALSE, StarPU = FALSE)
     return(ret);
 }
 
-rename_memmanager <- function (data = NULL)
-{
-  data$ResourceId <- lapply(data$ResourceId, function(x) gsub("MEMMANAGER", "MM", x));
-  return(data);
-}
-
 geom_events <- function (main_data = NULL, data = NULL, combined = FALSE, tstart=NULL, tend=NULL)
 {
     if (is.null(data)) stop("data is NULL when given to geom_events");
@@ -2019,7 +2013,7 @@ geom_memory <- function (data = NULL, combined = FALSE, tstart=NULL, tend=NULL)
     dfw$Height = pjr_value(pajer$memory$state$height, 2);
     dfw$Position = dfw$Position * dfw$Height;
 
-    yconfm <- rename_memmanager(yconfm);
+    yconfm$ResourceId <- lapply(yconfm$ResourceId, function(x) gsub("MEMMANAGER", "MM", x));
 
     ret[[length(ret)+1]] <- scale_y_continuous(breaks = yconfm$Position+(yconfm$Height/3), labels=yconfm$ResourceId, expand=c(pjr_value(pajer$expand, 0.05),0));
     # Y label
@@ -2044,7 +2038,7 @@ geom_memory <- function (data = NULL, combined = FALSE, tstart=NULL, tend=NULL)
                                 xmin=Start,
                                 xmax=End,
                                 ymin=Position,
-                                ymax=Position+(2.0-0.4-Height)), linetype=1, color=border, size=0.4, alpha=0.5);
+                                ymax=Position+(2.0-0.1-Height)), linetype=1, color=border, size=0.4, alpha=0.5);
 
 
     if(pjr(pajer$memory$state$total)){
@@ -2080,15 +2074,12 @@ geom_links <- function (data = NULL, combined = FALSE, tstart=NULL, tend=NULL)
     if (is.null(data)) stop("data is NULL when given to geom_links");
 
     #Get the start info on states because link dont have nodes & Position
-    dfw <- data$State %>%
-        # Memory State
-        filter(Type == "Memory Node State");
 
     dfl <- data$Link;
 
     loginfo("Starting geom_links");
 
-    col_pos <- as.tibble(data.frame(ResourceId=unique(dfw$ResourceId)) %>% tibble::rowid_to_column("Position"));
+    col_pos <- as.tibble(data.frame(ResourceId=unique(dfl$Dest)) %>% tibble::rowid_to_column("Position"));
     col_pos[2] <- data.frame(lapply(col_pos[2], as.character), stringsAsFactors=FALSE);
 
     if(combined){
@@ -2103,25 +2094,27 @@ geom_links <- function (data = NULL, combined = FALSE, tstart=NULL, tend=NULL)
                                   rename(D_Position = Position);
     stride <- 0.3;
 
+    dfl$Height <- 1;
+
     if(combined){
       stride = stride*pjr_value(pajer$memory$state$height, 2);;
     }
 
     if(!combined){
-      dfw <- dfw %>% select(-Position) %>% left_join(col_pos, by=c("ResourceId" = "ResourceId"));
 
+      #dfw <- dfw %>% select(-Position) %>% left_join(col_pos, by=c("ResourceId" = "ResourceId"));
       # Hardcoded here because yconf is specific to Resource Workers
-      yconfm <- dfw %>%
-          select(Node, ResourceId, Position, Height) %>%
+
+      yconfm <- dfl %>%
+          select(Dest, D_Position, Height) %>%
           distinct() %>%
-          group_by(Node) %>%
-          arrange(Node, ResourceId) %>%
+          group_by(Dest) %>%
+          arrange(Dest) %>%
           ungroup;
-      yconfm$Height = 1;
 
-      yconfm <- rename_memmanager(yconfm);
-
-      ret[[length(ret)+1]] <- scale_y_continuous(breaks = yconfm$Position, labels=yconfm$ResourceId, expand=c(0.10,0.5));
+      yconfm$Height <- 1;
+      yconfm$Dest <- lapply(yconfm$Dest, function(x) gsub("MEMMANAGER", "MM", x));
+      ret[[length(ret)+1]] <- scale_y_continuous(breaks = yconfm$D_Position, labels=yconfm$Dest, expand=c(0.10,0.5));
 
       # Color mapping
       #ret[[length(ret)+1]] <- scale_fill_manual(values = extract_colors(dfw));
@@ -2144,6 +2137,7 @@ geom_links <- function (data = NULL, combined = FALSE, tstart=NULL, tend=NULL)
     ret[[length(ret)+1]] <- geom_segment(data=dfl, aes(x = Start, xend = End, y = O_Position, yend = D_Position, color = Origin), arrow = arrow_g, alpha=1.0);
     selected_dfl <- dfl %>% filter(End > tstart) %>%  filter(Start < tend);
 
+    #ret[[length(ret)+1]] <- geom_text(data=dfl, colour = "black", fontface = "bold", aes(x = Start, y = O_Position, label=Key), size = 3, alpha=1.0, show.legend = FALSE);
     if(pjr(pajer$memory$transfers$total)){
       total_links <- data.frame(with(selected_dfl, table(Origin)))
       if(nrow(total_links) != 0 & !combined){

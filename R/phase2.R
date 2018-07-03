@@ -1921,6 +1921,70 @@ rename_memmanager <- function (data = NULL)
   return(data);
 }
 
+geom_events <- function (main_data = NULL, data = NULL, combined = FALSE, tstart=NULL, tend=NULL)
+{
+    if (is.null(data)) stop("data is NULL when given to geom_events");
+
+
+    loginfo("Starting geom_events");
+
+    dfw <- data
+
+    dfl <- main_data$Link;
+
+    loginfo("Starting geom_links");
+
+
+    col_pos <- data.frame(Container=unique(dfl$Dest)) %>% tibble::rowid_to_column("Position")
+    col_pos[2] <- data.frame(lapply(col_pos[2], as.character), stringsAsFactors=FALSE);
+    dfw <- dfw %>% left_join(col_pos, by=c("Container" = "Container"))
+    ret <- list();
+
+    dfw$Height = 1;
+
+
+    # Color mapping
+    #ret[[length(ret)+1]] <- scale_fill_manual(values = extract_colors(dfw));
+
+    # Y axis breaks and their labels
+    # Hardcoded here because yconf is specific to Resources Workers
+    yconfm <- dfw %>% ungroup %>%
+        select(Container, Position, Height) %>%
+        distinct() %>%
+        group_by(Container) %>%
+        arrange(Container) %>%
+        ungroup;
+
+    #yconfm$Height = pjr_value(pajer$memory$state$height, 2);
+    #yconfm$Position = yconfm$Position * yconfm$Height;
+    #dfw$Height = pjr_value(pajer$memory$state$height, 2);
+    #dfw$Position = dfw$Position * dfw$Height;
+
+    yconfm$Container <- lapply(yconfm$Container, function(x) gsub("MEMMANAGER", "MM", x));
+
+    ret[[length(ret)+1]] <- scale_y_continuous(breaks = yconfm$Position+(yconfm$Height/3), labels=yconfm$Container, expand=c(pjr_value(pajer$expand, 0.05),0));
+    # Y label
+    ret[[length(ret)+1]] <- ylab("Memory State");
+
+
+    border <- 0
+    if(pjr(pajer$memory$state$border)){
+        border <- 1
+    }
+    # Add states
+    ret[[length(ret)+1]] <- geom_rect(data=dfw, aes(fill=Type, xmin=Start, xmax=End, ymin=Position, ymax=Position+(2.0-0.4-Height)), color= "black", linetype=border, size=0.4, alpha=0.5);
+    dx <- dfw %>% filter(Type == "Allocating Start")
+
+    if(pjr(pajer$memory$state$text)){
+      ret[[length(ret)+1]] <- geom_text(data=dx, colour = "black", fontface = "bold", aes(x = Start+Duration/2, y = Position+(2.0-0.4-Height)/2, angle=90, label=substr(Handle, start = 6, stop = 12)), size = 3, alpha=1.0, show.legend = FALSE);
+    }
+
+    loginfo("Finishing geom_events");
+
+    return(ret);
+}
+
+
 geom_memory <- function (data = NULL, combined = FALSE, tstart=NULL, tend=NULL)
 {
     if (is.null(data)) stop("data is NULL when given to geom_memory");

@@ -873,7 +873,8 @@ var_chart_text <- function (dfv = NULL, tstart = NULL, tend = NULL, y_end = NULL
         ms <- ms %>% tibble::rowid_to_column("Position")
         ms$Position <- max_value*0.9 - (ms$Position-1) * (max_value/nrow(ms))
         ms$xvar <- paste0(ms$xvar, " GB");
-        ret[[length(ret)+1]] <- geom_label(data=ms, x = globalEndTime, colour = "white", fontface = "bold", aes(y = Position, label=xvar, fill = ResourceId), alpha=1.0, show.legend = FALSE);
+        ret[[length(ret)+1]] <- geom_label(data=ms, x = globalEndTime, colour = "white", fontface = "bold", aes(y = Position, label=xvar, fill = ResourceId), alpha=1.0, show.legend = FALSE)
+        ret[[length(ret)+1]] <- scale_fill_brewer(palette = "Dark2")
     }
     return(ret);
 }

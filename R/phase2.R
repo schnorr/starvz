@@ -738,7 +738,7 @@ st_time_aggregation_plot <- function (data = NULL, dfw_agg = NULL, StarPU.View =
         gow <- gow + ylab("StarPU Workers");
 
         # add some color palette for StarPU States
-        gow = gow + scale_fill_brewer(palette = "Set1");
+        gow = gow + scale_fill_manual(values = starpu_colors());
     }
 
     loginfo("Exit Agg");

@@ -416,8 +416,11 @@ the_reader_function <- function (directory = ".", app_states_fun = NULL, strict_
 
     loginfo("Assembling the named list with the data from this case.");
 
+    # Events
+    devents <- events_csv_parser (where = directory);
+
     data <- list(Origin=directory, State=dfw, Variable=dfv, Link=dfl, DAG=dfdag, Y=dfhie, ATree=dfa,
-                 pmtool=dpmtb, pmtool_states=dpmts, data_handles=ddh, tasks=dtasks$tasks, task_handles=dtasks$handles);
+                 pmtool=dpmtb, pmtool_states=dpmts, data_handles=ddh, tasks=dtasks$tasks, task_handles=dtasks$handles, Events=devents);
 
     # Calculate the GAPS from the DAG
     if (whichApplication == "cholesky"){
@@ -711,6 +714,50 @@ tasks_csv_parser <- function (where = ".")
     return( list(tasks = pm, handles=task_handles) );
 }
 
+events_csv_parser <- function (where = ".")
+{
+    entities.feather = paste0(where, "/events.feather");
+    entities.csv = paste0(where, "/paje.events.csv");
+
+
+    if (file.exists(entities.feather)){
+        loginfo(paste("Reading ", entities.feather));
+        pm <- read_feather(entities.feather);
+        loginfo(paste("Read of", entities.feather, "completed"));
+    }else if (file.exists(entities.csv)){
+        loginfo(paste("Reading ", entities.csv));
+
+        pm <- read_csv(entities.csv,
+                        trim_ws=TRUE,
+                        col_types=cols(
+                            Nature = col_character(),
+                            Contairner = col_character(),
+                            Type = col_character(),
+                            Start = col_double(),
+                            Value = col_character(),
+                            Handles = col_character(),
+                            Info = col_integer(),
+                            Size = col_integer(),
+                            Tid = col_integer(),
+                            Src = col_character()
+                        ));
+        # sort the data by the start time
+        print(pm)
+        pm <- pm[with(pm, order(Start)), ]
+
+        # Read links
+        pm <- pm %>%
+            # the new zero because of the long initialization phase
+            mutate(Start = Start - ZERO)
+
+        loginfo(paste("Read of", entities.csv, "completed"));
+    }else{
+        loginfo(paste("Files", entities.feather, "or", entities.csv, "do not exist."));
+        return(NULL);
+    }
+
+    return(pm);
+}
 
 hl_y_coordinates <- function (dfw = NULL, where = ".")
 {
@@ -835,7 +882,7 @@ dt_to_df_inner <- function (node)
 the_fast_reader_function <- function (directory = ".")
 {
     names <- c("State", "Variable", "Link", "DAG", "Y", "ATree", "Gaps", "pmtool",
-               "pmtool_states", "data_handles", "tasks", "task_handles");
+               "pmtool_states", "data_handles", "tasks", "task_handles", "Events");
 
     filenames <- gsub("^", "pre.", gsub("$", ".feather", tolower(names)));
 
@@ -1133,7 +1180,7 @@ cfd_colors <- function()
 {
     tibble(
         Kernel = c("fluid_bound", "diffuse_1", "diffuse_relax", "macCormack_commit", "macCormack_2", "macCormack_1", "obstacle_boundary_1", "conserve_1", "conserve_relax", "conserve_commit", "obstacle_velocity", "initial_state"),
-        Color = c("#e41a1c", "#377eb8", "#984ea3", "#4daf4a", "#ff7f00", "#ffff33", "#a65628", "#f781bf", "#ea1a1c", "#37beb8", "#4eaf4a", "#9a4ea3"));
+        Color = c("#e41a1c", "#377eb8", "#984ea3", "#9a4ea3", "#4daf4a", "#ffff33", "#a65628", "#f781bf", "#ea1a1c", "#37beb8", "#4eaf4a", "#ff7f00"));
 }
 
 scalfmm_colors <- function()

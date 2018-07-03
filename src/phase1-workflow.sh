@@ -100,6 +100,10 @@ PAJELINK=paje.link.csv
 echo "Nature, Container, Type, Start, End, Duration, Size, Origin, Dest, Key" > $PAJELINK
 cat paje.csv | grep ^Link >> $PAJELINK
 
+PAJEEVENT=paje.events.csv
+echo "Nature, Container, Type, Start, Value, Handle, Info, Size, Tid, Src" > $PAJEEVENT
+cat paje.csv | grep ^Event >> $PAJEEVENT
+
 rm -f paje.csv
 
 echo "Convert (DAG) DOT to CSV"

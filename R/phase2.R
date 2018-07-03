@@ -1468,9 +1468,16 @@ the_master_function <- function(data = NULL)
     # StarPU SpaceTime
     if (pjr(pajer$starpu$active)){
         loginfo("Creating the StarPU Space/Time");
-        data %>% state_chart (globalEndTime = tend, StarPU.View = TRUE) + tScale -> gstarpu;
-        loginfo("state_chart for StarPU behavior completed (no aggregation)");
-
+        if (pjr(pajer$starpu$aggregation$active)){
+          loginfo("Will call st_time_aggregation");
+          aggStep <- pjr_value(pajer$starpu$aggregation$step, globalAggStep);
+          dfw_agg <- st_time_aggregation(dfw, StarPU.View=TRUE, step=aggStep);
+          data %>% st_time_aggregation_plot (dfw_agg, StarPU.View=TRUE) + tScale -> gstarpu;
+          loginfo("st_time_aggregation completed");
+        }else{
+          data %>% state_chart (globalEndTime = tend, StarPU.View = TRUE) + tScale -> gstarpu;
+          loginfo("state_chart for StarPU behavior completed (no aggregation)");
+        }
         if (!pjr(pajer$starpu$legend)){
             gstarpu <- gstarpu + theme(legend.position="none");
         }

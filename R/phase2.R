@@ -1367,8 +1367,16 @@ the_master_function <- function(data = NULL)
     }
 
     if(is.null(data$Link)){
-      print("This data set dont have links, disabling some options")
+      print("This dataset dont have links, disabling some options")
       pajer$memory$transfers$active <<- FALSE;
+      pajer$memory$combined <<- FALSE;
+    }
+
+    dfevents = dfw %>% filter(Type == "Memory Node State")
+
+    if((dfevents %>% nrow) == 0 && ( pjr(pajer$memory$new_data) && (data$Events %>% nrow) == 0) ){
+      print("This dataset dont have memory node states")
+      pajer$memory$state$active <<- FALSE;
       pajer$memory$combined <<- FALSE;
     }
 

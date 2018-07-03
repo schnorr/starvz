@@ -1366,7 +1366,7 @@ the_master_function <- function(data = NULL)
       pajer$pmtool$bounds$active <<- FALSE;
     }
 
-    if(is.null(data$links)){
+    if(is.null(data$Link)){
       print("This data set dont have links, disabling some options")
       pajer$memory$transfers$active <<- FALSE;
       pajer$memory$combined <<- FALSE;

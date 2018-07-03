@@ -777,15 +777,15 @@ k_chart <- function (dfw = NULL)
         guides(fill = guide_legend(override.aes = list(alpha=1))) +
         scale_y_reverse() +
         # The start border
-        geom_curve(data=dfborders, aes(x=Start, xend=StartB, y=Iteration+height, yend=IterationB+height), curvature=0.1, angle=20) +
+        geom_curve(data=dfborders, aes(x=Start, xend=StartB, y=Iteration+height-height/2, yend=IterationB+height-height/2), curvature=0.1, angle=20) +
         # The end border
-        geom_curve(data=dfborders, aes(x=End, xend=EndB, y=Iteration, yend=IterationB), curvature=-0.1, angle=20) +
+        geom_curve(data=dfborders, aes(x=End, xend=EndB, y=Iteration-height/2, yend=IterationB-height/2), curvature=-0.1, angle=20) +
         # The state
         geom_rect(aes(fill=Value,
                       xmin=Start,
                       xmax=End,
-                      ymin=Iteration,
-                      ymax=Iteration+height), alpha=.5) -> goijk;
+                      ymin=Iteration-height/2,
+                      ymax=Iteration+height/2), alpha=.5) -> goijk;
     return(goijk);
 }
 

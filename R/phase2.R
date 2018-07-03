@@ -1570,7 +1570,7 @@ the_master_function <- function(data = NULL)
         loginfo("Creating the Used Memory plot");
         goguv <- dfv %>%
             filter(grepl("MEMMANAGER", ResourceId), grepl("Used", Type)) %>%
-            var_chart(ylabel="Used Mem.\n(MB/s)") + tScale;
+            var_chart(ylabel="Used Mem.\n(MB)") + tScale;
         if (!pjr(pajer$usedmemory$legend)){
             goguv <- goguv + theme(legend.position="none");
         }

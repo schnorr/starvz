@@ -93,6 +93,8 @@ st_time_aggregation <- function(dfw = NULL, StarPU.View = FALSE, step = 100)
 
     if (StarPU.View == FALSE){
         dfw <- dfw %>% filter(Application == TRUE);
+    }else{
+        dfw <- dfw %>% filter(Application == FALSE);
     }
 
     dfw_agg_prep <- time_aggregation_prep (dfw);

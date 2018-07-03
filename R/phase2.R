@@ -449,13 +449,16 @@ scalfmm_colors <- function()
 
 starpu_colors <- function()
 {
-    tibble(Value = starpu_states()) %>%
-        # Get colors from Set3
-        mutate(Color = brewer.pal(nrow(.), "Set3")) %>%
-        # Adopt Luka suggestion: Idle = orange; Sleeping = rose
-        mutate(Color = case_when(Value == "Idle" ~ "#FDB462",
-                                 Value == "PushingOutput" ~ "#BEBADA",
-                                 TRUE ~ Color)) -> t;
+  pre_colors <- brewer.pal(12, "Set3");
+  pre_colors[13] = "#000000"
+  pre_colors[14] = "#000000"
+  tibble(Value = starpu_states()) %>%
+      # Get colors from Set3
+      mutate(Color = pre_colors) %>%
+      # Adopt Luka suggestion: Idle = orange; Sleeping = rose
+      mutate(Color = case_when(Value == "Idle" ~ "#FDB462",
+                               Value == "PushingOutput" ~ "#BEBADA",
+                               TRUE ~ Color)) -> t;
     # Transform to a nice named list for ggplot
     ret <- t %>% pull(Color)
     names(ret) <- t %>% pull(Value);

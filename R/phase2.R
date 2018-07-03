@@ -546,6 +546,38 @@ state_chart <- function (data = NULL, globalEndTime = NULL, ST.Outliers = TRUE, 
     return(gow);
 }
 
+events_memory_chart <- function (data = NULL, globalEndTime = NULL, combined = FALSE, tstart = NULL, tend = NULL)
+{
+    if (is.null(data)) stop("data provided to memory_chart is NULL");
+
+    # Get traces
+    dfw <- data$Events;
+
+    loginfo("Entry of events_memory_chart");
+
+    memory_states = c("Allocating Async Start", "Allocating Async End", "Allocating Start", "Allocating End", "WritingBack Start", "WritingBack End");
+    memory_states_start = c("Allocating Async Start", "Allocating Start", "WritingBack Start");
+
+    # Filter
+    dfwapp = data$Events %>%
+          filter(Type %in% memory_states) %>%
+          group_by(Container, Handle, Tid, Src) %>% arrange(Start) %>%
+          mutate(End = lead(Start)) %>%
+          filter(Type %in% memory_states_start) %>%
+          mutate(Duration = End-Start)
+
+    #Plot
+    gow <- ggplot() + default_theme();
+
+    # Add states and outliers if requested
+    gow <- gow + geom_events(data, dfwapp, combined=combined, tstart=tstart, tend=tend);
+    if(combined){
+      gow <- gow + geom_links(data, combined=TRUE, tstart=tstart, tend=tend);
+    }
+
+    loginfo("Exit of events_memory_chart");
+    return(gow);
+}
 
 memory_chart <- function (data = NULL, globalEndTime = NULL, combined = FALSE, tstart = NULL, tend = NULL)
 {
@@ -1405,13 +1437,19 @@ the_master_function <- function(data = NULL)
         data %>% state_pmtool_chart () + tScale -> gow_pm;
     }
 
-    memory_combined <- pjr(pajer$memory$combined) & pajer$memory$transfers$active;
+    memory_combined <- pjr(pajer$memory$combined) & pjr(pajer$memory$transfers$active);
 
     if (pjr(pajer$memory$state$active)){
-        data %>% memory_chart(combined = memory_combined, tstart=tstart, tend=tend) + tScale -> gow_mm;
+        if(pjr(pajer$memory$new_data)){
+            loginfo("Memory Chart using Events")
+            data %>% events_memory_chart(combined = memory_combined, tstart=tstart, tend=tend) + tScale -> gow_mm;
+        }else{
+            loginfo("Memory Chart using States")
+            data %>% memory_chart(combined = memory_combined, tstart=tstart, tend=tend) + tScale -> gow_mm;
+        }
     }
 
-    if (pjr(pajer$memory$transfers$active) && !memory_combined){
+    if (pjr(pajer$memory$transfers$active) & !memory_combined){
         data %>% link_chart(tstart=tstart, tend=tend) + tScale -> gow_tf;
     }
 

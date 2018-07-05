@@ -555,8 +555,8 @@ events_memory_chart <- function (data = NULL, globalEndTime = NULL, combined = F
 
     loginfo("Entry of events_memory_chart");
 
-    memory_states = c("Allocating Async Start", "Allocating Async End", "Allocating Start", "Allocating End", "WritingBack Start", "WritingBack End");
-    memory_states_start = c("Allocating Async Start", "Allocating Start", "WritingBack Start");
+    memory_states = c("Allocating Async Start", "Allocating Async End", "Allocating Start", "Allocating End", "WritingBack Start", "WritingBack End", "Free Start", "Free End");
+    memory_states_start = c("Allocating Async Start", "Allocating Start", "WritingBack Start", "Free Start");
 
     # Filter
     dfwapp = data$Events %>%
@@ -564,7 +564,8 @@ events_memory_chart <- function (data = NULL, globalEndTime = NULL, combined = F
           group_by(Container, Handle, Tid, Src) %>% arrange(Start) %>%
           mutate(End = lead(Start)) %>%
           filter(Type %in% memory_states_start) %>%
-          mutate(Duration = End-Start)
+          mutate(Duration = End-Start) %>%
+          mutate(Type = gsub(" Start", "", Type))
 
     #Plot
     gow <- ggplot() + default_theme();
@@ -1968,10 +1969,35 @@ geom_events <- function (main_data = NULL, data = NULL, combined = FALSE, tstart
     }
     # Add states
     ret[[length(ret)+1]] <- geom_rect(data=dfw, aes(fill=Type, xmin=Start, xmax=End, ymin=Position, ymax=Position+(2.0-0.4-Height)), color= "black", linetype=border, size=0.4, alpha=0.5);
-    dx <- dfw %>% filter(Type == "Allocating Start")
+    print(dfw)
+    
+    dx <- dfw %>% filter(Type == "Allocating")
 
     if(pjr(pajer$memory$state$text)){
       ret[[length(ret)+1]] <- geom_text(data=dx, colour = "black", fontface = "bold", aes(x = Start+Duration/2, y = Position+(2.0-0.4-Height)/2, angle=90, label=substr(Handle, start = 6, stop = 12)), size = 3, alpha=1.0, show.legend = FALSE);
+    }
+
+
+    if(pjr(pajer$memory$state$total)){
+      select <- pjr_value(pajer$memory$state$select, "Allocating");
+      ms <- dfw %>% filter(Type == select, Start<tend, End>tstart) %>%
+                    mutate(Start = ifelse(Start<tstart, tstart, Start)) %>%
+                    mutate(End = ifelse(End>tend, tend, End))
+
+        #Calculate selected state % in time
+      total_time <- tend - tstart;
+
+      ms <- ms %>%
+          group_by (Container, Position) %>%
+          summarize(percent_time = round((sum(End-Start)/total_time)*100,2));
+      if(nrow(ms) != 0){
+          #ms[2] <- data.frame(lapply(ms[2], as.character), stringsAsFactors=FALSE);
+          #ms <- ms %>% left_join(col_pos, by=c("ResourceId" = "ResourceId"));
+          ms$Value <- select;
+          globalEndTime <- tend - (tend-tstart) * 0.05;
+          ms$percent_time <- paste0(ms$percent_time, "%");
+          ret[[length(ret)+1]] <- geom_label(data=ms, x = globalEndTime, colour = "black", fontface = "bold", aes(y = Position+0.3, label=percent_time, fill = Value), alpha=1.0, show.legend = FALSE);
+      }
     }
 
     loginfo("Finishing geom_events");

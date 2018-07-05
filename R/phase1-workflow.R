@@ -22,44 +22,49 @@ source(other.name)
 ##############################
 usage <- function ()
 {
-    stop("Usage: pre-workflow.R <directory> <application>\n   where <directory> contains CSV files of the workflow;\n   where <application> is either cholesky or qrmumps.", call.=FALSE)
+    stop("Usage: pre-workflow.R <directory> [application](optional)\n   where <directory> contains CSV files of the workflow;\n   where [application](optional) is either cholesky or qrmumps.", call.=FALSE)
 }
 
 # Get the arguments to this script
 args = commandArgs(trailingOnly=TRUE)
 
-if (length(args) < 2) {
+if (length(args) < 1) {
     usage();
+}else if (length(args) < 2) {
+   input.application = "";
+}else{
+   input.application = args[[2]];
 }
 
 input.directory = args[[1]];
-input.application = args[[2]];
 
-if (is.null(input.directory) ||
-    (input.application != "cholesky" && input.application != "qrmumps" && input.application != "cfd")){
+
+if ( is.null(input.directory) ){
     usage();
 }
 
 if (input.application == "cholesky"){
     states.fun = cholesky_colors;
-    states.filter.strict = FALSE;
+    states.filter = 1;
 }else if (input.application == "qrmumps") {
     states.fun = qrmumps_colors;
-    states.filter.strict = FALSE;
+    states.filter = 1;
 }else if (input.application == "cholesky_pastix") {
     states.fun = cholesky_pastix_colors;
-    states.filter.strict = FALSE;
+    states.filter = 1;
 }else if (input.application == "cfd") {
     states.fun = cfd_colors;
-    states.filter.strict = FALSE;
+    states.filter = 1;
+}else if (input.application == "") {
+    states.fun = cfd_colors;
+    states.filter = 0;
 }
-
 
 setwd(input.directory);
 
 data <- the_reader_function (directory = input.directory,
                              app_states_fun = states.fun,
-                             strict_state_filter = states.filter.strict,
+                             state_filter = states.filter,
                              whichApplication = input.application);
 
 loginfo("Let's start to write the pre-processed files as feather data");

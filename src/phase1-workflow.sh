@@ -22,7 +22,7 @@ function usage()
 CASE=${1:-}
 if [ -z "$CASE" ]; then echo "Error: <fxtdir> is empty"; usage; exit; fi
 APPLICATION=${2:-}
-if [ -z "$APPLICATION" ]; then echo "Error: <application> is empty"; usage; exit; fi
+#if [ -z "$APPLICATION" ]; then echo "Error: <application> is empty"; usage; exit; fi
 
 echo
 echo "Start of $CASE"
@@ -128,7 +128,7 @@ fi
 
 echo "Post-processing CSV files"
 ${DIR}/../R/phase1-workflow.R . ${APPLICATION}
-rm -f atree.csv dag.csv entities.csv paje.link.csv paje.state.csv paje.variable.csv types.csv
+#rm -f atree.csv dag.csv entities.csv paje.link.csv paje.state.csv paje.variable.csv types.csv
 
 echo
 echo "End of $CASE"

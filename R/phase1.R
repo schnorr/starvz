@@ -18,7 +18,7 @@ if(file.exists(other.name)){
 read_state_csv <- function (where = ".",
                             app_states_fun = NULL,
                             outlier_fun = NULL,
-                            strict_state_filter = FALSE,
+                            state_filter = 0,
                             whichApplication = NULL)
 {
     # Check obligatory parameters
@@ -84,14 +84,21 @@ read_state_csv <- function (where = ".",
     }
 
     # Split application and starpu behavior
-    if (strict_state_filter){
+    # state_filter:
+    # 0 = Based on Runtime fixed States
+    # 1 = Based on stricted application name states
+    # 2 = Based on non-stricted application name states
+    if (state_filter == 0){
+        dfw <- dfw %>% mutate(Application = case_when( .$Value %in% all_starpu_states() ~ FALSE, TRUE ~ TRUE));
+    }else if (state_filter == 1){
         # If strict, states need to be exact
         dfw <- dfw %>% mutate(Application = case_when(.$Value %in% (app_states_fun() %>% .$Kernel) ~ TRUE, TRUE ~ FALSE));
-    }else{
+    }else if (state_filter == 2){
         # If not strict, we mark using app_states_fun() Kernel field as RE
         state_condition = paste((app_states_fun() %>% .$Kernel), collapse='|');
         dfw <- dfw %>% mutate(Application = case_when(grepl(state_condition, .$Value) ~ TRUE, TRUE ~ FALSE));
     }
+
     if ((dfw %>% nrow) == 0) stop("After application states check, number of rows is zero.");
 
     loginfo("App state filter completed");
@@ -331,7 +338,7 @@ atree_to_df <- function (node)
 }
 
 
-the_reader_function <- function (directory = ".", app_states_fun = NULL, strict_state_filter = FALSE, whichApplication = NULL)
+the_reader_function <- function (directory = ".", app_states_fun = NULL, state_filter = 0, whichApplication = NULL)
 {
     # Logging configuration
     basicConfig();
@@ -358,7 +365,7 @@ the_reader_function <- function (directory = ".", app_states_fun = NULL, strict_
     dfw <- read_state_csv (where = directory,
                            app_states_fun=app_states_fun,
                            outlier_fun=outlier_definition,
-                           strict_state_filter=strict_state_filter,
+                           state_filter=state_filter,
                            whichApplication = whichApplication) %>%
         hl_y_coordinates(where = directory);
 
@@ -1157,7 +1164,12 @@ read_dag <- function (where = ".", dfw = NULL, dfl = NULL)
 
 starpu_states <- function()
 {
-    c("Callback", "FetchingInput", "Idle", "Initializing", "Overhead", "PushingOutput", "Scheduling", "Submitting task", "Progressing", "Sleeping", "Submiting task");
+    c("Callback", "FetchingInput", "Idle", "Initializing", "Overhead", "PushingOutput", "Scheduling", "Submitting task", "Progressing", "Sleeping", "Submiting task", "Waiting all tasks", "Building task", "Deinitializing");
+}
+
+all_starpu_states <- function()
+{
+    c("Callback", "FetchingInput", "Idle", "Initializing", "Overhead", "PushingOutput", "Scheduling", "Submitting task", "Progressing", "Sleeping", "Submiting task", "Waiting all tasks", "Building task", "Deinitializing", "Executing");
 }
 
 cholesky_states <- function()

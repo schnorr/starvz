@@ -1928,7 +1928,7 @@ geom_events <- function (main_data = NULL, data = NULL, combined = FALSE, tstart
 
     dfl <- main_data$Link;
 
-    loginfo("Starting geom_links");
+    loginfo("Starting geom_events");
 
 
     col_pos <- data.frame(Container=unique(dfl$Dest)) %>% tibble::rowid_to_column("Position")
@@ -1969,8 +1969,8 @@ geom_events <- function (main_data = NULL, data = NULL, combined = FALSE, tstart
     }
     # Add states
     ret[[length(ret)+1]] <- geom_rect(data=dfw, aes(fill=Type, xmin=Start, xmax=End, ymin=Position, ymax=Position+(2.0-0.4-Height)), color= "black", linetype=border, size=0.4, alpha=0.5);
-    print(dfw)
-    
+    print(dfw %>% select(Container, Position, Height))
+
     dx <- dfw %>% filter(Type == "Allocating")
 
     if(pjr(pajer$memory$state$text)){
@@ -2017,9 +2017,12 @@ geom_memory <- function (data = NULL, combined = FALSE, tstart=NULL, tend=NULL)
 
     loginfo("Starting geom_memory");
 
+    col_pos_1 <- data.frame(ResourceId=unique(dfl$Dest)) %>% tibble::rowid_to_column("Position");
 
+    col_pos_2 <- data.frame(ResourceId=unique(dfw$ResourceId)) %>% tibble::rowid_to_column("Position")
 
-    col_pos <- data.frame(ResourceId=unique(dfw$ResourceId)) %>% tibble::rowid_to_column("Position")
+    nrow(ms) != 0
+
     col_pos[2] <- data.frame(lapply(col_pos[2], as.character), stringsAsFactors=FALSE);
     dfw <- dfw %>% select(-Position) %>% left_join(col_pos, by=c("ResourceId" = "ResourceId"))
     ret <- list();
@@ -2110,7 +2113,7 @@ geom_links <- function (data = NULL, combined = FALSE, tstart=NULL, tend=NULL)
     col_pos[2] <- data.frame(lapply(col_pos[2], as.character), stringsAsFactors=FALSE);
 
     if(combined){
-      col_pos$Position = col_pos$Position * pjr_value(pajer$memory$state$height, 2);;
+      col_pos$Position = col_pos$Position * pjr_value(pajer$memory$state$height, 1);;
     }
 
     ret <- list();
@@ -2124,7 +2127,7 @@ geom_links <- function (data = NULL, combined = FALSE, tstart=NULL, tend=NULL)
     dfl$Height <- 1;
 
     if(combined){
-      stride = stride*pjr_value(pajer$memory$state$height, 2);;
+      stride = stride*pjr_value(pajer$memory$state$height, 1);;
     }
 
     if(!combined){
@@ -2160,7 +2163,7 @@ geom_links <- function (data = NULL, combined = FALSE, tstart=NULL, tend=NULL)
         ret[[length(ret)+1]] <- geom_segment(data=dfl, aes(x = Start, xend = End, y = O_Position, yend = D_Position), arrow = arrow_g, alpha=0.5, size=1.5, color = "black");
     }
 
-
+    print(dfl %>% select(Container, O_Position))
     ret[[length(ret)+1]] <- geom_segment(data=dfl, aes(x = Start, xend = End, y = O_Position, yend = D_Position, color = Origin), arrow = arrow_g, alpha=1.0);
     selected_dfl <- dfl %>% filter(End > tstart) %>%  filter(Start < tend);
 

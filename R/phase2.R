@@ -1930,14 +1930,25 @@ geom_events <- function (main_data = NULL, data = NULL, combined = FALSE, tstart
 
     loginfo("Starting geom_events");
 
+    col_pos_1 <- data.frame(Container=unique(dfl$Dest)) %>% tibble::rowid_to_column("Position");
 
-    col_pos <- data.frame(Container=unique(dfl$Dest)) %>% tibble::rowid_to_column("Position")
+    col_pos_2 <- data.frame(Container=unique(dfw$Container)) %>% tibble::rowid_to_column("Position")
+
+    if(nrow(col_pos_1)>nrow(col_pos_2)){
+      col_pos <- col_pos_1
+    }else{
+      col_pos <- col_pos_2
+      ret[[length(ret)+1]] <- scale_y_continuous(breaks = yconfm$Position+(yconfm$Height/3), labels=yconfm$Container, expand=c(pjr_value(pajer$expand, 0.05),0));
+    }
+
     col_pos[2] <- data.frame(lapply(col_pos[2], as.character), stringsAsFactors=FALSE);
     dfw <- dfw %>% left_join(col_pos, by=c("Container" = "Container"))
+
+    #col_pos <- data.frame(Container=unique(dfl$Dest)) %>% tibble::rowid_to_column("Position")
+
     ret <- list();
 
     dfw$Height = 1;
-
 
     # Color mapping
     #ret[[length(ret)+1]] <- scale_fill_manual(values = extract_colors(dfw));
@@ -1954,11 +1965,16 @@ geom_events <- function (main_data = NULL, data = NULL, combined = FALSE, tstart
     #yconfm$Height = pjr_value(pajer$memory$state$height, 2);
     #yconfm$Position = yconfm$Position * yconfm$Height;
     #dfw$Height = pjr_value(pajer$memory$state$height, 2);
-    #dfw$Position = dfw$Position * dfw$Height;
+
 
     yconfm$Container <- lapply(yconfm$Container, function(x) gsub("MEMMANAGER", "MM", x));
 
-    ret[[length(ret)+1]] <- scale_y_continuous(breaks = yconfm$Position+(yconfm$Height/3), labels=yconfm$Container, expand=c(pjr_value(pajer$expand, 0.05),0));
+    if(!combined){
+      ret[[length(ret)+1]] <- scale_y_continuous(breaks = yconfm$Position+(yconfm$Height/3), labels=yconfm$Container, expand=c(pjr_value(pajer$expand, 0.05),0));
+    }else{
+        dfw$Position = dfw$Position - 0.3;
+    }
+
     # Y label
     ret[[length(ret)+1]] <- ylab("Memory State");
 
@@ -1969,14 +1985,12 @@ geom_events <- function (main_data = NULL, data = NULL, combined = FALSE, tstart
     }
     # Add states
     ret[[length(ret)+1]] <- geom_rect(data=dfw, aes(fill=Type, xmin=Start, xmax=End, ymin=Position, ymax=Position+(2.0-0.4-Height)), color= "black", linetype=border, size=0.4, alpha=0.5);
-    print(dfw %>% select(Container, Position, Height))
 
     dx <- dfw %>% filter(Type == "Allocating")
 
     if(pjr(pajer$memory$state$text)){
       ret[[length(ret)+1]] <- geom_text(data=dx, colour = "black", fontface = "bold", aes(x = Start+Duration/2, y = Position+(2.0-0.4-Height)/2, angle=90, label=substr(Handle, start = 6, stop = 12)), size = 3, alpha=1.0, show.legend = FALSE);
     }
-
 
     if(pjr(pajer$memory$state$total)){
       select <- pjr_value(pajer$memory$state$select, "Allocating");
@@ -2126,8 +2140,20 @@ geom_links <- function (data = NULL, combined = FALSE, tstart=NULL, tend=NULL)
 
     dfl$Height <- 1;
 
+    yconfm <- dfl %>%
+        select(Dest, D_Position, Height) %>%
+        distinct() %>%
+        group_by(Dest) %>%
+        arrange(Dest) %>%
+        ungroup;
+
+    yconfm$Height <- 1;
+    yconfm$Dest <- lapply(yconfm$Dest, function(x) gsub("MEMMANAGER", "MM", x));
+
     if(combined){
-      stride = stride*pjr_value(pajer$memory$state$height, 1);;
+      stride = stride*pjr_value(pajer$memory$state$height, 1);
+      ret[[length(ret)+1]] <- scale_y_continuous(breaks = yconfm$D_Position, labels=yconfm$Dest, expand=c(0.10, 0.1));
+      stride <- 0.0;
     }
 
     if(!combined){
@@ -2135,15 +2161,6 @@ geom_links <- function (data = NULL, combined = FALSE, tstart=NULL, tend=NULL)
       #dfw <- dfw %>% select(-Position) %>% left_join(col_pos, by=c("ResourceId" = "ResourceId"));
       # Hardcoded here because yconf is specific to Resource Workers
 
-      yconfm <- dfl %>%
-          select(Dest, D_Position, Height) %>%
-          distinct() %>%
-          group_by(Dest) %>%
-          arrange(Dest) %>%
-          ungroup;
-
-      yconfm$Height <- 1;
-      yconfm$Dest <- lapply(yconfm$Dest, function(x) gsub("MEMMANAGER", "MM", x));
       ret[[length(ret)+1]] <- scale_y_continuous(breaks = yconfm$D_Position, labels=yconfm$Dest, expand=c(0.10,0.5));
 
       # Color mapping
@@ -2163,7 +2180,6 @@ geom_links <- function (data = NULL, combined = FALSE, tstart=NULL, tend=NULL)
         ret[[length(ret)+1]] <- geom_segment(data=dfl, aes(x = Start, xend = End, y = O_Position, yend = D_Position), arrow = arrow_g, alpha=0.5, size=1.5, color = "black");
     }
 
-    print(dfl %>% select(Container, O_Position))
     ret[[length(ret)+1]] <- geom_segment(data=dfl, aes(x = Start, xend = End, y = O_Position, yend = D_Position, color = Origin), arrow = arrow_g, alpha=1.0);
     selected_dfl <- dfl %>% filter(End > tstart) %>%  filter(Start < tend);
 
@@ -2173,8 +2189,9 @@ geom_links <- function (data = NULL, combined = FALSE, tstart=NULL, tend=NULL)
       if(nrow(total_links) != 0 & !combined){
           total_links[1] <- data.frame(lapply(total_links[1], as.character), stringsAsFactors=FALSE);
           total_links <- total_links %>% left_join(col_pos, by=c("Origin" = "ResourceId"));
-
-          globalEndTime <- tend * 1.01;
+          print(total_links)
+          
+          globalEndTime <- tend - (tend-tstart) * 0.05;
 
           ret[[length(ret)+1]] <- geom_label(data=total_links, x = globalEndTime, colour = "white", fontface = "bold", aes(y = Position, label=Freq, fill = Origin), alpha=1.0, show.legend = FALSE);
       }

@@ -45,7 +45,7 @@ if ( is.null(input.directory) ){
 
 if (input.application == "cholesky"){
     states.fun = cholesky_colors;
-    states.filter = 1;
+    states.filter = 2;
 }else if (input.application == "qrmumps") {
     states.fun = qrmumps_colors;
     states.filter = 1;

@@ -89,11 +89,14 @@ read_state_csv <- function (where = ".",
     # 1 = Based on stricted application name states
     # 2 = Based on non-stricted application name states
     if (state_filter == 0){
+        loginfo("Selecting application states based on runtime states.");
         dfw <- dfw %>% mutate(Application = case_when( .$Value %in% all_starpu_states() ~ FALSE, TRUE ~ TRUE));
     }else if (state_filter == 1){
+        loginfo("Selecting application states based on custom application stricted states names.");
         # If strict, states need to be exact
         dfw <- dfw %>% mutate(Application = case_when(.$Value %in% (app_states_fun() %>% .$Kernel) ~ TRUE, TRUE ~ FALSE));
     }else if (state_filter == 2){
+        loginfo("Selecting application states based on custom application non-stricted states names.");
         # If not strict, we mark using app_states_fun() Kernel field as RE
         state_condition = paste((app_states_fun() %>% .$Kernel), collapse='|');
         dfw <- dfw %>% mutate(Application = case_when(grepl(state_condition, .$Value) ~ TRUE, TRUE ~ FALSE));

@@ -1570,13 +1570,26 @@ the_master_function <- function(data = NULL)
     # Used Memory
     if (pjr(pajer$usedmemory$active)){
         loginfo("Creating the Used Memory plot");
-        goguv <- dfv %>%
-            filter(grepl("MEMMANAGER", ResourceId), grepl("Used", Type)) %>%
-            var_chart(ylabel="Used Mem.\n(MB)") + tScale;
-        if (!pjr(pajer$usedmemory$legend)){
-            goguv <- goguv + theme(legend.position="none");
+
+        if ((dfv %>% filter(grepl("MEMMANAGER", ResourceId) & grepl("Used", Type)) %>% nrow) == 0){
+            logwarn("There aren't any information about Used Memory, ignoring it.");
+            pajer$usedmemory$active <<- FALSE;
+        }else{
+          aggStep <- pjr_value(pajer$usedmemory$step, globalAggStep);
+
+          goguv <- dfv %>%
+              filter(grepl("MEMMANAGER", ResourceId) & grepl("Used", Type)) %>%
+              var_integration_segment_chart(step = aggStep) + tScale;
+          if (!pjr(pajer$usedmemory$legend)){
+              goguv <- goguv + theme(legend.position="none");
+          }else{
+              goguv <- goguv +
+                  theme(legend.position=c(.99,.8),
+                        legend.justification="right") +
+                  guides(color = guide_legend(nrow = 1))
+          }
+          goguv <- userYLimit(goguv, pajer$usedmemory$limit, c(tstart, tend));
         }
-        # TODO: user limit
     }
 
     # MPIBandwidth
@@ -2190,7 +2203,7 @@ geom_links <- function (data = NULL, combined = FALSE, tstart=NULL, tend=NULL)
           total_links[1] <- data.frame(lapply(total_links[1], as.character), stringsAsFactors=FALSE);
           total_links <- total_links %>% left_join(col_pos, by=c("Origin" = "ResourceId"));
           print(total_links)
-          
+
           globalEndTime <- tend - (tend-tstart) * 0.05;
 
           ret[[length(ret)+1]] <- geom_label(data=total_links, x = globalEndTime, colour = "white", fontface = "bold", aes(y = Position, label=Freq, fill = Origin), alpha=1.0, show.legend = FALSE);

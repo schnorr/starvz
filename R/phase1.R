@@ -752,7 +752,6 @@ events_csv_parser <- function (where = ".")
                             Src = col_character()
                         ));
         # sort the data by the start time
-        print(pm)
         pm <- pm[with(pm, order(Start)), ]
 
         # Read links
@@ -891,7 +890,7 @@ dt_to_df_inner <- function (node)
 
 the_fast_reader_function <- function (directory = ".")
 {
-    names <- c("State", "Variable", "Link", "DAG", "Y", "ATree", "Gaps", "pmtool",
+    names <- c("State", "Variable", "Link", "_DAG", "Y", "ATree", "Gaps", "pmtool",
                "pmtool_states", "data_handles", "tasks", "task_handles", "Events");
 
     filenames <- gsub("^", "pre.", gsub("$", ".feather", tolower(names)));
@@ -1241,6 +1240,95 @@ cholesky_pastix_colors <- function()
                   "#c0c0c0"));
 }
 
+qrmumps_color_mapping_2 <- function()
+{
+    tibble(
+        Kernel = c("ASM",
+                   "GEMQRT",
+                   "GEQRT",
+                   "TPMQRT",
+                   "TPQRT",
+		"Do_subtree",
+		"CLEAN",
+		"INIT"),
+        Color = c("#e41a1c",
+                  "#000000",
+                  "#377eb8",
+                  "#4daf4a",
+                  "#c0c0c0",
+                 "#a65628",
+                 "#f781bf",
+                 "#ea1a1c"));
+}
+
+qrmumps_states_level_order <- function ()
+{
+    c(
+        "Do_subtree", 
+        "INIT", 
+        "GEQRT", 
+        "GEMQRT",
+        "TPQRT",
+        "TPMQRT", 
+        "ASM", 
+        "CLEAN", 
+        "Idle");
+}
+qrmumps_states <- function ()
+{
+    c(
+        "ASM",
+        "GEMQRT",
+        "Do_subtree",
+        "CLEAN", 
+        "GEQRT", 
+        "INIT", 
+        "TPMQRT",
+        "TPQRT",
+        "Idle");
+}
+
+qrmumps_color_mapping <- function()
+{
+    #This vector changes the color ordering
+    states = qrmumps_states();
+    kcol <- data.frame(RGB=as.character(brewer.pal(9, "Set1")),
+#These are only the color names I put manually here to try to understand the color mapping
+#                       ColorName=c("red", "blue", "green", "purple", "orange", "yellow", "brown", "pink", "gray"),
+                       StateName=factor(states, levels=qrmumps_states_level_order()),
+                       xmin=1:length(states),
+                       xmax=1:length(states)+1,
+                       ymin=0,
+                       ymax=1);
+   kcol;
+}
+
+qrmumps_colors <- function()
+{
+qrmumps_color_mapping() %>%
+    # Rename
+    rename(Kernel = StateName, Color=RGB) %>%
+    # Remove Idle
+    filter(Kernel != "Idle") %>%
+    # Change to character
+    mutate(Kernel = as.character(Kernel), Color=as.character(Color)) %>%
+    # Select only those necessary
+    select(Kernel, Color) %>%
+    # Change names according to latest modifications
+    mutate(Kernel = case_when(
+               .$Kernel == "ASM" ~ "assemble_block",
+               .$Kernel == "GEMQRT" ~ "lapack_gemqrt",
+               .$Kernel == "GEQRT" ~ "lapack_geqrt",
+               .$Kernel == "TPMQRT" ~ "lapack_tpmqrt",
+               .$Kernel == "TPQRT" ~ "lapack_tpqrt",
+               .$Kernel == "Do_subtree" ~ "do_subtree",
+               .$Kernel == "CLEAN" ~ "clean_front",
+               .$Kernel == "INIT" ~ "init_front",
+               TRUE ~ .$Kernel)) %>%
+    # Add new kernels
+    bind_rows (tibble(Kernel = c("init_block", "clean_block"),
+                      Color = c("#FFFF33", "#984EA3")));
+}
 
 outlier_definition <- function(x) {
     (quantile(x)["75%"] + (quantile(x)["75%"] - quantile(x)["25%"]) * 1.5)

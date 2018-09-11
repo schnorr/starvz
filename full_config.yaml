@@ -149,3 +149,7 @@ default:
     legend:
     limit:
     step:
+  vertical_lines:
+    active: FALSE
+    y_list: [1, 2]
+    color_list: ["green", "gray"]

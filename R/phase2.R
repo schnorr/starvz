@@ -1714,32 +1714,7 @@ userYLimit <- function(obj, configuration, xlimits)
     }
     return(obj);
 }
-qrmumps_colors <- function()
-{
-qrmumps_color_mapping() %>%
-    # Rename
-    rename(Kernel = StateName, Color=RGB) %>%
-    # Remove Idle
-    filter(Kernel != "Idle") %>%
-    # Change to character
-    mutate(Kernel = as.character(Kernel), Color=as.character(Color)) %>%
-    # Select only those necessary
-    select(Kernel, Color) %>%
-    # Change names according to latest modifications
-    mutate(Kernel = case_when(
-               .$Kernel == "ASM" ~ "assemble_block",
-               .$Kernel == "GEMQRT" ~ "lapack_gemqrt",
-               .$Kernel == "GEQRT" ~ "lapack_geqrt",
-               .$Kernel == "TPMQRT" ~ "lapack_tpmqrt",
-               .$Kernel == "TPQRT" ~ "lapack_tpqrt",
-               .$Kernel == "Do_subtree" ~ "do_subtree",
-               .$Kernel == "CLEAN" ~ "clean_front",
-               .$Kernel == "INIT" ~ "init_front",
-               TRUE ~ .$Kernel)) %>%
-    # Add new kernels
-    bind_rows (tibble(Kernel = c("init_block", "clean_block"),
-                      Color = c("#FFFF33", "#984EA3")));
-}
+
 geom_atree <- function (data=NULL, Offset=1.02, Flip = TRUE)
 {
     if(is.null(data)) stop("input data for geom_atree is NULL");
@@ -1828,7 +1803,16 @@ default_theme <- function()
         legend.box.margin = margin(0,0,0,0),
         legend.title = element_blank());
     ret[[length(ret)+1]] <- xlab("Time [ms]");
-    ret[[length(ret)+1]] <- scale_x_continuous(expand=c(pjr_value(pajer$expand, 0.05),0));
+    ret[[length(ret)+1]] <- scale_x_continuous(expand=c(pjr_value(pajer$expand, 0.05),0),
+                                              labels = function(x) format(x, big.mark = "",  scientific = FALSE));
+
+    if(pjr(pajer$vertical_lines$active)){
+      ret[[length(ret)+1]] <- geom_vline(xintercept=pajer$vertical_lines$x_list,
+                       linetype='longdash',
+                       size=1,
+                       colour=pajer$vertical_lines$color_list)
+
+    }
     return(ret);
 }
 
@@ -1912,7 +1896,7 @@ geom_states <- function (data = NULL, Show.Outliers = FALSE, StarPU = FALSE)
                                 xmin=Start,
                                 xmax=End,
                                 ymin=Position,
-                                ymax=Position+Height-0.4), alpha=ifelse(Show.Outliers && !StarPU, 0.5, 1.0));
+                                ymax=Position+Height-0.2), alpha=ifelse(Show.Outliers && !StarPU, 0.5, 1.0));
 
     # Add outliers conditionally
     if (Show.Outliers && !StarPU){
@@ -1922,7 +1906,7 @@ geom_states <- function (data = NULL, Show.Outliers = FALSE, StarPU = FALSE)
                           xmin=Start,
                           xmax=End,
                           ymin=Position,
-                          ymax=Position+Height-0.4), alpha=1);
+                          ymax=Position+Height-0.2), alpha=1);
     }
 
     loginfo("Finishing geom_states");
@@ -1989,7 +1973,7 @@ geom_events <- function (main_data = NULL, data = NULL, combined = FALSE, tstart
     }
 
     # Y label
-    ret[[length(ret)+1]] <- ylab("Memory State");
+    ret[[length(ret)+1]] <- ylab("Mem Nodes");
 
 
     border <- 0
@@ -1999,10 +1983,18 @@ geom_events <- function (main_data = NULL, data = NULL, combined = FALSE, tstart
     # Add states
     ret[[length(ret)+1]] <- geom_rect(data=dfw, aes(fill=Type, xmin=Start, xmax=End, ymin=Position, ymax=Position+(2.0-0.4-Height)), color= "black", linetype=border, size=0.4, alpha=0.5);
 
-    dx <- dfw %>% filter(Type == "Allocating")
-
     if(pjr(pajer$memory$state$text)){
-      ret[[length(ret)+1]] <- geom_text(data=dx, colour = "black", fontface = "bold", aes(x = Start+Duration/2, y = Position+(2.0-0.4-Height)/2, angle=90, label=substr(Handle, start = 6, stop = 12)), size = 3, alpha=1.0, show.legend = FALSE);
+      dx <- dfw %>% filter(Type == "Allocating") %>%
+                  left_join(main_data$data_handles, by=c("Handle"="Handle") ) %>%
+                  select(-Tid, -Src, -Value)
+
+      ret[[length(ret)+1]] <- geom_text(data=dx, colour = "black", fontface = "bold",
+                                        aes(x = Start+Duration/2,
+                                            y = Position+(2.0-0.4-Height)/2,
+                                            angle=90,
+                                            label=Coordinates),
+                                            size = 4, alpha=1.0,
+                                            show.legend = FALSE);
     }
 
     if(pjr(pajer$memory$state$total)){
@@ -2074,7 +2066,7 @@ geom_memory <- function (data = NULL, combined = FALSE, tstart=NULL, tend=NULL)
 
     ret[[length(ret)+1]] <- scale_y_continuous(breaks = yconfm$Position+(yconfm$Height/3), labels=yconfm$ResourceId, expand=c(pjr_value(pajer$expand, 0.05),0));
     # Y label
-    ret[[length(ret)+1]] <- ylab("Memory State");
+    ret[[length(ret)+1]] <- ylab("Mem Nodes");
 
     border <- NA;
 
@@ -2335,11 +2327,14 @@ geom_idleness <- function(data = NULL)
 
     globalEndTime <- dfidle %>% pull(End) %>% na.omit %>% max;
     ret <- NULL;
-    ret <- geom_text(data=dfidle,
+    ret <- geom_label(data=dfidle,
                      # The size of the idle values for each resource
                      size=bsize/idleness_factor,
                      # The X position of each one
-                     x=(-1) * globalEndTime/100*2.5, # 2.5% before 0.0
+                     x=0, # 2.5% before 0.0
+                     hjust=0,
+                     fill="white",
+                     fontface = "bold",
                      # The Y position (depends on the Resource, so use "aes"
                      aes(y=Position+(Height/2.5), # vertical
                          # The idleness number followed by % as text

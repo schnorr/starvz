@@ -1,0 +1,43 @@
+Package: starvz
+Title: R-based visualization techniques for task-based applications.
+Version: 0.1.0.1
+Authors@R: as.person(c(
+    "Lucas Mello Schnorr <schnorr@inf.ufrgs.br> [aut, cre]",
+    "Vinicius Garcia Pinto <vgpinto@inf.ufrgs.br> [aut]",
+    "Lucas Leandro Nesi <llnesi@inf.ufrgs.br> [aut]",
+    "Guilherme Alles <galles@inf.ufrgs.br> [aut]"
+  ))
+Description: StarVZ consists in a performance analysis workflow that combines
+    the power of the R language (and the tidyverse realm) and many auxiliary
+    tools to provide a consistent, flexible, extensible, fast, and versatile
+    framework for the performance analysis of task-based applications that run
+    on top of the StarPU runtime (with its MPI layer for multi-node support).
+    Its goal is to provide a fruitful prototypical environment to conduct
+    performance analysis hypothesis-checking for task-based applications that
+    run on heterogeneous (multi-GPU, multi-core) multi-node HPC platforms.
+Depends: R (>= 3.1.0)
+Imports:
+    ggplot2,
+    gridExtra,
+    lpSolve,
+    pipeR,
+    RColorBrewer,
+    Rcpp,
+    tidyr,
+    tidyverse,
+    zoo,
+    cowplot,
+    data.tree,
+    dplyr,
+    feather,
+    logging,
+    magrittr,
+    pipeR,
+    readr,
+    reshape2,
+    tidyverse,
+    zoo
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+LinkingTo: Rcpp

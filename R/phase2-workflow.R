@@ -1,17 +1,6 @@
 #!/usr/bin/Rscript
 
-# see:
-# https://stackoverflow.com/questions/1815606/rscript-determine-path-of-the-executing-script (Suppressingfire answer)
-initial.options <- commandArgs(trailingOnly = FALSE)
-file.arg.name <- "--file="
-script.name <- sub(file.arg.name, "", initial.options[grep(file.arg.name, initial.options)])
-script.basename <- dirname(script.name)
-other.name.1 <- paste(sep="/", script.basename, "phase1.R")
-other.name.2 <- paste(sep="/", script.basename, "phase2.R")
-print(paste("Sourcing",other.name.1,"from",script.name))
-print(paste("Sourcing",other.name.2,"from",script.name))
-source(other.name.1)
-source(other.name.2)
+library(starvz)
 
 args = commandArgs(trailingOnly=TRUE)
 if (length(args) < 2) {

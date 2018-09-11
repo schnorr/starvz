@@ -55,33 +55,34 @@ loaded via a namespace (and not attached):
 [1] compiler_3.4.2
 #+end_example
 
-** R Dependencies
+** Installing only the R package
+To install only the R package, the =devtools= package is required. It can
+be installed with:
 
-These are the R packages required by our framework.
-
-You can run this code in your R shell to get them installed.
-
-#+begin_src R :results output :session :exports both
-install.packages(c("config",
-                   "cowplot",
-                   "data.table",
-                   "data.tree",
-                   "dplyr",
-                   "feather",
-                   "ggplot2",
-                   "gridExtra",
-                   "logging",
-                   "lpSolve",
-                   "magrittr",
-                   "pipeR",
-                   "RColorBrewer",
-                   "Rcpp",
-                   "readr",
-                   "reshape2",
-                   "tidyr",
-                   "tidyverse",
-                   "zoo"));
+#+begin_src R :results output :session *R* :exports both
+package.install("devtools")
 #+end_src
+
+Then, the StarVZ package can be installed via _github_ with:
+
+#+begin_src R :results output :session *R* :exports both
+library(devtools)
+devtools::install_github("schnorr/starvz", subdir="R_package")
+#+end_src
+
+Also, it is possible to install the package with the local files:
+
+#+begin_src R :results output :session *R* :exports both
+library(devtools)
+devtools::install_local(path="/starvz_git_path/R_package")
+#+end_src
+
+Now all StarVZ R functions can be accessible with:
+
+#+begin_src R :results output :session *R* :exports both
+library(starvz)
+#+end_src
+
 
 ** Non-R Dependencies
 
@@ -218,3 +219,8 @@ this necessity:
 
 
 
+** Uninstall R package
+Simples with:
+#+begin_src R :results output :session *R* :exports both
+remove.package(starvz)
+#+end_src

@@ -60,7 +60,7 @@ To install only the R package, the =devtools= package is required. It can
 be installed with:
 
 #+begin_src R :results output :session *R* :exports both
-package.install("devtools")
+install.packages("devtools")
 #+end_src
 
 Then, the StarVZ package can be installed via _github_ with:

@@ -16,7 +16,7 @@ Description: StarVZ consists in a performance analysis workflow that combines
     performance analysis hypothesis-checking for task-based applications that
     run on heterogeneous (multi-GPU, multi-core) multi-node HPC platforms.
 Depends: R (>= 3.1.0)
-Imports:
+Depends:
     ggplot2,
     gridExtra,
     lpSolve,

@@ -75,7 +75,7 @@ docker run -it schnorr/starvz
 After entering the container, run R and load the =starvz= package with:
 
 #+begin_src R :results output :session :exports both
-library(starvz);
+library(starvz)
 #+end_src
 
 ** Contact

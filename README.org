@@ -61,7 +61,7 @@ Experience.
   [[https://gitlab.in2p3.fr/schnorr/ccpe2017][Companion website]])
 ** Docker container
 
-Please [[./Dockerfile][check this =DockerFile]]= to create a docker container with all the
+Please [[./Dockerfile][check this DockerFile]] to create a docker container with all the
 necessary requirements for a basic utilization of the starvz framework
 (in the form of an R package). Assuming that you have =docker= installed
 in your system, you may want to simply pull and run this container

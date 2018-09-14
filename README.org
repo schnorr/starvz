@@ -59,6 +59,24 @@ Experience.
   Lucas Mello Schnorr, Luka Stanisic, Arnaud Legrand, Samuel Thibault,
   Vincent Danjean. Submitted to Wiley's CCPE. ([[https://hal.inria.fr/hal-01616632/][Draft of this paper]] and
   [[https://gitlab.in2p3.fr/schnorr/ccpe2017][Companion website]])
+** Docker container
+
+Please [[./Dockerfile][check this =DockerFile]]= to create a docker container with all the
+necessary requirements for a basic utilization of the starvz framework
+(in the form of an R package). Assuming that you have =docker= installed
+in your system, you may want to simply pull and run this container
+from Docker Hub, like this:
+
+#+begin_src shell :results output
+docker pull schnorr/starvz
+docker run -it schnorr/starvz
+#+end_src
+
+After entering the container, run R and load the =starvz= package with:
+
+#+begin_src R :results output :session :exports both
+library(starvz);
+#+end_src
 
 ** Contact
 

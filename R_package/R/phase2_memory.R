@@ -95,8 +95,6 @@ geom_events <- function (main_data = NULL, data = NULL, combined = FALSE, tstart
 
     dfl <- main_data$Link;
 
-    loginfo("Starting geom_events");
-
     col_pos_1 <- data.frame(Container=unique(dfl$Dest)) %>% tibble::rowid_to_column("Position");
 
     col_pos_2 <- data.frame(Container=unique(dfw$Container)) %>% tibble::rowid_to_column("Position")
@@ -105,7 +103,7 @@ geom_events <- function (main_data = NULL, data = NULL, combined = FALSE, tstart
       col_pos <- col_pos_1
     }else{
       col_pos <- col_pos_2
-      ret[[length(ret)+1]] <- scale_y_continuous(breaks = yconfm$Position+(yconfm$Height/3), labels=yconfm$Container, expand=c(pjr_value(pajer$expand, 0.05),0));
+      #ret[[length(ret)+1]] <- scale_y_continuous(breaks = yconfm$Position+(yconfm$Height/3), labels=yconfm$Container, expand=c(pjr_value(pajer$expand, 0.05),0));
     }
 
     col_pos[2] <- data.frame(lapply(col_pos[2], as.character), stringsAsFactors=FALSE);

@@ -661,7 +661,7 @@ tasks_csv_parser <- function (where = ".")
         loginfo(paste("Reading ", entities.feather));
         pm <- read_feather(entities.feather);
         loginfo(paste("Read of", entities.feather, "completed"));
-    }else if (file.exists(entities.csv)){
+    }else if (file.exists(entities.csv) & file.info(entities.csv)$size > 0){
         loginfo(paste("Reading ", entities.csv));
         pm <- read_csv(entities.csv,
                         trim_ws=TRUE,

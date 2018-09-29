@@ -57,8 +57,10 @@ Experience.
 - A Visual Performance Analysis Framework for Task-based Parallel
   Applications running on Hybrid Clusters. Vinicius Garcia Pinto,
   Lucas Mello Schnorr, Luka Stanisic, Arnaud Legrand, Samuel Thibault,
-  Vincent Danjean. Submitted to Wiley's CCPE. ([[https://hal.inria.fr/hal-01616632/][Draft of this paper]] and
-  [[https://gitlab.in2p3.fr/schnorr/ccpe2017][Companion website]])
+  Vincent Danjean. Concurrency and Computation: Practice and
+  Experience, Wiley, 2018, 30 (18), pp.1-31. ([[https://dx.doi.org/10.1002/cpe.4472][DOI]], [[https://hal.inria.fr/hal-01616632/][Draft of this paper]]
+  and [[https://gitlab.in2p3.fr/schnorr/ccpe2017][Companion website]])
+
 ** Docker container
 
 Please [[./Dockerfile][check this DockerFile]] to create a docker container with all the

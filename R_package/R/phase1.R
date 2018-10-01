@@ -142,6 +142,7 @@ read_state_csv <- function (where = ".",
                        grepl("trsm", .$Value) ~ "#377eb8",
                        grepl("syrk", .$Value) ~ "#984ea3",
                        grepl("gemm", .$Value) ~ "#4daf4a",
+		       grepl("plgsy", .$Value) ~ "yellow",
                        TRUE ~ .$Color));
     }
 
@@ -591,6 +592,7 @@ pmtools_states_csv_parser <- function (where = ".", whichApplication = NULL, Y =
                            Value=="dtrsm" ~ "#377eb8",
                            Value=="dsyrk" ~ "#984ea3",
                            Value=="dgemm" ~ "#4daf4a",
+                           Value=="dplgsy" ~ "yellow",
                            TRUE ~ "#000"));
         }
 
@@ -732,7 +734,7 @@ events_csv_parser <- function (where = ".")
                             Handle = col_character(),
                             Info = col_integer(),
                             Size = col_integer(),
-                            Tid = col_integer(),
+                            Tid = col_character(),
                             Src = col_character()
                         ));
         # sort the data by the start time
@@ -1149,8 +1151,8 @@ scalfmm_states <- function()
 cholesky_colors <- function()
 {
     tibble(
-        Kernel = c("potrf", "trsm", "syrk", "gemm"),
-        Color = c("#e41a1c", "#377eb8", "#984ea3", "#4daf4a"));
+        Kernel = c("potrf", "trsm", "syrk", "gemm", "plgsy"),
+        Color = c("#e41a1c", "#377eb8", "#984ea3", "#4daf4a", "yellow"));
 }
 
 cfd_colors <- function()
@@ -1175,18 +1177,22 @@ scalfmm_colors <- function()
 library(RColorBrewer);
 starpu_colors <- function()
 {
-    tibble(Value = starpu_states()) %>%
-        # Get colors from Set3
-        mutate(Color = brewer.pal(nrow(.), "Set3")) %>%
-        # Adopt Luka suggestion: Idle = orange; Sleeping = rose
-        mutate(Color = case_when(Value == "Idle" ~ "#FDB462",
-                                 Value == "PushingOutput" ~ "#BEBADA",
-                                 TRUE ~ Color)) -> t;
+  pre_colors <- brewer.pal(12, "Set3");
+  pre_colors[13] = "#000000"
+  pre_colors[14] = "#000000"
+  tibble(Value = starpu_states()) %>%
+      # Get colors from Set3
+      mutate(Color = pre_colors) %>%
+      # Adopt Luka suggestion: Idle = orange; Sleeping = rose
+      mutate(Color = case_when(Value == "Idle" ~ "#FDB462",
+                               Value == "PushingOutput" ~ "#BEBADA",
+                               TRUE ~ Color)) -> t;
     # Transform to a nice named list for ggplot
     ret <- t %>% pull(Color)
     names(ret) <- t %>% pull(Value);
     return(ret);
 }
+
 
 cholesky_pastix_colors <- function()
 {

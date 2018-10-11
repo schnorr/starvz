@@ -447,21 +447,20 @@ the_master_function <- function(data = NULL)
     if (pjr(pajer$usedmemory$active)){
         loginfo("Creating the Used Memory plot");
 
-        if ((dfv %>% filter(grepl("MEMMANAGER", ResourceId) & grepl("Used", Type)) %>% nrow) == 0){
+        if ((dfv %>% filter(grepl("Used", Type)) %>% nrow) == 0){
             logwarn("There aren't any information about Used Memory, ignoring it.");
             pajer$usedmemory$active <<- FALSE;
         }else{
           aggStep <- pjr_value(pajer$usedmemory$step, globalAggStep);
 
           goguv <- dfv %>%
-              filter(grepl("MEMMANAGER", ResourceId) & grepl("Used", Type)) %>%
+              filter(grepl("Used", Type)) %>%
               var_integration_segment_chart(step = aggStep) + tScale;
           if (!pjr(pajer$usedmemory$legend)){
               goguv <- goguv + theme(legend.position="none");
           }else{
               goguv <- goguv +
-                  theme(legend.position=c(.99,.8),
-                        legend.justification="right") +
+                  theme(legend.position = "top") +
                   guides(color = guide_legend(nrow = 1))
           }
           goguv <- userYLimit(goguv, pajer$usedmemory$limit, c(tstart, tend));

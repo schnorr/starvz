@@ -146,7 +146,7 @@ geom_states <- function (data = NULL, Show.Outliers = FALSE, StarPU = FALSE)
                                 xmin=Start,
                                 xmax=End,
                                 ymin=Position,
-                                ymax=Position+Height-0.4), alpha=ifelse(Show.Outliers && !StarPU, 0.5, 1.0));
+                                ymax=Position+Height-0.2), alpha=ifelse(Show.Outliers && !StarPU, 0.5, 1.0));
 
     # Add outliers conditionally
     if (Show.Outliers && !StarPU){
@@ -156,7 +156,7 @@ geom_states <- function (data = NULL, Show.Outliers = FALSE, StarPU = FALSE)
                           xmin=Start,
                           xmax=End,
                           ymin=Position,
-                          ymax=Position+Height-0.4), alpha=1);
+                          ymax=Position+Height-0.2), alpha=1);
     }
 
     loginfo("Finishing geom_states");

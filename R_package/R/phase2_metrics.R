@@ -289,11 +289,14 @@ geom_idleness <- function(data = NULL)
 
     globalEndTime <- dfidle %>% pull(End) %>% na.omit %>% max;
     ret <- NULL;
-    ret <- geom_text(data=dfidle,
+    ret <- geom_label(data=dfidle,
                      # The size of the idle values for each resource
                      size=bsize/idleness_factor,
                      # The X position of each one
-                     x=(-1) * globalEndTime/100*2.5, # 2.5% before 0.0
+                     x=0, # 2.5% before 0.0
+                     hjust=0,
+                     fill="white",
+                     fontface = "bold",
                      # The Y position (depends on the Resource, so use "aes"
                      aes(y=Position+(Height/2.5), # vertical
                          # The idleness number followed by % as text

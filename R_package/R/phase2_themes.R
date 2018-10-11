@@ -16,7 +16,17 @@ default_theme <- function()
         legend.box.margin = margin(0,0,0,0),
         legend.title = element_blank());
     ret[[length(ret)+1]] <- xlab("Time [ms]");
-    ret[[length(ret)+1]] <- scale_x_continuous(expand=c(pjr_value(pajer$expand, 0.05),0));
+    ret[[length(ret)+1]] <- scale_x_continuous(expand=c(pjr_value(pajer$expand, 0.05),0),
+                                              labels = function(x) format(x, big.mark = "",  scientific = FALSE));
+
+    if(pjr(pajer$vertical_lines$active)){
+      ret[[length(ret)+1]] <- geom_vline(xintercept=pajer$vertical_lines$x_list,
+                       linetype='longdash',
+                       size=1,
+                       colour=pajer$vertical_lines$color_list)
+
+    }
+
     return(ret);
 }
 

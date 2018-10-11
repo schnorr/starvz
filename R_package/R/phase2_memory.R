@@ -95,9 +95,9 @@ geom_events <- function (main_data = NULL, data = NULL, combined = FALSE, tstart
 
     dfl <- main_data$Link;
 
-    col_pos_1 <- data.frame(Container=unique(dfl$Dest)) %>% tibble::rowid_to_column("Position");
+    col_pos_1 <- data.frame(Container=unique(dfl$Dest)) %>% arrange(Container) %>% tibble::rowid_to_column("Position");
 
-    col_pos_2 <- data.frame(Container=unique(dfw$Container)) %>% tibble::rowid_to_column("Position")
+    col_pos_2 <- data.frame(Container=unique(dfw$Container)) %>% arrange(Container) %>% tibble::rowid_to_column("Position")
 
     if(nrow(col_pos_1)>nrow(col_pos_2)){
       col_pos <- col_pos_1
@@ -120,7 +120,7 @@ geom_events <- function (main_data = NULL, data = NULL, combined = FALSE, tstart
 
     # Y axis breaks and their labels
     # Hardcoded here because yconf is specific to Resources Workers
-    yconfm <- dfw %>% ungroup %>%
+    yconfm <- dfw %>% unnest() %>% ungroup %>%
         select(Container, Position, Height) %>%
         distinct() %>%
         group_by(Container) %>%
@@ -132,7 +132,9 @@ geom_events <- function (main_data = NULL, data = NULL, combined = FALSE, tstart
     #dfw$Height = pjr_value(pajer$memory$state$height, 2);
 
 
-    yconfm$Container <- lapply(yconfm$Container, function(x) gsub("MEMMANAGER", "MM", x));
+    #yconfm$Container <- lapply(yconfm$Container, function(x) gsub("MEMMANAGER", "MM", x));
+    #yconfm$Container <- c("RAM", "GPU1", "GPU2", "DISK")
+    yconfm <- yconfm %>% unnest() %>% arrange(Container)
 
     if(!combined){
       ret[[length(ret)+1]] <- scale_y_continuous(breaks = yconfm$Position+(yconfm$Height/3), labels=yconfm$Container, expand=c(pjr_value(pajer$expand, 0.05),0));
@@ -141,7 +143,7 @@ geom_events <- function (main_data = NULL, data = NULL, combined = FALSE, tstart
     }
 
     # Y label
-    ret[[length(ret)+1]] <- ylab("Memory State");
+    ret[[length(ret)+1]] <- ylab("Mem Managers");
 
 
     border <- 0
@@ -149,13 +151,22 @@ geom_events <- function (main_data = NULL, data = NULL, combined = FALSE, tstart
         border <- 1
     }
     # Add states
-    ret[[length(ret)+1]] <- geom_rect(data=dfw, aes(fill=Type, xmin=Start, xmax=End, ymin=Position, ymax=Position+(2.0-0.4-Height)), color= "black", linetype=border, size=0.4, alpha=0.5);
+    ret[[length(ret)+1]] <- geom_rect(data=dfw, aes(fill=Type, xmin=Start, xmax=End, ymin=Position, ymax=Position+(2.0-0.2-Height)), color= "black", linetype=border, size=0.4, alpha=0.5);
 
-    dx <- dfw %>% filter(Type == "Allocating")
+
 
     if(pjr(pajer$memory$state$text)){
-      ret[[length(ret)+1]] <- geom_text(data=dx, colour = "black", fontface = "bold", aes(x = Start+Duration/2, y = Position+(2.0-0.4-Height)/2, angle=90, label=substr(Handle, start = 6, stop = 12)), size = 3, alpha=1.0, show.legend = FALSE);
+
+	dx <- dfw %>% filter(Type == "Allocating") %>%
+                  left_join(main_data$data_handles, by=c("Handle"="Handle") ) %>%
+                  select(-Tid, -Src, -Value)
+	dx$Coordinates <- gsub(" ", "x", dx$Coordinates)
+
+      ret[[length(ret)+1]] <- geom_text(data=dx, colour = "black", fontface = "bold", aes(x = Start+Duration/2, y = Position+(2.0-0.2-Height)/2, label=Coordinates), size = 5, alpha=1.0, show.legend = FALSE);
     }
+
+    ret[[length(ret)+1]] <- theme (
+            legend.spacing.x = unit(2, 'mm'))
 
     if(pjr(pajer$memory$state$total)){
       select <- pjr_value(pajer$memory$state$select, "Allocating");
@@ -175,7 +186,7 @@ geom_events <- function (main_data = NULL, data = NULL, combined = FALSE, tstart
           ms$Value <- select;
           globalEndTime <- tend - (tend-tstart) * 0.05;
           ms$percent_time <- paste0(ms$percent_time, "%");
-          ret[[length(ret)+1]] <- geom_label(data=ms, x = globalEndTime, colour = "black", fontface = "bold", aes(y = Position+0.3, label=percent_time, fill = Value), alpha=1.0, show.legend = FALSE);
+          ret[[length(ret)+1]] <- geom_label(data=ms, x = globalEndTime, colour = "black", fontface = "bold", aes(y = Position+0.4, label=percent_time, fill = Value), alpha=1.0, show.legend = FALSE, size = 5);
       }
     }
 
@@ -196,15 +207,17 @@ geom_memory <- function (data = NULL, combined = FALSE, tstart=NULL, tend=NULL)
 
     loginfo("Starting geom_memory");
 
-    col_pos_1 <- data.frame(ResourceId=unique(dfl$Dest)) %>% tibble::rowid_to_column("Position");
+    col_pos_1 <- data.frame(ResourceId=unique(dfl$Dest)) %>% arrange(ResourceId) %>% tibble::rowid_to_column("Position");
 
-    col_pos_2 <- data.frame(ResourceId=unique(dfw$ResourceId)) %>% tibble::rowid_to_column("Position")
+    col_pos_2 <- data.frame(ResourceId=unique(dfw$ResourceId)) %>% arrange(ResourceId) %>% tibble::rowid_to_column("Position")
 
     nrow(ms) != 0
 
     col_pos[2] <- data.frame(lapply(col_pos[2], as.character), stringsAsFactors=FALSE);
     dfw <- dfw %>% select(-Position) %>% left_join(col_pos, by=c("ResourceId" = "ResourceId"))
     ret <- list();
+
+    print(dfw)
 
     # Color mapping
     #ret[[length(ret)+1]] <- scale_fill_manual(values = extract_colors(dfw));
@@ -288,8 +301,10 @@ geom_links <- function (data = NULL, combined = FALSE, tstart=NULL, tend=NULL)
 
     loginfo("Starting geom_links");
 
-    col_pos <- as.tibble(data.frame(ResourceId=unique(dfl$Dest)) %>% tibble::rowid_to_column("Position"));
+    col_pos <- as.tibble(data.frame(ResourceId=unique(dfl$Dest)) %>% arrange(ResourceId) %>% tibble::rowid_to_column("Position"));
     col_pos[2] <- data.frame(lapply(col_pos[2], as.character), stringsAsFactors=FALSE);
+
+    print(col_pos)
 
     if(combined){
       col_pos$Position = col_pos$Position * pjr_value(pajer$memory$state$height, 1);;
@@ -306,18 +321,18 @@ geom_links <- function (data = NULL, combined = FALSE, tstart=NULL, tend=NULL)
     dfl$Height <- 1;
 
     yconfm <- dfl %>%
-        select(Dest, D_Position, Height) %>%
+        select(Origin, O_Position, Height) %>%
         distinct() %>%
-        group_by(Dest) %>%
-        arrange(Dest) %>%
+        group_by(Origin) %>%
+        arrange(Origin) %>%
         ungroup;
 
     yconfm$Height <- 1;
-    yconfm$Dest <- lapply(yconfm$Dest, function(x) gsub("MEMMANAGER", "MM", x));
+    yconfm$Origin <- lapply(yconfm$Origin, function(x) gsub("MEMMANAGER", "MM", x));
 
     if(combined){
       stride = stride*pjr_value(pajer$memory$state$height, 1);
-      ret[[length(ret)+1]] <- scale_y_continuous(breaks = yconfm$D_Position, labels=yconfm$Dest, expand=c(0.10, 0.1));
+      ret[[length(ret)+1]] <- scale_y_continuous(breaks = yconfm$O_Position, labels=yconfm$Origin, expand=c(0.10, 0.1));
       stride <- 0.0;
     }
 

@@ -162,7 +162,7 @@ geom_events <- function (main_data = NULL, data = NULL, combined = FALSE, tstart
                   select(-Tid, -Src, -Value)
 	dx$Coordinates <- gsub(" ", "x", dx$Coordinates)
 
-      ret[[length(ret)+1]] <- geom_text(data=dx, colour = "black", fontface = "bold", aes(x = Start+Duration/2, y = Position+(2.0-0.2-Height)/2, label=Coordinates), size = 5, alpha=1.0, show.legend = FALSE);
+      ret[[length(ret)+1]] <- geom_text(data=dx, colour = "black", fontface = "bold", aes(x = Start+Duration/2, y = Position+(2.0-0.2-Height)/2, label=Coordinates), size = 5, alpha=1.0, angle=pjr_value(pajer$memory$state$angle, 90), show.legend = FALSE);
     }
 
     ret[[length(ret)+1]] <- theme (

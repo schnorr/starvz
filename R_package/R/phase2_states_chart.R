@@ -288,7 +288,7 @@ geom_path_highlight <- function (paths = NULL)
                                           xmin=Start,
                                           xmax=End,
                                           ymin=Position,
-                                          ymax=Position+Height-0.4), alpha=0);
+                                          ymax=Position+Height-0.2), alpha=0);
 
     # let's draw lines connecting tasks in the path
 

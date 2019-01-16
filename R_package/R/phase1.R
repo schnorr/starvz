@@ -117,18 +117,40 @@ read_state_csv <- function (where = ".",
 
     loginfo("Define colors is starting right now.");
 
-    # Define colors
-    dfcolors <- dfw %>%
-        select(Value) %>%
-        unique %>%
-        mutate(Value = as.character(Value), Color = NA) %>%
-        rbind(app_states_fun() %>% rename(Value = Kernel)) %>%
-        arrange(Value, Color) %>%
-        mutate(Color = na.locf(Color, na.rm=FALSE)) %>%
-        unique;
+    # In case application is not specified
+    if(whichApplication==""){
+      # Get only application states
+      dfcolors <- dfw %>% filter(Application == TRUE) %>%
+          select(Value) %>%
+          unique()
 
-    loginfo("Colors data.frame is defined.");
+      # Get the number of states to generate colors
+      nc <- dfcolors %>% nrow()
 
+      # TODO: Using set1 right now to generate colors, max of 9 states
+      c <- brewer.pal(n = nc, name = "Set1")
+
+      # Match States and Colors
+      dfcolors <- dfcolors %>% mutate(Color = c) %>%
+          arrange(Value, Color) %>%
+          mutate(Color = na.locf(Color, na.rm=FALSE)) %>%
+          unique;
+
+    }else{
+
+      # Define colors
+      dfcolors <- dfw %>%
+          select(Value) %>%
+          unique %>%
+          mutate(Value = as.character(Value), Color = NA) %>%
+          rbind(app_states_fun() %>% rename(Value = Kernel)) %>%
+          arrange(Value, Color) %>%
+          mutate(Color = na.locf(Color, na.rm=FALSE)) %>%
+          unique;
+
+      loginfo("Colors data.frame is defined.");
+    }
+    # Apply
     dfw <- dfw %>% left_join(dfcolors, by="Value");
 
     loginfo("Left joining the colors has completed.");
@@ -1212,14 +1234,14 @@ cholesky_pastix_colors <- function()
 qrmumps_states_level_order <- function ()
 {
     c(
-        "Do_subtree", 
-        "INIT", 
-        "GEQRT", 
+        "Do_subtree",
+        "INIT",
+        "GEQRT",
         "GEMQRT",
         "TPQRT",
-        "TPMQRT", 
-        "ASM", 
-        "CLEAN", 
+        "TPMQRT",
+        "ASM",
+        "CLEAN",
         "Idle");
 }
 qrmumps_states <- function ()
@@ -1228,9 +1250,9 @@ qrmumps_states <- function ()
         "ASM",
         "GEMQRT",
         "Do_subtree",
-        "CLEAN", 
-        "GEQRT", 
-        "INIT", 
+        "CLEAN",
+        "GEQRT",
+        "INIT",
         "TPMQRT",
         "TPQRT",
         "Idle");

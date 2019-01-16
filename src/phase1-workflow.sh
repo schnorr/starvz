@@ -1,7 +1,7 @@
 #!/bin/bash
 
 DIR=$(pwd)/$(dirname $0)
-
+export PATH="$PATH:$DIR"
 #
 # This script gets a directory with FXT files as input
 #

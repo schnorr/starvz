@@ -74,7 +74,7 @@ if [ -x "$(command -v rec2csv)" ]; then
   rec2csv tasks.rec | sed 's/"//g' > $TASKSCSV
 else
   # TODO: Read this files without the rec2csv tool?
-  echo "The library recutils is required to read the data.rec and tasks.rec files, skipping this step."
+  echo "WARN: The library recutils is required to read the data.rec and tasks.rec files, skipping this step."
 fi
 
 rm -f activity.data distrib.data trace.html tasks.rec data.rec trace.rec
@@ -82,6 +82,10 @@ rm -f activity.data distrib.data trace.html tasks.rec data.rec trace.rec
 echo "Convert from paje.sorted.trace to paje.csv"
 date
 
+if [ ! -x "$(command -v pj_dump)" ]; then
+  echo "ERROR: pj_dump is not installed, please install PajeNG or configure PATH"
+  exit 1
+fi
 pj_dump -o -n --user-defined --entity-hierarchy=entities.csv --type-hierarchy=types.csv "paje.sorted.trace" > paje.csv
 rm -f paje.sorted.trace
 

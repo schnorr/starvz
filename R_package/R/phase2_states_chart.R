@@ -92,11 +92,11 @@ k_chart <- function (dfw = NULL)
         scale_fill_manual(values = choleskyColors) +
         theme_bw(base_size=12) +
         xlab("Time [ms]") +
-        ylab("Cholesky\nIteration") +
+        ylab("Iteration") +
         default_theme() +
         # Keep the alpha = 1 even if we use an alpha below
         guides(fill = guide_legend(override.aes = list(alpha=1))) +
-        scale_y_reverse() +
+        scale_y_reverse(breaks = function(x) unique(floor(pretty(seq(0, (max(x) + 1) * 1.1))))) +
         # The start border
         geom_curve(data=dfborders, aes(x=Start, xend=StartB, y=Iteration+height-height/2, yend=IterationB+height-height/2), curvature=0.1, angle=20) +
         # The end border

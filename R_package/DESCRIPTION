@@ -18,6 +18,7 @@ Description: StarVZ consists in a performance analysis workflow that combines
 Depends: R (>= 3.1.0),
     ggplot2,
     gridExtra,
+    config,
     lpSolve,
     pipeR,
     RColorBrewer,

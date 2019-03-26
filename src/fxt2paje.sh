@@ -19,7 +19,14 @@ function usage()
 FXTS=$(ls -1 prof_file_* | sort --version-sort)
 
 # call the conversion
-starpu_fxt_tool $(echo $FXTS | sed -e "s/ / -i /g" -e "s/^/-i /")
+starpu_fxt_tool -memory-states $(echo $FXTS | sed -e "s/ / -i /g" -e "s/^/-i /")
+
+POTI="false"
+
+if ldd $(which starpu_fxt_tool) | grep -q "poti"; then
+  POTI="true"
+fi
 
 # sort the file
-paje_sort.sh true paje.trace > paje.sorted.trace
+paje_sort.sh $POTI paje.trace > paje.sorted.trace
+

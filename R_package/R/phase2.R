@@ -367,7 +367,11 @@ the_master_function <- function(data = NULL)
         goijk <- k_chart(dfw) + tScale;
 
         if (!pjr(pajer$kiteration$legend)){
-            goijk <- goijk + theme(legend.position="none");
+            goijk <- goijk +
+                     theme(legend.position="none")
+        }else{
+             goijk <- goijk +
+                      theme(legend.spacing.x = unit(0.2, 'cm'))
         }
     }
 

@@ -440,11 +440,12 @@ the_reader_function <- function (directory = ".", app_states_fun = NULL, state_f
                  pmtool=dpmtb, pmtool_states=dpmts, data_handles=ddh, tasks=dtasks$tasks, task_handles=dtasks$handles, Events=devents);
 
     # Calculate the GAPS from the DAG
-    if (whichApplication == "cholesky"){
-        data$Gaps <- gaps(data);
-    }else{
-        data$Gaps <- NULL;
-    }
+    #if (whichApplication == "cholesky"){
+    loginfo("Call Gaps.");
+    data$Gaps <- gaps(data);
+    #}else{
+    #    data$Gaps <- NULL;
+    #}
 
     return(data);
 }
@@ -1048,7 +1049,8 @@ read_links <- function (where = ".")
                             Size = col_integer(),
                             Origin = col_character(),
                             Dest = col_character(),
-                            Key = col_character()
+                            Key = col_character(),
+                            Tag = col_character()
                         ));
         loginfo(paste("Read of", link.csv, "completed"));
     }else{

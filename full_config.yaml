@@ -11,7 +11,7 @@ default:
     height: 0.6 # Title Size
   vanilla: # Options about X and Y axis title and values
     vertical: FALSE # If True, Remove Y axis' title and values
-    horizontal: TRUE # If False, Remove X axis' title and values
+    horizontal: FALSE  # If True, Remove X axis' title and values
   limits: # Set the time limits used
     start: 0 # Initial Time
     #end: 10000 # Final Time
@@ -51,7 +51,7 @@ default:
     tasks: # Shows Tasks Dependencies
       active: FALSE # Enable
       levels: 10 # Max Number of Dependencies
-      list: ["19666"] # List of Tasks Ids
+      list: ["600"] # List of Tasks Ids
 
   pmtool: # Create plots based on pmtool generated data
     bounds: # Shows pmtool theoretical bounds
@@ -104,7 +104,7 @@ default:
     threshold:
 
   usedmemory:
-    active: FALSE
+    active: TRUE
     height:
     legends:
 

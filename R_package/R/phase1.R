@@ -427,6 +427,9 @@ the_reader_function <- function (directory = ".", app_states_fun = NULL, state_f
 
     # Data.rec
     ddh <- data_handles_csv_parser (where = directory);
+    
+    # Papi.rec
+    dpapi <- papi_csv_parser (where = directory);
 
     # Tasks.rec
     dtasks <- tasks_csv_parser (where = directory);
@@ -437,7 +440,7 @@ the_reader_function <- function (directory = ".", app_states_fun = NULL, state_f
     devents <- events_csv_parser (where = directory);
 
     data <- list(Origin=directory, State=dfw, Variable=dfv, Link=dfl, DAG=dfdag, Y=dfhie, ATree=dfa,
-                 pmtool=dpmtb, pmtool_states=dpmts, data_handles=ddh, tasks=dtasks$tasks, task_handles=dtasks$handles, Events=devents);
+                 pmtool=dpmtb, pmtool_states=dpmts, data_handles=ddh, papi=dpapi, tasks=dtasks$tasks, task_handles=dtasks$handles, Events=devents);
 
     # Calculate the GAPS from the DAG
     #if (whichApplication == "cholesky"){
@@ -651,6 +654,34 @@ data_handles_csv_parser <- function (where = ".")
 
         # Not supported in feather
         # pm$Coordinates <- lapply(strsplit(pm$Coordinates, " "), as.integer);
+        loginfo(paste("Read of", entities.csv, "completed"));
+    }else{
+        loginfo(paste("Files", entities.feather, "or", entities.csv, "do not exist."));
+        return(NULL);
+    }
+    ret <- pm;
+
+    return(ret);
+}
+
+papi_csv_parser <- function (where = ".")
+{
+    entities.feather = paste0(where, "/papi.feather");
+    entities.csv = paste0(where, "/rec.papi.csv");
+
+    if (file.exists(entities.feather)){
+        loginfo(paste("Reading ", entities.feather));
+        pm <- read_feather(entities.feather);
+        loginfo(paste("Read of", entities.feather, "completed"));
+    }else if (file.exists(entities.csv)){
+        loginfo(paste("Reading ", entities.csv));
+        pm <- read_csv(entities.csv,
+                        trim_ws=TRUE,
+                        col_types=cols(
+                            JobId = col_character(),
+                            PapiEvent = col_character(),
+                            Value = col_integer()
+                        ));
         loginfo(paste("Read of", entities.csv, "completed"));
     }else{
         loginfo(paste("Files", entities.feather, "or", entities.csv, "do not exist."));

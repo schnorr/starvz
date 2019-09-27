@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DIR=$(pwd)/$(dirname $0)
+DIR=$(dirname $0)
 export PATH="$PATH:$DIR"
 #
 # This script gets a directory with FXT files as input
@@ -72,12 +72,17 @@ if [ -x "$(command -v rec2csv)" ]; then
 
   TASKSCSV="rec.tasks.csv"
   rec2csv tasks.rec | sed 's/"//g' > $TASKSCSV
+  PAPIFILE="papi.rec"
+  if [ -f "$PAPIFILE" ]; then
+    PAPICSV="rec.papi.csv"
+    rec2csv $PAPIFILE | sed 's/"//g' > $PAPICSV
+  fi
 else
   # TODO: Read this files without the rec2csv tool?
   echo "WARN: The library recutils is required to read the data.rec and tasks.rec files, skipping this step."
 fi
 
-rm -f activity.data distrib.data trace.html tasks.rec data.rec trace.rec
+rm -f activity.data distrib.data trace.html tasks.rec papi.rec data.rec trace.rec
 
 echo "Convert from paje.sorted.trace to paje.csv"
 date
@@ -132,7 +137,7 @@ fi
 
 echo "Post-processing CSV files"
 ${DIR}/../R/phase1-workflow.R . ${APPLICATION}
-#rm -f atree.csv dag.csv entities.csv paje.link.csv paje.state.csv paje.variable.csv types.csv
+rm -f atree.csv dag.csv entities.csv paje.link.csv paje.state.csv paje.variable.csv types.csv
 
 echo
 echo "End of $CASE"

@@ -168,4 +168,12 @@ if (!is.null(data$Events)){
     loginfo(paste("Data for", filename, "has not been feathered because is empty."));
 }
 
+filename <- "pre.papi.feather";
+loginfo(filename);
+if (!is.null(data$papi)){
+    write_feather(data$papi, filename);
+}else{
+    loginfo(paste("Data for", filename, "has not been feathered because is empty."));
+}
+
 loginfo("Pre-process finished correctly.");

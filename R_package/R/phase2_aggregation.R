@@ -164,7 +164,9 @@ geom_aggregated_states <- function (data = NULL, Show.Outliers = FALSE, min_time
         separate(ResourceId, into=c("Node", "Resource"), remove=FALSE) %>%
         mutate(Node = as.factor(Node)) %>%
         mutate(ResourceType = as.factor(gsub('[[:digit:]]+', '', Resource))) -> ydf;
-
+    
+    Colors <- data$State %>% select(Value, Color) %>% distinct()
+    
     # Do the aggregation
     data$State %>%
         filter(Application == TRUE) %>%
@@ -174,12 +176,7 @@ geom_aggregated_states <- function (data = NULL, Show.Outliers = FALSE, min_time
             ydf %>% select(ResourceId, Resource, Node, ResourceType, Height, Position),
             by=c("ResourceId" = "ResourceId")
         ) %>%
-        mutate(Color = case_when(
-                   grepl("potrf", Value) ~ "#e41a1c",
-                   grepl("trsm", Value) ~ "#377eb8",
-                   grepl("syrk", Value) ~ "#984ea3",
-                   grepl("gemm", Value) ~ "#4daf4a",
-                   TRUE ~ "unspecified")) -> dfw;
+        left_join(Colors, by=c("Value")) -> dfw;
 
     # The list of geoms
     ret <- list();

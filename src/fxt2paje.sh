@@ -20,6 +20,12 @@ FXTS=$(ls -1 prof_file_* | sort --version-sort)
 
 # call the conversion
 starpu_fxt_tool -memory-states $(echo $FXTS | sed -e "s/ / -i /g" -e "s/^/-i /")
+es=$?
+if [ $es -ne 0 ]
+then
+    echo "Error when executing starpu_fxt_tool (exit status: $es)"
+    exit 2
+fi
 
 POTI="false"
 

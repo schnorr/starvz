@@ -34,6 +34,12 @@ echo "Convert from FXT to paje.sorted.trace"
 date
 
 fxt2paje.sh
+es=$?
+if [ $es -ne 0 ]
+then
+    echo "ERROR: conversion from FXT failed! (exit status: $es)"
+    exit 1
+fi
 rm -f paje.trace
 
 # Put Lionel's pmtool to get bounds to enrich the visualization
@@ -92,6 +98,12 @@ if [ ! -x "$(command -v pj_dump)" ]; then
   exit 1
 fi
 pj_dump -o -n --user-defined --entity-hierarchy=entities.csv --type-hierarchy=types.csv "paje.sorted.trace" > paje.csv
+es=$?
+if [ $es -ne 0 ]
+then
+    echo "Error when executing pj_dump (exit status: $es)"
+    exit 1
+fi
 rm -f paje.sorted.trace
 
 echo "Get states, links and variables in CSV"
@@ -137,6 +149,12 @@ fi
 
 echo "Post-processing CSV files"
 ${DIR}/../R/phase1-workflow.R . ${APPLICATION}
+es=$?
+if [ $es -ne 0 ]
+then
+    echo "Error when executing phase1-workflow.R (exit status: $es)"
+    exit 2
+fi
 rm -f atree.csv dag.csv entities.csv paje.link.csv paje.state.csv paje.variable.csv types.csv
 
 echo

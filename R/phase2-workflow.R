@@ -1,6 +1,6 @@
 #!/usr/bin/Rscript
 
-library(starvz)
+suppressMessages(library(starvz))
 
 args = commandArgs(trailingOnly=TRUE)
 if (length(args) < 2) {

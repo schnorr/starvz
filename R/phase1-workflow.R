@@ -7,7 +7,7 @@ library(starvz)
 ##############################
 usage <- function ()
 {
-    stop("Usage: pre-workflow.R <directory> [application](optional)\n   where <directory> contains CSV files of the workflow;\n   where [application](optional) is either cholesky or qrmumps.", call.=FALSE)
+    stop("Usage: ", basename(commandArgs()[4]), " <directory> [application](optional)\n   where <directory> contains CSV files of the workflow;\n   where [application](optional) is either cholesky or qrmumps.", call.=FALSE)
 }
 
 # Get the arguments to this script

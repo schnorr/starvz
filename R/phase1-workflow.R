@@ -40,6 +40,9 @@ if (input.application == "cholesky"){
 }else if (input.application == "cfd") {
     states.fun = cfd_colors;
     states.filter = 1;
+}else if (input.application == "lu") {
+    states.fun = lu_colors;
+    states.filter = 2;
 }else if (input.application == "") {
     states.fun = cfd_colors;
     states.filter = 0;

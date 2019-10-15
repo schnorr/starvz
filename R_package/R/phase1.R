@@ -164,7 +164,18 @@ read_state_csv <- function (where = ".",
                        grepl("trsm", .$Value) ~ "#377eb8",
                        grepl("syrk", .$Value) ~ "#984ea3",
                        grepl("gemm", .$Value) ~ "#4daf4a",
-		       grepl("plgsy", .$Value) ~ "yellow",
+		                   grepl("plgsy", .$Value) ~ "yellow",
+                       TRUE ~ .$Color));
+    }
+
+    if (whichApplication == "lu"){
+        loginfo("This is a lu application, colors are hard-coded");
+        dfw <- dfw %>%
+            mutate(Color = case_when(
+                       grepl("getrf", .$Value) ~ "#e41a1c",
+                       grepl("trsm", .$Value) ~ "#377eb8",
+                       grepl("gemm", .$Value) ~ "#4daf4a",
+                       grepl("plgsy", .$Value) ~ "yellow",
                        TRUE ~ .$Color));
     }
 
@@ -427,7 +438,7 @@ the_reader_function <- function (directory = ".", app_states_fun = NULL, state_f
 
     # Data.rec
     ddh <- data_handles_csv_parser (where = directory);
-    
+
     # Papi.rec
     dpapi <- papi_csv_parser (where = directory);
 
@@ -1203,6 +1214,13 @@ scalfmm_states <- function()
 {
     scalfmm_colors() %>% .$Kernel;
 }
+lu_colors <- function()
+{
+    tibble(
+        Kernel = c("getrf", "trsm", "gemm", "plgsy"),
+        Color = c("#e41a1c", "#377eb8", "#4daf4a", "yellow"));
+}
+
 cholesky_colors <- function()
 {
     tibble(

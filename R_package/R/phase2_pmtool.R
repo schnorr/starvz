@@ -139,6 +139,16 @@ geom_pmtool_bounds <- function(data = NULL)
     minHeight = dftemp %>% pull(Height) %>% min;
     maxPos = dftemp %>% pull(Position) %>% max + minHeight/2;
 
+    # Filter
+    dfwapp = dfw %>%
+        # Considering only application data
+        filter(Application == TRUE) %>%
+        # Considering only Worker State
+        filter(Type == "Worker State");
+
+    # Obtain time interval
+    tstart <- dfwapp %>% .$Start %>% min;
+
     data$pmtool %>%
       mutate(MinPosition = minPos,
             MaxPosition = maxPos) -> df.pmtool;

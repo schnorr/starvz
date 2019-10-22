@@ -140,7 +140,7 @@ geom_pmtool_bounds <- function(data = NULL)
     maxPos = dftemp %>% pull(Position) %>% max + minHeight/2;
 
     # Filter
-    dfwapp = dfw %>%
+    dfwapp = data$State %>%
         # Considering only application data
         filter(Application == TRUE) %>%
         # Considering only Worker State

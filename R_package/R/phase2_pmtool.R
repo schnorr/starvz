@@ -25,7 +25,7 @@ state_pmtool_chart <- function (data = NULL)
 
     #if (pjr(pajer$st$abe$active)) gow = gow + geom_abe(data);
 
-    #if (pjr(pajer$pmtool$bounds$active)) gow = gow + geom_pmtools_bounds(data);
+    #if (pjr(pajer$pmtool$bounds$active)) gow = gow + geom_pmtool_bounds(data);
 
     # add makespan
     if (pjr(pajer$st$makespan)) gow = gow + geom_makespan_pmtool(data);
@@ -126,9 +126,9 @@ geom_pmtool_states <- function (data = NULL)
 }
 
 
-geom_pmtools_bounds <- function(data = NULL)
+geom_pmtool_bounds <- function(data = NULL)
 {
-    if (is.null(data)) stop("data is NULL when given to geom_pmtools_bounds");
+    if (is.null(data)) stop("data is NULL when given to geom_pmtool_bounds");
 
     dftemp <- data$State %>%
         filter(Application == TRUE) %>%

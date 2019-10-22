@@ -29,7 +29,7 @@ state_chart <- function (data = NULL, globalEndTime = NULL, ST.Outliers = TRUE, 
         if (pjr(pajer$st$abe$active)) gow = gow + geom_abe(data);
 
         # add pmtool bound
-        if (pjr(pajer$pmtool$bounds$active)) gow = gow + geom_pmtools_bounds(data);
+        if (pjr(pajer$pmtool$bounds$active)) gow = gow + geom_pmtool_bounds(data);
 
         # add makespan
         if (pjr(pajer$st$makespan)) gow = gow + geom_makespan(data);

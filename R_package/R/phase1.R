@@ -431,10 +431,10 @@ the_reader_function <- function (directory = ".", app_states_fun = NULL, state_f
     # Read entities.csv and register the hierarchy (with Y coordinates)
     dfhie <- hl_y_paje_tree (where = directory);
 
-    # PMTools information
-    dpmtb <- pmtools_bounds_csv_parser (where = directory);
+    # PMTool information
+    dpmtb <- pmtool_bounds_csv_parser (where = directory);
 
-    dpmts <- pmtools_states_csv_parser (where = directory, whichApplication = whichApplication, Y=dfhie, States = dfw);
+    dpmts <- pmtool_states_csv_parser (where = directory, whichApplication = whichApplication, Y=dfhie, States = dfw);
 
     # Data.rec
     ddh <- data_handles_csv_parser (where = directory);
@@ -515,7 +515,7 @@ hl_y_paje_tree <- function (where = ".")
     return(workertreedf);
 }
 
-pmtools_bounds_csv_parser <- function (where = ".")
+pmtool_bounds_csv_parser <- function (where = ".")
 {
     entities.feather = paste0(where, "/pmtool.feather");
     entities.csv = paste0(where, "/pmtool.csv");
@@ -532,7 +532,7 @@ pmtools_bounds_csv_parser <- function (where = ".")
                             Alg = col_character(),
                             Time = col_double()
                         ));
-        # pmtools gives time in microsecounds
+        # pmtool gives time in microsecounds
         pm[[2]] <- pm[[2]]/1000
         loginfo(paste("Read of", entities.csv, "completed"));
     }else{
@@ -543,7 +543,7 @@ pmtools_bounds_csv_parser <- function (where = ".")
     return(ret);
 }
 
-pmtools_states_csv_parser <- function (where = ".", whichApplication = NULL, Y = NULL, States = NULL)
+pmtool_states_csv_parser <- function (where = ".", whichApplication = NULL, Y = NULL, States = NULL)
 {
     entities.feather = paste0(where, "/pmtool_states.feather");
     entities.csv = paste0(where, "/pmtool_states.csv");
@@ -569,7 +569,7 @@ pmtools_states_csv_parser <- function (where = ".", whichApplication = NULL, Y =
                             duration = col_double(),
                             end = col_double()
                         ));
-        #pmtools states gives time in milisecounds
+        #pmtool states gives time in milisecounds
 
         pm[[6]] <- pm[[6]]/1000
         pm[[7]] <- pm[[7]]/1000

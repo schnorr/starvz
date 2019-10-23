@@ -155,17 +155,13 @@ geom_pmtool_bounds <- function(data = NULL)
 
     bsize = pjr_value(pajer$base_size, 22)/5;
 
-    for(i in 1:nrow(df.pmtool)) {
-      bound <- df.pmtool[i,];
-      if (!is.null(bound)){
-          ret <- list(
-              geom_segment(data=bound, aes(x = Time+tstart, xend=Time+tstart, y = MinPosition, yend=MaxPosition), size=5, alpha=.7, color="gray"),
-              geom_text (data=bound, aes(x = Time+tstart, y = MinPosition+(MaxPosition-MinPosition)/2, label=paste0(ifelse(pjr_value(pajer$pmtool$bounds$label, TRUE), paste0(Alg, ": "), ""), round(Time, 0))), angle=90, color="black", size=bsize)
-          );
-          return(ret);
-      }
-    }
-    return(list());
+    bound <- df.pmtool %>% filter(!is.na(Time)) %>% mutate(Label=pjr_value(pajer$pmtool$bounds$label, TRUE)) %>% mutate(Label=ifelse(Label, paste0(Alg, ": ", round(Time, 0)), round(Time, 0))) %>% unique %>% filter(Alg %in% pajer$pmtool$bounds$alg)
+        
+    ret <- list(geom_segment(data=bound, aes(x = Time+tstart, xend=Time+tstart, y = MinPosition, yend=MaxPosition), size=5, alpha=.7, color="gray"),
+                geom_text (data=bound, aes(x = Time+tstart, y = MinPosition+(MaxPosition-MinPosition)/2, label=Label), angle=90, color="black", size=bsize))
+
+    return(ret);
+
 }
 
 geom_makespan_pmtool <- function(data = NULL)

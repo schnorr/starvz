@@ -57,7 +57,7 @@ default:
     bounds: # Shows pmtool theoretical bounds
       active: TRUE # Enable
       label: TRUE # Bound name
-      alg: "area" # TODO
+      alg: ["area", "cp"] # List of bounds to plot
     state: # PMtool State Chart theoretical computed by shedule
       active: TRUE # Enable
       height: 4 # Vertical Size in the final visualization

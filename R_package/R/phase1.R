@@ -207,15 +207,17 @@ read_state_csv <- function (where = ".",
     dfw <- dfw %>% filter(Start >= 0);
 
     # The problem is that Vinicius traces do not have "Iteration" column
-    # We need to create it based on the Tag
-    if (dfw %>% filter(Application == TRUE) %>% slice(1) %>% .$Iteration %>% is.na){
-        dfw <- dfw %>%
-            mutate(Iteration = case_when(
-                       grepl("potrf", .$Value) ~ as.integer(paste0("0x", substr(.$Tag, 14, 16))),
-                       grepl("trsm", .$Value) ~ as.integer(paste0("0x", substr(.$Tag, 11, 13))),
-                       grepl("syrk", .$Value) ~ as.integer(paste0("0x", substr(.$Tag, 8, 10))),
-                       grepl("gemm", .$Value) ~ as.integer(paste0("0x", substr(.$Tag, 8, 10))),
-                       TRUE ~ as.integer(-10)));
+    if (whichApplication == "cholesky"){
+        # We need to create it based on the Tag
+        if (dfw %>% filter(Application == TRUE) %>% slice(1) %>% .$Iteration %>% is.na){
+            dfw <- dfw %>%
+                mutate(Iteration = case_when(
+                           grepl("potrf", .$Value) ~ as.integer(paste0("0x", substr(.$Tag, 14, 16))),
+                           grepl("trsm", .$Value) ~ as.integer(paste0("0x", substr(.$Tag, 11, 13))),
+                           grepl("syrk", .$Value) ~ as.integer(paste0("0x", substr(.$Tag, 8, 10))),
+                           grepl("gemm", .$Value) ~ as.integer(paste0("0x", substr(.$Tag, 8, 10))),
+                           TRUE ~ as.integer(-10)));
+        }
     }
 
     # QRMumps case:

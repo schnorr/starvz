@@ -186,6 +186,9 @@ read_state_csv <- function (where = ".",
             group_by(Value, ResourceType) %>%
             mutate(Outlier = ifelse(Duration > outlier_fun(Duration), TRUE, FALSE)) %>%
             ungroup ();
+    } (whichApplication == "qrmumps"){
+        loginfo("Attempt to detect outliers for QRMumps using GFlops**(2/3)")
+        # To be implemented
     }else{
         loginfo("No outlier detection; use NA in the corresponding column.");
         dfw <- dfw %>%

@@ -27,7 +27,6 @@ unnest <- unnest_legacy
 if ( is.null(input.directory) ){
     usage();
 }
-
 if (input.application == "cholesky"){
     states.fun = cholesky_colors;
     states.filter = 2;

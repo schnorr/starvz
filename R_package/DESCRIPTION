@@ -5,7 +5,8 @@ Authors@R: as.person(c(
     "Lucas Mello Schnorr <schnorr@inf.ufrgs.br> [aut, cre]",
     "Vinicius Garcia Pinto <vgpinto@inf.ufrgs.br> [aut]",
     "Lucas Leandro Nesi <llnesi@inf.ufrgs.br> [aut]",
-    "Guilherme Alles <galles@inf.ufrgs.br> [aut]"
+    "Guilherme Alles <galles@inf.ufrgs.br> [aut]",
+    "Marcelo Cogo Miletto <marcelo.miletto@inf.ufrgs.br> [aut]"
   ))
 Description: StarVZ consists in a performance analysis workflow that combines
     the power of the R language (and the tidyverse realm) and many auxiliary
@@ -36,7 +37,8 @@ Depends: R (>= 3.1.0),
     readr,
     reshape2,
     tidyverse,
-    zoo
+    zoo,
+    car
 License: GPL-3
 Encoding: UTF-8
 LazyData: true

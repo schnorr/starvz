@@ -186,9 +186,48 @@ read_state_csv <- function (where = ".",
             group_by(Value, ResourceType) %>%
             mutate(Outlier = ifelse(Duration > outlier_fun(Duration), TRUE, FALSE)) %>%
             ungroup ();
+    }else if(whichApplication == "qrmumps"){
     } (whichApplication == "qrmumps"){
         loginfo("Attempt to detect outliers for QRMumps using GFlops**(2/3)")
-        # To be implemented
+        
+        # Step 0: Define the linear model for outlier classification
+        task_model <- function(df) {
+            model = lm(Duration ~ I(GFlop**(2/3)), data = df)
+        }
+
+        # Step 1: apply the model to each task
+        dfw %>%
+            # filter factorization tasks
+            filter(grepl("lapack_", Value)) %>%
+            group_by(Value) %>%
+            nest() %>%
+            mutate(model = map(data, task_model)) %>%
+            mutate(outliers = map(model, function(m) {
+              tibble(Row = names(outlierTest(m)$rstudent))
+            })) -> df.pre.outliers
+        
+        # Step 2: identify outliers rows
+        df.pre.outliers %>%
+            unnest(outliers) %>%
+            mutate(Row = as.integer(Row)) -> df.pos.outliers
+
+        # Step 3: unnest all data and tag create the Outiler field according to the Row value
+        df.pre.outliers %>%
+            unnest(data) %>%
+            # this must be identical to the grouping used in the step 1
+            group_by(Value) %>%
+            mutate(Row = 1:n()) %>%
+            # the left join must be by exactly the same as the grouping + Row
+            left_join(df.pos.outliers %>% mutate(Outlier = TRUE), 
+                      by = c("Value", "Row")) %>%
+            mutate(Outlier = ifelse(is.na(Outlier), FALSE, Outlier)) %>%
+            select(-Row) %>%
+            ungroup -> df.outliers
+
+        # Step 4: regroup the Outlier data to the original dfw
+        dfw <- dfw %>%
+            left_join(df.outliers %>%
+                        select(JobId, Outlier), by=c("JobId"))          
     }else{
         loginfo("No outlier detection; use NA in the corresponding column.");
         dfw <- dfw %>%

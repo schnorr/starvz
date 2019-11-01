@@ -187,7 +187,6 @@ read_state_csv <- function (where = ".",
             mutate(Outlier = ifelse(Duration > outlier_fun(Duration), TRUE, FALSE)) %>%
             ungroup ();
     }else if(whichApplication == "qrmumps"){
-    } (whichApplication == "qrmumps"){
         loginfo("Attempt to detect outliers for QRMumps using GFlops**(2/3)")
         
         # Step 0: Define the linear model for outlier classification

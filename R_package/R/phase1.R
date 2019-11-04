@@ -187,11 +187,28 @@ read_state_csv <- function (where = ".",
             mutate(Outlier = ifelse(Duration > outlier_fun(Duration), TRUE, FALSE)) %>%
             ungroup ();
     }else if(whichApplication == "qrmumps"){
-        loginfo("Attempt to detect outliers for QRMumps using GFlops**(2/3)")
-        
-        # Step 0: Define the linear model for outlier classification
-        task_model <- function(df) {
-            model = lm(Duration ~ I(GFlop**(2/3)), data = df)
+
+        # Step 0: Define the linear models for outlier classification and select one based on ib
+        task_model_ib_other <- function(df) {
+          model = lm(Duration ~ I(GFlop**(2/3)), data = df)
+        }
+        task_model_ib_1 <- function(df) {
+          model = lm(Duration ~ GFlop, data = df)
+        }
+
+        if(file.exists("conf.txt")) {
+          ib <- as.integer(gsub("\\D", "", c(grep("qrm_ib", readLines("conf.txt"), value = TRUE))))
+        } else {
+          loginfo("File conf.txt not found! Assuming ib = 1")
+          ib = 1
+        }
+
+        if(ib != 1) {
+          loginfo("Attempt to detect outliers for QRMumps using Duration ~ GFlops**(2/3)")
+          task_model <- task_model_ib_other
+        } else {
+          loginfo("Attempt to detect outliers for QRMumps using Duration ~ GFlops")
+          task_model <- task_model_ib_1
         }
 
         # Step 1: apply the model to each task

@@ -513,6 +513,14 @@ the_reader_function <- function (directory = ".", app_states_fun = NULL, state_f
     data <- list(Origin=directory, State=dfw, Variable=dfv, Link=dfl, DAG=dfdag, Y=dfhie, ATree=dfa,
                  pmtool=dpmtb, pmtool_states=dpmts, data_handles=ddh, papi=dpapi, tasks=dtasks$tasks, task_handles=dtasks$handles, Events=devents);
 
+    # Calculate the GAPS from the DAG
+    #if (whichApplication == "cholesky"){
+    loginfo("Call Gaps.");
+    data$Gaps <- gaps(data);
+    #}else{
+    #    data$Gaps <- NULL;
+    #}
+
     return(data);
 }
 
@@ -991,6 +999,134 @@ dt_to_df_inner <- function (node)
     return(ret);
 }
 
+gaps.f_backward <- function (data)
+{
+    # Create the seed chain
+    if(TRUE %in% grepl("mpicom", data$DAG$JobId)){
+        data$DAG %>%
+            filter(grepl("mpicom", JobId)) -> tmpdag
+    } else {
+        data$DAG -> tmpdag
+    }
+    tmpdag %>%
+        rename(DepChain = JobId, Member = Dependent) %>%
+        select(DepChain, Member) -> seedchain;
+
+    f2 <- function (dfdag, chain.i)
+    {
+        dfdag %>% select(JobId, Dependent, Application, Value) -> full.i;
+
+        full.i %>% left_join(chain.i, by=c("JobId" = "Member")) -> full.o;
+
+        # If there are no application tasks in dependency chains, keep looking
+        if ((full.o %>% filter(!is.na(DepChain), Application == TRUE) %>% nrow) == 0) {
+            # Prepare the new chain
+            full.o %>%
+                filter(!is.na(DepChain)) %>%
+                rename(Member = Dependent) %>%
+                select(DepChain, Member) -> chain.o;
+            return(f2(full.o, chain.o));
+        }else{
+            return(full.o);
+        }
+    }
+    return(f2(data$DAG, seedchain));
+}
+
+gaps.f_forward <- function (data)
+{
+    # Create the seed chain
+    if(TRUE %in% grepl("mpicom", data$DAG$Dependent)){
+        data$DAG %>%
+            filter(grepl("mpicom", Dependent)) -> tmpdag
+    } else {
+        data$DAG -> tmpdag
+    }
+    tmpdag %>%
+        rename(DepChain = Dependent, Member = JobId) %>%
+        select(DepChain, Member) -> seedchain;
+
+    f2 <- function (dfdag, chain.i)
+    {
+        dfdag %>% select(JobId, Dependent, Application, Value) -> full.i;
+
+        full.i %>% left_join(chain.i, by=c("Dependent" = "Member")) -> full.o;
+
+        # If there are no application tasks in dependency chains, keep looking
+        if ((full.o %>% filter(!is.na(DepChain), Application == TRUE) %>% nrow) == 0) {
+            # Prepare the new chain
+            full.o %>%
+                filter(!is.na(DepChain)) %>%
+                rename(Member = JobId) %>%
+                select(DepChain, Member) -> chain.o;
+            return(f2(full.o, chain.o));
+        }else{
+            return(full.o);
+        }
+    }
+    return(f2(data$DAG, seedchain));
+}
+
+gaps <- function (data)
+{
+    loginfo("Starting the gaps calculation.");
+
+    if(is.null(data$DAG)) return(NULL);
+    if(is.null(data$State)) return(NULL);
+    #if(is.null(data$Link)) return(NULL);
+
+    gaps.f_backward(data) %>%
+        filter(!is.na(DepChain)) %>%
+        select(JobId, DepChain) %>%
+        rename(Dependent = JobId) %>%
+        rename(JobId = DepChain) %>%
+        select(JobId, Dependent) %>% unique -> data.b;
+
+    loginfo("backward completed");
+
+    gaps.f_forward(data) %>%
+        filter(!is.na(DepChain)) %>%
+        select(JobId, DepChain) %>%
+        rename(Dependent = DepChain) %>%
+        select(JobId, Dependent) %>% unique -> data.f;
+
+    loginfo("forward completed");
+
+    data$DAG %>%
+        filter(Application == TRUE) %>%
+        select(JobId, Dependent) -> data.z;
+
+    loginfo("z completed");
+
+    # Create the new gaps DAG
+    dfw <- data$State %>%
+        filter(Application == TRUE) %>%
+        select(JobId, Value, ResourceId, Node, Start, End);
+    if(is.null(data$Link)){
+        dfl <- data.frame()
+        data.b.dag <- data.frame()
+        data.f.dag <- data.frame()
+    } else {
+        dfl <- data$Link %>%
+            filter(grepl("mpicom", Key)) %>%
+            mutate(Value = NA, ResourceId = Origin, Node = NA) %>%
+            rename(JobId = Key) %>%
+            select(JobId, Value, ResourceId, Node, Start, End);
+            data.b %>%
+                left_join(dfl, by=c("JobId" = "JobId")) %>%
+                left_join(dfw, by=c("Dependent" = "JobId")) -> data.b.dag;
+        data.f %>%
+            left_join(dfw, by=c("JobId" = "JobId")) %>%
+            left_join(dfl, by=c("Dependent" = "JobId")) -> data.f.dag;
+    }
+    data.z %>%
+        left_join(dfw, by=c("JobId" = "JobId")) %>%
+        left_join(dfw, by=c("Dependent" = "JobId")) -> data.z.dag;
+
+    loginfo("The gaps calculation has completed.");
+
+    return(bind_rows(data.z.dag, data.b.dag, data.f.dag));
+}
 read_links <- function (where = ".")
 {
     link.feather = paste0(where, "/paje.link.feather");

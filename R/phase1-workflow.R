@@ -22,7 +22,6 @@ if (length(args) < 1) {
 }
 
 input.directory = args[[1]];
-unnest <- unnest_legacy
 
 if ( is.null(input.directory) ){
     usage();

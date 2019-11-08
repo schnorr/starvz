@@ -1,6 +1,6 @@
 #!/usr/bin/Rscript
 
-library(starvz)
+suppressMessages(library(starvz))
 
 ##############################
 # Usage                      #

@@ -1271,8 +1271,8 @@ qrmumps_color_mapping() %>%
                .$Kernel == "INIT" ~ "init_front",
                TRUE ~ .$Kernel)) %>%
     # Add new kernels
-    bind_rows (tibble(Kernel = c("init_block", "clean_block"),
-                      Color = c("#FFFF33", "#984EA3")));
+    bind_rows (tibble(Kernel = c("init_block", "clean_block", "block_copy"),
+                      Color = c("#FFFF33", "#984EA3", "#ad0a18")));
 }
 
 outlier_definition <- function(x) {

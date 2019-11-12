@@ -513,8 +513,8 @@ the_reader_function <- function (directory = ".", app_states_fun = NULL, state_f
     data <- list(Origin=directory, State=dfw, Variable=dfv, Link=dfl, DAG=dfdag, Y=dfhie, ATree=dfa,
                  pmtool=dpmtb, pmtool_states=dpmts, data_handles=ddh, papi=dpapi, tasks=dtasks$tasks, task_handles=dtasks$handles, Events=devents);
 
-    # Calculate the GAPS from the DAG (Cholesky-only)
-    if (whichApplication == "cholesky"){
+    # Calculate the GAPS from the DAG (Just ignore qrmumps...)
+    if (whichApplication != "qrmumps"){
         loginfo("Call Gaps.");
         data$Gaps <- gaps(data);
     }else{

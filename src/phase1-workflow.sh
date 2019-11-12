@@ -130,7 +130,7 @@ echo "Nature, ResourceId, Type, Start, End, Duration, Value" > $PAJEVARIABLE
 cat paje.csv | grep ^Variable >> $PAJEVARIABLE
 
 PAJELINK=paje.link.csv
-echo "Nature, Container, Type, Start, End, Duration, Size, Origin, Dest, Key" > $PAJELINK
+echo "Nature, Container, Type, Start, End, Duration, Size, Origin, Dest, Key, Tag" > $PAJELINK
 cat paje.csv | grep ^Link >> $PAJELINK
 
 PAJEEVENT=paje.events.csv

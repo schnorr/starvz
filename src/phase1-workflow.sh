@@ -33,14 +33,17 @@ pushd $CASE
 echo "Convert from FXT to paje.sorted.trace"
 date
 
-fxt2paje.sh
-es=$?
-if [ $es -ne 0 ]
-then
-    echo "ERROR: conversion from FXT failed! (exit status: $es)"
-    exit 1
+# If sorted is already present dont reexecute
+if [ ! -f "paje.sorted.trace" ]; then
+  fxt2paje.sh
+  es=$?
+  if [ $es -ne 0 ]
+  then
+      echo "ERROR: conversion from FXT failed! (exit status: $es)"
+      exit 1
+  fi
+  rm -f paje.trace
 fi
-rm -f paje.trace
 
 # Put Lionel's pmtool to get bounds to enrich the visualization
 # Also create a hypothetical trace from the solution of the LP

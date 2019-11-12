@@ -23,6 +23,13 @@ if (length(args) < 1) {
 
 input.directory = args[[1]];
 
+# This fixes some problems on recent versions of tidyverse
+# Check: https://github.com/tidyverse/tidyr/issues/751
+# Check: https://github.com/tidyverse/tidyr/issues/694
+if(exists("unnest_legacy")){
+  unnest <- unnest_legacy
+}
+
 if ( is.null(input.directory) ){
     usage();
 }

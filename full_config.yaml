@@ -34,6 +34,7 @@ default:
     labels: "ALL" # Labels of the Resources names, "ALL" "1CPU_per_NODE" "1GPU_per_NODE"
     legend: TRUE # Show the plot's Legends
     makespan: TRUE # Show the application makespan
+    alpha: 0.5 # Alpha value to control transparency of tasks that are not outliers
     outliers: TRUE # Differentiate outliers tasks
     abe: # Show Abe makespan metric
       active: FALSE # Enable

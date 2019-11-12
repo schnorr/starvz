@@ -146,7 +146,7 @@ geom_states <- function (data = NULL, Show.Outliers = FALSE, StarPU = FALSE)
                                 xmin=Start,
                                 xmax=End,
                                 ymin=Position,
-                                ymax=Position+Height-0.2), alpha=ifelse(Show.Outliers && !StarPU, 0.5, 1.0));
+        						ymax=Position+Height-0.2), alpha=ifelse(Show.Outliers && !StarPU, pjr_value(pajer$st$alpha, 0.5), 1.0));
 
     # Add outliers conditionally
     if (Show.Outliers && !StarPU){

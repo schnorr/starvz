@@ -513,13 +513,8 @@ the_reader_function <- function (directory = ".", app_states_fun = NULL, state_f
     data <- list(Origin=directory, State=dfw, Variable=dfv, Link=dfl, DAG=dfdag, Y=dfhie, ATree=dfa,
                  pmtool=dpmtb, pmtool_states=dpmts, data_handles=ddh, papi=dpapi, tasks=dtasks$tasks, task_handles=dtasks$handles, Events=devents);
 
-    # Calculate the GAPS from the DAG (Just ignore qrmumps...)
-    if (whichApplication != "qrmumps"){
-        loginfo("Call Gaps.");
-        data$Gaps <- gaps(data);
-    }else{
-        data$Gaps <- NULL;
-    }
+    loginfo("Call Gaps.");
+    data$Gaps <- gaps(data);
 
     return(data);
 }
@@ -1018,7 +1013,9 @@ gaps.f_backward <- function (data)
     f2 <- function (dfdag, chain.i)
     {
         dfdag %>% select(JobId, Dependent, Application, Value) -> full.i;
-
+        # qr mumps has duplicated data in these dfs and the left_join did not work correctly. unique() solves this problem
+        full.i %>% unique() -> full.i;
+        chain.i %>% unique() -> chain.i;
         full.i %>% left_join(chain.i, by=c("JobId" = "Member")) -> full.o;
 
         # If there are no application tasks in dependency chains, keep looking
@@ -1052,7 +1049,9 @@ gaps.f_forward <- function (data)
     f2 <- function (dfdag, chain.i)
     {
         dfdag %>% select(JobId, Dependent, Application, Value) -> full.i;
-
+        # qr mumps has duplicated data in these dfs and the left_join did not work correctly. unique() solves this problem
+        full.i %>% unique() -> full.i;
+        chain.i %>% unique() -> chain.i;
         full.i %>% left_join(chain.i, by=c("Dependent" = "Member")) -> full.o;
 
         # If there are no application tasks in dependency chains, keep looking

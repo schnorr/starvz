@@ -720,7 +720,10 @@ data_handles_csv_parser <- function (where = ".")
                             Handle = col_character(),
                             HomeNode = col_integer(),
                             Size = col_integer(),
-                            Coordinates = col_character()
+                            Coordinates = col_character(),
+                            MPIOwner = col_integer(),
+                            Description = col_character(),
+                            MPITag = col_integer()
                         ));
 
         # Not supported in feather

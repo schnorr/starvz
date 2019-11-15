@@ -492,21 +492,31 @@ the_master_function <- function(data = NULL)
     # MPI Concurrent
     if (pjr(pajer$mpiconcurrent$active)){
         loginfo("Creating the MPI concurrent ops plot");
-        aggStep <- pjr_value(pajer$mpiconcurrent$step, globalAggStep);
-        gompiconc <- data %>% concurrent_mpi() %>%
-            var_integration_segment_chart(., ylabel="Concurrent\nMPI Tasks", step=aggStep) + tScale;
-        if (!pjr(pajer$mpiconcurrent$legend)){
-            gompiconc <- gompiconc + theme(legend.position="none");
+        if ((data$Link %>% filter(grepl("mpicom", Key)) %>% nrow) == 0){
+            print("There aren't any information on MPI, ignoring it.");
+            pajer$mpiconcurrent$active <<- FALSE;
+        }else{
+          aggStep <- pjr_value(pajer$mpiconcurrent$step, globalAggStep);
+          gompiconc <- data %>% concurrent_mpi() %>%
+              var_integration_segment_chart(., ylabel="Concurrent\nMPI Tasks", step=aggStep) + tScale;
+          if (!pjr(pajer$mpiconcurrent$legend)){
+              gompiconc <- gompiconc + theme(legend.position="none");
+          }
+          gompiconc <- userYLimit(gompiconc, pajer$mpiconcurrent$limit, c(tstart, tend));
         }
-        gompiconc <- userYLimit(gompiconc, pajer$mpiconcurrent$limit, c(tstart, tend));
     }
 
     # MPI State
     if (pjr(pajer$mpistate$active)){
         loginfo("Creating the MPI state");
-        gompistate <- data %>% state_mpi_chart() + tScale;
-        if (!pjr(pajer$mpistate$legend)){
-            gompistate <- gompistate + theme(legend.position="none");
+        if ( (data$State %>% filter(Type == "Communication Thread State") %>% nrow) == 0 ){
+          print("There aren't any information on MPI, ignoring it.");
+          pajer$mpistate$active <<- FALSE;
+        }else{
+          gompistate <- data %>% state_mpi_chart() + tScale;
+          if (!pjr(pajer$mpistate$legend)){
+              gompistate <- gompistate + theme(legend.position="none");
+          }
         }
     }
 

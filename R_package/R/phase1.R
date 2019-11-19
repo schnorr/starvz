@@ -22,7 +22,7 @@ read_state_csv <- function (where = ".",
         loginfo(paste("Reading ", state.csv));
         dfw <- read_csv(file=state.csv,
                         trim_ws=TRUE,
-                        progress=TRUE,
+                        progress=FALSE,
                         col_types=cols(
                             Nature = col_character(),
                             ResourceId = col_character(),
@@ -221,7 +221,7 @@ read_state_csv <- function (where = ".",
             mutate(outliers = map(model, function(m) {
               tibble(Row = names(outlierTest(m)$rstudent))
             })) -> df.pre.outliers
-        
+
         # Step 2: identify outliers rows
         df.pre.outliers %>%
             unnest(outliers) %>%
@@ -234,7 +234,7 @@ read_state_csv <- function (where = ".",
             group_by(Value) %>%
             mutate(Row = 1:n()) %>%
             # the left join must be by exactly the same as the grouping + Row
-            left_join(df.pos.outliers %>% mutate(Outlier = TRUE), 
+            left_join(df.pos.outliers %>% mutate(Outlier = TRUE),
                       by = c("Value", "Row")) %>%
             mutate(Outlier = ifelse(is.na(Outlier), FALSE, Outlier)) %>%
             select(-Row) %>%
@@ -243,7 +243,7 @@ read_state_csv <- function (where = ".",
         # Step 4: regroup the Outlier data to the original dfw
         dfw <- dfw %>%
             left_join(df.outliers %>%
-                        select(JobId, Outlier), by=c("JobId"))          
+                        select(JobId, Outlier), by=c("JobId"))
     }else{
         loginfo("No outlier detection; use NA in the corresponding column.");
         dfw <- dfw %>%
@@ -298,7 +298,7 @@ read_vars_set_new_zero <- function (where = ".")
         loginfo(paste("Reading ", variable.csv));
         dfv <- read_csv(variable.csv,
                         trim_ws=TRUE,
-                        progress=TRUE,
+                        progress=FALSE,
                         col_types=cols(
                             Nature = col_character(),
                             ResourceId = col_character(),
@@ -345,7 +345,7 @@ atree_load <- function(where = "."){
         loginfo(paste("Reading ", atree.csv));
         df <- read_csv(file=atree.csv,
                        trim_ws=TRUE,
-                       progress=TRUE,
+                       progress=FALSE,
                        col_types=cols(
                            Node = col_integer(),
                            DependsOn = col_integer()
@@ -1142,7 +1142,7 @@ read_links <- function (where = ".")
         loginfo(paste("Reading ", link.csv));
         dfl <- read_csv(link.csv,
                         trim_ws=TRUE,
-                        progress=TRUE,
+                        progress=FALSE,
                         col_types=cols(
                             Nature = col_character(),
                             Container = col_character(),
@@ -1189,7 +1189,7 @@ read_dag <- function (where = ".", dfw = NULL, dfl = NULL)
         loginfo(paste("Reading ", dag.csv));
         dfdag <- read_csv(dag.csv,
                           trim_ws=TRUE,
-                          progress=TRUE,
+                          progress=FALSE,
                           col_types=cols(
                               Node = col_integer(),
                               DependsOn = col_integer()

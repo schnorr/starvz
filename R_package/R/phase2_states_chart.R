@@ -270,6 +270,43 @@ concurrent_mpi <- function(data = NULL)
         select(Start, End, Duration, Node, ResourceId, ResourceType, Type, Value)
 }
 
+concurrent_mpi_out <- function(data = NULL)
+{
+    if (is.null(data)) return(NULL);
+
+    data$Link %>%
+        filter(grepl("mpicom", Key)) %>%
+        select(-Nature, -Container, -Type, -Duration) -> dflink;
+
+    dflink %>%
+        select(-End) %>%
+        rename(Timestamp = Start) %>%
+        mutate(Start = TRUE) -> dfstart;
+    dflink %>%
+        select(-Start) %>%
+        rename(Timestamp = End) %>%
+        mutate(Start = FALSE) %>%
+        bind_rows (dfstart) %>%
+        arrange(Timestamp) %>%
+        group_by(Origin, Dest) %>%
+        mutate(Value = cumsum(as.integer(
+                   case_when(
+                       Start == TRUE ~ 1,
+                       Start == FALSE ~ -1,
+                       TRUE ~ 0)))) %>%
+        arrange(Dest, Timestamp) %>%
+        select(-Start) %>%
+        rename(Start = Timestamp) %>%
+        group_by(Dest) %>% mutate(End = lead(Start)) %>% na.omit %>% mutate(Duration = End-Start) %>% ungroup() %>%
+        mutate(Type = "MPI Concurrent") %>%
+        rename(ResourceId = Dest) %>%
+        separate(ResourceId, into=c("Node", "Resource"), remove=FALSE) %>%
+        mutate(Node = as.factor(Node)) %>%
+        mutate(ResourceType = as.factor(gsub('[[:digit:]]+', '', Resource))) %>%
+        select(Start, End, Duration, Node, ResourceId, ResourceType, Type, Value)
+
+}
+
 geom_path_highlight <- function (paths = NULL)
 {
     if (is.null(paths)) stop("paths is NULL when given to gaps_backward_deps");

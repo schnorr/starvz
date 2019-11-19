@@ -130,6 +130,13 @@ default:
     step:
     limit:
 
+  mpiconcurrentout:
+    active: FALSE
+    legend: FALSE
+    height: 1.5
+    step:
+    limit:
+
   mpistate:
     active: FALSE
     legend: TRUE

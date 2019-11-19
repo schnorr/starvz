@@ -96,7 +96,7 @@ pjr <- function (property)
     ifelse(!is.null(property) && property, property, FALSE);
 }
 
-starpu_mpi_grid_arrange <- function(atree, st, st_pm, st_mm, transf, starpu, ijk, ijk_pm, lackready, ready, submitted, mpi, mpiconc, mpistate, gpu, memory, gflops, title = NULL)
+starpu_mpi_grid_arrange <- function(atree, st, st_pm, st_mm, transf, starpu, ijk, ijk_pm, lackready, ready, submitted, mpi, mpiconc, mpiconcout, mpistate, gpu, memory, gflops, title = NULL)
 {
     # The list that will contain the plots
     P <- list();
@@ -178,6 +178,10 @@ starpu_mpi_grid_arrange <- function(atree, st, st_pm, st_mm, transf, starpu, ijk
     if (pjr(pajer$mpiconcurrent$active)){
         P[[length(P)+1]] <- mpiconc;
         H[[length(H)+1]] <- pjr_value(pajer$mpiconcurrent$height, 1);
+    }
+    if (pjr(pajer$mpiconcurrentout$active)){
+        P[[length(P)+1]] <- mpiconcout;
+        H[[length(H)+1]] <- pjr_value(pajer$mpiconcurrentout$height, 1);
     }
     if (pjr(pajer$mpistate$active)){
         P[[length(P)+1]] <- mpistate;
@@ -498,11 +502,28 @@ the_master_function <- function(data = NULL)
         }else{
           aggStep <- pjr_value(pajer$mpiconcurrent$step, globalAggStep);
           gompiconc <- data %>% concurrent_mpi() %>%
-              var_integration_segment_chart(., ylabel="Concurrent\nMPI Tasks", step=aggStep) + tScale;
+              var_integration_segment_chart(., ylabel="Concurrent\nMPI Tasks Send", step=aggStep) + tScale;
           if (!pjr(pajer$mpiconcurrent$legend)){
               gompiconc <- gompiconc + theme(legend.position="none");
           }
           gompiconc <- userYLimit(gompiconc, pajer$mpiconcurrent$limit, c(tstart, tend));
+        }
+    }
+
+    # MPI Concurrent Out
+    if (pjr(pajer$mpiconcurrentout$active)){
+        loginfo("Creating the MPI concurrent ops plot");
+        if ((data$Link %>% filter(grepl("mpicom", Key)) %>% nrow) == 0){
+            print("There aren't any information on MPI, ignoring it.");
+            pajer$mpiconcurrentout$active <<- FALSE;
+        }else{
+          aggStep <- pjr_value(pajer$mpiconcurrentout$step, globalAggStep);
+          gompiconcout <- data %>% concurrent_mpi_out() %>%
+              var_integration_segment_chart(., ylabel="Concurrent\nMPI Tasks Recv", step=aggStep) + tScale;
+          if (!pjr(pajer$mpiconcurrentout$legend)){
+              gompiconcout <- gompiconcout + theme(legend.position="none");
+          }
+          gompiconcout <- userYLimit(gompiconcout, pajer$mpiconcurrentout$limit, c(tstart, tend));
         }
     }
 
@@ -581,6 +602,7 @@ the_master_function <- function(data = NULL)
                                  submitted = gosv,
                                  mpi = gomov,
                                  mpiconc = gompiconc,
+                                 mpiconcout = gompiconcout,
                                  mpistate = gompistate,
                                  gpu = gogov,
                                  memory = goguv,

@@ -34,7 +34,7 @@ geom_atree <- function (data=NULL, Offset=1.02, Flip = TRUE)
             # The Label
             geom_text(data=data, size=3, aes(y=Label.Y, label=ANode, x=Label.X)),
             # Fix time coordinates
-            coord_cartesian(xlim=c(0, makespan))
+            #coord_cartesian(xlim=c(0, makespan))
         );
     return(ret);
 }

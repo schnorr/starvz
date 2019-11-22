@@ -133,9 +133,9 @@ var_integration_segment_chart <- function (dfv = NULL, ylabel = NA, step = 250, 
         mutate(Start = Slice, End = lead(Slice), Duration = End-Start) %>%
         ungroup() %>%
         filter(!is.na(End)) %>%
-        group_by(Type, Node, ResourceType, Start, End, Duration) %>%
+        group_by(Type, Node, ResourceId, Start, End, Duration) %>%
         summarize(Value = sum(Value), N=n()) %>%
-        rename(ResourceId = Node) %>%
+        #rename(ResourceId = Node) %>%
         ungroup() %>%
         var_chart(., ylabel=ylabel) -> result;
     if (facetting){

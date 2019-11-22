@@ -195,7 +195,6 @@ geom_events <- function (main_data = NULL, data = NULL, combined = FALSE, tstart
     return(ret);
 }
 
-
 geom_memory <- function (data = NULL, combined = FALSE, tstart=NULL, tend=NULL)
 {
     if (is.null(data)) stop("data is NULL when given to geom_memory");
@@ -205,19 +204,27 @@ geom_memory <- function (data = NULL, combined = FALSE, tstart=NULL, tend=NULL)
         filter(Type == "Memory Node State");
 
 
-    loginfo("Starting geom_memory");
+    loginfo("Starting geom_memory2");
 
-    col_pos_1 <- data.frame(ResourceId=unique(dfl$Dest)) %>% arrange(ResourceId) %>% tibble::rowid_to_column("Position");
+    dfl <- data$Link;
 
-    col_pos_2 <- data.frame(ResourceId=unique(dfw$ResourceId)) %>% arrange(ResourceId) %>% tibble::rowid_to_column("Position")
+    col_pos_1 <- data.frame(Container=unique(dfl$Dest)) %>% arrange(Container) %>% tibble::rowid_to_column("Position");
 
-    nrow(ms) != 0
+    col_pos_2 <- data.frame(Container=unique(dfw$Container)) %>% arrange(Container) %>% tibble::rowid_to_column("Position")
 
+    if(nrow(col_pos_1)>nrow(col_pos_2)){
+      col_pos <- col_pos_1
+    }else{
+      col_pos <- col_pos_2
+      #ret[[length(ret)+1]] <- scale_y_continuous(breaks = yconfm$Position+(yconfm$Height/3), labels=yconfm$Container, expand=c(pjr_value(pajer$expand, 0.05),0));
+    }
+
+   
     col_pos[2] <- data.frame(lapply(col_pos[2], as.character), stringsAsFactors=FALSE);
-    dfw <- dfw %>% select(-Position) %>% left_join(col_pos, by=c("ResourceId" = "ResourceId"))
+    dfw <- dfw %>% select(-Position) %>% left_join(col_pos, by=c("ResourceId" = "Container"))
     ret <- list();
 
-    print(dfw)
+   
 
     # Color mapping
     #ret[[length(ret)+1]] <- scale_fill_manual(values = extract_colors(dfw));
@@ -262,17 +269,20 @@ geom_memory <- function (data = NULL, combined = FALSE, tstart=NULL, tend=NULL)
                                 ymin=Position,
                                 ymax=Position+(2.0-0.1-Height)), linetype=1, color=border, size=0.4, alpha=0.5);
 
+    #Calculate selected state % in time
 
-    if(pjr(pajer$memory$state$total)){
+    if(is.null(tend) || is.null(tstart)){
+        total_time <- 0;
+    }else{
+        total_time <- tend - tstart;
+    }
+
+    if(pjr_value(pajer$memory$state$total, FALSE) & (total_time>0)){
       select <- pjr_value(pajer$memory$state$select, "DriverCopy");
       ms <- dfw %>% filter(Value == select);
-
-      #Calculate selected state % in time
-      total_time <- tend - tstart;
       ms <- ms %>%
           group_by (ResourceId, Node, Position) %>%
           summarize(percent_time = round((sum(End-Start)/total_time)*100,2));
-
       #ms <- data.frame(with(ms, table(Node, ResourceId)));
       if(nrow(ms) != 0){
           #ms[2] <- data.frame(lapply(ms[2], as.character), stringsAsFactors=FALSE);

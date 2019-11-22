@@ -189,7 +189,7 @@ geom_mpistates <- function (data = NULL)
         # Remove existing position
         select(-Position, -Height) %>%
         # Establish new position
-        left_join(ypos);
+        left_join(ypos, by = c("ResourceId"));
 
     # Color mapping
     ret[[length(ret)+1]] <- scale_fill_brewer(palette = "Dark2");

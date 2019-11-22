@@ -1,5 +1,5 @@
 #!/usr/bin/Rscript
-
+options(crayon.enabled = FALSE)
 suppressMessages(library(starvz))
 
 args = commandArgs(trailingOnly=TRUE)

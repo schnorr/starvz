@@ -406,9 +406,7 @@ the_master_function <- function(data = NULL)
             gorv <- gorv + theme(legend.position="none");
         }else{
             gorv <- gorv +
-                theme(legend.position=c(.99,.8),
-                      legend.justification="right") +
-                guides(color = guide_legend(nrow = 1))
+                theme(legend.position = "top")
         }
         gorv <- userYLimit(gorv, pajer$ready$limit, c(tstart, tend));
     }
@@ -424,9 +422,7 @@ the_master_function <- function(data = NULL)
             gosv <- gosv + theme(legend.position="none");
         }else{
             gosv <- gosv +
-                theme(legend.position=c(.99,.8),
-                      legend.justification="right") +
-                guides(color = guide_legend(nrow = 1))
+                theme(legend.position = "top")
         }
         gosv <- userYLimit(gosv, pajer$submitted$limit, c(tstart, tend));
     }
@@ -468,8 +464,8 @@ the_master_function <- function(data = NULL)
               goguv <- goguv + theme(legend.position="none");
           }else{
               goguv <- goguv +
-                  theme(legend.position = "top") +
-                  guides(color = guide_legend(nrow = 1))
+                  theme(legend.position = "top") #+
+                  #guides(color = guide_legend(nrow = 1))
           }
           goguv <- userYLimit(goguv, pajer$usedmemory$limit, c(tstart, tend));
         }

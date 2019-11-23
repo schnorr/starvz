@@ -74,6 +74,6 @@ invisible(data %>% purrr::list_modify("Origin" = NULL) %>% names %>%
               } else {
                   loginfo(paste("Data for", filename, "has not been feathered because is empty."));
               }
-          })
+          }))
 
 loginfo("Pre-process finished correctly.");

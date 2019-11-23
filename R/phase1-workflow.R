@@ -62,126 +62,18 @@ data <- the_reader_function (directory = input.directory,
 
 loginfo("Let's start to write the pre-processed files as feather data");
 
-# State
-filename <- "pre.state.feather";
-loginfo(filename);
-if (!is.null(data$State)){
-    write_feather(data$State, filename);
-}else{
-    loginfo(paste("Data for", filename, "has not been feathered because is empty."));
-}
-
-# Variable
-filename <- "pre.variable.feather";
-loginfo(filename);
-if (!is.null(data$Variable)){
-    write_feather(data$Variable, filename);
-}else{
-    loginfo(paste("Data for", filename, "has not been feathered because is empty."));
-}
-
-# Link
-filename <- "pre.link.feather";
-loginfo(filename);
-if (!is.null(data$Link)){
-    write_feather(data$Link, filename);
-}else{
-    loginfo(paste("Data for", filename, "has not been feathered because is empty."));
-}
-
-# DAG
-filename <- "pre.dag.feather";
-loginfo(filename);
-if (!is.null(data$DAG)){
-    write_feather(data$DAG, filename);
-}else{
-    loginfo(paste("Data for", filename, "has not been feathered because is empty."));
-}
-
-# Y
-filename <- "pre.y.feather";
-loginfo(filename);
-if (!is.null(data$Y)){
-    write_feather(data$Y, filename);
-}else{
-    loginfo(paste("Data for", filename, "has not been feathered because is empty."));
-}
-
-# ATree
-filename <- "pre.atree.feather";
-loginfo(filename);
-if (!is.null(data$ATree)){
-    write_feather(data$ATree, filename);
-}else{
-    loginfo(paste("Data for", filename, "has not been feathered because is empty."));
-}
-
-# Gaps
-filename <- "pre.gaps.feather";
-loginfo(filename);
-if (!is.null(data$Gaps)){
-    write_feather(data$Gaps, filename);
-}else{
-    loginfo(paste("Data for", filename, "has not been feathered because is empty."));
-}
-
-# PMtool
-filename <- "pre.pmtool.feather";
-loginfo(filename);
-if (!is.null(data$pmtool)){
-    write_feather(data$pmtool, filename);
-}else{
-    loginfo(paste("Data for", filename, "has not been feathered because is empty."));
-}
-
-filename <- "pre.pmtool_states.feather";
-loginfo(filename);
-if (!is.null(data$pmtool_states)){
-    write_feather(data$pmtool_states, filename);
-}else{
-    loginfo(paste("Data for", filename, "has not been feathered because is empty."));
-}
-
-# Data Rec
-filename <- "pre.data_handles.feather";
-loginfo(filename);
-if (!is.null(data$data_handles)){
-    write_feather(data$data_handles, filename);
-}else{
-    loginfo(paste("Data for", filename, "has not been feathered because is empty."));
-}
-
-# Tasks Rec
-filename <- "pre.tasks.feather";
-loginfo(filename);
-if (!is.null(data$tasks)){
-    write_feather(data$tasks, filename);
-}else{
-    loginfo(paste("Data for", filename, "has not been feathered because is empty."));
-}
-
-filename <- "pre.task_handles.feather";
-loginfo(filename);
-if (!is.null(data$task_handles)){
-    write_feather(data$task_handles, filename);
-}else{
-    loginfo(paste("Data for", filename, "has not been feathered because is empty."));
-}
-
-filename <- "pre.events.feather";
-loginfo(filename);
-if (!is.null(data$Events)){
-    write_feather(data$Events, filename);
-}else{
-    loginfo(paste("Data for", filename, "has not been feathered because is empty."));
-}
-
-filename <- "pre.papi.feather";
-loginfo(filename);
-if (!is.null(data$papi)){
-    write_feather(data$papi, filename);
-}else{
-    loginfo(paste("Data for", filename, "has not been feathered because is empty."));
-}
+invisible(data %>% purrr::list_modify("Origin" = NULL) %>% names %>%
+          lapply(function(x) {
+              filename <- paste0("pre.", tolower(x), ".feather"); loginfo(filename);
+              if (!is.null(data[[x]])){
+                  if(is.data.frame(data[[x]])){
+                      write_feather(data[[x]], filename);
+                  } else {
+                      loginfo(paste(filename, "must be a data frame."));
+                  }
+              } else {
+                  loginfo(paste("Data for", filename, "has not been feathered because is empty."));
+              }
+          })
 
 loginfo("Pre-process finished correctly.");

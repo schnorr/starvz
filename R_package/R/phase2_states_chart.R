@@ -189,7 +189,7 @@ geom_mpistates <- function (data = NULL)
         # Remove existing position
         select(-Position, -Height) %>%
         # Establish new position
-        left_join(ypos);
+        left_join(ypos, by = c("ResourceId"));
 
     # Color mapping
     ret[[length(ret)+1]] <- scale_fill_brewer(palette = "Dark2");
@@ -221,13 +221,13 @@ state_mpi_chart <- function (data = NULL)
     loginfo("Entry of state_mpi_chart");
 
     # Obtain time interval
-    tstart <- data$State %>% pull(Start) %>% min;
-    tend <- data$State %>% pull(End) %>% max;
+    #tstart <- data$State %>% pull(Start) %>% min;
+    #tend <- data$State %>% pull(End) %>% max;
 
     #Plot
     gow <- ggplot() +
         default_theme() +
-        coord_cartesian(xlim=c(tstart, tend)) +
+        #coord_cartesian(xlim=c(tstart, tend)) +
         # Add states and outliers if requested
         geom_mpistates(data);
 

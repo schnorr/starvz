@@ -297,7 +297,7 @@ st_time_aggregation_plot <- function (data = NULL, dfw_agg = NULL, StarPU.View =
     #Plot
     gow <- dfw_agg %>% ggplot() +
         default_theme() +
-        coord_cartesian(xlim=c(tstart, tend)) +
+        #coord_cartesian(xlim=c(tstart, tend)) +
         xlab("Time [ms]") +
         scale_fill_manual(values = choleskyColors) +
         scale_y_continuous(

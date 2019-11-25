@@ -14,7 +14,7 @@ var_chart <- function (dfv = NULL, ylabel = NA)
         geom_segment(aes(x=x, xend=xend, y=y, yend=yend, color=ResourceId)) +
         geom_segment(data=v, aes(x=x, xend=xend, y=y, yend=yend, color=ResourceId)) +
         geom_point(size=.1, aes(x=x, y=y, color=ResourceId)) +
-        coord_cartesian(xlim=c(0, max(dfv$End))) +
+#        coord_cartesian(xlim=c(0, max(dfv$End))) +
         ylim (0, NA) +
         ylab (ylabel) +
         scale_colour_brewer(palette = "Dark2");
@@ -77,7 +77,7 @@ var_simple_chart <- function (dfv = NULL, ylabel = NA)
         geom_line() +
         geom_point(size=.1) +
         xlab ("Time [ms]") +
-        coord_cartesian(xlim=c(0, max(dfv$End))) +
+        #coord_cartesian(xlim=c(0, max(dfv$End))) +
         ylim (0, NA) +
         ylab (ylabel) +
         theme_bw(base_size = 12) +
@@ -105,7 +105,7 @@ var_integration_chart <- function (dfv = NULL, ylabel = NA, step = 250, facettin
         default_theme() +
         geom_point(size=1) +
         geom_line() +
-        coord_cartesian(xlim=c(0, max(dfv$End))) +
+        #coord_cartesian(xlim=c(0, max(dfv$End))) +
         ylim (0, NA) +
         ylab (ylabel) +
         scale_fill_brewer(palette = "Set1") -> result;
@@ -133,9 +133,9 @@ var_integration_segment_chart <- function (dfv = NULL, ylabel = NA, step = 250, 
         mutate(Start = Slice, End = lead(Slice), Duration = End-Start) %>%
         ungroup() %>%
         filter(!is.na(End)) %>%
-        group_by(Type, Node, ResourceType, Start, End, Duration) %>%
+        group_by(Type, Node, ResourceId, Start, End, Duration) %>%
         summarize(Value = sum(Value), N=n()) %>%
-        rename(ResourceId = Node) %>%
+        #rename(ResourceId = Node) %>%
         ungroup() %>%
         var_chart(., ylabel=ylabel) -> result;
     if (facetting){

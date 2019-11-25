@@ -149,6 +149,10 @@ default:
     legend: TRUE
     step: 85
     total: TRUE
+ 
+  activenodes: # Plot the active node count over time   
+    active: TRUE # Enable
+    height: 1 # Vertical size for the plot
 
   gflops:
     active: FALSE

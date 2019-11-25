@@ -96,6 +96,7 @@ pjr <- function (property)
     ifelse(!is.null(property) && property, property, FALSE);
 }
 
+starpu_mpi_grid_arrange <- function(atree, st, st_pm, st_mm, transf, starpu, ijk, ijk_pm, lackready, ready, submitted, mpi, mpiconc, mpiconcout, mpistate, gpu, memory, gflops, activenodes, title = NULL)
 starpu_mpi_grid_arrange <- function(atree, st, st_pm, st_mm, transf, starpu, ijk, ijk_pm, lackready, ready, submitted, mpi, mpiconc, mpiconcout, mpistate, gpu, memory, gflops, title = NULL)
 {
     # The list that will contain the plots
@@ -186,6 +187,10 @@ starpu_mpi_grid_arrange <- function(atree, st, st_pm, st_mm, transf, starpu, ijk
     if (pjr(pajer$mpistate$active)){
         P[[length(P)+1]] <- mpistate;
         H[[length(H)+1]] <- pjr_value(pajer$mpistate$height, 1);
+    }
+    if (pjr(pajer$activenodes$active)){
+        P[[length(P)+1]] <- activenodes;
+        H[[length(H)+1]] <- pjr_value(pajer$activenodes$height, 1);
     }
 
     # Add empty X and horizontal legend to all plots
@@ -291,6 +296,7 @@ the_master_function <- function(data = NULL)
     goguv <- geom_blank();
     gomov <- geom_blank();
     gogov <- geom_blank();
+    goactivenodes <- geom_blank();
 
     if (!is.null(data$ATree) && pjr(pajer$atree$active)){
         loginfo("Creating the temporal atree plot");
@@ -582,6 +588,18 @@ the_master_function <- function(data = NULL)
         }
     }
 
+    # Active Nodes
+    if (pjr(pajer$activenodes$active)){
+        loginfo("Creating the Active Nodes plot");
+
+        if ( (dfw %>% filter(!is.na(ANode)) %>% nrow) == 0 ){
+          print("There aren't any information on ANode, ignoring it.");
+          pajer$activenodes$active <<- FALSE;
+        }else{
+          goactivenodes <- dfw %>% active_nodes_chart() + tScale;
+        }
+    }
+
     loginfo("Assembling the plot");
 
     # assembling
@@ -603,6 +621,7 @@ the_master_function <- function(data = NULL)
                                  gpu = gogov,
                                  memory = goguv,
                                  gflops = gogfv,
+                                 activenodes = goactivenodes,
                                  title = directory);
 
 

@@ -70,3 +70,52 @@ atree_temporal_chart <- function(data = NULL, globalEndTime = NULL)
 
     return(atreeplot);
 }
+
+active_nodes_chart <- function(data = NULL)
+{
+    if (is.null(data)) stop("a NULL data has been provided to active_nodes_chart");
+
+    loginfo("Entry of active_nodes_chart");
+
+    data %>%
+      filter(grepl("front", Value) | grepl("subtree", Value)) %>%
+      select(ResourceId, Start, End, Value, ANode) %>%
+      mutate(node_count = case_when(Value == "do_subtree" ~ "1",
+                                    Value == "init_front" ~ "1",
+                                    Value == "clean_front" ~ "-1",
+                                    TRUE ~ "<NA>"), 
+             node_count = as.integer(node_count)) -> df_active
+
+    # get all nodes that roots of sequential subtrees
+    df_active %>%
+      filter(Value == "do_subtree") %>% 
+      mutate(nodeType = TRUE) %>%
+      select(ANode, nodeType) -> seq_tree
+
+    df_active %>%
+      filter_at(vars(ANode), any_vars(. %in% seq_tree$ANode)) %>%
+      mutate(nodeType = "sequential")  -> seq_nodes       
+
+    df_active %>%
+      filter_at(vars(ANode), any_vars(!. %in% seq_tree$ANode)) %>%
+      mutate(nodeType = "parallel") -> front_nodes
+
+    # let's merge them
+    df_all <- front_nodes %>% bind_rows(seq_nodes) 
+    df_all %>%
+      group_by(nodeType) %>%
+      mutate(active = 0) %>%
+      mutate(active = cumsum(node_count)) -> df_all
+
+    activenodesplot <- df_all %>%
+      ggplot(aes(x=Start, y=active, color=nodeType)) +
+      default_theme() +
+      geom_line() +
+      theme(legend.position="top") +
+      ylab("Active Nodes") +
+      scale_colour_brewer(palette = "Dark2");
+
+    loginfo("Exit of active_nodes_chart");
+
+    return(activenodesplot);
+}

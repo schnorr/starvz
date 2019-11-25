@@ -258,7 +258,9 @@ calculate_resource_idleness <- function(dfw = NULL, max_only = TRUE)
     if(is.null(dfw)) stop("Input data frame is NULL");
 
     # Get only application states
-    dfw <- dfw %>% filter(Application == TRUE);
+    dfw <- dfw %>% filter(Application) %>%
+            distinct(ResourceType, ResourceId, Node, Position, Height, JobId, 
+                     Value, Duration, .keep_all=TRUE);
 
     # Obtain time interval
     tstart <- dfw %>% .$Start %>% min;

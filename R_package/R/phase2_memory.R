@@ -158,7 +158,7 @@ geom_events <- function (main_data = NULL, data = NULL, combined = FALSE, tstart
     if(pjr(pajer$memory$state$text)){
 
 	dx <- dfw %>% filter(Type == "Allocating") %>%
-                  left_join(main_data$data_handles, by=c("Handle"="Handle") ) %>%
+                  left_join(main_data$Data_handles, by=c("Handle"="Handle") ) %>%
                   select(-Tid, -Src, -Value)
 	dx$Coordinates <- gsub(" ", "x", dx$Coordinates)
 
@@ -400,7 +400,7 @@ handles_presence_states <- function(data){
 		               Type=="data state shared") -> data_states
 
 	# Getting the data handles by its coordinates
-	data$data_handles %>% separate(Coordinates, c("X", "Y")) -> cords
+	data$Data_handles %>% separate(Coordinates, c("X", "Y")) -> cords
 
 	# Getting all events of the handles
 	data_states %>% filter(Value %in% cords$Handle) %>% select(Container, Start, Type, Value) -> data_state_events
@@ -455,8 +455,8 @@ pre_handle_gantt <- function(data){
 	        
 	p_data %>% select(Container, Value, y1) %>% distinct() -> pre_p_data
 
-	data$task_handles %>% filter(!is.na(JobId)) %>% 
-                  inner_join(data$tasks %>% filter(!is.na(JobId)), by=c("JobId"="JobId")) %>% 
+	data$Task_handles %>% filter(!is.na(JobId)) %>% 
+                  inner_join(data$Tasks %>% filter(!is.na(JobId)), by=c("JobId"="JobId")) %>% 
 		  select(JobId, Handles, MPIRank, MemoryNode) %>% 
                   mutate(sContainer = paste0(MPIRank,"_MEMMANAGER",MemoryNode) ) -> job_handles
 
@@ -491,7 +491,7 @@ pre_handle_gantt <- function(data){
 		         filter(Type=="Transfer Request") %>%
 		         mutate(Pre = as.character(Info)) -> request_events
 
-	data$task_handles %>% select(Handles) %>% distinct() %>% .$Handles -> h_used
+	data$Task_handles %>% select(Handles) %>% distinct() %>% .$Handles -> h_used
 	data$Events %>%  filter(Handle %in% h_used) %>% select(-Nature, -Tid) %>%
 		         inner_join(data$data_handle, by=c("Handle" = "Handle") ) %>%
 		         inner_join(position, by=c("Container"="Container")) %>% 
@@ -568,7 +568,7 @@ handles_gantt <- function(data, JobId=NA, lines=NA, lHandle=NA){
 	}else{
 	      data$data_handle$Coordinates <- gsub(" ", "x", data$data_handle$Coordinates)
 	      myjobid = JobId
-	      data$task_handles %>% filter(JobId==myjobid) %>% 
+	      data$Task_handles %>% filter(JobId==myjobid) %>% 
 			  inner_join(data$data_handle, by=c("Handles" = "Handle") ) %>%
 			  ungroup() %>%
 			  mutate(Value = paste0("Memory Block ", Coordinates, "")) %>% 
@@ -693,7 +693,7 @@ handles_gantt <- function(data, JobId=NA, lines=NA, lHandle=NA){
 	#   my_job <- JobId
 	#   data$State %>% filter(JobId==my_job) %>% .$Start -> job_start
 	#   data$State %>% filter(JobId==my_job) %>% .$Duration -> job_dur
-	#   data$tasks %>% filter(JobId==my_job) %>% .$ MemoryNode -> job_node
+	#   data$Tasks %>% filter(JobId==my_job) %>% .$ MemoryNode -> job_node
 	#   text <- data.frame(x=c(job_start+job_dur/2), y=c(job_node+1.4), text=c(my_job))
 	#   p <- p + geom_text(data=text, aes(x=x, y=y, label=my_job), color="black", size=2, 
         #		  fontface="bold",

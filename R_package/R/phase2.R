@@ -237,13 +237,13 @@ the_master_function <- function(data = NULL)
     loginfo("Starting the master function");
 
     # Fail Checking
-    if((pjr(pajer$pmtool$state$active) || pjr(pajer$pmtool$kiteration$active)) && is.null(data$pmtool_states)){
+    if((pjr(pajer$pmtool$state$active) || pjr(pajer$pmtool$kiteration$active)) && is.null(data$Pmtool_states)){
       print("Pmtool states config is active but the data is NULL")
       pajer$pmtool$state$active <<- FALSE;
       pajer$pmtool$kiteration$active <<- FALSE;
     }
 
-    if(pjr(pajer$pmtool$bounds$active) && is.null(data$pmtool)){
+    if(pjr(pajer$pmtool$bounds$active) && is.null(data$Pmtool)){
       print("Pmtool bounds config is active but the data is NULL")
       pajer$pmtool$bounds$active <<- FALSE;
     }
@@ -382,7 +382,7 @@ the_master_function <- function(data = NULL)
     # KIteration PMTOOL
     if (pjr(pajer$pmtool$kiteration$active)){
         loginfo("Creating the KIteration for PMTool");
-        goijk_pm <- k_chart_pmtool(data$pmtool_states) + tScale;
+        goijk_pm <- k_chart_pmtool(data$Pmtool_states) + tScale;
 
         if (!pjr(pajer$pmtool$kiteration$legend)){
             goijk_pm <- goijk_pm + theme(legend.position="none");

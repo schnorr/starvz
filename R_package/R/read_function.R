@@ -1,13 +1,10 @@
 the_fast_reader_function <- function (directory = ".")
 {
-    names <- c("State", "Variable", "Link", "DAG", "Y", "ATree", "Gaps", "pmtool",
-               "pmtool_states", "data_handles", "papi", "tasks", "task_handles", "Events");
 
-    filenames <- gsub("^", "pre.", gsub("$", ".feather", tolower(names)));
-
+    filenames <- list.files(path = directory, pattern = "pre.*.feather", full.names = TRUE, recursive = TRUE);
+    
     l1 <- list(Origin = directory);
-    l2 <- lapply(filenames, function(x) {
-        filename = paste0(directory, "/", x);
+    l2 <- lapply(filenames, function(filename) {
         if (file.exists(filename)){
             read_feather(filename);
         }else{
@@ -15,6 +12,6 @@ the_fast_reader_function <- function (directory = ".")
             NULL;
         }
     });
-    names(l2) <- names;
+    names(l2) <- filenames %>% basename() %>% str_replace_all("pre.|.feather", "") %>% str_to_title();
     c(l1, l2);
 }

@@ -4,7 +4,7 @@ state_pmtool_chart <- function (data = NULL)
     if (is.null(data)) stop("data provided to state_chart is NULL");
 
     # Get traces
-    dfw <- data$pmtool_states;
+    dfw <- data$Pmtool_states;
 
     loginfo("Entry of state_pmtool_chart");
 
@@ -94,7 +94,7 @@ geom_pmtool_states <- function (data = NULL)
     if (is.null(data)) stop("data is NULL when given to geom_pmtool_states");
 
 
-    dfw <- data$pmtool_states %>% filter(sched == pajer$pmtool$state$sched);
+    dfw <- data$Pmtool_states %>% filter(sched == pajer$pmtool$state$sched);
 
 
     loginfo("Starting geom_pmtool_states");
@@ -149,7 +149,7 @@ geom_pmtool_bounds <- function(data = NULL)
     # Obtain time interval
     tstart <- dfwapp %>% .$Start %>% min;
 
-    data$pmtool %>%
+    data$Pmtool %>%
       mutate(MinPosition = minPos,
             MaxPosition = maxPos) -> df.pmtool;
 
@@ -167,7 +167,7 @@ geom_pmtool_bounds <- function(data = NULL)
 geom_makespan_pmtool <- function(data = NULL)
 {
     if(is.null(data)) stop("data provided for geom_makespan_pmtool is NULL");
-    dfw <- data$pmtool_states;
+    dfw <- data$Pmtool_states;
 
     bsize = pjr_value(pajer$base_size, 22);
 

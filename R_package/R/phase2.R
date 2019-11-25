@@ -97,7 +97,6 @@ pjr <- function (property)
 }
 
 starpu_mpi_grid_arrange <- function(atree, st, st_pm, st_mm, transf, starpu, ijk, ijk_pm, lackready, ready, submitted, mpi, mpiconc, mpiconcout, mpistate, gpu, memory, gflops, activenodes, title = NULL)
-starpu_mpi_grid_arrange <- function(atree, st, st_pm, st_mm, transf, starpu, ijk, ijk_pm, lackready, ready, submitted, mpi, mpiconc, mpiconcout, mpistate, gpu, memory, gflops, title = NULL)
 {
     # The list that will contain the plots
     P <- list();

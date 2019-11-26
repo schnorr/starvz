@@ -10,6 +10,13 @@ abe_cpu_cuda_details <- function(dfl, debug=FALSE)
 {
     node <- dfl %>% slice(1) %>% pull(Node);
     lpresult <- abe_cpu_cuda_inner(dfl, debug);
+	
+    # This fixes some problems on recent versions of tidyverse
+    # Check: https://github.com/tidyverse/tidyr/issues/751
+    # Check: https://github.com/tidyverse/tidyr/issues/694
+    if(exists("unnest_legacy")){
+      unnest <- unnest_legacy
+    }
 
     # Extract the solution from the LP
     lpresult %>% pull(Result) -> result;

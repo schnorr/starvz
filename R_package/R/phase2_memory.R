@@ -115,6 +115,13 @@ geom_events <- function (main_data = NULL, data = NULL, combined = FALSE, tstart
 
     dfw$Height = 1;
 
+    # This fixes some problems on recent versions of tidyverse
+    # Check: https://github.com/tidyverse/tidyr/issues/751
+    # Check: https://github.com/tidyverse/tidyr/issues/694
+    if(exists("unnest_legacy")){
+      unnest <- unnest_legacy
+    }
+
     # Color mapping
     #ret[[length(ret)+1]] <- scale_fill_manual(values = extract_colors(dfw));
 
@@ -439,7 +446,7 @@ pre_handle_gantt <- function(data){
 	}
 
 	# Processing the States: Handles & Tasks
-	data$data_handle$Coordinates <- gsub(" ", "x", data$data_handle$Coordinates)
+	data$Data_handle$Coordinates <- gsub(" ", "x", data$Data_handle$Coordinates)
 	
 	position <- data$handle_states %>% ungroup() %>%
                     select(Container) %>%
@@ -472,7 +479,7 @@ pre_handle_gantt <- function(data){
 	jobs_p_data$size <- 0.6
 
 	all_st_m_data <- bind_rows(p_data, jobs_p_data) %>%
-		         inner_join(data$data_handle, by=c("Value" = "Handle") ) %>%
+		         inner_join(data$Data_handle, by=c("Value" = "Handle") ) %>%
 		         ungroup() %>%
 		         mutate(Value = paste0("Memory Block ", Coordinates, "")) %>%
 		         select(Container, Start, End, Value, y1, Colour, size, JobId) %>%
@@ -484,7 +491,7 @@ pre_handle_gantt <- function(data){
                      mutate(G = substr(Container,1,nchar(Container)-1)) %>%
 		         mutate(Container=paste0(G, P)) %>% select(-P, -G) %>% 
 		         select(-Nature, -Tid) %>%
-		         inner_join(data$data_handle, by=c("Handle" = "Handle") ) %>%
+		         inner_join(data$Data_handle, by=c("Handle" = "Handle") ) %>%
 		         inner_join(position, by=c("Container"="Container")) %>%
 		         mutate(Value = paste0("Memory Block ", Coordinates, "")) %>%
 		         select(Container, Type, Start, Value, Info, y1) %>% 
@@ -493,7 +500,7 @@ pre_handle_gantt <- function(data){
 
 	data$Task_handles %>% select(Handles) %>% distinct() %>% .$Handles -> h_used
 	data$Events %>%  filter(Handle %in% h_used) %>% select(-Nature, -Tid) %>%
-		         inner_join(data$data_handle, by=c("Handle" = "Handle") ) %>%
+		         inner_join(data$Data_handle, by=c("Handle" = "Handle") ) %>%
 		         inner_join(position, by=c("Container"="Container")) %>% 
 		         mutate(Value = paste0("Memory Block ", Coordinates, "")) %>%
 		         select(Container, Type, Start, Value, Info, y1) %>% 
@@ -520,7 +527,7 @@ pre_handle_gantt <- function(data){
 			inner_join(position, by=c("Dest"="Container")) %>% 
 			rename(dest_y = y1) %>%
                     mutate(Tag = as.numeric(Tag)) %>%
-			inner_join(data$data_handle, by=c("Tag" = "MPITag")) %>%
+			inner_join(data$Data_handle, by=c("Tag" = "MPITag")) %>%
 			mutate(Value = paste0("Memory Block ", Coordinates, "")) %>% 
 			select(Type, Start, End, Value, origin_y, dest_y) %>%
 			rename(Transfer = Type)
@@ -536,7 +543,7 @@ pre_handle_gantt <- function(data){
 		 rename(origin_y = y1) %>%
 		 inner_join(position, by=c("Dest"="Container")) %>% 
 		 rename(dest_y = y1) %>%
-		 inner_join(data$data_handle, by=c("Handle" = "Handle") ) %>%
+		 inner_join(data$Data_handle, by=c("Handle" = "Handle") ) %>%
 		 mutate(Value = paste0("Memory Block ", Coordinates, "")) %>% 
 		 select(Type, Start, End, Value, origin_y, dest_y) %>%
 		 rename(Transfer = Type)
@@ -566,10 +573,10 @@ handles_gantt <- function(data, JobId=NA, lines=NA, lHandle=NA){
 	     final_events_data <- data$handle_gantt_data$events_points  %>% filter(Value %in% lHandle)
 	     final_links_data <- data$handle_gantt_data$final_links %>% filter(Value %in% lHandle)
 	}else{
-	      data$data_handle$Coordinates <- gsub(" ", "x", data$data_handle$Coordinates)
+	      data$Data_handle$Coordinates <- gsub(" ", "x", data$Data_handle$Coordinates)
 	      myjobid = JobId
 	      data$Task_handles %>% filter(JobId==myjobid) %>% 
-			  inner_join(data$data_handle, by=c("Handles" = "Handle") ) %>%
+			  inner_join(data$Data_handle, by=c("Handles" = "Handle") ) %>%
 			  ungroup() %>%
 			  mutate(Value = paste0("Memory Block ", Coordinates, "")) %>% 
 			  .$Value -> selected_handles
@@ -703,10 +710,122 @@ handles_gantt <- function(data, JobId=NA, lines=NA, lHandle=NA){
 
 }
 
+
+pre_snap <- function(data, f_data){
+	
+	# This fixes some problems on recent versions of tidyverse
+	# Check: https://github.com/tidyverse/tidyr/issues/751
+	# Check: https://github.com/tidyverse/tidyr/issues/694
+	if(exists("unnest_legacy")){
+	  unnest <- unnest_legacy
+	}
+
+	data$Data_handles %>% 
+		  separate(Coordinates, c("Y", "X")) %>%
+		  mutate(X=as.numeric(X), Y=as.numeric(Y)) -> new_handles 
+
+
+	new_handles %>% select(Handle, X, Y) -> hand
+
+	f_data %>% ungroup() %>% select(Container) %>% distinct() %>% .$Container -> cont
+	hand <- hand %>% mutate(Container=list(cont)) 
+	hand %>% unnest() -> hand
+
+	f_data %>% mutate(st = ifelse(Type=="data state owner", "Owner", "Shared")) -> d_presence
+
+	data$State %>% mutate(JobId=JobId) %>%
+		       inner_join(data$Tasks, by=c("JobId"="JobId")) %>%
+		       select(Start, End, Value, JobId, MemoryNode, MPIRank, Color) %>%
+		       inner_join(data$Task_handles, by=c("JobId"="JobId")) %>%
+		       mutate(Container = ifelse(MPIRank>=0, paste0(MPIRank, "_MEMMANAGER", MemoryNode), paste0("MEMMANAGER", MemoryNode))) %>%
+		       select(Handles, Modes, Start, End, Value, JobId, Container, Color) -> tasks
+
+	return(list(d_presence, hand, tasks))
+}
+
+memory_snap <- function(data, selected_time, step, tasks_size=30){
+
+	data[[3]] %>% select(Value, Color) %>% distinct() -> c_info
+
+	colors <- c("darksalmon","steelblue1")
+
+	colors <- c(colors, c_info$Color)
+
+	c_names <- c("Owner", "Shared")
+	c_names <- c(c_names, c_info$Value)
+
+	data[[1]] %>% filter(Start < selected_time, End > selected_time) %>% 
+		      right_join(data[[2]], by=c("Value" = "Handle", "Container"="Container")) -> d_presence
+
+	task_presence <- data[[3]] %>% filter(Start <= selected_time, End >= selected_time) %>% 
+		         inner_join(data[[2]], by=c("Handles" = "Handle", "Container"="Container"))
+
+	task_presence_alpha <- data[[3]] %>% filter(Start > selected_time-step, End <= selected_time) %>% 
+		         inner_join(data[[2]], by=c("Handles" = "Handle", "Container"="Container"))
+
+	max_x <- data[[2]] %>% arrange(-X) %>% slice(1) %>% .$X %>% unlist()
+
+	p <- ggplot(d_presence, aes(Y, X)) +
+	    geom_tile(aes(fill = st),
+		      colour = "white") + 
+	    geom_point(data = task_presence_alpha,
+		      aes(fill = Value,
+		          x=Y,
+		          y=X,
+		          shape=Modes),
+		      colour = "black",
+		      size=(tasks_size/max_x), stroke = 0.2, alpha=0.3) +
+	    geom_point(data = task_presence,
+		      aes(fill = Value,
+		          x=Y,
+		          y=X,
+		          shape=Modes),
+		      colour = "black",
+		      size=(tasks_size/max_x), stroke = 0.2) + 
+	    
+	    scale_shape_manual(values=c("R"=21, "W"=22, "RW"=22), drop = FALSE,
+		               limits = c("R", "RW"),
+		               guide = guide_legend(title.position = "top") ) +
+	    scale_fill_manual(name = "State", values = colors, drop = FALSE,
+		              limits = c_names,
+		              guide = guide_legend(title.position = "top", override.aes = 
+		                      list(shape = NA, stroke=1
+		                          )) ) +
+	    scale_y_reverse(limits=c(max_x+0.6, -0.6), expand=c(0,0) ) + 
+	    scale_x_continuous(limits=c(-0.6, max_x+0.6), expand=c(0,0) ) +
+	    facet_wrap(~ Container) +
+	    labs(x="Block X Coordinate", y="Block Y Coordinate") +
+	    theme_bw(base_size=16) +
+	    theme(legend.position="top",
+		  plot.margin = unit(c(0, 10, 0, 0), "mm"), 
+		  legend.box.margin=margin(-5, 0, -16, 0),
+		  strip.text.x = element_text(margin = margin(.1, 0, .1, 0, "cm")),
+		  legend.background = element_rect(fill="transparent"),
+		  panel.grid.major = element_blank(),
+		  panel.grid.minor = element_blank(),
+		  panel.spacing = unit(1, "mm"))
+
+	return(p)
+}
+
+multiple_snaps <- function(snap_data, start, end, step, path){
+	  se <- seq(start, end, step)
+	  se <- c(se, end)
+	  i <- 1
+	  for(time in se) {
+	    p <- memory_snap(snap_data, time, step, tasks_size=40)
+	    p <- p + ggtitle(paste0("Time: ",as.character(time)))
+	    ggsave(paste0(path, i, ".png"), plot = p, scale=4, width=4, height=3, unit="cm")
+	    i <- i+1
+	  }
+}
+
 handles_help <- function(){
 	print("To accelerate the process:")
 	print("data$handle_states <- handles_presence_states(data)")
 	print("data$handle_gantt_data <- pre_handle_gantt(data)")
 	print("To Select time:")
 	print("handles_gantt(data, JobId=c(jobid)) + coord_cartesian(xlim=c(start, end))")
+	print("snap_data <- pre_snap(data, data$handle_states)")
+	print("memory_snap(snap_data, 1000, tasks_size=200, step=1)")
 }

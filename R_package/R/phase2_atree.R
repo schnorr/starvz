@@ -191,3 +191,14 @@ atree_time_aggregation <- function(dfw = NULL, step = 100)
         filter(Value != 0) %>%
         summarize(Quantity = n(), Activity = sum(Value))
 }
+
+
+computing_nodes_chart <- function(data=NULL, step = 100)
+{
+  atree_time_aggregation(data, step) %>%  
+    ggplot(aes(x=Slice, y=Quantity)) +
+    geom_line() +
+    default_theme() +
+    ylab("Computing\nNodes") +
+    scale_colour_brewer(palette = "Dark2");
+}

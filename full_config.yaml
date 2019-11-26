@@ -152,7 +152,12 @@ default:
  
   activenodes: # Plot the active node count over time   
     active: TRUE # Enable
-    height: 1 # Vertical size for the plot
+    height: 2 # Vertical size for the plot
+
+  computingnodes: # Plot the computationally active nodes over time   
+    active: TRUE # Enable
+    height: 2 # Vertical size for the plot
+    step: 10 # Time step used for aggregation
 
   gflops:
     active: FALSE

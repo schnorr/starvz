@@ -103,6 +103,7 @@ active_nodes_chart <- function(data = NULL)
     # let's merge them
     df_all <- front_nodes %>% bind_rows(seq_nodes) 
     df_all %>%
+      arrange(Start) %>%
       group_by(nodeType) %>%
       mutate(active = 0) %>%
       mutate(active = cumsum(node_count)) -> df_all

@@ -120,3 +120,74 @@ active_nodes_chart <- function(data = NULL)
 
     return(activenodesplot);
 }
+
+## time integration for cpu active atree nodes
+
+atree_time_aggregation_prep <- function(dfw = NULL)
+{
+    if (is.null(dfw)) return(NULL);
+
+    dfw_initial <- dfw %>%
+        rename(Task = Value) %>%
+        # This is the only difference
+        group_by (ANode) %>%
+        mutate(Value = 1) %>%
+        select(-Duration, -Color, -Nature, -Type,
+               -Size, -Depth, -Params, -JobId, -Footprint, -Tag,
+               -GFlop, -X, -Y, -Iteration, -Subiteration,
+               -Node, -Resource, -ResourceType, -Outlier, -Height,
+               -Position);
+
+    # Define the first zero
+    dfw_zero_1 <- dfw_initial %>% slice(1) %>% mutate(StartN = 0, EndN = Start, Value = 0);
+
+    # Define other zeroes
+    dfw_zero_N <- dfw_initial %>% mutate(StartN = End, EndN = lead(Start), Value = 0);
+
+    # Row bind them
+    dfw_agg_prep <- dfw_zero_1 %>%
+        bind_rows(dfw_zero_N) %>%
+        mutate(Start = StartN, End = EndN) %>%
+        select(-StartN, -EndN) %>%
+        bind_rows(dfw_initial) %>%
+        ungroup() %>%
+        arrange(Start);
+
+    # Set max end time for NA cases
+    dfw_agg_prep <- dfw_agg_prep %>%
+        filter(!complete.cases(.)) %>%
+        mutate(End = max(dfw$End)) %>%
+        bind_rows(dfw_agg_prep %>% filter(complete.cases(.))) %>%
+        mutate (Duration = End - Start) %>%
+        arrange(ResourceId, Task, Start);
+
+    return(dfw_agg_prep);
+}
+
+atree_time_aggregation_do <- function(dfw_agg_prep = NULL, step = NA)
+{
+    if (is.null(dfw_agg_prep)) return(NULL);
+    if (is.na(step)) return(NULL);
+
+    dfw_agg_prep %>%
+        group_by(ANode) %>%
+        do(remyTimeIntegrationPrep(., myStep = step)) %>%
+        mutate(Start = Slice, End = lead(Slice), Duration = End-Start) %>%
+        ungroup() %>%
+        na.omit()
+}
+
+atree_time_aggregation <- function(dfw = NULL, step = 100)
+{
+    if (is.null(dfw)) return(NULL);
+
+    dfw <- dfw %>% filter(Application) %>% filter(Type == "Worker State")
+
+    dfw_agg_prep <- atree_time_aggregation_prep (dfw);
+    dfw_agg <- atree_time_aggregation_do (dfw_agg_prep, step);
+
+    dfw_agg %>%
+        group_by(Slice) %>%
+        filter(Value != 0) %>%
+        summarize(Quantity = n(), Activity = sum(Value))
+}

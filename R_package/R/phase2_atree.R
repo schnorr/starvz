@@ -9,9 +9,9 @@ geom_atree <- function (data=NULL, Offset=1.02, Flip = TRUE)
     dfactor <- makespan * 0.04;
     doffset <- makespan * Offset;
 
-    data <- data$ATree %>%
+    data <- data$Atree %>%
         # Get graphical properties of each parent for each row
-        left_join(data$ATree, by=c("Parent" = "ANode"), suffix=c(".Node", ".Parent")) %>%
+        left_join(data$Atree, by=c("Parent" = "ANode"), suffix=c(".Node", ".Parent")) %>%
         rename(Height = Height.Node, Position = Position.Node, Depth = Depth.Node, Intermediary = Intermediary.Node) %>%
         select(-Parent.Parent) %>%
         # Keep only intermediary nodes
@@ -34,7 +34,7 @@ geom_atree <- function (data=NULL, Offset=1.02, Flip = TRUE)
             # The Label
             geom_text(data=data, size=3, aes(y=Label.Y, label=ANode, x=Label.X)),
             # Fix time coordinates
-            #coord_cartesian(xlim=c(0, makespan))
+            coord_cartesian(xlim=c(0, makespan))
         );
     return(ret);
 }
@@ -45,7 +45,7 @@ atree_temporal_chart <- function(data = NULL, globalEndTime = NULL)
     loginfo("Entry of atree_temporal_chart");
 
     dfw <- data$State;
-    dfa <- data$ATree;
+    dfa <- data$Atree;
     # Prepare for colors
     namedcolors <- extract_colors(dfw);
     atreeplot <- dfw %>%
@@ -67,7 +67,6 @@ atree_temporal_chart <- function(data = NULL, globalEndTime = NULL)
         geom_atree(data, Offset = 1.05, Flip = TRUE);
 
     loginfo("Exit of atree_temporal_chart");
-
     return(atreeplot);
 }
 

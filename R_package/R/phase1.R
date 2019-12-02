@@ -451,7 +451,7 @@ the_reader_function <- function (directory = ".", app_states_fun = NULL, state_f
         hl_y_coordinates(where = directory);
 
     # QRMumps case:
-    # If the ATree is available and loaded, we create new columns for each task
+    # If the Atree is available and loaded, we create new columns for each task
     # to hold Y coordinates for the temporal elimination tree plot
     if (!is.null(dfa)){
         dfap <- dfa %>% select(-Parent, -Depth) %>% rename(Height.ANode = Height, Position.ANode = Position);
@@ -513,7 +513,7 @@ the_reader_function <- function (directory = ".", app_states_fun = NULL, state_f
     # Enframe ZERO
     ZERO <- enframe(ZERO, name = NULL)
     
-    data <- list(Origin=directory, State=dfw, Variable=dfv, Link=dfl, DAG=dfdag, Y=dfhie, ATree=dfa,
+    data <- list(Origin=directory, State=dfw, Variable=dfv, Link=dfl, DAG=dfdag, Y=dfhie, Atree=dfa,
                  Pmtool=dpmtb, Pmtool_states=dpmts, Data_handles=ddh, Papi=dpapi, Tasks=dtasks$Tasks, Task_handles=dtasks$handles, Events=devents, Zero=ZERO);
 
     loginfo("Call Gaps.");

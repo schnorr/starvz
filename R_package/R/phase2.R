@@ -302,7 +302,7 @@ the_master_function <- function(data = NULL)
     goactivenodes <- geom_blank();
     gocomputingnodes <- geom_blank();
 
-    if (!is.null(data$ATree) && pjr(pajer$atree$active)){
+    if (!is.null(data$Atree) && pjr(pajer$atree$active)){
         loginfo("Creating the temporal atree plot");
         goatreet <- atree_temporal_chart(data) + tScale;
         loginfo("Temporal atree plot completed");

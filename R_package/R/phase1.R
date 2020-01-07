@@ -218,7 +218,7 @@ read_state_csv <- function (where = ".",
             nest() %>%
             mutate(model = map(data, task_model)) %>%
             mutate(outliers = map(model, function(m) {
-              tibble(Row = names(outlierTest(m)$rstudent))
+              tibble(Row = names(outlierTest(m, n.max=Inf)$rstudent))
             })) -> df.pre.outliers
 
         # Step 2: identify outliers rows

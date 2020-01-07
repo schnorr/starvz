@@ -199,8 +199,7 @@ read_state_csv <- function (where = ".",
         if(file.exists("conf.txt")) {
           ib <- as.integer(gsub("\\D", "", c(grep("qrm_ib", readLines("conf.txt"), value = TRUE))))
         } else {
-          loginfo("File conf.txt not found! Assuming ib = 1")
-          ib = 1
+          stop(paste("File conf.txt do not exist!"));
         }
 
         if(ib != 1) {

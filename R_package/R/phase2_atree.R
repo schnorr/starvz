@@ -49,7 +49,8 @@ atree_temporal_chart <- function(data = NULL, globalEndTime = NULL)
     # Prepare for colors
     namedcolors <- extract_colors(dfw);
     atreeplot <- dfw %>%
-        filter(Application == TRUE) %>%
+        # Considering only application data and Worker State
+        filter(Application, Type == "Worker State") %>%
         # Remove all tasks that do not have ANode
         filter(!is.na(Height.ANode)) %>%
         # Plot

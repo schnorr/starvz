@@ -1299,6 +1299,14 @@ cfd_colors <- function()
         Color = c("#e41a1c", "#377eb8", "#984ea3", "#9a4ea3", "#4daf4a", "#ffff33", "#a65628", "#f781bf", "#ea1a1c", "#37beb8", "#4eaf4a", "#ff7f00"));
 }
 
+qr_colors <- function()
+{
+    tibble(
+        Kernel = c("dgeqrt", "dlarfb" , "dtpqrt" , "dtpmqrt"),
+        Color = c("#96e3a2", "#f68285", "#d194d0",  "#9bb6dd"));
+    )
+}
+
 scalfmm_colors <- function()
 {
     tibble(

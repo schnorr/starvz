@@ -1277,6 +1277,12 @@ cholesky_states <- function()
     cholesky_colors() %>% .$Kernel;
 }
 
+qr_states <- function()
+{
+    qr_colors() %>% .$Kernel;
+}
+
+
 scalfmm_states <- function()
 {
     scalfmm_colors() %>% .$Kernel;

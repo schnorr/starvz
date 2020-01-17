@@ -1277,6 +1277,11 @@ cholesky_states <- function()
     cholesky_colors() %>% .$Kernel;
 }
 
+qr_states <- function()
+{
+    qr_colors() %>% .$Kernel;
+}
+
 scalfmm_states <- function()
 {
     scalfmm_colors() %>% .$Kernel;
@@ -1305,8 +1310,8 @@ cfd_colors <- function()
 qr_colors <- function()
 {
     tibble(
-        Kernel = c("dgeqrt", "dlarfb" , "dtpqrt" , "dtpmqrt"),
-        Color = c("#96e3a2", "#f68285", "#d194d0",  "#9bb6dd"));
+        Kernel = c("dgeqrt", "dlarfb" , "dtpqrt" , "dtpmqrt", "lapack_dgeqrt", "lapack_dlarfb" , "lapack_dtpqrt" , "lapack_dtpmqrt"),
+        Color = c("#96e3a2", "#f68285", "#d194d0",  "#9bb6dd", "#96e3a2", "#f68285", "#d194d0",  "#9bb6dd"));
 }
 
 scalfmm_colors <- function()

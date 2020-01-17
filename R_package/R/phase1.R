@@ -1307,7 +1307,6 @@ qr_colors <- function()
     tibble(
         Kernel = c("dgeqrt", "dlarfb" , "dtpqrt" , "dtpmqrt"),
         Color = c("#96e3a2", "#f68285", "#d194d0",  "#9bb6dd"));
-    )
 }
 
 scalfmm_colors <- function()

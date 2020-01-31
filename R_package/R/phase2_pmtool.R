@@ -117,7 +117,7 @@ geom_pmtool_states <- function (data = NULL)
                                 xmin=Start,
                                 xmax=End,
                                 ymin=Position,
-                                ymax=Position+Height-0.4), alpha=0.5);
+                                ymax=Position+Height-0.4), alpha=0.5, color=ifelse(pjr_value(pajer$st$rect_outline, NA), "black", NA));
 
 
     loginfo("Finishing geom_pmtool_states");

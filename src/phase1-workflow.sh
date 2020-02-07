@@ -30,11 +30,10 @@ echo
 
 pushd $CASE
 
-echo "Convert from FXT to paje.sorted.trace"
-date
-
 # If sorted is already present dont reexecute
-if [ ! -f "paje.sorted.trace" ]; then
+if [ ! -f "paje.sorted.trace" ] || [ ! -f "data.rec" ] || [ ! -f "tasks.rec" ]; then
+  echo "Convert from FXT to paje.sorted.trace"
+  date
   fxt2paje.sh
   es=$?
   if [ $es -ne 0 ]
@@ -43,8 +42,10 @@ if [ ! -f "paje.sorted.trace" ]; then
       exit 1
   fi
   rm -f paje.trace
+else
+  echo "fxt2paje files already present"
 fi
-
+#aa
 # Put Lionel's pmtool to get bounds to enrich the visualization
 # Also create a hypothetical trace from the solution of the LP
 
@@ -55,8 +56,8 @@ if [ -x "$(command -v pmtool)" ] && [ ! -f "platform_file.rec" ]; then
   if [ $STARPU_PERF_MODEL_DIR != "" ] && [ $STARPU_HOSTNAME != "" ]; then
     starpu_perfmodel_recdump tasks.rec -o platform_file.rec
   else
-    echo "Lionel's platform_file.rec file is not available and cannot be generated, skipping it."	  
-  fi	
+    echo "Lionel's platform_file.rec file is not available and cannot be generated, skipping it."
+  fi
 fi
 
 # Checking if Lionel's pmtool command and platform_file.rec file are available & accessible

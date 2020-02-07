@@ -514,9 +514,9 @@ the_reader_function <- function (directory = ".", app_states_fun = NULL, state_f
 
     # Enframe ZERO
     ZERO <- enframe(ZERO, name = NULL)
-    
+
     data <- list(Origin=directory, State=dfw, Variable=dfv, Link=dfl, DAG=dfdag, Y=dfhie, Atree=dfa,
-                 Pmtool=dpmtb, Pmtool_states=dpmts, Data_handles=ddh, Papi=dpapi, Tasks=dtasks$Tasks, Task_handles=dtasks$handles, Events=devents, Zero=ZERO);
+                 Pmtool=dpmtb, Pmtool_states=dpmts, Data_handles=ddh, Papi=dpapi, Tasks=dtasks$tasks, Task_handles=dtasks$handles, Events=devents, Zero=ZERO);
 
     loginfo("Call Gaps.");
     data$Gaps <- gaps(data);

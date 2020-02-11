@@ -129,7 +129,9 @@ read_state_csv <- function (where = ".",
 
       # TODO: Using set1 right now to generate colors, max of 9 states
       c <- brewer.pal(n = nc, name = "Set1")
-
+      if(nc < 3)
+        c <- head(c, nc)          
+        
       # Match States and Colors
       dfcolors <- dfcolors %>% mutate(Color = c) %>%
           arrange(Value, Color) %>%

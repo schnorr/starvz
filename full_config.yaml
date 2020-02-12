@@ -22,7 +22,7 @@ default:
     height: # Vertical Size in the final visualization
 
   kiteration: # Visualization about application itarations
-    active: TRUE # Enable
+    active: FALSE # Enable
     legend: TRUE # Enable Legends
     height: 2 # Vertical Size in the final visualization
 

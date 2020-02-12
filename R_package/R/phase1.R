@@ -249,9 +249,11 @@ read_state_csv <- function (where = ".",
                         select(JobId, Outlier), by=c("JobId"))
 
     }else{
-        loginfo("No outlier detection; use NA in the corresponding column.");
+        loginfo("No outlier detection; use standard model (note that this model could be not accurate for irregular tasks).");
         dfw <- dfw %>%
-            mutate(Outlier = NA);
+            group_by(Value, ResourceType) %>%
+            mutate(Outlier = ifelse(Duration > outlier_fun(Duration), TRUE, FALSE)) %>%
+            ungroup ();
     }
 
     loginfo("Define the ZERO timestamp.");

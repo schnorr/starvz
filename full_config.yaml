@@ -56,15 +56,15 @@ default:
 
   pmtool: # Create plots based on pmtool generated data
     bounds: # Shows pmtool theoretical bounds
-      active: TRUE # Enable
+      active: FALSE # Enable
       label: TRUE # Bound name
       alg: ["area", "cp"] # List of bounds to plot
     state: # PMtool State Chart theoretical computed by shedule
-      active: TRUE # Enable
+      active: FALSE # Enable
       height: 4 # Vertical Size in the final visualization
       sched: "dmdas:" # Scheduler Used
     kiteration: # Iteration Chart
-      active: TRUE
+      active: FALSE
       height: 2
       legend: TRUE
 
@@ -151,11 +151,11 @@ default:
     total: TRUE
  
   activenodes: # Plot the active node count over time   
-    active: TRUE # Enable
+    active: FALSE # Enable
     height: 2 # Vertical size for the plot
 
   computingnodes: # Plot the computationally active nodes over time   
-    active: TRUE # Enable
+    active: FALSE # Enable
     height: 2 # Vertical size for the plot
     step: 10 # Time step used for aggregation
 

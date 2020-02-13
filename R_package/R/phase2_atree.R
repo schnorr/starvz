@@ -122,7 +122,6 @@ active_nodes_chart <- function(data = NULL)
 }
 
 ## time integration for cpu active atree nodes
-
 atree_time_aggregation_prep <- function(dfw = NULL)
 {
     if (is.null(dfw)) return(NULL);
@@ -131,6 +130,7 @@ atree_time_aggregation_prep <- function(dfw = NULL)
         rename(Task = Value) %>%
         # This is the only difference
         group_by (ANode) %>%
+        arrange(Start) %>%
         mutate(Value = 1) %>%
         select(-Duration, -Color, -Nature, -Type,
                -Size, -Depth, -Params, -JobId, -Footprint, -Tag,

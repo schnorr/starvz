@@ -25,20 +25,9 @@ state_chart <- function (data = NULL, globalEndTime = NULL, ST.Outliers = TRUE, 
     gow <- gow + geom_states(data, ST.Outliers, StarPU.View);
 
     if (!StarPU.View){
-        # The per-node ABE
-        if (pjr(pajer$st$abe$active)) gow = gow + geom_abe(data);
-
-        # add pmtool bound
-        if (pjr(pajer$pmtool$bounds$active)) gow = gow + geom_pmtool_bounds(data);
-
-        # add makespan
-        if (pjr(pajer$st$makespan)) gow = gow + geom_makespan(data);
 
         # add idleness
         if (pjr(pajer$st$idleness)) gow = gow + geom_idleness(data);
-
-        # add Global CPB
-        if (pjr(pajer$st$cpb) || pjr(pajer$st$cpb_mpi$active)) gow = gow + geom_cpb(data);
 
         # check if task dependencies should be added
         if (pjr(pajer$st$tasks$active)){
@@ -54,6 +43,17 @@ state_chart <- function (data = NULL, globalEndTime = NULL, ST.Outliers = TRUE, 
             loginfo("DO NOT add dependencies");
         }
 
+        # add Global CPB
+        if (pjr(pajer$st$cpb) || pjr(pajer$st$cpb_mpi$active)) gow = gow + geom_cpb(data);
+
+        # The per-node ABE
+        if (pjr(pajer$st$abe$active)) gow = gow + geom_abe(data);
+
+        # add pmtool bound
+        if (pjr(pajer$pmtool$bounds$active)) gow = gow + geom_pmtool_bounds(data);
+
+        # add makespan
+        if (pjr(pajer$st$makespan)) gow = gow + geom_makespan(data);
 
     }else{
         # add some color palette for StarPU States

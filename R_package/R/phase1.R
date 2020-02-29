@@ -130,8 +130,8 @@ read_state_csv <- function (where = ".",
       # TODO: Using set1 right now to generate colors, max of 9 states
       c <- brewer.pal(n = nc, name = "Set1")
       if(nc < 3)
-        c <- head(c, nc)          
-        
+        c <- head(c, nc)
+
       # Match States and Colors
       dfcolors <- dfcolors %>% mutate(Color = c) %>%
           arrange(Value, Color) %>%
@@ -723,10 +723,11 @@ data_handles_csv_parser <- function (where = ".")
                         col_types=cols(
                             Handle = col_character(),
                             HomeNode = col_integer(),
+                            MPIRank = col_integer(),
                             Size = col_integer(),
+                            Description = col_character(),
                             Coordinates = col_character(),
                             MPIOwner = col_integer(),
-                            Description = col_character(),
                             MPITag = col_integer()
                         ));
 

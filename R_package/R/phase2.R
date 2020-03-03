@@ -96,7 +96,7 @@ pjr <- function (property)
     ifelse(!is.null(property) && property, property, FALSE);
 }
 
-starpu_mpi_grid_arrange <- function(atree, st, st_pm, st_mm, transf, starpu, ijk, ijk_pm, lackready, ready, submitted, mpi, mpiconc, mpiconcout, mpistate, gpu, memory, gflops, activenodes, computingnodes, title = NULL)
+starpu_mpi_grid_arrange <- function(atree, utiltreenode, utiltreedepth, st, st_pm, st_mm, transf, starpu, ijk, ijk_pm, lackready, ready, submitted, mpi, mpiconc, mpiconcout, mpistate, gpu, memory, gflops, activenodes, computingnodes, title = NULL)
 {
     # The list that will contain the plots
     P <- list();
@@ -118,6 +118,14 @@ starpu_mpi_grid_arrange <- function(atree, st, st_pm, st_mm, transf, starpu, ijk
     if (pjr(pajer$atree$active)){
         P[[length(P)+1]] <- atree;
         H[[length(H)+1]] <- pjr_value(pajer$atree$height, 3);
+    }
+    if (pjr(pajer$utiltreenode$active)){
+        P[[length(P)+1]] <- utiltreenode;
+        H[[length(H)+1]] <- pjr_value(pajer$utiltreenode$height, 2);
+    }
+    if (pjr(pajer$utiltreedepth$active)){
+        P[[length(P)+1]] <- utiltreedepth;
+        H[[length(H)+1]] <- pjr_value(pajer$utiltreedepth$height, 2);
     }
     if (pjr(pajer$kiteration$active)){
         P[[length(P)+1]] <- ijk;
@@ -285,6 +293,8 @@ the_master_function <- function(data = NULL)
 
     # Set all possible plots to NULL
     goatreet <- geom_blank();
+    goutiltreenode <- geom_blank();
+    goutiltreedepth <- geom_blank();
     gow <- geom_blank();
     gow_pm <- geom_blank();
     gow_mm <- geom_blank();
@@ -302,10 +312,27 @@ the_master_function <- function(data = NULL)
     goactivenodes <- geom_blank();
     gocomputingnodes <- geom_blank();
 
+    # Atree space/time view
     if (!is.null(data$Atree) && pjr(pajer$atree$active)){
         loginfo("Creating the temporal atree plot");
         goatreet <- atree_temporal_chart(data) + tScale;
         loginfo("Temporal atree plot completed");
+    }
+
+    # Resource utilization by tree node
+    if (!is.null(data$Atree) && pjr(pajer$utiltreenode$active)){
+        loginfo("Creating the resource utilization by node plot");
+        aggStep <- pjr_value(pajer$utiltreenode$step, globalAggStep);
+        goutiltreenode <- resource_utilization_tree_node_plot(data, step=aggStep) + tScale;
+        loginfo("Resource utilization by node plot completed");
+    }
+
+    # Resource utilization by tree depth
+    if (!is.null(data$Atree) && pjr(pajer$utiltreedepth$active)){
+        loginfo("Creating the resource utilization by depth plot");
+        aggStep <- pjr_value(pajer$utiltreenode$step, globalAggStep);
+        goutiltreedepth <- resource_utilization_tree_depth_plot(data, step=aggStep) + tScale;
+        loginfo("Resource utilization by depth plot completed");
     }
 
     # SpaceTime
@@ -620,6 +647,8 @@ the_master_function <- function(data = NULL)
 
     # assembling
     g <- starpu_mpi_grid_arrange(atree = goatreet,
+                                 utiltreenode = goutiltreenode,
+                                 utiltreedepth = goutiltreedepth,
                                  st = gow,
                                  st_pm = gow_pm,
                                  st_mm = gow_mm,

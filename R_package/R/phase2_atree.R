@@ -202,3 +202,155 @@ computing_nodes_chart <- function(data=NULL, step = 100)
     ylab("Computing\nNodes") +
     scale_colour_brewer(palette = "Dark2");
 }
+
+# remyTimeIntegrationPrep without dividing the Value column by the time slice
+remyTimeIntegrationPrepNoDivision <- function(dfv = NULL, myStep = 100)
+{
+    if (is.null(dfv)) return(NULL);
+    if (nrow(dfv) == 0) return(NULL);
+    mySlices <- getSlices(dfv, step = myStep);
+    tibble(Slice = mySlices, Value = c(remyTimeIntegration(dfv, slices=mySlices), 0));
+}
+
+resource_utilization_tree_node <- function(data = NULL)
+{
+  data %>%
+    # arrange(-color_id) %>%
+    ggplot(aes(x=Slice, y=Value, fill=as.factor(ANode))) +
+    geom_area() +
+	# scale_fill_manual(values=c(gray.colors(data %>% 
+	#                      select(ANode) %>%
+	#                      unique() %>% nrow(), start = 0.1, end = 0.9, gamma = 1, alpha=1, rev = FALSE))) +
+    # scale_fill_manual(values=colors) +
+    default_theme() +
+    theme(legend.position = "none") +
+    #xlab("Time [ms]") +
+    ylab("Resource Utilization %\nANode")
+}
+
+resource_utilization_tree_depth <- function(data = NULL)
+{
+  data %>%
+    filter(Depth != 0) %>%
+    ungroup() %>%
+    arrange(Depth) %>%
+    ggplot() +
+    geom_area(aes(x=Slice, y=Value2, fill=as.factor(Depth))) +
+   # scale_fill_manual(values = heat) +
+    default_theme() +
+    theme(legend.position = "none") +
+    #xlab("Time [ms]") +
+    ylab("Resource Utilization %\nDepth")
+}
+
+resource_utilization_tree_node_plot <- function(data = NULL, step = 100)
+{
+  # Prepare and filter data
+  df_filter <- data$State %>% 
+    filter(Application, Type == "Worker State", 
+           grepl("lapack", Value) | grepl("subtree", Value)) %>%
+    select(ANode, Start, End, JobId) %>%
+    arrange(Start)
+
+  # Get number of workers for resource utilization
+  NWorkers <- data$State %>% 
+      filter(grepl("CPU", ResourceType) | grepl("CUDA", ResourceType)) %>%
+      select(ResourceId) %>% unique() %>% nrow()
+
+  # Compute the node parallelism
+  df_node_parallelism <- df_filter %>%
+    select(ANode, Start, JobId) %>%
+    mutate(Event = "Start") %>%
+    rename(Time = Start) %>%
+    bind_rows(df_filter %>%
+              select(ANode, End, JobId) %>%
+              mutate(Event = "End") %>%
+              rename(Time = End)  
+              ) %>%
+    arrange(Time) %>%
+    group_by(ANode) %>%
+    mutate(Value = ifelse(Event == "Start", 1, -1)) %>%
+    mutate(nodeParallelism = cumsum(Value)) %>%
+    ungroup()
+
+  # Integrate resource utilization by ANode
+  df_node_plot <- df_node_parallelism %>%
+    select(ANode, Time, nodeParallelism) %>%
+    arrange(Time) %>%
+    mutate(End = lead(Time)) %>%
+    mutate(Duration = End-Time) %>%
+    rename(Start = Time, Value = nodeParallelism) %>%
+    na.omit() %>%
+    group_by(ANode) %>%
+    do(remyTimeIntegrationPrepNoDivision(., myStep = step)) %>%
+    # This give us the total worker usage grouped by ANode in a time slice
+    mutate(Value1 = (Value / (step*NWorkers)) * 100) %>%
+    ungroup() %>%
+    group_by(Slice) %>%
+    arrange(Slice) %>%
+    mutate(Usage = sum(Value1))
+
+	resource_utilization_tree_node(df_node_plot)
+}  
+
+
+resource_utilization_tree_depth_plot <- function(data = NULL, step = 100)
+{
+  # Prepare and filter data
+  df_filter <- data$State %>% 
+    filter(Application, Type == "Worker State", 
+           grepl("lapack", Value) | grepl("subtree", Value)) %>%
+    select(ANode, Start, End, JobId) %>%
+    arrange(Start)
+
+  # Get number of workers for resource utilization
+  NWorkers <- data$State %>% 
+      filter(grepl("CPU", ResourceType) | grepl("CUDA", ResourceType)) %>%
+      select(ResourceId) %>% unique() %>% nrow()
+
+  # Compute the node parallelism
+  df_node_parallelism <- df_filter %>%
+    select(ANode, Start, JobId) %>%
+    mutate(Event = "Start") %>%
+    rename(Time = Start) %>%
+    bind_rows(df_filter %>%
+              select(ANode, End, JobId) %>%
+              mutate(Event = "End") %>%
+              rename(Time = End)  
+              ) %>%
+    arrange(Time) %>%
+    group_by(ANode) %>%
+    mutate(Value = ifelse(Event == "Start", 1, -1)) %>%
+    mutate(nodeParallelism = cumsum(Value)) %>%
+    ungroup()
+
+  # Integrate resource utilization by ANode
+  df_node_plot <- df_node_parallelism %>%
+    select(ANode, Time, nodeParallelism) %>%
+    arrange(Time) %>%
+    mutate(End = lead(Time)) %>%
+    mutate(Duration = End-Time) %>%
+    rename(Start = Time, Value = nodeParallelism) %>%
+    na.omit() %>%
+    group_by(ANode) %>%
+    do(remyTimeIntegrationPrepNoDivision(., myStep = step)) %>%
+    # This give us the total worker usage grouped by ANode in a time slice
+    mutate(Value1 = (Value / (step*NWorkers)) * 100) %>%
+    ungroup() %>%
+    group_by(Slice) %>%
+    arrange(Slice) %>%
+    mutate(Usage = sum(Value1))
+
+  # Compute for Depth
+  df_depth_plot <- df_node_plot %>%
+    left_join(data$Atree, by="ANode") %>%
+    select(-Value, -Height, -Position, -Intermediary) %>%
+    filter(!is.na(Depth)) %>% 
+    ungroup() %>%
+    group_by(Slice, Depth) %>%
+    mutate(Value2 = sum(Value1)) %>%
+    select(Slice, Depth, Value2) %>%
+    unique()
+    
+    resource_utilization_tree_depth(df_depth_plot)
+}

@@ -216,11 +216,11 @@ resource_utilization_tree_node <- function(data = NULL)
 {
   data %>%
     # arrange(-color_id) %>%
-    ggplot(aes(x=Slice, y=Value, fill=as.factor(ANode))) +
+    ggplot(aes(x=Slice, y=Value1, fill=as.factor(ANode))) +
     geom_area() +
-	# scale_fill_manual(values=c(gray.colors(data %>% 
-	#                      select(ANode) %>%
-	#                      unique() %>% nrow(), start = 0.1, end = 0.9, gamma = 1, alpha=1, rev = FALSE))) +
+	  # scale_fill_manual(values=c(gray.colors(data %>% 
+	  #                      select(ANode) %>%
+	  #                      unique() %>% nrow(), start = 0.1, end = 0.9, gamma = 1, alpha=1, rev = FALSE))) +
     # scale_fill_manual(values=colors) +
     default_theme() +
     theme(legend.position = "none") +
@@ -246,11 +246,12 @@ resource_utilization_tree_depth <- function(data = NULL)
 resource_utilization_tree_node_plot <- function(data = NULL, step = 100)
 {
   # Prepare and filter data
-  df_filter <- data$State %>% 
-    filter(Application, Type == "Worker State", 
+  data$State %>% 
+    filter(Application,
+           Type == "Worker State", 
            grepl("lapack", Value) | grepl("subtree", Value)) %>%
     select(ANode, Start, End, JobId) %>%
-    arrange(Start)
+    arrange(Start) -> df_filter
 
   # Get number of workers for resource utilization
   NWorkers <- data$State %>% 
@@ -258,23 +259,23 @@ resource_utilization_tree_node_plot <- function(data = NULL, step = 100)
       select(ResourceId) %>% unique() %>% nrow()
 
   # Compute the node parallelism
-  df_node_parallelism <- df_filter %>%
+  df_filter %>%
     select(ANode, Start, JobId) %>%
     mutate(Event = "Start") %>%
     rename(Time = Start) %>%
     bind_rows(df_filter %>%
-              select(ANode, End, JobId) %>%
-              mutate(Event = "End") %>%
-              rename(Time = End)  
+                select(ANode, End, JobId) %>%
+                mutate(Event = "End") %>%
+                rename(Time = End)  
               ) %>%
     arrange(Time) %>%
     group_by(ANode) %>%
     mutate(Value = ifelse(Event == "Start", 1, -1)) %>%
     mutate(nodeParallelism = cumsum(Value)) %>%
-    ungroup()
+    ungroup() -> df_node_parallelism
 
   # Integrate resource utilization by ANode
-  df_node_plot <- df_node_parallelism %>%
+  df_node_parallelism %>%
     select(ANode, Time, nodeParallelism) %>%
     arrange(Time) %>%
     mutate(End = lead(Time)) %>%
@@ -284,11 +285,11 @@ resource_utilization_tree_node_plot <- function(data = NULL, step = 100)
     group_by(ANode) %>%
     do(remyTimeIntegrationPrepNoDivision(., myStep = step)) %>%
     # This give us the total worker usage grouped by ANode in a time slice
-    mutate(Value1 = (Value / (step*NWorkers)) * 100) %>%
+    mutate(Value1 = Value/(step*NWorkers)*100) %>%
     ungroup() %>%
     group_by(Slice) %>%
     arrange(Slice) %>%
-    mutate(Usage = sum(Value1))
+    mutate(Usage = sum(Value1)) -> df_node_plot
 
 	resource_utilization_tree_node(df_node_plot)
 }  

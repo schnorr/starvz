@@ -38,6 +38,7 @@ Depends: R (>= 3.1.0),
     reshape2,
     tidyverse,
     zoo,
+    gtools,
     car
 License: GPL-3
 Encoding: UTF-8

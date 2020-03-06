@@ -16,10 +16,20 @@ default:
     start: 0 # Initial Time
     #end: 10000 # Final Time
 
-  # Visualizations in ordem of appearance
-  atree: # TODO
-    active: FALSE # Enable
+  # Visualizations in order of appearance
+  atree: # plot space/time tree structure computation
+    active: TRUE # Enable
     height: # Vertical Size in the final visualization
+
+  utiltreenode: # Plot of resource utilization by tree depth 
+    active: TRUE # Enable
+    step: 10 # Time step used for aggregation
+    height: 2 # Vertical size for the plot
+
+  utiltreedepth: # Plot of resource utilization by tree node
+    active: TRUE # Enable
+    step: 10 # Time step used for aggregation
+    height: 2 # Vertical size for the plot
 
   kiteration: # Visualization about application itarations
     active: FALSE # Enable
@@ -35,7 +45,7 @@ default:
     labels: "ALL" # Labels of the Resources names, "ALL" "1CPU_per_NODE" "1GPU_per_NODE"
     legend: TRUE # Show the plot's Legends
     makespan: TRUE # Show the application makespan
-    alpha: 0.5 # Alpha value to control transparency of tasks that are not outliers
+    alpha: 0.25 # Alpha value to control transparency of tasks that are not outliers
     outliers: TRUE # Differentiate outliers tasks
     abe: # Show Abe makespan metric
       active: FALSE # Enable
@@ -90,7 +100,7 @@ default:
   starpu:
     active: TRUE
     legend: TRUE
-    height:
+    height: 
 
   ready:
     active: TRUE
@@ -100,13 +110,13 @@ default:
     step:
 
   lackready:
-    active: FALSE
-    aggregation: 1000
+    active: TRUE
+    aggregation: 10
     height: 0.3
     threshold:
 
   usedmemory:
-    active: TRUE
+    active: FALSE
     height:
     legends:
 
@@ -150,9 +160,15 @@ default:
     legend: TRUE
     step: 85
     total: TRUE
+<<<<<<< HEAD
 
   activenodes: # Plot the active node count over time
     active: FALSE # Enable
+=======
+ 
+  activenodes: # Plot the active node count over time   
+    active: TRUE # Enable
+>>>>>>> bb853d5d6009c6d7e9acb0e46bb149dbac98045d
     height: 2 # Vertical size for the plot
 
   computingnodes: # Plot the computationally active nodes over time

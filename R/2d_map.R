@@ -20,11 +20,10 @@ library(RColorBrewer)
 
 mycolors <- rep(brewer.pal(8, "Set1"), 5)
 
-x <- data$Data_handle %>%
-    filter(HomeNode==0) %>%
+x <- data$Data_handle %>% select(MPIOwner, Coordinates) %>% unique() %>%
     separate(Coordinates, c("Y", "X")) %>%
     mutate(X=as.numeric(X), Y=as.numeric(Y)) %>%
-    ggplot(aes(x=X, y=Y, fill=factor(MPIRank))) +
+    ggplot(aes(x=X, y=Y, fill=factor(MPIOwner))) +
     geom_tile() +
     scale_fill_manual(values = mycolors) +
     scale_y_reverse(expand=c(0.01,0.01)) +

@@ -20,8 +20,10 @@ yconf <- function (dfw = NULL)
 
     # Currently being ignored
     # step <- pjr_value(pajer$st$labels, 6);
-
-    if(pjr_value(pajer$st$labels, "1") == "1CPU_per_NODE"){
+    dfw %>% mutate(Node = as.integer(as.character(Node))) -> dfw
+    dfw %>% mutate(ResourceId = factor(ResourceId)) %>%
+            mutate(ResourceId = factor(ResourceId, levels=mixedsort(levels(ResourceId)))) -> dfw
+    if(pjr_value(pajer$st$labels, "1") == "1CPU_per_NODE"){ #First
         # One CPU per node
         dfw %>%
             select(Node, ResourceId, ResourceType, Position, Height) %>%
@@ -30,7 +32,7 @@ yconf <- function (dfw = NULL)
             arrange(Node, ResourceId, ResourceType) %>%
             slice(1) %>%
             ungroup;
-    }else if(pjr_value(pajer$st$labels, "1") == "1GPU_per_NODE"){
+    }else if(pjr_value(pajer$st$labels, "1") == "1GPU_per_NODE"){ #Last
         # One GPU per node
         dfw %>%
             select(Node, ResourceId, ResourceType, Position, Height) %>%
@@ -46,7 +48,7 @@ yconf <- function (dfw = NULL)
             group_by(Node, ResourceType) %>%
             arrange(Node, ResourceId, ResourceType) %>%
             ungroup;
-    }else{
+    }else{ #First and Last
         dfw %>%
             select(Node, ResourceId, ResourceType, Position, Height) %>%
             distinct() %>%

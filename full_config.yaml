@@ -110,7 +110,7 @@ default:
     step:
 
   lackready:
-    active: TRUE
+    active: FALSE
     aggregation: 10
     height: 0.3
     threshold:
@@ -160,7 +160,7 @@ default:
     legend: TRUE
     step: 85
     total: TRUE
-    
+
   activenodes: # Plot the active node count over time
     active: FALSE # Enable
     height: 2 # Vertical size for the plot

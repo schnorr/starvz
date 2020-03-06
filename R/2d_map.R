@@ -16,10 +16,21 @@ data <- the_fast_reader_function(directory);
 
 print("Data has been read");
 
-x <- data$Data_handle %>% filter(HomeNode==0) %>%
-                     separate(Coordinates, c("Y", "X")) %>%
-                     mutate(X=as.numeric(X), Y=as.numeric(Y)) %>%
-                     ggplot(aes(x=X, y=Y, fill=factor(MPIRank))) +
-                     geom_tile()
+library(RColorBrewer)
+
+mycolors <- rep(brewer.pal(8, "Set1"), 5)
+
+x <- data$Data_handle %>%
+    filter(HomeNode==0) %>%
+    separate(Coordinates, c("Y", "X")) %>%
+    mutate(X=as.numeric(X), Y=as.numeric(Y)) %>%
+    ggplot(aes(x=X, y=Y, fill=factor(MPIRank))) +
+    geom_tile() +
+    scale_fill_manual(values = mycolors) +
+    scale_y_reverse(expand=c(0.01,0.01)) +
+    scale_x_continuous(expand=c(0.01,0.01)) +
+    theme(legend.position="bottom") +
+    guides(fill = guide_legend(ncol = 11, title="Mac")) +
+    xlab("Column") + ylab("Line")
 
 ggsave(name, x, width=10, height=10)

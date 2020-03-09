@@ -183,7 +183,7 @@ geom_mpistates <- function (data = NULL)
     ret <- list();
 
     # Calculate Y position
-    ypos <- tibble(ResourceId = (dfw %>% pull(ResourceId) %>% unique)) %>%
+    ypos <- tibble(ResourceId = (dfw %>% arrange(as.integer(as.character(Node))) %>% pull(ResourceId) %>% unique())) %>%
         mutate(Height = 1) %>%
         mutate(Position = cumsum(Height));
 
@@ -193,8 +193,10 @@ geom_mpistates <- function (data = NULL)
         # Establish new position
         left_join(ypos, by = c("ResourceId"));
 
+    mycolors <- c(brewer.pal(8, "Dark2"), "blue")
+
     # Color mapping
-    ret[[length(ret)+1]] <- scale_fill_brewer(palette = "Dark2");
+    ret[[length(ret)+1]] <- scale_fill_manual(values = mycolors);
 
     # Y label
     ret[[length(ret)+1]] <- ylab("MPI\nThread");

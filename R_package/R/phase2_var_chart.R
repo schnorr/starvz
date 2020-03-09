@@ -6,6 +6,8 @@ var_chart <- function (dfv = NULL, ylabel = NA)
     variable <- dfv %>% select(Type) %>% .$Type %>% unique;
     if (is.na(ylabel)) ylabel = variable;
 
+    mycolors <- rep(brewer.pal(8, "Dark2"), 5)
+
     k <- dfv %>% rename(x=Start, xend=End, y=Value) %>% mutate(yend=y) %>% select(-Duration);
     v <- k %>% group_by(ResourceId, Type) %>% mutate(xend=x, y=y, yend=lag(y));# %>% na.omit();
     k %>%
@@ -17,7 +19,7 @@ var_chart <- function (dfv = NULL, ylabel = NA)
 #        coord_cartesian(xlim=c(0, max(dfv$End))) +
         ylim (0, NA) +
         ylab (ylabel) +
-        scale_colour_brewer(palette = "Dark2");
+        scale_colour_manual(values = mycolors);
 }
 
 var_chart_text <- function (dfv = NULL, tstart = NULL, tend = NULL, y_end = NULL)
@@ -32,6 +34,7 @@ var_chart_text <- function (dfv = NULL, tstart = NULL, tend = NULL, y_end = NULL
         group_by (ResourceId) %>%
         summarize(xvar = round(sum(Value * (Duration/1000) / 1024),2));
 
+    mycolors <- rep(brewer.pal(8, "Dark2"), 5)
 
     if(nrow(ms) != 0){
         globalEndTime <- tend * 1.01;
@@ -39,7 +42,7 @@ var_chart_text <- function (dfv = NULL, tstart = NULL, tend = NULL, y_end = NULL
         ms$Position <- max_value*0.9 - (ms$Position-1) * (max_value/nrow(ms))
         ms$xvar <- paste0(ms$xvar, " GB");
         ret[[length(ret)+1]] <- geom_label(data=ms, x = globalEndTime, colour = "white", fontface = "bold", aes(y = Position, label=xvar, fill = ResourceId), alpha=1.0, show.legend = FALSE)
-        ret[[length(ret)+1]] <- scale_fill_brewer(palette = "Dark2")
+        ret[[length(ret)+1]] <- scale_fill_manual(values = mycolors)
     }
     return(ret);
 }

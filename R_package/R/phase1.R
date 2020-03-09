@@ -918,7 +918,11 @@ tree_filtering <- function (dfe, natures, types)
     # Remove a node named 0 whose parent is also named 0
     filter (Name != 0 & Parent != 0) %>%
     # Convert to data.frame to avoid compatibility problems between tibble and data.tree
-    as.data.frame() %>>%
+    as.data.frame() -> x
+    # Sort by machines ID
+    y <- x[mixedorder(as.character(x$Name), decreasing=TRUE),]
+    # Continue
+    y %>%
     # Remove all variables
     #filter (Nature != "Variable") %>%
     # Remove bogus scheduler (should use a new trace)

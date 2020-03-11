@@ -224,6 +224,15 @@ read_state_csv <- function (where = ".",
                 tibble(Row = names(outlierTest(m, n.max=Inf)$rstudent))
             })) -> df.pre.outliers
 
+        # Step 1.2: get the negative residuals for each task
+        df.pre.outliers %>% 
+          select(Value, ResourceType, model) %>%
+          mutate(Residual = map(model, resid)) %>%
+          select(-model) %>%
+          unnest(Residual) %>%
+          mutate(Row = 1:n()) %>%
+          filter(Residual < 0) -> df.residuals
+
         # Step 2: identify outliers rows
         df.pre.outliers %>%
             unnest(outliers) %>%
@@ -240,6 +249,8 @@ read_state_csv <- function (where = ".",
             # the left join must be by exactly the same as the grouping + Row
             left_join(df.pos.outliers, by=c("Value", "Row", "ResourceType")) %>%
             mutate(Outlier = ifelse(is.na(Outlier), FALSE, Outlier)) %>%
+            # remove outliers that are below the regression line
+            mutate(Outlier = ifelse(Outlier & Row %in% df.residuals$Row, FALSE, Outlier)) %>%
             select(-Row) %>%
             ungroup() -> df.outliers
 

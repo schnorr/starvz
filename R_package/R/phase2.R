@@ -651,6 +651,7 @@ the_master_function <- function(data = NULL)
           pajer$computingnodes$active <<- FALSE;
         }else{
           gocomputingnodes <- computing_nodes_chart(data=dfw, step=aggStep) + tScale;
+          loginfo("Exit of computing_nodes_chart");
         }
     }
 

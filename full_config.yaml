@@ -18,16 +18,16 @@ default:
 
   # Visualizations in order of appearance
   atree: # plot space/time tree structure computation
-    active: TRUE # Enable
+    active: FALSE # Disable
     height: # Vertical Size in the final visualization
 
   utiltreenode: # Plot of resource utilization by tree depth
-    active: TRUE # Enable
+    active: FALSE # Disable
     step: 10 # Time step used for aggregation
     height: 2 # Vertical size for the plot
 
   utiltreedepth: # Plot of resource utilization by tree node
-    active: TRUE # Enable
+    active: FALSE # Disable
     step: 10 # Time step used for aggregation
     height: 2 # Vertical size for the plot
 

@@ -272,15 +272,6 @@ the_master_function <- function(data = NULL)
       pajer$memory$combined <<- FALSE;
     }
 
-    if(is.null(data$Atree)){
-      print("This dataset dont have Atree, disabling some options")
-      pajer$utiltreenode$active <<- FALSE;
-      pajer$utiltreedepth$active <<- FALSE;
-      pajer$atree$active <<- FALSE;
-      pajer$activenodes$active <<- FALSE;
-      pajer$computingnodes$active <<- FALSE;
-    } 
-
     dfevents = dfw %>% filter(Type == "Memory Node State")
 
     if((dfevents %>% nrow) == 0 && ( pjr(pajer$memory$new_data) && (data$Events %>% nrow) == 0) ){
@@ -291,11 +282,12 @@ the_master_function <- function(data = NULL)
    
     if(is.null(data$Atree)){
       print("This dataset dont have atree, disabling some options")
-      pajer$atree$active  <<-  FALSE;
       pajer$utiltreenode$active <<- FALSE;
-      pajer$utiltreedepth$active  <<- FALSE;
-    }
-
+      pajer$utiltreedepth$active <<- FALSE;
+      pajer$atree$active <<- FALSE;
+      pajer$activenodes$active <<- FALSE;
+      pajer$computingnodes$active <<- FALSE;
+    } 
 
     if (!is.null(pajer$time)){
         stop("pajer: you are using a deprecated parameter.");

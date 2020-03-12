@@ -272,6 +272,15 @@ the_master_function <- function(data = NULL)
       pajer$memory$combined <<- FALSE;
     }
 
+    if(is.null(data$Atree)){
+      print("This dataset dont have Atree, disabling some options")
+      pajer$utiltreenode$active <<- FALSE;
+      pajer$utiltreedepth$active <<- FALSE;
+      pajer$atree$active <<- FALSE;
+      pajer$activenodes$active <<- FALSE;
+      pajer$computingnodes$active <<- FALSE;
+    } 
+
     dfevents = dfw %>% filter(Type == "Memory Node State")
 
     if((dfevents %>% nrow) == 0 && ( pjr(pajer$memory$new_data) && (data$Events %>% nrow) == 0) ){
@@ -325,7 +334,7 @@ the_master_function <- function(data = NULL)
     if (!is.null(data$Atree) && pjr(pajer$utiltreenode$active)){
         loginfo("Creating the resource utilization by node plot");
         aggStep <- pjr_value(pajer$utiltreenode$step, globalAggStep);
-        goutiltreenode <- resource_utilization_tree_node_plot(data, step=aggStep) + tScale;
+        resource_utilization_tree_node_plot(data=data, step=aggStep) + tScale -> goutiltreenode;
         loginfo("Resource utilization by node plot completed");
     }
 
@@ -333,7 +342,7 @@ the_master_function <- function(data = NULL)
     if (!is.null(data$Atree) && pjr(pajer$utiltreedepth$active)){
         loginfo("Creating the resource utilization by depth plot");
         aggStep <- pjr_value(pajer$utiltreenode$step, globalAggStep);
-        goutiltreedepth <- resource_utilization_tree_depth_plot(data, step=aggStep) + tScale;
+        resource_utilization_tree_depth_plot(data, step=aggStep) + tScale -> goutiltreedepth;
         loginfo("Resource utilization by depth plot completed");
     }
 
@@ -641,7 +650,7 @@ the_master_function <- function(data = NULL)
           print("There aren't any information on ANode, ignoring it.");
           pajer$computingnodes$active <<- FALSE;
         }else{
-          gocomputingnodes <- dfw %>% computing_nodes_chart(., step=aggStep) + tScale;
+          gocomputingnodes <- computing_nodes_chart(data=dfw, step=aggStep) + tScale;
         }
     }
 

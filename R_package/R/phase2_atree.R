@@ -28,7 +28,7 @@ geom_atree <- function (data=NULL, Offset=1.02, Flip = TRUE)
     ret <-
         list(
             # Horizontal lines
-#            geom_segment(data=(data %>% mutate(XOrigin = max(Depth)+0.6)), aes(yend=Position, x=Depth+0.5, xend=XOrigin, y=Position), color="lightgray"),
+            # geom_segment(data=(data %>% mutate(XOrigin = max(Depth)+0.6)), aes(yend=Position, x=Depth+0.5, xend=XOrigin, y=Position), color="lightgray"),
             # Lines connecting child with parent
             geom_segment(data=data, aes(x=Edge.X, yend=Edge.Yend, xend=Edge.Xend, y=Edge.Y), color="gray"),
             # The Label
@@ -195,12 +195,14 @@ atree_time_aggregation <- function(dfw = NULL, step = 100)
 
 computing_nodes_chart <- function(data=NULL, step = 100)
 {
+  loginfo("Entry of computing_nodes_chart");
   atree_time_aggregation(data, step) %>%  
     ggplot(aes(x=Slice, y=Quantity)) +
     geom_line() +
     default_theme() +
     ylab("Computing\nNodes") +
     scale_colour_brewer(palette = "Dark2");
+  loginfo("Exit of computing_nodes_chart");
 }
 
 # remyTimeIntegrationPrep without dividing the Value column by the time slice
@@ -245,6 +247,7 @@ resource_utilization_tree_depth <- function(data = NULL)
 
 resource_utilization_tree_node_plot <- function(data = NULL, step = 100)
 {
+  loginfo("Entry of resource_utilization_tree_node_plot");
   # Prepare and filter data
   data$State %>% 
     filter(Application,
@@ -291,12 +294,13 @@ resource_utilization_tree_node_plot <- function(data = NULL, step = 100)
     arrange(Slice) %>%
     mutate(Usage = sum(Value1)) -> df_node_plot
 
+  loginfo("Exit of resource_utilization_tree_node_plot");
 	resource_utilization_tree_node(df_node_plot)
 }  
 
-
 resource_utilization_tree_depth_plot <- function(data = NULL, step = 100)
 {
+  loginfo("Entry of resource_utilization_tree_depth_plot");
   # Prepare and filter data
   df_filter <- data$State %>% 
     filter(Application, Type == "Worker State", 
@@ -353,5 +357,6 @@ resource_utilization_tree_depth_plot <- function(data = NULL, step = 100)
     select(Slice, Depth, Value2) %>%
     unique()
     
-    resource_utilization_tree_depth(df_depth_plot)
+  loginfo("Exit of resource_utilization_tree_depth_plot");
+  resource_utilization_tree_depth(df_depth_plot)
 }

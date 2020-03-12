@@ -279,6 +279,14 @@ the_master_function <- function(data = NULL)
       pajer$memory$state$active <<- FALSE;
       pajer$memory$combined <<- FALSE;
     }
+   
+    if(is.null(data$Atree)){
+      print("This dataset dont have atree, disabling some options")
+      pajer$atree$active  <<-  FALSE;
+      pajer$utiltreenode$active <<- FALSE;
+      pajer$utiltreedepth$active  <<- FALSE;
+    }
+
 
     if (!is.null(pajer$time)){
         stop("pajer: you are using a deprecated parameter.");

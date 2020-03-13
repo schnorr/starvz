@@ -105,7 +105,7 @@ geom_pmtool_states <- function (data = NULL)
     ret[[length(ret)+1]] <- scale_fill_manual(values = extract_colors(dfw));
 
     # Y axis breaks and their labels
-    gg <- data$State %>% filter(Application == TRUE);
+    gg <- data$Application;
     yconfm <- yconf(gg);
     ret[[length(ret)+1]] <- scale_y_continuous(breaks = yconfm$Position+(yconfm$Height/3), labels=yconfm$ResourceId, expand=c(pjr_value(pajer$expand, 0.05),0));
     # Y label
@@ -130,8 +130,7 @@ geom_pmtool_bounds <- function(data = NULL)
 {
     if (is.null(data)) stop("data is NULL when given to geom_pmtool_bounds");
 
-    dftemp <- data$State %>%
-        filter(Application == TRUE) %>%
+    dftemp <- data$Application %>%
         filter(grepl("CPU|CUDA", ResourceId)) %>%
         select(Node, Resource, ResourceType, Duration, Value, Position, Height);
     # Y position
@@ -140,9 +139,7 @@ geom_pmtool_bounds <- function(data = NULL)
     maxPos = dftemp %>% pull(Position) %>% max + minHeight/2;
 
     # Filter
-    dfwapp = data$State %>%
-        # Considering only application data
-        filter(Application == TRUE) %>%
+    dfwapp = data$Application %>%
         # Considering only Worker State
         filter(Type == "Worker State");
 
@@ -156,7 +153,7 @@ geom_pmtool_bounds <- function(data = NULL)
     bsize = pjr_value(pajer$base_size, 22)/5;
 
     bound <- df.pmtool %>% filter(!is.na(Time)) %>% mutate(Label=pjr_value(pajer$pmtool$bounds$label, TRUE)) %>% mutate(Label=ifelse(Label, paste0(Alg, ": ", round(Time, 0)), round(Time, 0))) %>% unique %>% filter(Alg %in% pajer$pmtool$bounds$alg)
-        
+
     ret <- list(geom_segment(data=bound, aes(x = Time+tstart, xend=Time+tstart, y = MinPosition, yend=MaxPosition), size=5, alpha=.7, color="gray"),
                 geom_text (data=bound, aes(x = Time+tstart, y = MinPosition+(MaxPosition-MinPosition)/2, label=Label), angle=90, color="black", size=bsize))
 

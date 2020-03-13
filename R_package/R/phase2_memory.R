@@ -37,15 +37,10 @@ memory_chart <- function (data = NULL, globalEndTime = NULL, combined = FALSE, t
 {
     if (is.null(data)) stop("data provided to memory_chart is NULL");
 
-    # Get traces
-    dfw <- data$State;
-
     loginfo("Entry of memory_chart");
 
     # Filter
-    dfwapp = dfw %>%
-        # Considering only application data
-        filter(Application == TRUE) %>%
+    dfwapp = data$Application %>%
         # Considering only Worker State
         filter(Type == "Memory Node State");
 
@@ -226,12 +221,12 @@ geom_memory <- function (data = NULL, combined = FALSE, tstart=NULL, tend=NULL)
       #ret[[length(ret)+1]] <- scale_y_continuous(breaks = yconfm$Position+(yconfm$Height/3), labels=yconfm$Container, expand=c(pjr_value(pajer$expand, 0.05),0));
     }
 
-   
+
     col_pos[2] <- data.frame(lapply(col_pos[2], as.character), stringsAsFactors=FALSE);
     dfw <- dfw %>% select(-Position) %>% left_join(col_pos, by=c("ResourceId" = "Container"))
     ret <- list();
 
-   
+
 
     # Color mapping
     #ret[[length(ret)+1]] <- scale_fill_manual(values = extract_colors(dfw));
@@ -416,7 +411,7 @@ handles_presence_states <- function(data){
 
 	fini_end <- unlist(end)
 
-	data_state_events %>% group_by(Value, Container) %>% 
+	data_state_events %>% group_by(Value, Container) %>%
 		          mutate(rep = case_when(Type=="data state owner" ~ 1,
 		                                 Type=="data state invalid" ~ 2,
 		                                 TRUE ~ 5)) %>%
@@ -427,7 +422,7 @@ handles_presence_states <- function(data){
 		          mutate(need = flow!=0) %>%
 		          filter(need == TRUE) %>%
 		          mutate(End = lead(Start, default=unlist(fini_end))) %>%
-		          filter(Type != "data state invalid") %>% 
+		          filter(Type != "data state invalid") %>%
 		          select(-rep, -flow, -t_diff, -need) %>%
 		          ungroup() %>%
 		          group_by(Value, Container) -> f_data
@@ -436,7 +431,7 @@ handles_presence_states <- function(data){
 }
 
 pre_handle_gantt <- function(data){
-	
+
 	data$Events <- data$Events %>% mutate(Type=case_when(Type=="Allocating Start" ~ "Allocation Request",
                                     Type=="Request Created" ~ "Transfer Request",
                                     TRUE ~ Type))
@@ -447,27 +442,27 @@ pre_handle_gantt <- function(data){
 
 	# Processing the States: Handles & Tasks
 	data$Data_handle$Coordinates <- gsub(" ", "x", data$Data_handle$Coordinates)
-	
+
 	position <- data$handle_states %>% ungroup() %>%
                     select(Container) %>%
                     distinct() %>%
                     arrange(Container) %>%
 	            mutate(y1 = 1:n())
 
-	p_data <- data$handle_states %>% 
+	p_data <- data$handle_states %>%
 		  mutate(Colour = ifelse(Type=="data state owner", "Owner", "Shared") ) %>%
-                  inner_join(position, by=c("Container"="Container")) %>% 
+                  inner_join(position, by=c("Container"="Container")) %>%
                   select(Container, Start, End, Value, y1, Colour)
 
-	        
+
 	p_data %>% select(Container, Value, y1) %>% distinct() -> pre_p_data
 
-	data$Task_handles %>% filter(!is.na(JobId)) %>% 
-                  inner_join(data$Tasks %>% filter(!is.na(JobId)), by=c("JobId"="JobId")) %>% 
-		  select(JobId, Handles, MPIRank, MemoryNode) %>% 
+	data$Task_handles %>% filter(!is.na(JobId)) %>%
+                  inner_join(data$Tasks %>% filter(!is.na(JobId)), by=c("JobId"="JobId")) %>%
+		  select(JobId, Handles, MPIRank, MemoryNode) %>%
                   mutate(sContainer = paste0(MPIRank,"_MEMMANAGER",MemoryNode) ) -> job_handles
 
-	job_handles %>% inner_join(pre_p_data, by=c("Handles"="Value")) %>% 
+	job_handles %>% inner_join(pre_p_data, by=c("Handles"="Value")) %>%
 		              select(Container, sContainer, JobId, Handles, y1, MemoryNode) %>%
 		              filter(sContainer==Container) %>%
 		              mutate(JobId=as.character(JobId)) %>%
@@ -486,27 +481,27 @@ pre_handle_gantt <- function(data){
 		         group_by(Value, Container)
 
 	# Processing the Events: Request & Allocation
-	data$Events %>%  filter(Type=="Transfer Request") %>% 
+	data$Events %>%  filter(Type=="Transfer Request") %>%
 		         mutate(P = substring(Tid, 5)) %>%
                      mutate(G = substr(Container,1,nchar(Container)-1)) %>%
-		         mutate(Container=paste0(G, P)) %>% select(-P, -G) %>% 
+		         mutate(Container=paste0(G, P)) %>% select(-P, -G) %>%
 		         select(-Nature, -Tid) %>%
 		         inner_join(data$Data_handle, by=c("Handle" = "Handle") ) %>%
 		         inner_join(position, by=c("Container"="Container")) %>%
 		         mutate(Value = paste0("Memory Block ", Coordinates, "")) %>%
-		         select(Container, Type, Start, Value, Info, y1) %>% 
+		         select(Container, Type, Start, Value, Info, y1) %>%
 		         filter(Type=="Transfer Request") %>%
 		         mutate(Pre = as.character(Info)) -> request_events
 
 	data$Task_handles %>% select(Handles) %>% distinct() %>% .$Handles -> h_used
 	data$Events %>%  filter(Handle %in% h_used) %>% select(-Nature, -Tid) %>%
 		         inner_join(data$Data_handle, by=c("Handle" = "Handle") ) %>%
-		         inner_join(position, by=c("Container"="Container")) %>% 
+		         inner_join(position, by=c("Container"="Container")) %>%
 		         mutate(Value = paste0("Memory Block ", Coordinates, "")) %>%
-		         select(Container, Type, Start, Value, Info, y1) %>% 
+		         select(Container, Type, Start, Value, Info, y1) %>%
 		         filter(Type=="Allocation Request") -> allocation_events
 
-	allocation_events  %>% group_by(Value, Container, Type) %>% 
+	allocation_events  %>% group_by(Value, Container, Type) %>%
 		           mutate(Old = lag(Start, default=-5), R=abs(Start-Old)) %>%
 		           filter(R>1) %>% select(-Old,-R)  -> allocation_events_filtered
 
@@ -515,43 +510,43 @@ pre_handle_gantt <- function(data){
 	events_points <- bind_rows(request_events, allocation_events_filtered)
 
 	# Processing Links (Transfers)
-	data$Events %>% filter(Type=="DriverCopy Start") %>% 
+	data$Events %>% filter(Type=="DriverCopy Start") %>%
 		        select(Handle, Info, Container) -> links_handles
 
 	mpi_links <- data$Link %>% filter(Type=="MPI communication") %>%
 			select(-Nature, -Container, -Size) %>%
                  	mutate(Origin=str_replace(Origin, "mpict", "MEMMANAGER0")) %>%
                  	mutate(Dest=str_replace(Dest, "mpict", "MEMMANAGER0")) %>%
-			inner_join(position, by=c("Origin"="Container")) %>% 
+			inner_join(position, by=c("Origin"="Container")) %>%
 			rename(origin_y = y1) %>%
-			inner_join(position, by=c("Dest"="Container")) %>% 
+			inner_join(position, by=c("Dest"="Container")) %>%
 			rename(dest_y = y1) %>%
                     mutate(Tag = as.numeric(Tag)) %>%
 			inner_join(data$Data_handle, by=c("Tag" = "MPITag")) %>%
-			mutate(Value = paste0("Memory Block ", Coordinates, "")) %>% 
+			mutate(Value = paste0("Memory Block ", Coordinates, "")) %>%
 			select(Type, Start, End, Value, origin_y, dest_y) %>%
 			rename(Transfer = Type)
 
-	links <- data$Link %>% filter(Type=="Intra-node data Fetch" | 
+	links <- data$Link %>% filter(Type=="Intra-node data Fetch" |
 		                      Type=="Intra-node data PreFetch") %>%
 		      select(-Nature, -Container, -Size) %>%
 		      mutate(Con = as.integer(substring(Key, 5))) %>%
 		      select(-Key)
 
 	final_links <- links %>% inner_join(links_handles, by=c("Con"="Info", "Dest"="Container")) %>%
-		 inner_join(position, by=c("Origin"="Container")) %>% 
+		 inner_join(position, by=c("Origin"="Container")) %>%
 		 rename(origin_y = y1) %>%
-		 inner_join(position, by=c("Dest"="Container")) %>% 
+		 inner_join(position, by=c("Dest"="Container")) %>%
 		 rename(dest_y = y1) %>%
 		 inner_join(data$Data_handle, by=c("Handle" = "Handle") ) %>%
-		 mutate(Value = paste0("Memory Block ", Coordinates, "")) %>% 
+		 mutate(Value = paste0("Memory Block ", Coordinates, "")) %>%
 		 select(Type, Start, End, Value, origin_y, dest_y) %>%
 		 rename(Transfer = Type)
-    
+
         all_links <- bind_rows(mpi_links, final_links)
 
 	return(list(all_st_m_data = all_st_m_data,
-		    events_points = events_points, 
+		    events_points = events_points,
 		    final_links = all_links,
                     position = position))
 
@@ -575,10 +570,10 @@ handles_gantt <- function(data, JobId=NA, lines=NA, lHandle=NA){
 	}else{
 	      data$Data_handle$Coordinates <- gsub(" ", "x", data$Data_handle$Coordinates)
 	      myjobid = JobId
-	      data$Task_handles %>% filter(JobId==myjobid) %>% 
+	      data$Task_handles %>% filter(JobId==myjobid) %>%
 			  inner_join(data$Data_handle, by=c("Handles" = "Handle") ) %>%
 			  ungroup() %>%
-			  mutate(Value = paste0("Memory Block ", Coordinates, "")) %>% 
+			  mutate(Value = paste0("Memory Block ", Coordinates, "")) %>%
 			  .$Value -> selected_handles
 
 	     final_st_data <- data$handle_gantt_data$all_st_m_data %>% filter(Value %in% selected_handles)
@@ -591,8 +586,8 @@ handles_gantt <- function(data, JobId=NA, lines=NA, lHandle=NA){
 	fills <- c("Owner" = "darksalmon",
 		    "Shared" = "steelblue1",
 		    " " = "white",
-		    "dpotrf" = "#e41a1c", 
-		    "dtrsm" = "#377eb8", 
+		    "dpotrf" = "#e41a1c",
+		    "dtrsm" = "#377eb8",
 		    "dsyrk" = "#984ea3",
 		    "dgemm" = "#4daf4a",
 		    "dplgsy" = "yellow")
@@ -600,15 +595,15 @@ handles_gantt <- function(data, JobId=NA, lines=NA, lHandle=NA){
 	colors <- c("Allocation Request" = events_colors[[1]],
 		    "Transfer Request" = events_colors[[2]],
 		    "Intra-node data Fetch" = events_colors[[3]],
-		    "Intra-node data PreFetch" = events_colors[[4]], 
-		    "MPI communication" = events_colors[[5]], 
+		    "Intra-node data PreFetch" = events_colors[[4]],
+		    "MPI communication" = events_colors[[5]],
 		    "Last Job on same Worker" = events_colors[[6]]
 		    )
 
 	arrow_g <- arrow(length = unit(0.1, "cm"));
 
 	p <- ggplot(data = final_st_data) + theme_bw(base_size=16) +
-	     geom_point(data = final_events_data, 
+	     geom_point(data = final_events_data,
 		        aes(x=Start,
 		            y=y1+0.4,
 		            colour=Type,
@@ -616,22 +611,22 @@ handles_gantt <- function(data, JobId=NA, lines=NA, lHandle=NA){
 		        size=2.5, stroke = 1) +
 	     geom_rect(aes(xmin=Start,
 		           xmax=End,
-		           fill=Colour, 
+		           fill=Colour,
 		           ymin=y1+ifelse(is.na(JobId), 0, 0.2),
 		           ymax=y1+size
 		           ),
-		       colour="black", 
+		       colour="black",
 		       size=0.1
 		       ) +
-	     scale_fill_manual(name = "State         Task", values = fills, 
-		               drop = FALSE, 
+	     scale_fill_manual(name = "State         Task", values = fills,
+		               drop = FALSE,
 		               limits=c( "Owner", "Shared", " ", "dpotrf", "dtrsm", "dsyrk", "dgemm", "dplgsy" ),
 		               guide = guide_legend(nrow=3, title.position = "top", order=1,
-		                       override.aes = 
-		                        list(shape = NA, colour=NA) 
+		                       override.aes =
+		                        list(shape = NA, colour=NA)
 		               )) +
 	     scale_colour_manual(name = "Event", values = colors,
-		                 drop = FALSE, 
+		                 drop = FALSE,
 		                 breaks=c("Allocation Request",
 		                          "Transfer Request",
 		                          "Intra-node data Fetch",
@@ -643,11 +638,11 @@ handles_gantt <- function(data, JobId=NA, lines=NA, lHandle=NA){
 		                          "Intra-node data PreFetch",
 		                          "MPI communication"),
 		               guide = guide_legend(nrow=5,title.position = "top", order=0,
-		                       override.aes = 
+		                       override.aes =
 		                        list(arrow = NA, linetype = 0, shape=c(19, 19, 15, 15, 15),
-		                             yintercept=NA ) 
+		                             yintercept=NA )
 		               )) +
-	      
+
 	     scale_shape_manual(name = "Event Type", labels=c("Fetch", "Prefetch", "Idle Fetch"), values=c(19, 21, 23),
 		                guide = guide_legend(nrow=3,title.position = "top") )+
 	     #Arrow Border
@@ -677,7 +672,7 @@ handles_gantt <- function(data, JobId=NA, lines=NA, lHandle=NA){
 		              colour=Transfer),
 		          size=0.6) +
 	     scale_y_continuous(breaks=data$handle_gantt_data$position$y1 + 0.4, labels=data$handle_gantt_data$position$Container) +
-	     #geom_segment(data=handle_end_m, 
+	     #geom_segment(data=handle_end_m,
 	     #             aes(x = End, y = MemoryNode+1, xend = End, yend = MemoryNode+1.8), color = "red") +
 	     facet_wrap(Value ~ ., strip.position="top", ncol=1 ) +
 	     scale_x_continuous(expand=c(0,0),
@@ -691,7 +686,7 @@ handles_gantt <- function(data, JobId=NA, lines=NA, lHandle=NA){
 		   legend.background = element_rect(fill="transparent"),
 		   legend.position="top") +
 	     labs(x="Time [ms]", y="Memory Manager")
-	     
+
 
 	if(!is.na(lines)){
 	   p <- p + geom_vline(data=lines, aes(xintercept=x, color=colors), alpha=0.7, size=1)
@@ -702,9 +697,9 @@ handles_gantt <- function(data, JobId=NA, lines=NA, lHandle=NA){
 	#   data$State %>% filter(JobId==my_job) %>% .$Duration -> job_dur
 	#   data$Tasks %>% filter(JobId==my_job) %>% .$ MemoryNode -> job_node
 	#   text <- data.frame(x=c(job_start+job_dur/2), y=c(job_node+1.4), text=c(my_job))
-	#   p <- p + geom_text(data=text, aes(x=x, y=y, label=my_job), color="black", size=2, 
+	#   p <- p + geom_text(data=text, aes(x=x, y=y, label=my_job), color="black", size=2,
         #		  fontface="bold",
-	#	  alpha=0.8) 
+	#	  alpha=0.8)
 	#}
 	return(p)
 
@@ -712,7 +707,7 @@ handles_gantt <- function(data, JobId=NA, lines=NA, lHandle=NA){
 
 
 pre_snap <- function(data, f_data){
-	
+
 	# This fixes some problems on recent versions of tidyverse
 	# Check: https://github.com/tidyverse/tidyr/issues/751
 	# Check: https://github.com/tidyverse/tidyr/issues/694
@@ -720,15 +715,15 @@ pre_snap <- function(data, f_data){
 	  unnest <- unnest_legacy
 	}
 
-	data$Data_handles %>% 
+	data$Data_handles %>%
 		  separate(Coordinates, c("Y", "X")) %>%
-		  mutate(X=as.numeric(X), Y=as.numeric(Y)) -> new_handles 
+		  mutate(X=as.numeric(X), Y=as.numeric(Y)) -> new_handles
 
 
 	new_handles %>% select(Handle, X, Y) -> hand
 
 	f_data %>% ungroup() %>% select(Container) %>% distinct() %>% .$Container -> cont
-	hand <- hand %>% mutate(Container=list(cont)) 
+	hand <- hand %>% mutate(Container=list(cont))
 	hand %>% unnest() -> hand
 
 	f_data %>% mutate(st = ifelse(Type=="data state owner", "Owner", "Shared")) -> d_presence
@@ -754,20 +749,20 @@ memory_snap <- function(data, selected_time, step, tasks_size=30){
 	c_names <- c("Owner", "Shared")
 	c_names <- c(c_names, c_info$Value)
 
-	data[[1]] %>% filter(Start < selected_time, End > selected_time) %>% 
+	data[[1]] %>% filter(Start < selected_time, End > selected_time) %>%
 		      right_join(data[[2]], by=c("Value" = "Handle", "Container"="Container")) -> d_presence
 
-	task_presence <- data[[3]] %>% filter(Start <= selected_time, End >= selected_time) %>% 
+	task_presence <- data[[3]] %>% filter(Start <= selected_time, End >= selected_time) %>%
 		         inner_join(data[[2]], by=c("Handles" = "Handle", "Container"="Container"))
 
-	task_presence_alpha <- data[[3]] %>% filter(Start > selected_time-step, End <= selected_time) %>% 
+	task_presence_alpha <- data[[3]] %>% filter(Start > selected_time-step, End <= selected_time) %>%
 		         inner_join(data[[2]], by=c("Handles" = "Handle", "Container"="Container"))
 
 	max_x <- data[[2]] %>% arrange(-X) %>% slice(1) %>% .$X %>% unlist()
 
 	p <- ggplot(d_presence, aes(Y, X)) +
 	    geom_tile(aes(fill = st),
-		      colour = "white") + 
+		      colour = "white") +
 	    geom_point(data = task_presence_alpha,
 		      aes(fill = Value,
 		          x=Y,
@@ -781,23 +776,23 @@ memory_snap <- function(data, selected_time, step, tasks_size=30){
 		          y=X,
 		          shape=Modes),
 		      colour = "black",
-		      size=(tasks_size/max_x), stroke = 0.2) + 
-	    
+		      size=(tasks_size/max_x), stroke = 0.2) +
+
 	    scale_shape_manual(values=c("R"=21, "W"=22, "RW"=22), drop = FALSE,
 		               limits = c("R", "RW"),
 		               guide = guide_legend(title.position = "top") ) +
 	    scale_fill_manual(name = "State", values = colors, drop = FALSE,
 		              limits = c_names,
-		              guide = guide_legend(title.position = "top", override.aes = 
+		              guide = guide_legend(title.position = "top", override.aes =
 		                      list(shape = NA, stroke=1
 		                          )) ) +
-	    scale_y_reverse(limits=c(max_x+0.6, -0.6), expand=c(0,0) ) + 
+	    scale_y_reverse(limits=c(max_x+0.6, -0.6), expand=c(0,0) ) +
 	    scale_x_continuous(limits=c(-0.6, max_x+0.6), expand=c(0,0) ) +
 	    facet_wrap(~ Container) +
 	    labs(x="Block X Coordinate", y="Block Y Coordinate") +
 	    theme_bw(base_size=16) +
 	    theme(legend.position="top",
-		  plot.margin = unit(c(0, 10, 0, 0), "mm"), 
+		  plot.margin = unit(c(0, 10, 0, 0), "mm"),
 		  legend.box.margin=margin(-5, 0, -16, 0),
 		  strip.text.x = element_text(margin = margin(.1, 0, .1, 0, "cm")),
 		  legend.background = element_rect(fill="transparent"),

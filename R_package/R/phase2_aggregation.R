@@ -75,12 +75,6 @@ st_time_aggregation <- function(dfw = NULL, StarPU.View = FALSE, step = 100)
 {
     if (is.null(dfw)) return(NULL);
 
-    if (StarPU.View == FALSE){
-        dfw <- dfw %>% filter(Application == TRUE);
-    }else{
-        dfw <- dfw %>% filter(Application == FALSE);
-    }
-
     dfw_agg_prep <- time_aggregation_prep (dfw);
     dfw_agg <- time_aggregation_do (dfw_agg_prep, step);
     dfwagg_full <- time_aggregation_post (dfw, dfw_agg);
@@ -150,8 +144,7 @@ geom_aggregated_states <- function (data = NULL, Show.Outliers = FALSE, min_time
 
     # Define the exclude ids based on the Show.Outliers parameter
     if (Show.Outliers){
-        data$State %>%
-            filter(Application == TRUE) %>%
+        data$Application %>%
             filter(Outlier == TRUE) %>%
             pull(JobId) -> excludeIds;
     }else{
@@ -164,12 +157,11 @@ geom_aggregated_states <- function (data = NULL, Show.Outliers = FALSE, min_time
         separate(ResourceId, into=c("Node", "Resource"), remove=FALSE) %>%
         mutate(Node = as.factor(Node)) %>%
         mutate(ResourceType = as.factor(gsub('[[:digit:]]+', '', Resource))) -> ydf;
-    
+
     Colors <- data$State %>% select(Value, Color) %>% distinct()
-    
+
     # Do the aggregation
-    data$State %>%
-        filter(Application == TRUE) %>%
+    data$Application %>%
         select(ResourceId, Start, End, Duration, Value, JobId) %>%
         aggregate_trace(states, excludeIds, min_time_pure) %>%
         left_join(
@@ -212,12 +204,12 @@ st_time_aggregation_vinicius_plot <- function (data = NULL)
     with.outliers = pjr_value(pajer$st$outliers, TRUE);
     with.states = pjr_value(pajer$st$aggregation$states, c("dgemm"));
     # The longer outlier
-    longer.outlier = data$State %>% filter(Application == TRUE, Outlier == TRUE) %>% pull(Duration) %>% max;
+    longer.outlier = data$Application %>% filter(Outlier == TRUE) %>% pull(Duration) %>% max;
     loginfo(paste("Longer outlier for min_time_pure definition is", longer.outlier));
     with.min_time_pure = pjr_value(pajer$st$aggregation$step, longer.outlier);
 
     # Considering only application states
-    dfw <- data$State %>% filter(Application == TRUE);
+    dfw <- data$Application;
 
     # Obtain time interval
     tstart <- dfw %>% .$Start %>% min;
@@ -275,9 +267,9 @@ st_time_aggregation_plot <- function (data = NULL, dfw_agg = NULL, StarPU.View =
 
     # Considering only application or StarPU data
     if (StarPU.View == FALSE){
-        dfw <- data$State %>% filter(Application == TRUE);
+        dfw <- data$Application;
     }else{
-        dfw <- data$State %>% filter(Application == FALSE);
+        dfw <- data$Starpu;
     }
     # Obtain time interval
     tstart <- dfw %>% .$Start %>% min;

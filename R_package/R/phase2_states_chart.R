@@ -2,15 +2,10 @@ state_chart <- function (data = NULL, globalEndTime = NULL, ST.Outliers = TRUE, 
 {
     if (is.null(data)) stop("data provided to state_chart is NULL");
 
-    # Get traces
-    dfw <- data$State;
-
     loginfo("Entry of state_chart");
 
     # Filter
-    dfwapp = dfw %>%
-        # Considering only application data
-        filter(Application == TRUE) %>%
+    dfwapp = data$Application %>%
         # Considering only Worker State
         filter(Type == "Worker State");
 
@@ -70,7 +65,7 @@ k_chart <- function (dfw = NULL)
 {
     if (is.null(dfw)) stop("dfw provided to k_chart is NULL");
 
-    dfw <- dfw %>% filter(Application == TRUE);
+    dfw <- dfw;
 
     # Prepare for colors
     dfw %>% select(Value, Color) %>% unique %>% .$Color -> choleskyColors
@@ -114,13 +109,11 @@ geom_states <- function (data = NULL, Show.Outliers = FALSE, StarPU = FALSE)
 {
     if (is.null(data)) stop("data is NULL when given to geom_states");
     if (StarPU){
-        dfw <- data$State %>%
-            # Non application
-            filter(Application == FALSE) %>%
+        dfw <- data$Starpu %>%
             # And only Starpu Worker State
             filter(Type == "Worker State");
     }else{
-        dfw <- data$State %>% filter(Application == TRUE);
+        dfw <- data$Application;
     }
 
     loginfo("Starting geom_states");

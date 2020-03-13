@@ -10,7 +10,7 @@ abe_cpu_cuda_details <- function(dfl, debug=FALSE)
 {
     node <- dfl %>% slice(1) %>% pull(Node);
     lpresult <- abe_cpu_cuda_inner(dfl, debug);
-	
+
     # This fixes some problems on recent versions of tidyverse
     # Check: https://github.com/tidyverse/tidyr/issues/751
     # Check: https://github.com/tidyverse/tidyr/issues/694
@@ -173,7 +173,6 @@ hl_per_node_ABE <- function (dfw = NULL)
     loginfo("hl_per_node_ABE starts");
 
     dftemp <- dfw %>%
-        filter(Application == TRUE) %>%
         filter(grepl("CPU|CUDA", ResourceId)) %>%
         select(Node, Resource, ResourceType, Duration, Value, Position, Height);
     pernodeABE <- dftemp %>%
@@ -195,8 +194,7 @@ hl_per_node_ABE_details <- function (data = NULL)
     if(is.null(data)) stop("Input data is NULL");
     if(is.null(data$State)) stop("Input data state is NULL");
 
-    data$State %>%
-        filter(Application == TRUE) %>%
+    data$Application %>%
         filter(grepl("CPU|CUDA", ResourceId)) %>%
         select(Node, Resource, ResourceType, Duration, Value, Color, Position, Height) %>%
         group_by(Node) %>%
@@ -266,7 +264,7 @@ calculate_resource_idleness <- function(dfw = NULL, max_only = TRUE)
 
     # Get only application states
     dfw <- dfw %>% filter(Application) %>%
-            distinct(ResourceType, ResourceId, Node, Position, Height, JobId, 
+            distinct(ResourceType, ResourceId, Node, Position, Height, JobId,
                      Value, Duration, .keep_all=TRUE);
 
     # Obtain time interval
@@ -315,11 +313,11 @@ geom_idleness <- function(data = NULL)
 geom_makespan <- function(data = NULL)
 {
     if(is.null(data)) stop("data provided for geom_makespan is NULL");
-    dfw <- data$State;
+    dfw <- data$Application;
 
     bsize = pjr_value(pajer$base_size, 22);
 
-    tend = dfw %>% filter(Application == TRUE) %>% pull(End) %>% max;
+    tend = dfw %>% pull(End) %>% max;
     loginfo(paste("makespan is", tend));
     height = dfw %>% select(Position) %>% na.omit %>% pull(Position) %>% max;
     loginfo(paste("max height for makespan is", height));
@@ -395,12 +393,12 @@ geom_abe <- function(data = NULL)
     if (is.null(data)) stop("data is NULL when given to geom_abe");
 
     # states and k
-    pernodeABEdf <- hl_per_node_ABE(data$State);
+    pernodeABEdf <- hl_per_node_ABE(data$Application);
 
     bsize = pjr_value(pajer$base_size, 22)/5;
 
     # Obtain time interval
-    dfwapp <- data$State %>% filter(Application == TRUE) %>%
+    dfwapp <- data$Application %>%
         filter(Type == "Worker State");
     tstart <- dfwapp %>% .$Start %>% min;
     tend <- dfwapp %>% .$End %>% max;

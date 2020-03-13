@@ -3,7 +3,7 @@ geom_atree <- function (data=NULL, Offset=1.02, Flip = TRUE)
 {
     if(is.null(data)) stop("input data for geom_atree is NULL");
 
-    makespan = data$State %>% filter(Application == TRUE) %>% .$End %>% max;
+    makespan = data$Application %>% .$End %>% max;
 
     ffactor <- ifelse(Flip, +1, -1);
     dfactor <- makespan * 0.04;
@@ -83,25 +83,25 @@ active_nodes_chart <- function(data = NULL)
       mutate(node_count = case_when(Value == "do_subtree" ~ "1",
                                     Value == "init_front" ~ "1",
                                     Value == "clean_front" ~ "-1",
-                                    TRUE ~ "<NA>"), 
+                                    TRUE ~ "<NA>"),
              node_count = as.integer(node_count)) -> df_active
 
     # get all nodes that roots of sequential subtrees
     df_active %>%
-      filter(Value == "do_subtree") %>% 
+      filter(Value == "do_subtree") %>%
       mutate(nodeType = TRUE) %>%
       select(ANode, nodeType) -> seq_tree
 
     df_active %>%
       filter_at(vars(ANode), any_vars(. %in% seq_tree$ANode)) %>%
-      mutate(nodeType = "sequential")  -> seq_nodes       
+      mutate(nodeType = "sequential")  -> seq_nodes
 
     df_active %>%
       filter_at(vars(ANode), any_vars(!. %in% seq_tree$ANode)) %>%
       mutate(nodeType = "parallel") -> front_nodes
 
     # let's merge them
-    df_all <- front_nodes %>% bind_rows(seq_nodes) 
+    df_all <- front_nodes %>% bind_rows(seq_nodes)
     df_all %>%
       arrange(Start) %>%
       group_by(nodeType) %>%
@@ -196,13 +196,13 @@ atree_time_aggregation <- function(dfw = NULL, step = 100)
 computing_nodes_chart <- function(data=NULL, step = 100)
 {
   loginfo("Entry of computing_nodes_chart");
-  atree_time_aggregation(data, step) %>%  
+  atree_time_aggregation(data, step) %>%
     ggplot(aes(x=Slice, y=Quantity)) +
     geom_line() +
     default_theme() +
     ylab("Computing\nNodes") +
     scale_colour_brewer(palette = "Dark2");
-  
+
 }
 
 # remyTimeIntegrationPrep without dividing the Value column by the time slice
@@ -220,7 +220,7 @@ resource_utilization_tree_node <- function(data = NULL)
     # arrange(-color_id) %>%
     ggplot(aes(x=Slice, y=Value1, fill=as.factor(ANode))) +
     geom_area() +
-	  # scale_fill_manual(values=c(gray.colors(data %>% 
+	  # scale_fill_manual(values=c(gray.colors(data %>%
 	  #                      select(ANode) %>%
 	  #                      unique() %>% nrow(), start = 0.1, end = 0.9, gamma = 1, alpha=1, rev = FALSE))) +
     # scale_fill_manual(values=colors) +
@@ -249,15 +249,15 @@ resource_utilization_tree_node_plot <- function(data = NULL, step = 100)
 {
   loginfo("Entry of resource_utilization_tree_node_plot");
   # Prepare and filter data
-  data$State %>% 
+  data$State %>%
     filter(Application,
-           Type == "Worker State", 
+           Type == "Worker State",
            grepl("lapack", Value) | grepl("subtree", Value)) %>%
     select(ANode, Start, End, JobId) %>%
     arrange(Start) -> df_filter
 
   # Get number of workers for resource utilization
-  NWorkers <- data$State %>% 
+  NWorkers <- data$State %>%
       filter(grepl("CPU", ResourceType) | grepl("CUDA", ResourceType)) %>%
       select(ResourceId) %>% unique() %>% nrow()
 
@@ -269,7 +269,7 @@ resource_utilization_tree_node_plot <- function(data = NULL, step = 100)
     bind_rows(df_filter %>%
                 select(ANode, End, JobId) %>%
                 mutate(Event = "End") %>%
-                rename(Time = End)  
+                rename(Time = End)
               ) %>%
     arrange(Time) %>%
     group_by(ANode) %>%
@@ -296,20 +296,20 @@ resource_utilization_tree_node_plot <- function(data = NULL, step = 100)
 
   loginfo("Exit of resource_utilization_tree_node_plot");
 	resource_utilization_tree_node(df_node_plot)
-}  
+}
 
 resource_utilization_tree_depth_plot <- function(data = NULL, step = 100)
 {
   loginfo("Entry of resource_utilization_tree_depth_plot");
   # Prepare and filter data
-  df_filter <- data$State %>% 
-    filter(Application, Type == "Worker State", 
+  df_filter <- data$State %>%
+    filter(Application, Type == "Worker State",
            grepl("lapack", Value) | grepl("subtree", Value)) %>%
     select(ANode, Start, End, JobId) %>%
     arrange(Start)
 
   # Get number of workers for resource utilization
-  NWorkers <- data$State %>% 
+  NWorkers <- data$State %>%
       filter(grepl("CPU", ResourceType) | grepl("CUDA", ResourceType)) %>%
       select(ResourceId) %>% unique() %>% nrow()
 
@@ -321,7 +321,7 @@ resource_utilization_tree_depth_plot <- function(data = NULL, step = 100)
     bind_rows(df_filter %>%
               select(ANode, End, JobId) %>%
               mutate(Event = "End") %>%
-              rename(Time = End)  
+              rename(Time = End)
               ) %>%
     arrange(Time) %>%
     group_by(ANode) %>%
@@ -350,13 +350,13 @@ resource_utilization_tree_depth_plot <- function(data = NULL, step = 100)
   df_depth_plot <- df_node_plot %>%
     left_join(data$Atree, by="ANode") %>%
     select(-Value, -Height, -Position, -Intermediary) %>%
-    filter(!is.na(Depth)) %>% 
+    filter(!is.na(Depth)) %>%
     ungroup() %>%
     group_by(Slice, Depth) %>%
     mutate(Value2 = sum(Value1)) %>%
     select(Slice, Depth, Value2) %>%
     unique()
-    
+
   loginfo("Exit of resource_utilization_tree_depth_plot");
   resource_utilization_tree_depth(df_depth_plot)
 }

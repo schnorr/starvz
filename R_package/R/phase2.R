@@ -279,7 +279,7 @@ the_master_function <- function(data = NULL)
       pajer$memory$state$active <<- FALSE;
       pajer$memory$combined <<- FALSE;
     }
-   
+
     if(is.null(data$Atree)){
       print("This dataset dont have atree, disabling some options")
       pajer$utiltreenode$active <<- FALSE;
@@ -287,7 +287,7 @@ the_master_function <- function(data = NULL)
       pajer$atree$active <<- FALSE;
       pajer$activenodes$active <<- FALSE;
       pajer$computingnodes$active <<- FALSE;
-    } 
+    }
 
     if (!is.null(pajer$time)){
         stop("pajer: you are using a deprecated parameter.");
@@ -323,6 +323,14 @@ the_master_function <- function(data = NULL)
     goactivenodes <- geom_blank();
     gocomputingnodes <- geom_blank();
 
+    # Lets do some transformations on data here
+    # TODO: Maybe this will make sense to transfer to Phase1
+    data$Application <- data$State %>%
+                        filter(Application == TRUE)
+
+    data$Starpu <- data$State %>%
+                        filter(Application == FALSE)
+
     # Atree space/time view
     if (!is.null(data$Atree) && pjr(pajer$atree$active)){
         loginfo("Creating the temporal atree plot");
@@ -353,7 +361,7 @@ the_master_function <- function(data = NULL)
             if (pjr_value(pajer$st$aggregation$method, "lucas") == "lucas"){
                 loginfo("Will call st_time_aggregation");
                 aggStep <- pjr_value(pajer$st$aggregation$step, globalAggStep);
-                dfw_agg <- st_time_aggregation(dfw, step=aggStep);
+                dfw_agg <- st_time_aggregation(data$Application, step=aggStep);
                 data %>% st_time_aggregation_plot (dfw_agg) + tScale -> gow;
                 loginfo("st_time_aggregation completed");
             }else{
@@ -401,7 +409,7 @@ the_master_function <- function(data = NULL)
         if (pjr(pajer$starpu$aggregation$active)){
           loginfo("Will call st_time_aggregation");
           aggStep <- pjr_value(pajer$starpu$aggregation$step, globalAggStep);
-          dfw_agg <- st_time_aggregation(dfw, StarPU.View=TRUE, step=aggStep);
+          dfw_agg <- st_time_aggregation(data$Starpu, StarPU.View=TRUE, step=aggStep);
           data %>% st_time_aggregation_plot (dfw_agg, StarPU.View=TRUE) + tScale -> gstarpu;
           loginfo("st_time_aggregation completed");
         }else{
@@ -416,7 +424,7 @@ the_master_function <- function(data = NULL)
     # KIteration
     if (pjr(pajer$kiteration$active)){
         loginfo("Creating the KIteration");
-        goijk <- k_chart(dfw) + tScale;
+        goijk <- k_chart(data$Application) + tScale;
 
         if (!pjr(pajer$kiteration$legend)){
             goijk <- goijk +

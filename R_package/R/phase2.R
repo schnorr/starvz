@@ -266,6 +266,12 @@ the_master_function <- function(data = NULL)
       pajer$pmtool$bounds$active <<- FALSE;
     }
 
+    if((data$State %>% filter(Type == "Memory Node State") %>% nrow) == 0 && pjr(pajer$memory$state$active) ){
+      print("There is not information about memory states")
+      pajer$memory$state$active <<- FALSE;
+      pajer$memory$combined <<- FALSE;
+    }
+
     if(is.null(data$Link)){
       print("This dataset dont have links, disabling some options")
       pajer$memory$transfers$active <<- FALSE;

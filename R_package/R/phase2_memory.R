@@ -201,7 +201,7 @@ geom_memory <- function (data = NULL, combined = FALSE, tstart=NULL, tend=NULL)
 {
     if (is.null(data)) stop("data is NULL when given to geom_memory");
 
-    dfw <- data$State %>%
+    dfw <- data$Starpu %>%
         # Memory State
         filter(Type == "Memory Node State");
 

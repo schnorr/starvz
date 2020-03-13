@@ -82,7 +82,7 @@ default:
   memory:
     combined: FALSE
     state:
-      active: FALSE
+      active: TRUE
       border: FALSE
       height:
       total: TRUE

@@ -225,7 +225,7 @@ read_state_csv <- function (where = ".",
             })) -> df.pre.outliers
 
         # Step 1.2: get the negative residuals for each task
-        df.pre.outliers %>% 
+        df.pre.outliers %>%
           select(Value, ResourceType, model) %>%
           mutate(Residual = map(model, resid)) %>%
           select(-model) %>%
@@ -1284,12 +1284,12 @@ read_dag <- function (where = ".", dfw = NULL, dfl = NULL)
 
 starpu_states <- function()
 {
-    c("Callback", "FetchingInput", "Idle", "Initializing", "Overhead", "PushingOutput", "Scheduling", "Submitting task", "Progressing", "Sleeping", "Submiting task", "Waiting all tasks", "Building task", "Deinitializing");
+    c("Callback", "FetchingInput", "Idle", "Initializing", "Overhead", "PushingOutput", "Scheduling", "Submitting task", "Progressing", "Sleeping", "Submiting task", "Waiting all tasks", "Building task", "Deinitializing", "execute_on_all_wrapper");
 }
 
 all_starpu_states <- function()
 {
-    c("Callback", "FetchingInput", "Idle", "Initializing", "Overhead", "PushingOutput", "Scheduling", "Submitting task", "Progressing", "Sleeping", "Submiting task", "Waiting all tasks", "Building task", "Deinitializing", "Executing");
+    c("Callback", "FetchingInput", "Idle", "Initializing", "Overhead", "PushingOutput", "Scheduling", "Submitting task", "Progressing", "Sleeping", "Submiting task", "Waiting all tasks", "Building task", "Deinitializing", "execute_on_all_wrapper", "Executing");
 }
 
 cholesky_states <- function()
@@ -1352,6 +1352,7 @@ starpu_colors <- function()
   pre_colors <- brewer.pal(12, "Set3");
   pre_colors[13] = "#000000"
   pre_colors[14] = "#000000"
+  pre_colors[15] = "#000000"
   tibble(Value = starpu_states()) %>%
       # Get colors from Set3
       mutate(Color = pre_colors) %>%

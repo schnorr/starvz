@@ -233,7 +233,7 @@ starpu_mpi_grid_arrange <- function(atree, utiltreenode, utiltreedepth, st, st_p
     return(g);
 }
 
-the_master_function <- function(data = NULL)
+starvz_plot <- function(data = NULL)
 {
     if(is.null(data)) return(NULL);
     if(is.null(pajer)) return(NULL);
@@ -275,7 +275,7 @@ the_master_function <- function(data = NULL)
 
     # Prune end of Variables
 
-    loginfo("Starting the master function");
+    loginfo("Starting the Starvz plot function");
 
     # Fail Checking
     if((pjr(pajer$pmtool$state$active) || pjr(pajer$pmtool$kiteration$active)) && is.null(data$Pmtool_states)){
@@ -701,6 +701,10 @@ the_master_function <- function(data = NULL)
                                  computingnodes = gocomputingnodes,
                                  title = directory);
 
+    loginfo("Ending Starvz plot function");
 
     return(g);
 }
+
+# Keep the old name
+the_master_function <- starvz_plot

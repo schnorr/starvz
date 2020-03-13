@@ -251,6 +251,10 @@ the_master_function <- function(data = NULL)
        stop("The State data was not loaded, check if the feather files exists.");
     }
 
+    if (!is.null(pajer$time)){
+        stop("pajer: you are using a deprecated parameter.");
+    }
+
     # Lets do some transformations on data here
     # TODO: Maybe this will make sense to transfer to Phase1
     data$Application <- data$State %>%
@@ -261,6 +265,15 @@ the_master_function <- function(data = NULL)
 
     data$State <- NULL
     gc()
+
+    # Adjust temporal scale
+    tstart <- pjr_value(pajer$limits$start, data$Application %>% pull(Start) %>% min);
+    tend <- pjr_value(pajer$limits$end, data$Application %>% pull(End) %>% max) + 1 # Just to give space
+    tScale <- list(
+        coord_cartesian(xlim=c(tstart, tend))
+    );
+
+    # Prune end of Variables
 
     loginfo("Starting the master function");
 
@@ -305,16 +318,6 @@ the_master_function <- function(data = NULL)
       pajer$computingnodes$active <<- FALSE;
     }
 
-    if (!is.null(pajer$time)){
-        stop("pajer: you are using a deprecated parameter.");
-    }
-
-    # Adjust temporal scale
-    tstart <- pjr_value(pajer$limits$start, data$Application %>% pull(Start) %>% min);
-    tend <- pjr_value(pajer$limits$end, data$Application %>% pull(End) %>% max)
-    tScale <- list(
-        coord_cartesian(xlim=c(tstart, tend))
-    );
     # Define the global aggregation step as 0.1% of the total window
     globalAggStep = (tend - tstart) * .001;
 

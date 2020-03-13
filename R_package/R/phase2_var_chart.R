@@ -9,7 +9,7 @@ var_chart <- function (dfv = NULL, ylabel = NA)
     mycolors <- rep(brewer.pal(8, "Dark2"), 5)
 
     k <- dfv %>% rename(x=Start, xend=End, y=Value) %>% mutate(yend=y) %>% select(-Duration);
-    v <- k %>% group_by(ResourceId, Type) %>% mutate(xend=x, y=y, yend=lag(y));# %>% na.omit();
+    v <- k %>% group_by(ResourceId, Type) %>% mutate(xend=x, y=y, yend=lag(y)) %>% na.omit();
     k %>%
         ggplot() +
         default_theme() +

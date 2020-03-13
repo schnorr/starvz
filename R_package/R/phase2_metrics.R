@@ -191,8 +191,7 @@ hl_per_node_ABE <- function (dfw = NULL)
 
 hl_per_node_ABE_details <- function (data = NULL)
 {
-    if(is.null(data)) stop("Input data is NULL");
-    if(is.null(data$State)) stop("Input data state is NULL");
+    if(is.null(data$Application)) stop("Input data is NULL");
 
     data$Application %>%
         filter(grepl("CPU|CUDA", ResourceId)) %>%
@@ -240,7 +239,8 @@ hl_global_cpb <- function (data = NULL)
     tasksOnCriticalPath <- identifiers %>% filter(JobIdInt %in% tasksOnCriticalPath) %>% .$JobId %>% unique
 
     # Gather the CPB, sum the durations, return
-    data$State %>%
+    States <- bind_rows(data$Application, data$Starpu)
+    States %>%
         filter(JobId %in% tasksOnCriticalPath) %>% pull(Duration) -> sel1;
     sel1 %>% sum -> sum1;
     if(!is.null(data$Link)){
@@ -263,7 +263,7 @@ calculate_resource_idleness <- function(dfw = NULL, max_only = TRUE)
     if(is.null(dfw)) stop("Input data frame is NULL");
 
     # Get only application states
-    dfw <- dfw %>% filter(Application) %>%
+    dfw <- dfw %>%
             distinct(ResourceType, ResourceId, Node, Position, Height, JobId,
                      Value, Duration, .keep_all=TRUE);
 
@@ -288,7 +288,7 @@ geom_idleness <- function(data = NULL)
 {
     if(is.null(data)) stop("data provided for geom_idleness is NULL");
 
-    dfidle <- calculate_resource_idleness(data$State, !pjr_value(pajer$idleness_all, FALSE));
+    dfidle <- calculate_resource_idleness(data$Application, !pjr_value(pajer$idleness_all, FALSE));
 
     bsize = pjr_value(pajer$base_size, 22);
     expand = pjr_value(pajer$expand, 0.05);
@@ -355,7 +355,7 @@ geom_cpb_internal <- function(data = NULL, value = NULL, desc = NULL)
 {
 
     if (!is.null(value) && !is.null(desc)){
-        dfw <- data$State;
+        dfw <- data$Application;
 
         bsize = pjr_value(pajer$base_size, 22);
 

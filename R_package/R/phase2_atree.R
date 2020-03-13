@@ -44,13 +44,13 @@ atree_temporal_chart <- function(data = NULL, globalEndTime = NULL)
 
     loginfo("Entry of atree_temporal_chart");
 
-    dfw <- data$State;
+    dfw <- data$Application;
     dfa <- data$Atree;
     # Prepare for colors
     namedcolors <- extract_colors(dfw);
     atreeplot <- dfw %>%
         # Considering only application data and Worker State
-        filter(Application, Type == "Worker State") %>%
+        filter(Type == "Worker State") %>%
         # Remove all tasks that do not have ANode
         filter(!is.na(Height.ANode)) %>%
         # Plot
@@ -181,7 +181,7 @@ atree_time_aggregation <- function(dfw = NULL, step = 100)
 {
     if (is.null(dfw)) return(NULL);
 
-    dfw <- dfw %>% filter(Application) %>% filter(Type == "Worker State")
+    dfw <- dfw %>% filter(Type == "Worker State")
 
     dfw_agg_prep <- atree_time_aggregation_prep (dfw);
     dfw_agg <- atree_time_aggregation_do (dfw_agg_prep, step);
@@ -196,7 +196,7 @@ atree_time_aggregation <- function(dfw = NULL, step = 100)
 computing_nodes_chart <- function(data=NULL, step = 100)
 {
   loginfo("Entry of computing_nodes_chart");
-  atree_time_aggregation(data, step) %>%
+  atree_time_aggregation(data$Application, step) %>%
     ggplot(aes(x=Slice, y=Quantity)) +
     geom_line() +
     default_theme() +
@@ -249,15 +249,14 @@ resource_utilization_tree_node_plot <- function(data = NULL, step = 100)
 {
   loginfo("Entry of resource_utilization_tree_node_plot");
   # Prepare and filter data
-  data$State %>%
-    filter(Application,
-           Type == "Worker State",
+  data$Application %>%
+    filter(Type == "Worker State",
            grepl("lapack", Value) | grepl("subtree", Value)) %>%
     select(ANode, Start, End, JobId) %>%
     arrange(Start) -> df_filter
 
   # Get number of workers for resource utilization
-  NWorkers <- data$State %>%
+  NWorkers <- data$Application %>%
       filter(grepl("CPU", ResourceType) | grepl("CUDA", ResourceType)) %>%
       select(ResourceId) %>% unique() %>% nrow()
 
@@ -302,14 +301,14 @@ resource_utilization_tree_depth_plot <- function(data = NULL, step = 100)
 {
   loginfo("Entry of resource_utilization_tree_depth_plot");
   # Prepare and filter data
-  df_filter <- data$State %>%
-    filter(Application, Type == "Worker State",
+  df_filter <- data$Application %>%
+    filter(Type == "Worker State",
            grepl("lapack", Value) | grepl("subtree", Value)) %>%
     select(ANode, Start, End, JobId) %>%
     arrange(Start)
 
   # Get number of workers for resource utilization
-  NWorkers <- data$State %>%
+  NWorkers <- data$Application %>%
       filter(grepl("CPU", ResourceType) | grepl("CUDA", ResourceType)) %>%
       select(ResourceId) %>% unique() %>% nrow()
 

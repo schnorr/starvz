@@ -163,7 +163,7 @@ geom_states <- function (data = NULL, Show.Outliers = FALSE, StarPU = FALSE)
 geom_mpistates <- function (data = NULL)
 {
     if (is.null(data)) stop("data is NULL when given to geom_mpistates");
-    dfw <- data$State;
+    dfw <- data$Starpu;
     if (is.null(dfw)) stop("dfw is NULL when given to geom_mpistates");
 
     # Get only MPI states
@@ -217,14 +217,9 @@ state_mpi_chart <- function (data = NULL)
 
     loginfo("Entry of state_mpi_chart");
 
-    # Obtain time interval
-    #tstart <- data$State %>% pull(Start) %>% min;
-    #tend <- data$State %>% pull(End) %>% max;
-
     #Plot
     gow <- ggplot() +
         default_theme() +
-        #coord_cartesian(xlim=c(tstart, tend)) +
         # Add states and outliers if requested
         geom_mpistates(data);
 
@@ -311,7 +306,7 @@ geom_path_highlight <- function (paths = NULL)
         return(list());
     }
 
-    # paths is identical to data$State, but with an additional column called Path
+    # paths is identical to data$Starpu, but with an additional column called Path
 
     ret <- list();
 

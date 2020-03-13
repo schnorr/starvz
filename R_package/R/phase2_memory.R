@@ -407,7 +407,7 @@ handles_presence_states <- function(data){
 	# Getting all events of the handles
 	data_states %>% filter(Value %in% cords$Handle) %>% select(Container, Start, Type, Value) -> data_state_events
 
-	end <- max(data$State$End)
+	end <- max(data$Starpu$End)
 
 	fini_end <- unlist(end)
 
@@ -466,7 +466,7 @@ pre_handle_gantt <- function(data){
 		              select(Container, sContainer, JobId, Handles, y1, MemoryNode) %>%
 		              filter(sContainer==Container) %>%
 		              mutate(JobId=as.character(JobId)) %>%
-		              inner_join(data$State, by=c("JobId"="JobId")) %>%
+		              inner_join(data$Application, by=c("JobId"="JobId")) %>%
 		              select(Container, JobId, Handles, Start, End, y1, Value) %>%
 		              rename(Colour=Value) %>%
 		              rename(Value=Handles) -> jobs_p_data
@@ -693,8 +693,8 @@ handles_gantt <- function(data, JobId=NA, lines=NA, lHandle=NA){
 	}
 	#if(!is.na(JobId)){
 	#   my_job <- JobId
-	#   data$State %>% filter(JobId==my_job) %>% .$Start -> job_start
-	#   data$State %>% filter(JobId==my_job) %>% .$Duration -> job_dur
+	#   data$Starpu %>% filter(JobId==my_job) %>% .$Start -> job_start
+	#   data$Starpu %>% filter(JobId==my_job) %>% .$Duration -> job_dur
 	#   data$Tasks %>% filter(JobId==my_job) %>% .$ MemoryNode -> job_node
 	#   text <- data.frame(x=c(job_start+job_dur/2), y=c(job_node+1.4), text=c(my_job))
 	#   p <- p + geom_text(data=text, aes(x=x, y=y, label=my_job), color="black", size=2,
@@ -728,7 +728,7 @@ pre_snap <- function(data, f_data){
 
 	f_data %>% mutate(st = ifelse(Type=="data state owner", "Owner", "Shared")) -> d_presence
 
-	data$State %>% mutate(JobId=JobId) %>%
+	data$Application %>% mutate(JobId=JobId) %>%
 		       inner_join(data$Tasks, by=c("JobId"="JobId")) %>%
 		       select(Start, End, Value, JobId, MemoryNode, MPIRank, Color) %>%
 		       inner_join(data$Task_handles, by=c("JobId"="JobId")) %>%

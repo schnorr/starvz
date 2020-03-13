@@ -158,7 +158,7 @@ geom_aggregated_states <- function (data = NULL, Show.Outliers = FALSE, min_time
         mutate(Node = as.factor(Node)) %>%
         mutate(ResourceType = as.factor(gsub('[[:digit:]]+', '', Resource))) -> ydf;
 
-    Colors <- data$State %>% select(Value, Color) %>% distinct()
+    Colors <- data$Application %>% select(Value, Color) %>% distinct()
 
     # Do the aggregation
     data$Application %>%

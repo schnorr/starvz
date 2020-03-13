@@ -245,12 +245,22 @@ the_master_function <- function(data = NULL)
 
     # Get data
     directory <- data$Origin;
-    dfw <- data$State;
     dfv <- data$Variable;
 
-    if(is.null(dfw)){
+    if(is.null(data$State)){
        stop("The State data was not loaded, check if the feather files exists.");
     }
+
+    # Lets do some transformations on data here
+    # TODO: Maybe this will make sense to transfer to Phase1
+    data$Application <- data$State %>%
+                        filter(Application == TRUE)
+
+    data$Starpu <- data$State %>%
+                        filter(Application == FALSE)
+
+    data$State <- NULL
+    gc()
 
     loginfo("Starting the master function");
 
@@ -266,7 +276,7 @@ the_master_function <- function(data = NULL)
       pajer$pmtool$bounds$active <<- FALSE;
     }
 
-    if((data$State %>% filter(Type == "Memory Node State") %>% nrow) == 0 && pjr(pajer$memory$state$active) ){
+    if((data$Starpu %>% filter(Type == "Memory Node State") %>% nrow) == 0 && pjr(pajer$memory$state$active) ){
       print("There is not information about memory states")
       pajer$memory$state$active <<- FALSE;
       pajer$memory$combined <<- FALSE;
@@ -278,7 +288,7 @@ the_master_function <- function(data = NULL)
       pajer$memory$combined <<- FALSE;
     }
 
-    dfevents = dfw %>% filter(Type == "Memory Node State")
+    dfevents = data$Starpu %>% filter(Type == "Memory Node State")
 
     if((dfevents %>% nrow) == 0 && ( pjr(pajer$memory$new_data) && (data$Events %>% nrow) == 0) ){
       print("This dataset dont have memory node states")
@@ -300,8 +310,8 @@ the_master_function <- function(data = NULL)
     }
 
     # Adjust temporal scale
-    tstart <- pjr_value(pajer$limits$start, dfw %>% pull(Start) %>% min);
-    tend <- pjr_value(pajer$limits$end, dfw %>% pull(End) %>% max)
+    tstart <- pjr_value(pajer$limits$start, data$Application %>% pull(Start) %>% min);
+    tend <- pjr_value(pajer$limits$end, data$Application %>% pull(End) %>% max)
     tScale <- list(
         coord_cartesian(xlim=c(tstart, tend))
     );
@@ -328,14 +338,6 @@ the_master_function <- function(data = NULL)
     gogov <- geom_blank();
     goactivenodes <- geom_blank();
     gocomputingnodes <- geom_blank();
-
-    # Lets do some transformations on data here
-    # TODO: Maybe this will make sense to transfer to Phase1
-    data$Application <- data$State %>%
-                        filter(Application == TRUE)
-
-    data$Starpu <- data$State %>%
-                        filter(Application == FALSE)
 
     # Atree space/time view
     if (!is.null(data$Atree) && pjr(pajer$atree$active)){
@@ -588,7 +590,7 @@ the_master_function <- function(data = NULL)
     # MPI State
     if (pjr(pajer$mpistate$active)){
         loginfo("Creating the MPI state");
-        if ( (data$State %>% filter(Type == "Communication Thread State") %>% nrow) == 0 ){
+        if ( (data$Starpu %>% filter(Type == "Communication Thread State") %>% nrow) == 0 ){
           print("There aren't any information on MPI, ignoring it.");
           pajer$mpistate$active <<- FALSE;
         }else{
@@ -648,11 +650,11 @@ the_master_function <- function(data = NULL)
     if (pjr(pajer$activenodes$active)){
       loginfo("Creating the Active Nodes plot");
 
-      if ( (dfw %>% filter(!is.na(ANode)) %>% nrow) == 0 ){
+      if ( (data$Application %>% filter(!is.na(ANode)) %>% nrow) == 0 ){
         print("There aren't any information on ANode, ignoring it.");
         pajer$activenodes$active <<- FALSE;
       }else{
-        goactivenodes <- dfw %>% active_nodes_chart() + tScale;
+        goactivenodes <- data$Application %>% active_nodes_chart() + tScale;
       }
     }
 
@@ -660,11 +662,11 @@ the_master_function <- function(data = NULL)
     if (pjr(pajer$computingnodes$active)){
         loginfo("Creating the Computing Nodes plot");
         aggStep <- pjr_value(pajer$computingnodes$step, globalAggStep);
-        if ( (dfw %>% filter(!is.na(ANode)) %>% nrow) == 0 ) {
+        if ( (data$Application %>% filter(!is.na(ANode)) %>% nrow) == 0 ) {
           print("There aren't any information on ANode, ignoring it.");
           pajer$computingnodes$active <<- FALSE;
         }else{
-          gocomputingnodes <- computing_nodes_chart(data=dfw, step=aggStep) + tScale;
+          gocomputingnodes <- computing_nodes_chart(data=data$Application, step=aggStep) + tScale;
           loginfo("Exit of computing_nodes_chart");
         }
     }

@@ -22,7 +22,7 @@ gaps_backward_deps_one <- function(data = NULL, task = NULL, levels = 1)
     }
 
     # Enrich states
-    dfw <- data$State;
+    dfw <- data$Starpu;
     ret %>%
         filter(!grepl("mpi", JobId)) %>%
         left_join(dfw, by=c("JobId" = "JobId")) -> retw;

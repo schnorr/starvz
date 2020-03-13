@@ -1,10 +1,10 @@
 plot_lackready <- function (data = NULL)
 {
     if (is.null(data)) stop("data is NULL when given to geom_lackready");
-    if (is.null(data$State)) stop("state is NULL when given to geom_lackready");
+    if (is.null(data$Starpu)) stop("state is NULL when given to geom_lackready");
     if (is.null(data$Variable)) stop("variable is NULL when given to geom_lackready");
 
-    data$State %>%
+    data$Starpu %>%
         select(Node, Resource) %>%
         unique %>%
         group_by(Node) %>%

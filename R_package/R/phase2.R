@@ -266,24 +266,24 @@ the_master_function <- function(data = NULL)
 
     # Fail Checking
     if((pjr(pajer$pmtool$state$active) || pjr(pajer$pmtool$kiteration$active)) && is.null(data$Pmtool_states)){
-      print("Pmtool states config is active but the data is NULL")
+      logwarn("Pmtool states config is active but the data is NULL")
       pajer$pmtool$state$active <<- FALSE;
       pajer$pmtool$kiteration$active <<- FALSE;
     }
 
     if(pjr(pajer$pmtool$bounds$active) && is.null(data$Pmtool)){
-      print("Pmtool bounds config is active but the data is NULL")
+      logwarn("Pmtool bounds config is active but the data is NULL")
       pajer$pmtool$bounds$active <<- FALSE;
     }
 
     if((data$Starpu %>% filter(Type == "Memory Node State") %>% nrow) == 0 && pjr(pajer$memory$state$active) ){
-      print("There is not information about memory states")
+      logwarn("There is not information about memory states")
       pajer$memory$state$active <<- FALSE;
       pajer$memory$combined <<- FALSE;
     }
 
     if(is.null(data$Link)){
-      print("This dataset dont have links, disabling some options")
+      logwarn("This dataset dont have links, disabling some options")
       pajer$memory$transfers$active <<- FALSE;
       pajer$memory$combined <<- FALSE;
     }
@@ -291,13 +291,13 @@ the_master_function <- function(data = NULL)
     dfevents = data$Starpu %>% filter(Type == "Memory Node State")
 
     if((dfevents %>% nrow) == 0 && ( pjr(pajer$memory$new_data) && (data$Events %>% nrow) == 0) ){
-      print("This dataset dont have memory node states")
+      logwarn("This dataset dont have memory node states")
       pajer$memory$state$active <<- FALSE;
       pajer$memory$combined <<- FALSE;
     }
 
     if(is.null(data$Atree)){
-      print("This dataset dont have atree, disabling some options")
+      logwarn("This dataset dont have atree, disabling some options")
       pajer$utiltreenode$active <<- FALSE;
       pajer$utiltreedepth$active <<- FALSE;
       pajer$atree$active <<- FALSE;
@@ -541,7 +541,7 @@ the_master_function <- function(data = NULL)
         aggStep <- pjr_value(pajer$mpibandwidth$step, globalAggStep);
         mpi_out <- dfv %>% filter(grepl("mpict", ResourceId), grepl("Out", Type));
         if ((mpi_out %>% nrow) == 0){
-            print("There aren't any information on MPIBandwidth, ignoring it.");
+            logwarn("There aren't any information on MPIBandwidth, ignoring it.");
             pajer$mpibandwidth$active <<- FALSE;
         }else{
             gomov <- mpi_out %>%
@@ -557,7 +557,7 @@ the_master_function <- function(data = NULL)
     if (pjr(pajer$mpiconcurrent$active)){
         loginfo("Creating the MPI concurrent ops plot");
         if ((data$Link %>% filter(grepl("mpicom", Key)) %>% nrow) == 0){
-            print("There aren't any information on MPI, ignoring it.");
+            logwarn("There aren't any information on MPI, ignoring it.");
             pajer$mpiconcurrent$active <<- FALSE;
         }else{
           aggStep <- pjr_value(pajer$mpiconcurrent$step, globalAggStep);
@@ -574,7 +574,7 @@ the_master_function <- function(data = NULL)
     if (pjr(pajer$mpiconcurrentout$active)){
         loginfo("Creating the MPI concurrent ops plot");
         if ((data$Link %>% filter(grepl("mpicom", Key)) %>% nrow) == 0){
-            print("There aren't any information on MPI, ignoring it.");
+            logwarn("There aren't any information on MPI, ignoring it.");
             pajer$mpiconcurrentout$active <<- FALSE;
         }else{
           aggStep <- pjr_value(pajer$mpiconcurrentout$step, globalAggStep);
@@ -591,7 +591,7 @@ the_master_function <- function(data = NULL)
     if (pjr(pajer$mpistate$active)){
         loginfo("Creating the MPI state");
         if ( (data$Starpu %>% filter(Type == "Communication Thread State") %>% nrow) == 0 ){
-          print("There aren't any information on MPI, ignoring it.");
+          logwarn("There aren't any information on MPI, ignoring it.");
           pajer$mpistate$active <<- FALSE;
         }else{
           gompistate <- data %>% state_mpi_chart() + tScale;
@@ -651,7 +651,7 @@ the_master_function <- function(data = NULL)
       loginfo("Creating the Active Nodes plot");
 
       if ( (data$Application %>% filter(!is.na(ANode)) %>% nrow) == 0 ){
-        print("There aren't any information on ANode, ignoring it.");
+        logwarn("There aren't any information on ANode, ignoring it.");
         pajer$activenodes$active <<- FALSE;
       }else{
         goactivenodes <- data$Application %>% active_nodes_chart() + tScale;
@@ -663,7 +663,7 @@ the_master_function <- function(data = NULL)
         loginfo("Creating the Computing Nodes plot");
         aggStep <- pjr_value(pajer$computingnodes$step, globalAggStep);
         if ( (data$Application %>% filter(!is.na(ANode)) %>% nrow) == 0 ) {
-          print("There aren't any information on ANode, ignoring it.");
+          logwarn("There aren't any information on ANode, ignoring it.");
           pajer$computingnodes$active <<- FALSE;
         }else{
           gocomputingnodes <- computing_nodes_chart(data=data$Application, step=aggStep) + tScale;

@@ -155,10 +155,10 @@ geom_pmtool_bounds <- function(data = NULL)
     bound <- df.pmtool %>% filter(!is.na(Time)) %>% mutate(Label=pjr_value(pajer$pmtool$bounds$label, TRUE)) %>% mutate(Label=ifelse(Label, paste0(Alg, ": ", round(Time, 0)), round(Time, 0))) %>% unique %>% filter(Alg %in% pajer$pmtool$bounds$alg)
 
     ret <- list(geom_segment(data=bound %>% filter(Bound == FALSE), aes(x = Time+tstart, xend=Time+tstart, y = MinPosition, yend=MaxPosition), size=5, alpha=.7, color="lightgrey"),
-                geom_text (data=bound, aes(x = Time+tstart, y = MinPosition+(MaxPosition-MinPosition)/2, label=Label), angle=90, color="black", size=bsize, fontface="italic"))
+                geom_text (data=bound %>% filter(Bound == FALSE), aes(x = Time+tstart, y = MinPosition+(MaxPosition-MinPosition)/2, label=Label), angle=90, color="black", size=bsize, fontface="italic"))
 
     ret[[length(ret)+1]] <- list(geom_segment(data=bound %>% filter(Bound == TRUE), aes(x = Time+tstart, xend=Time+tstart, y = MinPosition, yend=MaxPosition), size=5, alpha=.7, color="gainsboro"),
-                geom_text (data=bound, aes(x = Time+tstart, y = MinPosition+(MaxPosition-MinPosition)/2, label=Label), angle=90, color="black", size=bsize))
+                geom_text (data=bound %>% filter(Bound == TRUE), aes(x = Time+tstart, y = MinPosition+(MaxPosition-MinPosition)/2, label=Label), angle=90, color="black", size=bsize))
 
     return(ret);
 

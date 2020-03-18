@@ -136,7 +136,7 @@ geom_pmtool_bounds <- function(data = NULL)
     # Y position
     minPos = dftemp %>% pull(Position) %>% min;
     minHeight = dftemp %>% pull(Height) %>% min;
-    maxPos = dftemp %>% pull(Position) %>% max + minHeight/2;
+    maxPos = dftemp %>% pull(Position) %>% max + minHeight/1.25;
 
     # Filter
     dfwapp = data$Application %>%

@@ -72,8 +72,8 @@ if [ -x "$(command -v pmtool)" ] && [ -f "platform_file.rec" ]; then
   pmtool -p platform_file.rec tasks.rec -d fast -a dmdas --threads --no-header -w -s pmtool_states.out > pmtool.out 2> /dev/null
 
   # Cleaning pmtools bounds.
-  echo "Alg,Time" > $PMTOOLOUT
-  cat pmtool.out | awk '{ print $(NF-2), $(NF-1)}' | sed -e 's/[[:space:]]/,/g' >> $PMTOOLOUT
+  echo "Alg,Bound,Time" > $PMTOOLOUT
+  cat pmtool.out | awk '{ print $(4), $(3), $(5)}' | sed '/^[[:space:]]*$/d' | sed '/^[[:space:]]*$/d' >> $PMTOOLOUT
 
   # Cleaning states
   cat pmtool_states.out | sed -e 's/[[:space:]][[:space:]]*/,/g' > pmtool_states.csv

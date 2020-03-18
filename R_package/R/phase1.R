@@ -605,6 +605,7 @@ pmtool_bounds_csv_parser <- function (where = ".")
                         trim_ws=TRUE,
                         col_types=cols(
                             Alg = col_character(),
+                            Bound = col_logical(),
                             Time = col_double()
                         ));
         # pmtool gives time in microsecounds

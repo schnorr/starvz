@@ -73,7 +73,7 @@ if [ -x "$(command -v pmtool)" ] && [ -f "platform_file.rec" ]; then
 
   # Cleaning pmtools bounds.
   echo "Alg,Bound,Time" > $PMTOOLOUT
-  cat pmtool.out | awk '{ print $(4), $(3), $(5)}' | sed '/^[[:space:]]*$/d' | sed '/^[[:space:]]*$/d' | sed 's/True/TRUE/g' | sed 's/False/FALSE/g' >> $PMTOOLOUT
+  cat pmtool.out | awk '{ print $(4), $(3), $(5)}' | sed '/^[[:space:]]*$/d' | sed -e 's/[[:space:]]/,/g' | sed 's/True/TRUE/g' | sed 's/False/FALSE/g' >> $PMTOOLOUT
 
   # Cleaning states
   cat pmtool_states.out | sed -e 's/[[:space:]][[:space:]]*/,/g' > pmtool_states.csv

@@ -181,7 +181,7 @@ hl_per_node_ABE <- function (dfw = NULL)
     # Y position
     pernodeABE <- dftemp %>%
         group_by(Node) %>%
-        summarize(MinPosition = min(Position), MaxPosition = max(Position)+min(Height)/2) %>%
+        summarize(MinPosition = min(Position), MaxPosition = max(Position)+min(Height)/1.25) %>%
         left_join(pernodeABE, by="Node");
 
     loginfo("hl_per_node_ABE ends");

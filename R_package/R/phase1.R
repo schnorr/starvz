@@ -609,7 +609,7 @@ pmtool_bounds_csv_parser <- function (where = ".")
                             Time = col_double()
                         ));
         # pmtool gives time in microsecounds
-        pm[[2]] <- pm[[2]]/1000
+        pm[[3]] <- pm[[3]]/1000
         loginfo(paste("Read of", entities.csv, "completed"));
     }else{
         loginfo(paste("Files", entities.feather, "or", entities.csv, "do not exist."));

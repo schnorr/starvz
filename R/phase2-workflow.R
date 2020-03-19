@@ -33,10 +33,10 @@ if (length(args)==3) {
 
 data <- the_fast_reader_function(directory);
 
-print("Data has been read");
+cat("StarVZ - Phase 2 - Data has been read\n", file = stdout())
 
 pajer <- config::get(file = pajer.config);
 
-png(name, width = 1000, height = 1500);
-print(grid.arrange(the_master_function(data)));
-end <- dev.off();
+ggsave(name, plot=the_master_function(data), width = 10, height = 18, units = "in", dpi=120)
+
+cat("End of StarVZ - Phase 2\n", file = stdout())

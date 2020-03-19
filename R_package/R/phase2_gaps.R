@@ -22,7 +22,7 @@ gaps_backward_deps_one <- function(data = NULL, task = NULL, levels = 1)
     }
 
     # Enrich states
-    dfw <- data$Starpu;
+    dfw <- bind_rows(data$Starpu, data$Application);
     ret %>%
         filter(!grepl("mpi", JobId)) %>%
         left_join(dfw, by=c("JobId" = "JobId")) -> retw;
@@ -43,7 +43,7 @@ gaps_backward_deps_one <- function(data = NULL, task = NULL, levels = 1)
             separate(ResourceId, into=c("Node", "Resource"), remove=FALSE) %>%
             select(-Origin, -Container) %>%
             # Enrich ResourceId with Height, Position
-            left_join((data$Y %>% select(-Type, -Nature)), by=c("ResourceId" = "Parent")) %>%
+            left_join((data$Y %>% select(-Type, -Nature) %>% mutate(Parent=as.character(Parent))), by=c("ResourceId" = "Parent")) %>%
             # Post-processing to ease row binding
             mutate(Size = as.character(Size)) -> retl;
     } else {

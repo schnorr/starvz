@@ -126,7 +126,7 @@ atree_temporal_chart <- function(data = NULL, step = 100, globalEndTime = NULL)
       # Plot
       ggplot() +
       default_theme() +
-      ylab("Task Location") +
+      ylab("Task\nLocation") +
       scale_y_continuous(breaks=NULL, labels=NULL) +
       # Add the atree representation on top
       geom_atree(data, Offset = 1.05, Flip = TRUE) +
@@ -189,7 +189,7 @@ active_nodes_chart <- function(data = NULL)
       default_theme() +
       geom_line() +
       theme(legend.position="top") +
-      ylab("Active Nodes") +
+      ylab("Active\nNodes") +
       scale_colour_brewer(palette = "Dark2");
 
     loginfo("Exit of active_nodes_chart");
@@ -351,7 +351,7 @@ resource_utilization_tree_node_plot <- function(data = NULL, step = 100)
       geom_area() +
       default_theme() +
       theme(legend.position = "none") +
-      ylab("Resource Utilization %\nANode")
+      ylab("Usage %\nANode") +
 }
 
 resource_utilization_tree_depth <- function(data = NULL)
@@ -366,7 +366,7 @@ resource_utilization_tree_depth <- function(data = NULL)
     default_theme() +
     theme(legend.position = "none") +
     #xlab("Time [ms]") +
-    ylab("Resource Utilization %\nDepth")
+    ylab("Usage %\nDepth") +
 }
 
 resource_utilization_tree_depth_plot <- function(data = NULL, step = 100)

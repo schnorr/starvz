@@ -345,7 +345,8 @@ starvz_plot <- function(data = NULL)
     # Atree space/time view
     if (!is.null(data$Atree) && pjr(pajer$atree$active)){
         loginfo("Creating the temporal atree plot");
-        goatreet <- atree_temporal_chart(data) + tScale;
+        aggStep <- pjr_value(pajer$atree$step, globalAggStep);
+        goatreet <- atree_temporal_chart(data, step=aggStep) + tScale;
         loginfo("Temporal atree plot completed");
     }
 
@@ -669,7 +670,7 @@ starvz_plot <- function(data = NULL)
           logwarn("There aren't any information on ANode, ignoring it.");
           pajer$computingnodes$active <<- FALSE;
         }else{
-          gocomputingnodes <- computing_nodes_chart(data=data$Application, step=aggStep) + tScale;
+          gocomputingnodes <- computing_nodes_chart(data=data, step=aggStep) + tScale;
           loginfo("Exit of computing_nodes_chart");
         }
     }

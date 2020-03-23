@@ -1,4 +1,3 @@
-
 geom_atree <- function (data=NULL, Offset=1.02, Flip = TRUE)
 {
     if(is.null(data)) stop("input data for geom_atree is NULL");
@@ -9,36 +8,86 @@ geom_atree <- function (data=NULL, Offset=1.02, Flip = TRUE)
     dfactor <- makespan * 0.04;
     doffset <- makespan * Offset;
 
-    data <- data$Atree %>%
+    d <- data$Atree %>%
+        # Get Start time of the first task belonging to each ANode
+        left_join(data$Application %>%
+                  filter(Type == "Worker State") %>%
+                  select(ANode, Start, End) %>%
+                  group_by(ANode) %>%
+                  summarize(Start = min(Start),
+                            End = max(End)),
+                  by="ANode") %>%
         # Get graphical properties of each parent for each row
-        left_join(data$Atree, by=c("Parent" = "ANode"), suffix=c(".Node", ".Parent")) %>%
-        rename(Height = Height.Node, Position = Position.Node, Depth = Depth.Node, Intermediary = Intermediary.Node) %>%
+        left_join(x = .,
+                  y = .,
+                  by=c("Parent" = "ANode"), suffix=c(".Node", ".Parent")) %>%
+        rename(Height = Height.Node,
+               Position = Position.Node,
+               Depth = Depth.Node,
+               Intermediary = Intermediary.Node,
+               Start = Start.Node,
+               End = End.Node) %>%
         select(-Parent.Parent) %>%
         # Keep only intermediary nodes
         filter(Intermediary == TRUE) %>%
         # Calculate coordinates for Labels
-        mutate(Label.X = doffset - (Depth * dfactor) * ffactor,
+        mutate(Label.X = Start,
                Label.Y = Position + Height/2) %>%
+        # Calculate coordinates for horizontal line
+        mutate(Line.Y = Position + Height/2,
+            Line.X.start = Start,
+            Line.X.end = End) %>%
         # Calculate coordinates for lines connecting child with parent
-        mutate(Edge.X = doffset - ((Depth-0.3) * dfactor) * ffactor,
+        mutate(Edge.X = Start,
                Edge.Y = Position + Height/2,
-               Edge.Xend = doffset - ((Depth.Parent+0.3) * dfactor) * ffactor,
-               Edge.Yend = Position.Parent + Height.Parent/2);
+               Edge.Xend = Start.Parent,
+               Edge.Yend = Position.Parent + Height.Parent/2) %>%
+        mutate(Edge.End.X = End,
+               Edge.End.Y = Position + Height/2,
+               Edge.End.Xend = End.Parent,
+               Edge.End.Yend = Position.Parent + Height.Parent/2) %>%
+        mutate(Middle.X = Start + (End - Start)/2,
+               Middle.Y = Position + Height/2,
+               Middle.End.X = Start.Parent + (End.Parent - Start.Parent)/2,
+               Middle.End.Y = Position.Parent + Height.Parent/2);
 
     ret <-
         list(
-            # Horizontal lines
-            # geom_segment(data=(data %>% mutate(XOrigin = max(Depth)+0.6)), aes(yend=Position, x=Depth+0.5, xend=XOrigin, y=Position), color="lightgray"),
-            # Lines connecting child with parent
-            geom_segment(data=data, aes(x=Edge.X, yend=Edge.Yend, xend=Edge.Xend, y=Edge.Y), color="gray"),
-            # The Label
-            geom_text(data=data, size=3, aes(y=Label.Y, label=ANode, x=Label.X)),
+            # Lines connecting child with parent (Start)
+            geom_segment(data=d,
+                         aes(x=Edge.X,
+                             yend=Edge.Yend,
+                             xend=Edge.Xend,
+                             y=Edge.Y),
+                         color="blue"),
+            geom_point(data=d,
+                       aes(x=Edge.X,
+                           y=Edge.Y), color="blue"),
+            geom_point(data=d,
+                       aes(x=Edge.Xend,
+                           y=Edge.Yend), color="blue"),
+            # Lines connecting child with parent (End)
+            geom_segment(data=d,
+                         aes(x=Edge.End.X,
+                             yend=Edge.End.Yend,
+                             xend=Edge.End.Xend,
+                             y=Edge.End.Y),
+                         color="red"),
+            geom_point(data=d,
+                       aes(x=Edge.End.X,
+                           y=Edge.End.Y), color="red"),
+            geom_point(data=d,
+                       aes(x=Edge.End.Xend,
+                           y=Edge.End.Yend), color="red"),
             # Fix time coordinates
-            coord_cartesian(xlim=c(0, makespan))
+            coord_cartesian(xlim=c(0, makespan)),
+            # Horizontal lines
+            geom_segment(data=d, aes(y = Position, yend = Position, x = Start, xend = End), color="lightblue")
         );
     return(ret);
 }
-atree_temporal_chart <- function(data = NULL, globalEndTime = NULL)
+
+atree_temporal_chart <- function(data = NULL, step = 100, globalEndTime = NULL)
 {
     if (is.null(data)) stop("a NULL data has been provided to atree_temporal_chart");
 
@@ -46,27 +95,54 @@ atree_temporal_chart <- function(data = NULL, globalEndTime = NULL)
 
     dfw <- data$Application;
     dfa <- data$Atree;
-    # Prepare for colors
-    namedcolors <- extract_colors(dfw);
-    atreeplot <- dfw %>%
-        # Considering only application data and Worker State
-        filter(Type == "Worker State") %>%
-        # Remove all tasks that do not have ANode
-        filter(!is.na(Height.ANode)) %>%
-        # Plot
-        ggplot() +
-        default_theme() +
-        ylab("Task Location") +
-        scale_y_continuous(breaks=NULL, labels=NULL) +
-        scale_fill_manual(values = namedcolors) +
-        geom_rect(aes(fill=as.factor(Value),
-                      xmin=Start,
-                      xmax=End,
-                      ymin=Position.ANode,
-                      ymax=Position.ANode+Height.ANode), alpha=.5) +
-        # Add the atree representation on top
-        geom_atree(data, Offset = 1.05, Flip = TRUE);
+    
+    df_node_plot <- resource_utilization_tree_node(data=data, step=step);
 
+    # Calculate NodeUsage, this represent the "most active" node at the time slice
+    df_node_plot %>% 
+      filter(Value != 0) %>%
+      select(ANode, Slice, Value1, Usage) %>%
+      ungroup() %>%
+      # calculate usage in percentage by node given the total Usage
+      mutate(NodeUsage = 100 * (Value1/Usage)) %>%
+      left_join(data$Atree, by="ANode") -> df_node_plot_filtered
+    
+    # filter initialization tasks 
+    dfw_init_block <- dfw %>%
+      filter(Type == "Worker State", Application) %>%
+      filter(grepl("init_", Value)) %>%
+      unique() %>%
+      select(-Position, -Height) %>%
+      left_join(data$Atree, by="ANode")
+
+    # Prepare for colors
+    atreeplot <- dfw %>%
+      # Considering only application data and Worker State
+      filter(Type == "Worker State", Application, Intermediary) %>%
+      filter(grepl("lapack_", Value) | grepl("subtree", Value)) %>%
+      unique() %>%
+      # Remove all tasks that do not have ANode
+      filter(!is.na(Height.ANode)) %>%
+      # Plot
+      ggplot() +
+      default_theme() +
+      ylab("Task Location") +
+      scale_y_continuous(breaks=NULL, labels=NULL) +
+      # Add the atree representation on top
+      geom_atree(data, Offset = 1.05, Flip = TRUE) +
+      geom_rect(data=df_node_plot_filtered,
+                aes(fill=NodeUsage,
+                xmin=Slice,
+                xmax=Slice+step,
+                ymin=Position,
+                ymax=Position+Height)) +
+      scale_fill_viridis(option="plasma") +
+      geom_rect(data=dfw_init_block,
+                  aes(xmin=Start,
+                  xmax=End,
+                  ymin=Position,
+                  ymax=Position+Height),
+                  fill="green");
     loginfo("Exit of atree_temporal_chart");
     return(atreeplot);
 }
@@ -181,28 +257,26 @@ atree_time_aggregation <- function(dfw = NULL, step = 100)
 {
     if (is.null(dfw)) return(NULL);
 
-    dfw <- dfw %>% filter(Type == "Worker State")
+    dfw <- dfw %>% filter(Type == "Worker State");
 
-    dfw_agg_prep <- atree_time_aggregation_prep (dfw);
+    dfw_agg_prep <- atree_time_aggregation_prep(dfw);
     dfw_agg <- atree_time_aggregation_do (dfw_agg_prep, step);
 
     dfw_agg %>%
         group_by(Slice) %>%
         filter(Value != 0) %>%
         summarize(Quantity = n(), Activity = sum(Value))
-}
-
+} 
 
 computing_nodes_chart <- function(data=NULL, step = 100)
 {
   loginfo("Entry of computing_nodes_chart");
-  atree_time_aggregation(data$Application, step) %>%
+  atree_time_aggregation(dfw=data$Application, step=step) %>%
     ggplot(aes(x=Slice, y=Quantity)) +
     geom_line() +
     default_theme() +
     ylab("Computing\nNodes") +
     scale_colour_brewer(palette = "Dark2");
-
 }
 
 # remyTimeIntegrationPrep without dividing the Value column by the time slice
@@ -214,52 +288,24 @@ remyTimeIntegrationPrepNoDivision <- function(dfv = NULL, myStep = 100)
     tibble(Slice = mySlices, Value = c(remyTimeIntegration(dfv, slices=mySlices), 0));
 }
 
-resource_utilization_tree_node <- function(data = NULL)
+resource_utilization_tree_node <- function(data = NULL, step = 100)
 {
-  data %>%
-    # arrange(-color_id) %>%
-    ggplot(aes(x=Slice, y=Value1, fill=as.factor(ANode))) +
-    geom_area() +
-	  # scale_fill_manual(values=c(gray.colors(data %>%
-	  #                      select(ANode) %>%
-	  #                      unique() %>% nrow(), start = 0.1, end = 0.9, gamma = 1, alpha=1, rev = FALSE))) +
-    # scale_fill_manual(values=colors) +
-    default_theme() +
-    theme(legend.position = "none") +
-    #xlab("Time [ms]") +
-    ylab("Resource Utilization %\nANode")
-}
-
-resource_utilization_tree_depth <- function(data = NULL)
-{
-  data %>%
-    filter(Depth != 0) %>%
-    ungroup() %>%
-    arrange(Depth) %>%
-    ggplot() +
-    geom_area(aes(x=Slice, y=Value2, fill=as.factor(Depth))) +
-   # scale_fill_manual(values = heat) +
-    default_theme() +
-    theme(legend.position = "none") +
-    #xlab("Time [ms]") +
-    ylab("Resource Utilization %\nDepth")
-}
-
-resource_utilization_tree_node_plot <- function(data = NULL, step = 100)
-{
-  loginfo("Entry of resource_utilization_tree_node_plot");
+  loginfo("Entry of resource_utilization_tree_node");
   # Prepare and filter data
   data$Application %>%
-    filter(Type == "Worker State",
+    filter(Type == "Worker State", Intermediary,
            grepl("lapack", Value) | grepl("subtree", Value)) %>%
     select(ANode, Start, End, JobId) %>%
+    unique() %>%
     arrange(Start) -> df_filter
-
+  
+  loginfo("Get number of workers for resource utilization");
   # Get number of workers for resource utilization
   NWorkers <- data$Application %>%
       filter(grepl("CPU", ResourceType) | grepl("CUDA", ResourceType)) %>%
       select(ResourceId) %>% unique() %>% nrow()
 
+  loginfo("Compute the node parallelism");
   # Compute the node parallelism
   df_filter %>%
     select(ANode, Start, JobId) %>%
@@ -276,6 +322,7 @@ resource_utilization_tree_node_plot <- function(data = NULL, step = 100)
     mutate(nodeParallelism = cumsum(Value)) %>%
     ungroup() -> df_node_parallelism
 
+  loginfo("Integrate resource utilization by ANode");
   # Integrate resource utilization by ANode
   df_node_parallelism %>%
     select(ANode, Time, nodeParallelism) %>%
@@ -293,8 +340,33 @@ resource_utilization_tree_node_plot <- function(data = NULL, step = 100)
     arrange(Slice) %>%
     mutate(Usage = sum(Value1)) -> df_node_plot
 
-  loginfo("Exit of resource_utilization_tree_node_plot");
-	resource_utilization_tree_node(df_node_plot)
+  loginfo("Exit of resource_utilization_tree_node");
+  return(df_node_plot)
+}
+
+resource_utilization_tree_node_plot <- function(data = NULL, step = 100)
+{
+    resource_utilization_tree_node(data=data, step=step) %>%
+      ggplot(aes(x=Slice, y=Value1, fill=as.factor(ANode))) +
+      geom_area() +
+      default_theme() +
+      theme(legend.position = "none") +
+      ylab("Resource Utilization %\nANode")
+}
+
+resource_utilization_tree_depth <- function(data = NULL)
+{
+  data %>%
+    filter(Depth != 0) %>%
+    ungroup() %>%
+    arrange(Depth) %>%
+    ggplot() +
+    geom_area(aes(x=Slice, y=Value2, fill=as.factor(Depth))) +
+   # scale_fill_manual(values = heat) +
+    default_theme() +
+    theme(legend.position = "none") +
+    #xlab("Time [ms]") +
+    ylab("Resource Utilization %\nDepth")
 }
 
 resource_utilization_tree_depth_plot <- function(data = NULL, step = 100)

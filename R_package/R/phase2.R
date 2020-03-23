@@ -268,6 +268,12 @@ starvz_plot <- function(data = NULL)
     data$State <- NULL
     gc()
 
+    # Define makespan and filter out everything after it
+    # TODO: Maybe this will make sense to transfer to Phase1
+    makespan <- data$Application %>% pull(End) %>% max
+    data$Application <- data$Application %>% filter(Start < makespan)
+    data$Starpu <- data$Starpu %>% filter(Start < makespan)
+
     # Adjust temporal scale
     tstart <- pjr_value(pajer$limits$start, data$Application %>% pull(Start) %>% min);
     tend <- pjr_value(pajer$limits$end, data$Application %>% pull(End) %>% max) + 1 # Just to give space

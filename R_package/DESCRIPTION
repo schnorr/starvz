@@ -39,7 +39,8 @@ Depends: R (>= 3.1.0),
     tidyverse,
     zoo,
     gtools,
-    car
+    car,
+    viridis
 License: GPL-3
 Encoding: UTF-8
 LazyData: true

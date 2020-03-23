@@ -669,7 +669,7 @@ starvz_plot <- function(data = NULL)
           logwarn("There aren't any information on ANode, ignoring it.");
           pajer$computingnodes$active <<- FALSE;
         }else{
-          gocomputingnodes <- computing_nodes_chart(data=data$Application, step=aggStep) + tScale;
+          gocomputingnodes <- computing_nodes_chart(data, step=aggStep) + tScale;
           loginfo("Exit of computing_nodes_chart");
         }
     }

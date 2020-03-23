@@ -202,7 +202,7 @@ computing_nodes_chart <- function(data=NULL, step = 100)
     default_theme() +
     ylab("Computing\nNodes") +
     scale_colour_brewer(palette = "Dark2");
-
+  loginfo("Exit of computing_nodes_chart")
 }
 
 # remyTimeIntegrationPrep without dividing the Value column by the time slice

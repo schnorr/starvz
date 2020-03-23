@@ -361,6 +361,11 @@ starvz_plot <- function(data = NULL)
         loginfo("Creating the temporal atree plot");
         aggStep <- pjr_value(pajer$atree$step, globalAggStep);
         goatreet <- atree_temporal_chart(data, step=aggStep) + tScale;
+        if (!pjr(pajer$atree$legend)){
+            goatreet <- goatreet + theme(legend.position="none");
+        }else{
+            goatreet <- goatreet + theme(legend.position = "top")
+        }
         loginfo("Temporal atree plot completed");
     }
 

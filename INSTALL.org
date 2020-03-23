@@ -224,3 +224,21 @@ this necessity:
 #+begin_src R :results output :session *R* :exports both
 remove.packages("starvz")
 #+end_src
+
+** Development Tips
+
+If you are involved in the development, this might be of your interest:
+
+*** Reinstall from directory
+
+#+begin_src R :results output :session :exports both
+library(devtools)
+devtools::install_local(path="/starvz_git_path/R_package/", force=TRUE)
+#+end_src
+
+*** Reload after reinstall
+
+#+begin_src R :results output :session :exports both
+detach("package:starvz", unload=TRUE)
+library(starvz)
+#+end_src

@@ -275,7 +275,7 @@ computing_nodes_chart <- function(data=NULL, step = 100)
     ggplot(aes(x=Slice, y=Quantity)) +
     geom_line() +
     default_theme() +
-    ylab("Computing\nNodes") +
+    ylab("Tree\nParallelism") +
     scale_colour_brewer(palette = "Dark2");
 }
 

@@ -258,9 +258,11 @@ starvz_plot <- function(data = NULL)
     # Lets do some transformations on data here
     # TODO: Maybe this will make sense to transfer to Phase1
     data$Application <- data$State %>%
+                        filter(Type == "Worker State") %>%
                         filter(Application == TRUE)
 
     data$Starpu <- data$State %>%
+                        filter(Type == "Worker State") %>%
                         filter(Application == FALSE)
 
     data$State <- NULL

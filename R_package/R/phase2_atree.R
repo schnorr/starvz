@@ -352,6 +352,7 @@ resource_utilization_tree_node_plot <- function(data = NULL, step = 100)
       default_theme() +
       theme(legend.position = "none") +
       ylab("Usage %\nANode") +
+      coord_cartesian(ylim=c(0,100)) + ylim(0,100)
 }
 
 resource_utilization_tree_depth <- function(data = NULL)
@@ -367,6 +368,7 @@ resource_utilization_tree_depth <- function(data = NULL)
     theme(legend.position = "none") +
     #xlab("Time [ms]") +
     ylab("Usage %\nDepth") +
+    coord_cartesian(ylim=c(0,100)) + ylim(0,100)
 }
 
 resource_utilization_tree_depth_plot <- function(data = NULL, step = 100)

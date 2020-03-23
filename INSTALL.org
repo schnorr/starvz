@@ -220,7 +220,7 @@ this necessity:
 
 
 ** Uninstall R package
-Simples with:
+
 #+begin_src R :results output :session *R* :exports both
 remove.package(starvz)
 #+end_src

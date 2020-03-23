@@ -245,7 +245,6 @@ starvz_plot <- function(data = NULL)
 
     # Get data
     directory <- data$Origin;
-    dfv <- data$Variable;
 
     if(is.null(data$State)){
        stop("The State data was not loaded, check if the feather files exists.");
@@ -268,11 +267,18 @@ starvz_plot <- function(data = NULL)
     data$State <- NULL
     gc()
 
-    # Define makespan and filter out everything after it
-    # TODO: Maybe this will make sense to transfer to Phase1
+    # Define makespan
     makespan <- data$Application %>% pull(End) %>% max
+
+    #  Filter out everything after the makespan
+    # TODO: Maybe this will make sense to transfer to Phase1
     data$Application <- data$Application %>% filter(Start < makespan)
     data$Starpu <- data$Starpu %>% filter(Start < makespan)
+    data$Dag <- data$Dag %>% filter(Start < makespan)
+    data$Events <- data$Events %>% filter(Start < makespan)
+    data$Gaps <- data$Gaps %>% filter(Start.x < makespan)
+    data$Link <- data$Link %>% filter(Start < makespan)
+    data$Variable <- data$Variable %>% filter(End < makespan)
 
     # Adjust temporal scale
     tstart <- pjr_value(pajer$limits$start, data$Application %>% pull(Start) %>% min);
@@ -281,7 +287,7 @@ starvz_plot <- function(data = NULL)
         coord_cartesian(xlim=c(tstart, tend))
     );
 
-    # Prune end of Variables
+    dfv <- data$Variable;
 
     loginfo("Starting the Starvz plot function");
 

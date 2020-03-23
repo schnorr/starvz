@@ -369,6 +369,11 @@ starvz_plot <- function(data = NULL)
         loginfo("Creating the resource utilization by node plot");
         aggStep <- pjr_value(pajer$utiltreenode$step, globalAggStep);
         resource_utilization_tree_node_plot(data=data, step=aggStep) + tScale -> goutiltreenode;
+        if (!pjr(pajer$utiltreenode$legend)){
+            goutiltreenode <- goutiltreenode + theme(legend.position="none");
+        }else{
+            goutiltreenode <- goutiltreenode + theme(legend.position = "top")
+        }
         loginfo("Resource utilization by node plot completed");
     }
 
@@ -377,6 +382,11 @@ starvz_plot <- function(data = NULL)
         loginfo("Creating the resource utilization by depth plot");
         aggStep <- pjr_value(pajer$utiltreenode$step, globalAggStep);
         resource_utilization_tree_depth_plot(data, step=aggStep) + tScale -> goutiltreedepth;
+        if (!pjr(pajer$utiltreedepth$legend)){
+            goutiltreedepth <- goutiltreedepth + theme(legend.position="none");
+        }else{
+            goutiltreedepth <- goutiltreedepth + theme(legend.position = "top")
+        }
         loginfo("Resource utilization by depth plot completed");
     }
 
@@ -673,6 +683,11 @@ starvz_plot <- function(data = NULL)
         pajer$activenodes$active <<- FALSE;
       }else{
         goactivenodes <- data$Application %>% active_nodes_chart() + tScale;
+        if (!pjr(pajer$activenodes$legend)){
+          goactivenodes <- goactivenodes + theme(legend.position="none");
+        }else{
+          goactivenodes <- goactivenodes + theme(legend.position = "top")
+        }
       }
     }
 

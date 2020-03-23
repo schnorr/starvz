@@ -129,6 +129,14 @@ starpu_mpi_grid_arrange <- function(atree, utiltreenode, utiltreedepth, st, st_p
         P[[length(P)+1]] <- utiltreedepth;
         H[[length(H)+1]] <- pjr_value(pajer$utiltreedepth$height, 2);
     }
+    if (pjr(pajer$activenodes$active)){
+        P[[length(P)+1]] <- activenodes;
+        H[[length(H)+1]] <- pjr_value(pajer$activenodes$height, 1);
+    }
+    if (pjr(pajer$computingnodes$active)){
+        P[[length(P)+1]] <- computingnodes;
+        H[[length(H)+1]] <- pjr_value(pajer$computingnodes$height, 1);
+    }
     if (pjr(pajer$kiteration$active)){
         P[[length(P)+1]] <- ijk;
         H[[length(H)+1]] <- pjr_value(pajer$kiteration$height, 2);
@@ -196,14 +204,6 @@ starpu_mpi_grid_arrange <- function(atree, utiltreenode, utiltreedepth, st, st_p
     if (pjr(pajer$mpistate$active)){
         P[[length(P)+1]] <- mpistate;
         H[[length(H)+1]] <- pjr_value(pajer$mpistate$height, 1);
-    }
-    if (pjr(pajer$activenodes$active)){
-        P[[length(P)+1]] <- activenodes;
-        H[[length(H)+1]] <- pjr_value(pajer$activenodes$height, 1);
-    }
-    if (pjr(pajer$computingnodes$active)){
-        P[[length(P)+1]] <- computingnodes;
-        H[[length(H)+1]] <- pjr_value(pajer$computingnodes$height, 1);
     }
 
     # Add empty X and horizontal legend to all plots

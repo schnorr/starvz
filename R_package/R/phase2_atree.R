@@ -60,6 +60,7 @@ geom_atree <- function (data=NULL, Offset=1.02, Flip = TRUE)
         list(
             # Lines connecting child with parent (Start)
             geom_segment(data=d,
+                         arrow=arrow(length = unit(0.03, "npc")),
                          aes(x=Edge.X,
                              yend=Edge.Yend,
                              xend=Edge.Xend,
@@ -73,6 +74,7 @@ geom_atree <- function (data=NULL, Offset=1.02, Flip = TRUE)
                            y=Edge.Yend), color="blue"),
             # Lines connecting child with parent (End)
             geom_segment(data=d,
+                         arrow=arrow(length = unit(0.03, "npc")),
                          aes(x=Edge.End.X,
                              yend=Edge.End.Yend,
                              xend=Edge.End.Xend,

@@ -87,7 +87,7 @@ geom_atree <- function (data=NULL, Offset=1.02, Flip = TRUE)
             # Fix time coordinates
             coord_cartesian(xlim=c(0, makespan)),
             # Horizontal lines
-            geom_segment(data=d, aes(y = Position, yend = Position, x = Start, xend = End), color="lightblue")
+            geom_segment(data=d, aes(y = Position + Height/2, yend = Position + Height/2, x = Start, xend = End), color="lightblue")
         );
     return(ret);
 }

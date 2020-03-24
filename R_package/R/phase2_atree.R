@@ -69,9 +69,9 @@ geom_atree <- function (data=NULL, Offset=1.02, Flip = TRUE)
             geom_point(data=d,
                        aes(x=Edge.X,
                            y=Edge.Y), color="blue"),
-            geom_point(data=d,
-                       aes(x=Edge.Xend,
-                           y=Edge.Yend), color="blue"),
+            #geom_point(data=d,
+            #           aes(x=Edge.Xend,
+            #               y=Edge.Yend), color="blue"),
             # Lines connecting child with parent (End)
             geom_segment(data=d,
                          arrow=arrow(length = unit(0.03, "npc")),
@@ -83,9 +83,9 @@ geom_atree <- function (data=NULL, Offset=1.02, Flip = TRUE)
             geom_point(data=d,
                        aes(x=Edge.End.X,
                            y=Edge.End.Y), color="red"),
-            geom_point(data=d,
-                       aes(x=Edge.End.Xend,
-                           y=Edge.End.Yend), color="red"),
+            #geom_point(data=d,
+            #           aes(x=Edge.End.Xend,
+            #               y=Edge.End.Yend), color="red"),
             # Fix time coordinates
             coord_cartesian(xlim=c(0, makespan)),
             # Horizontal lines

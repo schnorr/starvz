@@ -49,7 +49,12 @@ geom_atree <- function (data=NULL, Offset=1.02, Flip = TRUE)
         mutate(Middle.X = Start + (End - Start)/2,
                Middle.Y = Position + Height/2,
                Middle.End.X = Start.Parent + (End.Parent - Start.Parent)/2,
-               Middle.End.Y = Position.Parent + Height.Parent/2);
+               Middle.End.Y = Position.Parent + Height.Parent/2) %>%
+        # Remove that without parent
+        filter(!is.na(Parent)) %>%
+        # The root has no tasks associated with, remove it.
+        mutate(Parent = as.integer(Parent)) %>%
+        filter(Parent != max(Parent))
 
     ret <-
         list(

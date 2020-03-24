@@ -369,9 +369,12 @@ starvz_plot <- function(data = NULL)
         # Vertical zoom
         z.start <- pjr_value(pajer$atree$zoom$start, 0)
         z.end <- pjr_value(pajer$atree$zoom$end, 100)
+        max.y.coordinate <- (data$Atree %>% pull(Position) %>% max) +
+            (data$Atree %>% pull(Height) %>% max)
         tzScale <- list(
             coord_cartesian(xlim=c(tstart, tend),
-                            ylim=c(z.start, z.end))
+                            ylim=c(z.start/100 * max.y.coordinate,
+                                   z.end/100 * max.y.coordinate))
         );
         goatreet <- goatreet + tzScale
         loginfo("Temporal atree plot completed");

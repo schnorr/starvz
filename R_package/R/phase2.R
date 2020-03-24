@@ -366,6 +366,14 @@ starvz_plot <- function(data = NULL)
         }else{
             goatreet <- goatreet + theme(legend.position = "top")
         }
+        # Vertical zoom
+        z.start <- pjr_value(pajer$atree$zoom$start, 0)
+        z.end <- pjr_value(pajer$atree$zoom$end, 100)
+        tzScale <- list(
+            coord_cartesian(xlim=c(tstart, tend),
+                            ylim=c(z.start, z.end))
+        );
+        goatreet <- goatreet + tzScale
         loginfo("Temporal atree plot completed");
     }
 

@@ -134,20 +134,24 @@ atree_temporal_chart <- function(data = NULL, step = 100, globalEndTime = NULL)
       ylab("Task\nLocation") +
       scale_y_continuous(breaks=NULL, labels=NULL) +
       # Add the atree representation on top
-      geom_atree(data, Offset = 1.05, Flip = TRUE) +
-      geom_rect(data=df_node_plot_filtered,
-                aes(fill=NodeUsage,
-                xmin=Slice,
-                xmax=Slice+step,
-                ymin=Position,
-                ymax=Position+Height)) +
-      scale_fill_viridis(option="plasma") +
-      geom_rect(data=dfw_init_block,
-                  aes(xmin=Start,
-                  xmax=End,
-                  ymin=Position,
-                  ymax=Position+Height),
-                  fill="green");
+      geom_atree(data, Offset = 1.05, Flip = TRUE)
+
+    if (pjr_value(pajer$atree$utilization, TRUE)){
+        atreeplot <- atreeplot +
+            geom_rect(data=df_node_plot_filtered,
+                      aes(fill=NodeUsage,
+                          xmin=Slice,
+                          xmax=Slice+step,
+                          ymin=Position,
+                          ymax=Position+Height)) +
+            scale_fill_viridis(option="plasma") +
+            geom_rect(data=dfw_init_block,
+                      aes(xmin=Start,
+                          xmax=End,
+                          ymin=Position,
+                          ymax=Position+Height),
+                      fill="green");
+    }
     loginfo("Exit of atree_temporal_chart");
     return(atreeplot);
 }

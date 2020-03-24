@@ -306,19 +306,17 @@ resource_utilization_tree_node <- function(data = NULL, step = 100)
   loginfo("Entry of resource_utilization_tree_node");
   # Prepare and filter data
   data$Application %>%
-    filter(Type == "Worker State", Intermediary,
+    filter(Type == "Worker State",
            grepl("lapack", Value) | grepl("subtree", Value)) %>%
     select(ANode, Start, End, JobId) %>%
     unique() %>%
     arrange(Start) -> df_filter
   
-  loginfo("Get number of workers for resource utilization");
   # Get number of workers for resource utilization
   NWorkers <- data$Application %>%
       filter(grepl("CPU", ResourceType) | grepl("CUDA", ResourceType)) %>%
       select(ResourceId) %>% unique() %>% nrow()
 
-  loginfo("Compute the node parallelism");
   # Compute the node parallelism
   df_filter %>%
     select(ANode, Start, JobId) %>%
@@ -335,7 +333,6 @@ resource_utilization_tree_node <- function(data = NULL, step = 100)
     mutate(nodeParallelism = cumsum(Value)) %>%
     ungroup() -> df_node_parallelism
 
-  loginfo("Integrate resource utilization by ANode");
   # Integrate resource utilization by ANode
   df_node_parallelism %>%
     select(ANode, Time, nodeParallelism) %>%

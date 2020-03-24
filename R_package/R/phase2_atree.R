@@ -147,6 +147,8 @@ atree_temporal_chart <- function(data = NULL, step = 100, globalEndTime = NULL)
                           ymin=Position,
                           ymax=Position+Height)) +
             scale_fill_viridis(option="plasma") +
+            scale_fill_gradient(low="lightsalmon", high="red1") +
+            scale_fill_gradient2(name="Computational Load", limits=c(0,100), midpoint=50, low="blue", mid="yellow", high="red") +
             geom_rect(data=dfw_init_block,
                       aes(xmin=Start,
                           xmax=End,

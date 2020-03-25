@@ -165,6 +165,10 @@ default:
   activenodes: # Plot the active node count over time
     active: FALSE # Enable
     height: 2 # Vertical size for the plot
+    nodememuse: # Plot the memory usage for qr_mumps
+      active: FALSE # Enable
+      height: 2 # Vertical size for the plot
+      mempeak: FALSE # Show/Hide memory usage peak 
 
   computingnodes: # Plot the computationally active nodes over time
     active: FALSE # Enable

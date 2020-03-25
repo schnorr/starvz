@@ -98,7 +98,7 @@ pjr <- function (property)
     ifelse(!is.null(property) && property, property, FALSE);
 }
 
-starpu_mpi_grid_arrange <- function(atree, utiltreenode, utiltreedepth, st, st_pm, st_mm, transf, starpu, ijk, ijk_pm, lackready, ready, submitted, mpi, mpiconc, mpiconcout, mpistate, gpu, memory, gflops, activenodes, computingnodes, title = NULL)
+starpu_mpi_grid_arrange <- function(atree, utiltreenode, utiltreedepth, st, st_pm, st_mm, transf, starpu, ijk, ijk_pm, lackready, ready, submitted, mpi, mpiconc, mpiconcout, mpistate, gpu, memory, gflops, activenodes, nodememuse, computingnodes, title = NULL)
 {
     # The list that will contain the plots
     P <- list();
@@ -132,6 +132,10 @@ starpu_mpi_grid_arrange <- function(atree, utiltreenode, utiltreedepth, st, st_p
     if (pjr(pajer$activenodes$active)){
         P[[length(P)+1]] <- activenodes;
         H[[length(H)+1]] <- pjr_value(pajer$activenodes$height, 1);
+    }
+    if (pjr(pajer$activenodes$nodememuse$active)){
+        P[[length(P)+1]] <- nodememuse;
+        H[[length(H)+1]] <- pjr_value(pajer$activenodes$nodememuse$height, 1);
     }
     if (pjr(pajer$computingnodes$active)){
         P[[length(P)+1]] <- computingnodes;
@@ -354,6 +358,7 @@ starvz_plot <- function(data = NULL)
     gomov <- geom_blank();
     gogov <- geom_blank();
     goactivenodes <- geom_blank();
+    gonodememuse <- geom_blank();
     gocomputingnodes <- geom_blank();
 
     # Atree space/time view
@@ -706,6 +711,17 @@ starvz_plot <- function(data = NULL)
         }
       }
     }
+    # Node memory usage
+    if (pjr(pajer$activenodes$nodememuse$active)) {
+      loginfo("Creating the Node Memory Usage plot");
+      
+      if ( (data$Application %>% filter(grepl("front", Value) & GFlop != 0) %>% nrow) == 0 ){
+        logwarn("There is no memory information on data, ignoring it.");
+        pajer$activenodes$nodememuse$active <<- FALSE;
+      }else{
+        gonodememuse <- nodes_memory_usage_plot(data=data) + tScale;
+      }
+    }
 
     # Computing Nodes
     if (pjr(pajer$computingnodes$active)){
@@ -744,6 +760,7 @@ starvz_plot <- function(data = NULL)
                                  memory = goguv,
                                  gflops = gogfv,
                                  activenodes = goactivenodes,
+                                 nodememuse = gonodememuse,
                                  computingnodes = gocomputingnodes,
                                  title = directory);
 

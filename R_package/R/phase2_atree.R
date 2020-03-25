@@ -443,3 +443,34 @@ resource_utilization_tree_depth_plot <- function(data = NULL, step = 100)
   loginfo("Exit of resource_utilization_tree_depth_plot");
   resource_utilization_tree_depth(df_depth_plot)
 }
+nodes_memory_usage_plot <- function(data = NULL)
+{
+  loginfo("Entry of nodes_memory_usage_plot");
+  if (is.null(data)) stop("a NULL data has been provided to nodes_memory_usage_plot");
+    
+  df_mem <- data$Application %>%
+    filter(grepl("front", Value) | grepl("do_sub", Value)) %>%
+    select(Start, Value, GFlop, ANode, Node) %>%
+    arrange(Start) %>%
+    mutate(GFlop = ifelse(Value=="clean_front", -GFlop, GFlop)) %>%
+    mutate(MemMB = GFlop*1024) %>%
+    mutate(UsedMemMB = cumsum(MemMB));
+
+  node_mem_use <- df_mem %>%
+    ggplot(aes(x=Start, y=UsedMemMB, color=Node)) +
+    geom_line() + 
+    default_theme() +
+    theme(legend.position = "none") +
+    ylab("Used Mem MB") +
+    scale_color_brewer(palette="Dark2");
+
+  if (pjr_value(pajer$activenodes$nodememuse$mempeak, FALSE)) {
+    mem_peak = max(df_mem$UsedMemMB);
+    node_mem_use <- node_mem_use + 
+      geom_text(aes(x=0, y=mem_peak), hjust=-.5, vjust=1.1 , color="red", label=paste0("Memory peak = ", round(mem_peak, digits=2), "MB")) +
+      geom_hline(yintercept = mem_peak, color="red", linetype = "dashed");
+  }      
+
+  loginfo("Exit of nodes_memory_usage_plot");
+  return(node_mem_use);
+}

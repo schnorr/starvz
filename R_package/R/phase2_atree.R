@@ -461,7 +461,7 @@ nodes_memory_usage_plot <- function(data = NULL)
     geom_line() + 
     default_theme() +
     theme(legend.position = "none") +
-    ylab("Used Mem MB") +
+    ylab("Used\nMB") +
     scale_color_brewer(palette="Dark2");
 
   if (pjr_value(pajer$activenodes$nodememuse$mempeak, FALSE)) {

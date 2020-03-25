@@ -1,0 +1,528 @@
+graph G {
+node [color=black,
+fillcolor=white,
+shape=circle,
+style=filled
+];
+node000001[fillcolor=gray , label=" node:     1\n m:    22\n n:   121\n np:     4"];
+node000002[fillcolor=gray , label=" node:     2\n m:     9\n n:    62\n np:     1"];
+node000003[fillcolor=gray , label=" node:     3\n m:    14\n n:    76\n np:     3"];
+node000004[fillcolor=gray , label=" node:     4\n m:     8\n n:    56\n np:     1"];
+node000005[fillcolor=gray , label=" node:     5\n m:     7\n n:    46\n np:     1"];
+node000006[fillcolor=gray , label=" node:     6\n m:    17\n n:    32\n np:     6"];
+node000007[fillcolor=gray , label=" node:     7\n m:    41\n n:    81\n np:    15"];
+node000008[fillcolor=gray , label=" node:     8\n m:    37\n n:    82\n np:    15"];
+node000009[fillcolor=gray , label=" node:     9\n m:    56\n n:   127\n np:    15"];
+node000010[fillcolor=gray , label=" node:    10\n m:    67\n n:   162\n np:    14"];
+node000011[fillcolor=gray , label=" node:    11\n m:    89\n n:   214\n np:    22"];
+node000012[fillcolor=gray , label=" node:    12\n m:   103\n n:   249\n np:    18"];
+node000013[fillcolor=gray , label=" node:    13\n m:   132\n n:   302\n np:    15"];
+node000014[fillcolor=gray , label=" node:    14\n m:   153\n n:   363\n np:    15"];
+node000015[fillcolor=gray , label=" node:    15\n m:   194\n n:   449\n np:    14"];
+node000016[fillcolor=gray , label=" node:    16\n m:   259\n n:   574\n np:    31"];
+node000017[fillcolor=gray , label=" node:    17\n m:   310\n n:   686\n np:    40"];
+node000018[fillcolor=gray , label=" node:    18\n m:    27\n n:   125\n np:     5"];
+node000019[fillcolor=gray , label=" node:    19\n m:    30\n n:   148\n np:     4"];
+node000020[fillcolor=gray , label=" node:    20\n m:    83\n n:   284\n np:    15"];
+node000021[fillcolor=gray , label=" node:    21\n m:     8\n n:    56\n np:     1"];
+node000022[fillcolor=gray , label=" node:    22\n m:     7\n n:    47\n np:     1"];
+node000023[fillcolor=gray , label=" node:    23\n m:    25\n n:   125\n np:     4"];
+node000024[fillcolor=gray , label=" node:    24\n m:     7\n n:    47\n np:     1"];
+node000025[fillcolor=gray , label=" node:    25\n m:    51\n n:   214\n np:     8"];
+node000026[fillcolor=gray , label=" node:    26\n m:     6\n n:    32\n np:     1"];
+node000027[fillcolor=gray , label=" node:    27\n m:     4\n n:    11\n np:     1"];
+node000028[fillcolor=gray , label=" node:    28\n m:    23\n n:    91\n np:     6"];
+node000029[fillcolor=gray , label=" node:    29\n m:    64\n n:   220\n np:    14"];
+node000030[fillcolor=gray , label=" node:    30\n m:    89\n n:   299\n np:    15"];
+node000031[fillcolor=gray , label=" node:    31\n m:   140\n n:   479\n np:    14"];
+node000032[fillcolor=gray , label=" node:    32\n m:   209\n n:   615\n np:    30"];
+node000033[fillcolor=gray , label=" node:    33\n m:   300\n n:   829\n np:    31"];
+node000034[fillcolor=white, label=" node:    34\n m:   583\n n:  1141\n np:   111"];
+node000035[fillcolor=gray , label=" node:    35\n m:     9\n n:    63\n np:     1"];
+node000036[fillcolor=gray , label=" node:    36\n m:     8\n n:    61\n np:     1"];
+node000037[fillcolor=gray , label=" node:    37\n m:     7\n n:    44\n np:     1"];
+node000038[fillcolor=gray , label=" node:    38\n m:     9\n n:    43\n np:     2"];
+node000039[fillcolor=gray , label=" node:    39\n m:     8\n n:    47\n np:     1"];
+node000040[fillcolor=gray , label=" node:    40\n m:    88\n n:   370\n np:    15"];
+node000041[fillcolor=gray , label=" node:    41\n m:   139\n n:   547\n np:    15"];
+node000042[fillcolor=gray , label=" node:    42\n m:     8\n n:    59\n np:     1"];
+node000043[fillcolor=gray , label=" node:    43\n m:     6\n n:    36\n np:     1"];
+node000044[fillcolor=gray , label=" node:    44\n m:     6\n n:    36\n np:     1"];
+node000045[fillcolor=gray , label=" node:    45\n m:     9\n n:    70\n np:     1"];
+node000046[fillcolor=gray , label=" node:    46\n m:     4\n n:    16\n np:     1"];
+node000047[fillcolor=gray , label=" node:    47\n m:     6\n n:    33\n np:     1"];
+node000048[fillcolor=gray , label=" node:    48\n m:    92\n n:   382\n np:    15"];
+node000049[fillcolor=gray , label=" node:    49\n m:   132\n n:   548\n np:    15"];
+node000050[fillcolor=gray , label=" node:    50\n m:   187\n n:   735\n np:    27"];
+node000051[fillcolor=gray , label=" node:    51\n m:   326\n n:  1191\n np:    33"];
+node000052[fillcolor=gray , label=" node:    52\n m:   376\n n:  1385\n np:    40"];
+node000053[fillcolor=white, label=" node:    53\n m:   473\n n:  1701\n np:    34"];
+node000054[fillcolor=gray , label=" node:    54\n m:    17\n n:   121\n np:     2"];
+node000055[fillcolor=gray , label=" node:    55\n m:    10\n n:    82\n np:     1"];
+node000056[fillcolor=gray , label=" node:    56\n m:     8\n n:    58\n np:     1"];
+node000057[fillcolor=gray , label=" node:    57\n m:     6\n n:    29\n np:     1"];
+node000058[fillcolor=gray , label=" node:    58\n m:     6\n n:    36\n np:     1"];
+node000059[fillcolor=gray , label=" node:    59\n m:     7\n n:    46\n np:     1"];
+node000060[fillcolor=gray , label=" node:    60\n m:     7\n n:    46\n np:     1"];
+node000061[fillcolor=gray , label=" node:    61\n m:   129\n n:   677\n np:    15"];
+node000062[fillcolor=gray , label=" node:    62\n m:    10\n n:    82\n np:     1"];
+node000063[fillcolor=gray , label=" node:    63\n m:     9\n n:    75\n np:     1"];
+node000064[fillcolor=gray , label=" node:    64\n m:    10\n n:    81\n np:     1"];
+node000065[fillcolor=gray , label=" node:    65\n m:    12\n n:   110\n np:     1"];
+node000066[fillcolor=gray , label=" node:    66\n m:     7\n n:    46\n np:     1"];
+node000067[fillcolor=gray , label=" node:    67\n m:    22\n n:   146\n np:     3"];
+node000068[fillcolor=gray , label=" node:    68\n m:    58\n n:   265\n np:     8"];
+node000069[fillcolor=gray , label=" node:    69\n m:   179\n n:   752\n np:    15"];
+node000070[fillcolor=gray , label=" node:    70\n m:     9\n n:    76\n np:     1"];
+node000071[fillcolor=gray , label=" node:    71\n m:     9\n n:    75\n np:     1"];
+node000072[fillcolor=gray , label=" node:    72\n m:   109\n n:   599\n np:    15"];
+node000073[fillcolor=gray , label=" node:    73\n m:    10\n n:    76\n np:     1"];
+node000074[fillcolor=gray , label=" node:    74\n m:   122\n n:   616\n np:    15"];
+node000075[fillcolor=gray , label=" node:    75\n m:   299\n n:  1244\n np:    15"];
+node000076[fillcolor=white, label=" node:    76\n m:   732\n n:  2042\n np:    85"];
+node000077[fillcolor=white, label=" node:    77\n m:  1733\n n:  3458\n np:   526"];
+node000078[fillcolor=gray , label=" node:    78\n m:     8\n n:    68\n np:     1"];
+node000079[fillcolor=gray , label=" node:    79\n m:    72\n n:   460\n np:     8"];
+node000080[fillcolor=gray , label=" node:    80\n m:   155\n n:   869\n np:    15"];
+node000081[fillcolor=gray , label=" node:    81\n m:     9\n n:    73\n np:     1"];
+node000082[fillcolor=gray , label=" node:    82\n m:     9\n n:    75\n np:     1"];
+node000083[fillcolor=gray , label=" node:    83\n m:   111\n n:   577\n np:    15"];
+node000084[fillcolor=gray , label=" node:    84\n m:    85\n n:   584\n np:    10"];
+node000085[fillcolor=gray , label=" node:    85\n m:    10\n n:    81\n np:     1"];
+node000086[fillcolor=gray , label=" node:    86\n m:   136\n n:   716\n np:    15"];
+node000087[fillcolor=gray , label=" node:    87\n m:    15\n n:    89\n np:     2"];
+node000088[fillcolor=gray , label=" node:    88\n m:     9\n n:    75\n np:     1"];
+node000089[fillcolor=gray , label=" node:    89\n m:    10\n n:    89\n np:     1"];
+node000090[fillcolor=gray , label=" node:    90\n m:    37\n n:   260\n np:     5"];
+node000091[fillcolor=gray , label=" node:    91\n m:   153\n n:   900\n np:    15"];
+node000092[fillcolor=gray , label=" node:    92\n m:   333\n n:  1460\n np:    15"];
+node000093[fillcolor=white, label=" node:    93\n m:   636\n n:  2245\n np:    43"];
+node000094[fillcolor=white, label=" node:    94\n m:   888\n n:  2671\n np:    47"];
+node000095[fillcolor=gray , label=" node:    95\n m:     9\n n:    74\n np:     1"];
+node000096[fillcolor=gray , label=" node:    96\n m:     9\n n:    73\n np:     1"];
+node000097[fillcolor=gray , label=" node:    97\n m:     9\n n:    69\n np:     1"];
+node000098[fillcolor=gray , label=" node:    98\n m:    46\n n:   258\n np:     7"];
+node000099[fillcolor=gray , label=" node:    99\n m:     7\n n:    48\n np:     1"];
+node000100[fillcolor=gray , label=" node:   100\n m:    60\n n:   264\n np:    13"];
+node000101[fillcolor=gray , label=" node:   101\n m:   162\n n:   779\n np:    15"];
+node000102[fillcolor=gray , label=" node:   102\n m:   199\n n:   976\n np:    15"];
+node000103[fillcolor=white, label=" node:   103\n m:   336\n n:  1468\n np:    32"];
+node000104[fillcolor=gray , label=" node:   104\n m:    10\n n:    89\n np:     1"];
+node000105[fillcolor=gray , label=" node:   105\n m:     8\n n:    63\n np:     1"];
+node000106[fillcolor=gray , label=" node:   106\n m:    57\n n:   421\n np:     6"];
+node000107[fillcolor=gray , label=" node:   107\n m:   183\n n:  1054\n np:    15"];
+node000108[fillcolor=gray , label=" node:   108\n m:    10\n n:    91\n np:     1"];
+node000109[fillcolor=gray , label=" node:   109\n m:   104\n n:   612\n np:    13"];
+node000110[fillcolor=gray , label=" node:   110\n m:   173\n n:  1007\n np:    15"];
+node000111[fillcolor=gray , label=" node:   111\n m:   428\n n:  2022\n np:    13"];
+node000112[fillcolor=white, label=" node:   112\n m:   564\n n:  2337\n np:    47"];
+node000113[fillcolor=white, label=" node:   113\n m:   948\n n:  3135\n np:    65"];
+node000114[fillcolor=white, label=" node:   114\n m:  2019\n n:  4235\n np:   181"];
+node000115[fillcolor=gray , label=" node:   115\n m:    10\n n:    84\n np:     1"];
+node000116[fillcolor=gray , label=" node:   116\n m:    10\n n:    88\n np:     1"];
+node000117[fillcolor=gray , label=" node:   117\n m:    13\n n:   133\n np:     1"];
+node000118[fillcolor=gray , label=" node:   118\n m:    81\n n:   574\n np:     8"];
+node000119[fillcolor=gray , label=" node:   119\n m:   213\n n:  1217\n np:    15"];
+node000120[fillcolor=gray , label=" node:   120\n m:    10\n n:    93\n np:     1"];
+node000121[fillcolor=gray , label=" node:   121\n m:    37\n n:   262\n np:     4"];
+node000122[fillcolor=gray , label=" node:   122\n m:     9\n n:    72\n np:     1"];
+node000123[fillcolor=gray , label=" node:   123\n m:     9\n n:    74\n np:     1"];
+node000124[fillcolor=gray , label=" node:   124\n m:    49\n n:   339\n np:     6"];
+node000125[fillcolor=gray , label=" node:   125\n m:   162\n n:   799\n np:    15"];
+node000126[fillcolor=gray , label=" node:   126\n m:   297\n n:  1386\n np:    15"];
+node000127[fillcolor=gray , label=" node:   127\n m:    10\n n:    90\n np:     1"];
+node000128[fillcolor=gray , label=" node:   128\n m:    27\n n:   197\n np:     3"];
+node000129[fillcolor=gray , label=" node:   129\n m:    12\n n:    67\n np:     2"];
+node000130[fillcolor=gray , label=" node:   130\n m:    63\n n:   408\n np:     8"];
+node000131[fillcolor=gray , label=" node:   131\n m:   156\n n:   776\n np:    15"];
+node000132[fillcolor=gray , label=" node:   132\n m:   239\n n:  1106\n np:    15"];
+node000133[fillcolor=gray , label=" node:   133\n m:   326\n n:  1524\n np:    15"];
+node000134[fillcolor=white, label=" node:   134\n m:   626\n n:  2284\n np:    15"];
+node000135[fillcolor=white, label=" node:   135\n m:  1062\n n:  3063\n np:    89"];
+node000136[fillcolor=gray , label=" node:   136\n m:     9\n n:    69\n np:     1"];
+node000137[fillcolor=gray , label=" node:   137\n m:    11\n n:   100\n np:     1"];
+node000138[fillcolor=gray , label=" node:   138\n m:    16\n n:    99\n np:     3"];
+node000139[fillcolor=gray , label=" node:   139\n m:    17\n n:   117\n np:     2"];
+node000140[fillcolor=gray , label=" node:   140\n m:   121\n n:   570\n np:    15"];
+node000141[fillcolor=gray , label=" node:   141\n m:    31\n n:   226\n np:     3"];
+node000142[fillcolor=gray , label=" node:   142\n m:   107\n n:   688\n np:    13"];
+node000143[fillcolor=gray , label=" node:   143\n m:   226\n n:  1269\n np:    15"];
+node000144[fillcolor=white, label=" node:   144\n m:   512\n n:  2025\n np:    44"];
+node000145[fillcolor=gray , label=" node:   145\n m:    10\n n:    87\n np:     1"];
+node000146[fillcolor=gray , label=" node:   146\n m:   102\n n:   574\n np:    15"];
+node000147[fillcolor=gray , label=" node:   147\n m:    19\n n:   139\n np:     2"];
+node000148[fillcolor=gray , label=" node:   148\n m:    10\n n:    83\n np:     1"];
+node000149[fillcolor=gray , label=" node:   149\n m:   132\n n:   712\n np:    15"];
+node000150[fillcolor=gray , label=" node:   150\n m:   193\n n:   947\n np:    15"];
+node000151[fillcolor=gray , label=" node:   151\n m:     9\n n:    72\n np:     1"];
+node000152[fillcolor=gray , label=" node:   152\n m:    10\n n:    92\n np:     1"];
+node000153[fillcolor=gray , label=" node:   153\n m:   126\n n:   787\n np:    15"];
+node000154[fillcolor=gray , label=" node:   154\n m:   462\n n:  1992\n np:    15"];
+node000155[fillcolor=white, label=" node:   155\n m:   574\n n:  2221\n np:    47"];
+node000156[fillcolor=white, label=" node:   156\n m:  1108\n n:  3418\n np:    94"];
+node000157[fillcolor=white, label=" node:   157\n m:  6094\n n:  6784\n np:  2478"];
+node000158[fillcolor=gray , label=" node:   158\n m:   102\n n:   717\n np:    11"];
+node000159[fillcolor=gray , label=" node:   159\n m:    23\n n:   216\n np:     2"];
+node000160[fillcolor=gray , label=" node:   160\n m:    12\n n:   116\n np:     1"];
+node000161[fillcolor=gray , label=" node:   161\n m:   103\n n:   501\n np:    15"];
+node000162[fillcolor=gray , label=" node:   162\n m:    10\n n:    96\n np:     1"];
+node000163[fillcolor=gray , label=" node:   163\n m:    13\n n:   131\n np:     1"];
+node000164[fillcolor=gray , label=" node:   164\n m:    13\n n:   139\n np:     1"];
+node000165[fillcolor=gray , label=" node:   165\n m:    77\n n:   552\n np:     8"];
+node000166[fillcolor=gray , label=" node:   166\n m:   329\n n:  1314\n np:    15"];
+node000167[fillcolor=gray , label=" node:   167\n m:   537\n n:  1876\n np:    31"];
+node000168[fillcolor=white, label=" node:   168\n m:   674\n n:  2052\n np:    40"];
+node000169[fillcolor=white, label=" node:   169\n m:   918\n n:  2524\n np:    72"];
+node000170[fillcolor=gray , label=" node:   170\n m:    11\n n:    91\n np:     1"];
+node000171[fillcolor=gray , label=" node:   171\n m:    72\n n:   537\n np:     7"];
+node000172[fillcolor=gray , label=" node:   172\n m:    45\n n:   370\n np:     4"];
+node000173[fillcolor=gray , label=" node:   173\n m:    11\n n:   108\n np:     1"];
+node000174[fillcolor=gray , label=" node:   174\n m:    12\n n:   114\n np:     1"];
+node000175[fillcolor=gray , label=" node:   175\n m:    12\n n:   121\n np:     1"];
+node000176[fillcolor=white, label=" node:   176\n m:   262\n n:  1466\n np:    15"];
+node000177[fillcolor=gray , label=" node:   177\n m:    12\n n:   116\n np:     1"];
+node000178[fillcolor=gray , label=" node:   178\n m:    13\n n:   136\n np:     1"];
+node000179[fillcolor=gray , label=" node:   179\n m:    14\n n:   144\n np:     1"];
+node000180[fillcolor=gray , label=" node:   180\n m:   162\n n:  1016\n np:    15"];
+node000181[fillcolor=gray , label=" node:   181\n m:    33\n n:   297\n np:     2"];
+node000182[fillcolor=gray , label=" node:   182\n m:   110\n n:   564\n np:    11"];
+node000183[fillcolor=white, label=" node:   183\n m:   388\n n:  2003\n np:    15"];
+node000184[fillcolor=white, label=" node:   184\n m:   818\n n:  3098\n np:    38"];
+node000185[fillcolor=white, label=" node:   185\n m:  2153\n n:  4590\n np:   284"];
+node000186[fillcolor=gray , label=" node:   186\n m:    20\n n:   199\n np:     1"];
+node000187[fillcolor=gray , label=" node:   187\n m:   174\n n:  1283\n np:    15"];
+node000188[fillcolor=gray , label=" node:   188\n m:    27\n n:   277\n np:     2"];
+node000189[fillcolor=gray , label=" node:   189\n m:    13\n n:   131\n np:     1"];
+node000190[fillcolor=gray , label=" node:   190\n m:   141\n n:  1089\n np:    12"];
+node000191[fillcolor=white, label=" node:   191\n m:   328\n n:  2154\n np:    15"];
+node000192[fillcolor=white, label=" node:   192\n m:   610\n n:  3157\n np:    16"];
+node000193[fillcolor=white, label=" node:   193\n m:   850\n n:  3585\n np:    47"];
+node000194[fillcolor=gray , label=" node:   194\n m:   104\n n:   783\n np:    12"];
+node000195[fillcolor=gray , label=" node:   195\n m:    92\n n:   654\n np:     9"];
+node000196[fillcolor=white, label=" node:   196\n m:   308\n n:  1900\n np:    15"];
+node000197[fillcolor=gray , label=" node:   197\n m:    11\n n:   108\n np:     1"];
+node000198[fillcolor=gray , label=" node:   198\n m:    13\n n:   135\n np:     1"];
+node000199[fillcolor=gray , label=" node:   199\n m:    26\n n:   273\n np:     2"];
+node000200[fillcolor=gray , label=" node:   200\n m:    34\n n:   238\n np:     4"];
+node000201[fillcolor=gray , label=" node:   201\n m:    13\n n:   139\n np:     1"];
+node000202[fillcolor=gray , label=" node:   202\n m:    50\n n:   447\n np:     4"];
+node000203[fillcolor=white, label=" node:   203\n m:   285\n n:  1957\n np:    15"];
+node000204[fillcolor=white, label=" node:   204\n m:   656\n n:  3286\n np:    15"];
+node000205[fillcolor=white, label=" node:   205\n m:   867\n n:  3601\n np:    61"];
+node000206[fillcolor=white, label=" node:   206\n m:  1696\n n:  5128\n np:    15"];
+node000207[fillcolor=white, label=" node:   207\n m:  4632\n n:  6409\n np:   855"];
+node000208[fillcolor=gray , label=" node:   208\n m:     4\n n:    23\n np:     1"];
+node000209[fillcolor=gray , label=" node:   209\n m:    21\n n:   131\n np:     3"];
+node000210[fillcolor=gray , label=" node:   210\n m:     9\n n:    59\n np:     1"];
+node000211[fillcolor=gray , label=" node:   211\n m:    59\n n:   201\n np:    15"];
+node000212[fillcolor=gray , label=" node:   212\n m:    76\n n:   313\n np:    15"];
+node000213[fillcolor=gray , label=" node:   213\n m:   140\n n:   621\n np:    15"];
+node000214[fillcolor=gray , label=" node:   214\n m:   186\n n:   774\n np:    14"];
+node000215[fillcolor=gray , label=" node:   215\n m:   243\n n:  1074\n np:    14"];
+node000216[fillcolor=gray , label=" node:   216\n m:    20\n n:   186\n np:     1"];
+node000217[fillcolor=gray , label=" node:   217\n m:    19\n n:   143\n np:     2"];
+node000218[fillcolor=gray , label=" node:   218\n m:    54\n n:   244\n np:    11"];
+node000219[fillcolor=gray , label=" node:   219\n m:   100\n n:   494\n np:    15"];
+node000220[fillcolor=gray , label=" node:   220\n m:   225\n n:  1280\n np:    15"];
+node000221[fillcolor=white, label=" node:   221\n m:   531\n n:  2301\n np:    17"];
+node000222[fillcolor=white, label=" node:   222\n m:   689\n n:  2635\n np:    46"];
+node000223[fillcolor=gray , label=" node:   223\n m:    13\n n:   130\n np:     1"];
+node000224[fillcolor=gray , label=" node:   224\n m:    23\n n:   210\n np:     2"];
+node000225[fillcolor=gray , label=" node:   225\n m:    11\n n:   100\n np:     1"];
+node000226[fillcolor=gray , label=" node:   226\n m:    21\n n:   168\n np:     2"];
+node000227[fillcolor=gray , label=" node:   227\n m:    10\n n:    88\n np:     1"];
+node000228[fillcolor=gray , label=" node:   228\n m:    33\n n:   132\n np:     9"];
+node000229[fillcolor=gray , label=" node:   229\n m:    92\n n:   419\n np:    14"];
+node000230[fillcolor=gray , label=" node:   230\n m:   192\n n:   897\n np:    15"];
+node000231[fillcolor=gray , label=" node:   231\n m:   255\n n:  1184\n np:    15"];
+node000232[fillcolor=gray , label=" node:   232\n m:   439\n n:  1904\n np:    42"];
+node000233[fillcolor=white, label=" node:   233\n m:   505\n n:  2274\n np:    28"];
+node000234[fillcolor=white, label=" node:   234\n m:   684\n n:  2948\n np:    47"];
+node000235[fillcolor=white, label=" node:   235\n m:  1602\n n:  4811\n np:   155"];
+node000236[fillcolor=gray , label=" node:   236\n m:    13\n n:   145\n np:     1"];
+node000237[fillcolor=gray , label=" node:   237\n m:    65\n n:   546\n np:     6"];
+node000238[fillcolor=gray , label=" node:   238\n m:    10\n n:    88\n np:     1"];
+node000239[fillcolor=gray , label=" node:   239\n m:    11\n n:   105\n np:     1"];
+node000240[fillcolor=gray , label=" node:   240\n m:    11\n n:    95\n np:     1"];
+node000241[fillcolor=gray , label=" node:   241\n m:   228\n n:  1449\n np:    15"];
+node000242[fillcolor=gray , label=" node:   242\n m:    40\n n:   340\n np:     4"];
+node000243[fillcolor=gray , label=" node:   243\n m:    28\n n:   205\n np:     3"];
+node000244[fillcolor=gray , label=" node:   244\n m:    36\n n:   344\n np:     3"];
+node000245[fillcolor=gray , label=" node:   245\n m:   211\n n:  1490\n np:    15"];
+node000246[fillcolor=white, label=" node:   246\n m:   553\n n:  3005\n np:    22"];
+node000247[fillcolor=white, label=" node:   247\n m:   748\n n:  3562\n np:    44"];
+node000248[fillcolor=gray , label=" node:   248\n m:    12\n n:   126\n np:     1"];
+node000249[fillcolor=gray , label=" node:   249\n m:    55\n n:   499\n np:     5"];
+node000250[fillcolor=gray , label=" node:   250\n m:   205\n n:  1548\n np:    15"];
+node000251[fillcolor=gray , label=" node:   251\n m:    13\n n:   136\n np:     1"];
+node000252[fillcolor=gray , label=" node:   252\n m:    12\n n:   113\n np:     1"];
+node000253[fillcolor=gray , label=" node:   253\n m:   144\n n:  1007\n np:    15"];
+node000254[fillcolor=gray , label=" node:   254\n m:    57\n n:   404\n np:     7"];
+node000255[fillcolor=gray , label=" node:   255\n m:   306\n n:  1979\n np:    15"];
+node000256[fillcolor=white, label=" node:   256\n m:   455\n n:  2534\n np:    22"];
+node000257[fillcolor=white, label=" node:   257\n m:   736\n n:  3448\n np:    34"];
+node000258[fillcolor=white, label=" node:   258\n m:   889\n n:  3807\n np:    47"];
+node000259[fillcolor=white, label=" node:   259\n m:  8113\n n:  7846\n np:  3540"];
+node000260[fillcolor=white, label=" node:   260\n m:  7922\n n:  4306\n np:  4306"];
+node000261[fillcolor=white, label=" node:   261\n m:     0\n n:     0\n np:     0"];
+node000017 -- node000001
+node000017 -- node000002
+node000016 -- node000003
+node000015 -- node000004
+node000014 -- node000005
+node000007 -- node000006
+node000008 -- node000007
+node000009 -- node000008
+node000010 -- node000009
+node000011 -- node000010
+node000012 -- node000011
+node000013 -- node000012
+node000014 -- node000013
+node000015 -- node000014
+node000016 -- node000015
+node000017 -- node000016
+node000034 -- node000017
+node000033 -- node000018
+node000020 -- node000019
+node000033 -- node000020
+node000032 -- node000021
+node000032 -- node000022
+node000032 -- node000023
+node000031 -- node000024
+node000031 -- node000025
+node000030 -- node000026
+node000029 -- node000027
+node000029 -- node000028
+node000030 -- node000029
+node000031 -- node000030
+node000032 -- node000031
+node000033 -- node000032
+node000034 -- node000033
+node000077 -- node000034
+node000041 -- node000035
+node000040 -- node000036
+node000040 -- node000037
+node000040 -- node000038
+node000040 -- node000039
+node000041 -- node000040
+node000051 -- node000041
+node000050 -- node000042
+node000048 -- node000043
+node000048 -- node000044
+node000048 -- node000045
+node000048 -- node000046
+node000048 -- node000047
+node000049 -- node000048
+node000050 -- node000049
+node000051 -- node000050
+node000052 -- node000051
+node000053 -- node000052
+node000077 -- node000053
+node000061 -- node000054
+node000061 -- node000055
+node000061 -- node000056
+node000061 -- node000057
+node000061 -- node000058
+node000061 -- node000059
+node000061 -- node000060
+node000076 -- node000061
+node000076 -- node000062
+node000069 -- node000063
+node000069 -- node000064
+node000069 -- node000065
+node000069 -- node000066
+node000069 -- node000067
+node000069 -- node000068
+node000076 -- node000069
+node000075 -- node000070
+node000072 -- node000071
+node000075 -- node000072
+node000074 -- node000073
+node000075 -- node000074
+node000076 -- node000075
+node000077 -- node000076
+node000157 -- node000077
+node000114 -- node000078
+node000080 -- node000079
+node000094 -- node000080
+node000093 -- node000081
+node000093 -- node000082
+node000093 -- node000083
+node000093 -- node000084
+node000086 -- node000085
+node000092 -- node000086
+node000092 -- node000087
+node000091 -- node000088
+node000091 -- node000089
+node000091 -- node000090
+node000092 -- node000091
+node000093 -- node000092
+node000094 -- node000093
+node000114 -- node000094
+node000113 -- node000095
+node000103 -- node000096
+node000101 -- node000097
+node000101 -- node000098
+node000101 -- node000099
+node000101 -- node000100
+node000102 -- node000101
+node000103 -- node000102
+node000113 -- node000103
+node000107 -- node000104
+node000107 -- node000105
+node000107 -- node000106
+node000111 -- node000107
+node000110 -- node000108
+node000110 -- node000109
+node000111 -- node000110
+node000112 -- node000111
+node000113 -- node000112
+node000114 -- node000113
+node000157 -- node000114
+node000119 -- node000115
+node000119 -- node000116
+node000119 -- node000117
+node000119 -- node000118
+node000135 -- node000119
+node000126 -- node000120
+node000126 -- node000121
+node000125 -- node000122
+node000125 -- node000123
+node000125 -- node000124
+node000126 -- node000125
+node000134 -- node000126
+node000133 -- node000127
+node000132 -- node000128
+node000131 -- node000129
+node000131 -- node000130
+node000132 -- node000131
+node000133 -- node000132
+node000134 -- node000133
+node000135 -- node000134
+node000157 -- node000135
+node000144 -- node000136
+node000144 -- node000137
+node000140 -- node000138
+node000140 -- node000139
+node000144 -- node000140
+node000143 -- node000141
+node000143 -- node000142
+node000144 -- node000143
+node000156 -- node000144
+node000146 -- node000145
+node000154 -- node000146
+node000149 -- node000147
+node000149 -- node000148
+node000150 -- node000149
+node000154 -- node000150
+node000154 -- node000151
+node000153 -- node000152
+node000154 -- node000153
+node000155 -- node000154
+node000156 -- node000155
+node000157 -- node000156
+node000260 -- node000157
+node000169 -- node000158
+node000167 -- node000159
+node000167 -- node000160
+node000166 -- node000161
+node000166 -- node000162
+node000166 -- node000163
+node000166 -- node000164
+node000166 -- node000165
+node000167 -- node000166
+node000168 -- node000167
+node000169 -- node000168
+node000185 -- node000169
+node000184 -- node000170
+node000176 -- node000171
+node000176 -- node000172
+node000176 -- node000173
+node000176 -- node000174
+node000176 -- node000175
+node000184 -- node000176
+node000180 -- node000177
+node000180 -- node000178
+node000180 -- node000179
+node000183 -- node000180
+node000183 -- node000181
+node000183 -- node000182
+node000184 -- node000183
+node000185 -- node000184
+node000207 -- node000185
+node000187 -- node000186
+node000192 -- node000187
+node000191 -- node000188
+node000191 -- node000189
+node000191 -- node000190
+node000192 -- node000191
+node000193 -- node000192
+node000206 -- node000193
+node000196 -- node000194
+node000196 -- node000195
+node000204 -- node000196
+node000203 -- node000197
+node000203 -- node000198
+node000203 -- node000199
+node000203 -- node000200
+node000203 -- node000201
+node000203 -- node000202
+node000204 -- node000203
+node000205 -- node000204
+node000206 -- node000205
+node000207 -- node000206
+node000259 -- node000207
+node000259 -- node000208
+node000215 -- node000209
+node000211 -- node000210
+node000212 -- node000211
+node000213 -- node000212
+node000214 -- node000213
+node000215 -- node000214
+node000221 -- node000215
+node000220 -- node000216
+node000220 -- node000217
+node000219 -- node000218
+node000220 -- node000219
+node000221 -- node000220
+node000222 -- node000221
+node000235 -- node000222
+node000234 -- node000223
+node000232 -- node000224
+node000232 -- node000225
+node000230 -- node000226
+node000230 -- node000227
+node000229 -- node000228
+node000230 -- node000229
+node000231 -- node000230
+node000232 -- node000231
+node000233 -- node000232
+node000234 -- node000233
+node000235 -- node000234
+node000259 -- node000235
+node000241 -- node000236
+node000241 -- node000237
+node000241 -- node000238
+node000241 -- node000239
+node000241 -- node000240
+node000246 -- node000241
+node000245 -- node000242
+node000245 -- node000243
+node000245 -- node000244
+node000246 -- node000245
+node000247 -- node000246
+node000259 -- node000247
+node000250 -- node000248
+node000250 -- node000249
+node000257 -- node000250
+node000253 -- node000251
+node000253 -- node000252
+node000255 -- node000253
+node000255 -- node000254
+node000256 -- node000255
+node000257 -- node000256
+node000258 -- node000257
+node000259 -- node000258
+node000260 -- node000259
+node000261 -- node000260
+}

@@ -8,7 +8,7 @@ geom_atree <- function (data=NULL, Offset=1.02, Flip = TRUE)
     dfactor <- makespan * 0.04;
     doffset <- makespan * Offset;
 
-    d <- data$Atree %>%
+    dtree <- data$Atree %>%
         # Get Start time of the first task belonging to each ANode
         left_join(data$Application %>%
                   filter(Type == "Worker State") %>%
@@ -49,38 +49,46 @@ geom_atree <- function (data=NULL, Offset=1.02, Flip = TRUE)
         mutate(Middle.X = Start + (End - Start)/2,
                Middle.Y = Position + Height/2,
                Middle.End.X = Start.Parent + (End.Parent - Start.Parent)/2,
-               Middle.End.Y = Position.Parent + Height.Parent/2) %>%
-        # Remove that without parent
-        filter(!is.na(Parent)) %>%
-        # The root has no tasks associated with, remove it.
-        mutate(Parent = as.integer(Parent)) %>%
-        filter(Parent != max(Parent))
+               Middle.End.Y = Position.Parent + Height.Parent/2);
+
+    # data frame for the tree plot structure
+    dstruct <- dtree %>%
+      # Remove that without parent
+      filter(!is.na(Parent)) %>%
+      # The root has no tasks associated with, remove it.
+      mutate(Parent = as.integer(Parent)) %>%
+      filter(Parent != max(Parent));
+
+    # data frame for node "lifetime" geom_segment
+    dline <- dtree %>%
+      select(ANode, Start, End, Position, Height, Parent) %>%
+      filter(!is.na(Parent), !is.na(Start));
 
     ret <-
         list(
             # Lines connecting child with parent (Start)
-            geom_segment(data=d,
+            geom_segment(data=dstruct,
                          arrow=arrow(length = unit(0.03, "npc")),
                          aes(x=Edge.X,
                              y=Edge.Y,
                              xend=Edge.Xend,
                              yend=Edge.Yend),
                          color="blue"),
-            geom_point(data=d,
+            geom_point(data=dstruct,
                        aes(x=Edge.X,
                            y=Edge.Y), color="blue"),
             #geom_point(data=d,
             #           aes(x=Edge.Xend,
             #               y=Edge.Yend), color="blue"),
             # Lines connecting child with parent (End)
-            geom_segment(data=d,
+            geom_segment(data=dstruct,
                          arrow=arrow(length = unit(0.03, "npc")),
                          aes(x=Edge.End.X,
                              y=Edge.End.Y,
                              xend=Edge.End.Xend,
                              yend=Edge.End.Yend),
                          color="red"),
-            geom_point(data=d,
+            geom_point(data=dstruct,
                        aes(x=Edge.End.X,
                            y=Edge.End.Y), color="red"),
             #geom_point(data=d,
@@ -89,7 +97,7 @@ geom_atree <- function (data=NULL, Offset=1.02, Flip = TRUE)
             # Fix time coordinates
             coord_cartesian(xlim=c(0, makespan)),
             # Horizontal lines
-            geom_segment(data=d, aes(y = Position + Height/2, yend = Position + Height/2, x = Start, xend = End), color="lightblue")
+            geom_segment(data=dline, aes(y = Position + Height/2, yend = Position + Height/2, x = Start, xend = End), color="lightblue")
         );
     return(ret);
 }

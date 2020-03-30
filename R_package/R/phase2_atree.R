@@ -11,7 +11,7 @@ geom_atree <- function (data=NULL, Offset=1.02, Flip = TRUE)
     dtree <- data$Atree %>%
         # Get Start time of the first task belonging to each ANode
         left_join(data$Application %>%
-                  filter(Type == "Worker State") %>%
+                  filter(Type == "Worker State", Value != "block_copy") %>%
                   select(ANode, Start, End) %>%
                   group_by(ANode) %>%
                   summarize(Start = min(Start),
@@ -120,20 +120,26 @@ atree_temporal_chart <- function(data = NULL, step = 100, globalEndTime = NULL)
       ungroup() %>%
       # calculate usage in percentage by node given the total Usage
       mutate(NodeUsage = 100 * (Value1/Usage)) %>%
-      left_join(data$Atree, by="ANode") -> df_node_plot_filtered
-    
+      left_join(data$Atree, by="ANode") %>%
+      inner_join(data$Application %>%
+                  filter(grepl("init_", Value)) %>%
+                  select(ANode, End) %>%
+                  group_by(ANode) %>%
+                  filter(End == max(End)),
+                by="ANode") %>%
+      mutate(Start = ifelse(End >= Slice, End, Slice)) -> df_node_plot_filtered  
+
     # filter initialization tasks 
-    dfw_init_block <- dfw %>%
-      filter(Type == "Worker State", Application) %>%
+    dfw_init <- dfw %>%
       filter(grepl("init_", Value)) %>%
       unique() %>%
       select(-Position, -Height) %>%
-      left_join(data$Atree, by="ANode")
+      left_join(data$Atree, by="ANode");
 
     # Prepare for colors
     atreeplot <- dfw %>%
       # Considering only application data and Worker State
-      filter(Type == "Worker State", Application, Intermediary) %>%
+      filter(Intermediary) %>%
       filter(grepl("lapack_", Value) | grepl("subtree", Value)) %>%
       unique() %>%
       # Remove all tasks that do not have ANode
@@ -150,19 +156,19 @@ atree_temporal_chart <- function(data = NULL, step = 100, globalEndTime = NULL)
         atreeplot <- atreeplot +
             geom_rect(data=df_node_plot_filtered,
                       aes(fill=NodeUsage,
-                          xmin=Slice,
+                          xmin=Start,
                           xmax=Slice+step,
                           ymin=Position,
                           ymax=Position+Height)) +
-            scale_fill_viridis(option="plasma") +
+            # scale_fill_viridis(option="plasma") +
             scale_fill_gradient(low="lightsalmon", high="red1") +
             scale_fill_gradient2(name="Computational Load", limits=c(0,100), midpoint=50, low="blue", mid="yellow", high="red") +
-            geom_rect(data=dfw_init_block,
+            geom_rect(data=dfw_init,
                       aes(xmin=Start,
                           xmax=End,
                           ymin=Position,
                           ymax=Position+Height),
-                      fill="green");
+                      fill="#4DAF4A");
     }
     loginfo("Exit of atree_temporal_chart");
     return(atreeplot);

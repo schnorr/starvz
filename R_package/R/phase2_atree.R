@@ -370,13 +370,59 @@ resource_utilization_tree_node <- function(data = NULL, step = 100)
 
 resource_utilization_tree_node_plot <- function(data = NULL, step = 100)
 {
-    resource_utilization_tree_node(data=data, step=step) %>%
-      ggplot(aes(x=Slice, y=Value1, fill=as.factor(ANode))) +
-      geom_area() +
-      default_theme() +
-      theme(legend.position = "none") +
-      ylab("Usage %\nANode") +
-      coord_cartesian(ylim=c(0,100)) + ylim(0,100)
+  df1 <- resource_utilization_tree_node(data=data, step=step)
+
+  event_data <- df1 %>%
+    filter(Value != 0) %>%
+    group_by(ANode) %>%
+    summarize(Start=min(Slice), End=max(Slice)+step) %>%
+    arrange(Start, End) %>%
+    gather(Start, End, key="Event", value="Time") %>%
+    arrange(Time, Event);
+
+  # Set node colors
+  active_colors <<- c()
+  df_colors <<- tibble(ANode=character(), Event=character(), color=integer())
+  apply(event_data, 1, define_colors) -> colors
+  colors = tibble(Color=colors)
+  event_data <- event_data %>% 
+    cbind(colors) %>%
+    as_tibble() %>%
+    select(ANode, Color) %>%
+    unique();
+
+  # join data frames
+  df2 <- df1 %>%
+    ungroup() %>%
+    left_join(event_data) %>%
+    group_by(Slice);
+  
+  # must expand data frame to make geom_area work properly
+  df2 %>%
+    filter(!is.na(Color)) %>%
+    select(-ANode) %>%
+    expand(Slice, Color) %>%
+    left_join(df2 %>% filter(Value != 0)) %>%
+    mutate(Value1 = ifelse(is.na(Value1), 0, Value1)) -> df_plot
+
+  ncolors <- df_plot %>% ungroup() %>% select(Color) %>% max(.$Color)
+  if (ncolors <= 10) {
+    palette = brewer.pal(9, "Greens")[3:9];
+  } else {
+    palette = c(brewer.pal(9, "Oranges")[3:9], brewer.pal(9, "Blues")[3:9],
+                brewer.pal(9, "Reds")[3:9], brewer.pal(9, "Greens")[3:9])
+  }
+
+  fill_palette <- rev(colorRampPalette(palette)(ncolors+1))
+
+  df_plot %>%
+    ggplot() +
+    geom_area(aes(x=Slice, y=Value1, fill=as.factor(Color)), stat = "identity", position = "stack") +
+    scale_fill_manual(values=fill_palette) +
+    default_theme() +
+    theme(legend.position = "none") +
+    ylab("Usage %\nANode") +
+    coord_cartesian(ylim=c(0,100)) + ylim(0,100)
 }
 
 resource_utilization_tree_depth <- function(data = NULL)
@@ -487,4 +533,48 @@ nodes_memory_usage_plot <- function(data = NULL)
 
   loginfo("Exit of nodes_memory_usage_plot");
   return(node_mem_use);
+}
+
+get_min_color <- function(node) {
+  min_color = 0
+  while(1) {
+    if(min_color %in% active_colors) {
+      min_color = min_color+1
+    } else {
+      df_colors <<- df_colors %>%
+        rbind(tibble(ANode=node, Event="Start", color=min_color))
+      active_colors <<- c(active_colors, min_color)
+      return(min_color)
+    }
+  }
+}
+ 
+find_node_color <- function(node) {
+  color <- df_colors %>%
+    filter(ANode == node & Event == "Start") %>%
+    select(color) %>%
+    .$color
+
+  return(color)
+}
+
+set_color_available <- function(node) {
+  color <- find_node_color(node);
+  
+  df_colors <<- df_colors %>%
+    rbind(tibble(ANode=node, Event="End", color=color)) 
+  active_colors <<- active_colors[active_colors != as.integer(color)]
+ 
+ return(color)
+}
+
+define_colors <- function(data) {
+    ANode <- data[1]
+    Event  <- data[2]
+
+    if(Event == "Start") {
+      get_min_color(ANode)
+    } else {
+      set_color_available(ANode)
+    }
 }

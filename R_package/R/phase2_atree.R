@@ -507,17 +507,22 @@ nodes_memory_usage_plot <- function(data = NULL)
 {
   loginfo("Entry of nodes_memory_usage_plot");
   if (is.null(data)) stop("a NULL data has been provided to nodes_memory_usage_plot");
-    
+
   df_mem <- data$Application %>%
     filter(grepl("front", Value) | grepl("do_sub", Value)) %>%
     select(Start, Value, GFlop, ANode, Node) %>%
     arrange(Start) %>%
     mutate(GFlop = ifelse(Value=="clean_front", -GFlop, GFlop)) %>%
     mutate(MemMB = GFlop*1024) %>%
-    mutate(UsedMemMB = cumsum(MemMB));
+    mutate(UsedMemMB = cumsum(MemMB)) %>%
+    mutate(Time = Start*0.9999) %>%
+    gather(Start, Time, key="Start", value="Time") %>% 
+    select(-Start) %>%
+    arrange(Time) %>%
+    mutate(UsedMemMB = lag(UsedMemMB))
 
   node_mem_use <- df_mem %>%
-    ggplot(aes(x=Start, y=UsedMemMB, color=Node)) +
+    ggplot(aes(x=Time, y=UsedMemMB, color=Node)) +
     geom_line() + 
     default_theme() +
     theme(legend.position = "none") +
@@ -529,7 +534,7 @@ nodes_memory_usage_plot <- function(data = NULL)
     node_mem_use <- node_mem_use + 
       geom_text(aes(x=0, y=mem_peak), hjust=-.5, vjust=1.1 , color="red", label=paste0("Memory peak = ", round(mem_peak, digits=2), "MB")) +
       geom_hline(yintercept = mem_peak, color="red", linetype = "dashed");
-  }      
+  }
 
   loginfo("Exit of nodes_memory_usage_plot");
   return(node_mem_use);

@@ -427,16 +427,19 @@ resource_utilization_tree_node_plot <- function(data = NULL, step = 100)
 
 resource_utilization_tree_depth <- function(data = NULL)
 {
+
+  maxDepth <- data %>% ungroup() %>% select(Depth) %>% unique() %>% max(.$Depth)
+  depthPalette <- rev(colorRampPalette(brewer.pal(9, "YlOrRd"))(maxDepth));
+
   data %>%
     filter(Depth != 0) %>%
     ungroup() %>%
     arrange(Depth) %>%
     ggplot() +
     geom_area(aes(x=Slice, y=Value2, fill=as.factor(Depth))) +
-   # scale_fill_manual(values = heat) +
     default_theme() +
-    theme(legend.position = "none") +
-    #xlab("Time [ms]") +
+    theme(legend.position = "top") +
+    scale_fill_manual(values = depthPalette) +
     ylab("Usage %\nDepth") +
     coord_cartesian(ylim=c(0,100)) + ylim(0,100)
 }

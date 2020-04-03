@@ -1,6 +1,6 @@
 
 starvz_write_feather <- function(data){
-  data %>% purrr::list_modify("Origin" = NULL) %>% names %>%
+  invisible(data %>% purrr::list_modify("Origin" = NULL) %>% names %>%
   lapply(function(x) {
       filename <- paste0("pre.", tolower(x), ".feather"); loginfo(filename);
       if (!is.null(data[[x]])){
@@ -12,5 +12,5 @@ starvz_write_feather <- function(data){
       } else {
           loginfo(paste("Data for", filename, "has not been feathered because is empty."));
       }
-  })
+  }))
 }

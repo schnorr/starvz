@@ -211,7 +211,6 @@ read_state_csv <- function (where = ".",
           loginfo("Attempt to detect outliers for QRMumps using Duration ~ GFlops")
           task_model <- task_model_ib_1
         }
-
         # Step 1: apply the model to each task, considering the ResourceType
         dfw %>%
             filter(grepl("lapack_", Value)) %>%
@@ -220,28 +219,21 @@ read_state_csv <- function (where = ".",
             group_by(ResourceType, Value) %>%
             nest() %>%
             mutate(model = map(data, task_model)) %>%
+            mutate(Residual = map(model, resid)) %>%
             mutate(outliers = map(model, function(m) {
                 tibble(Row = names(outlierTest(m, n.max=Inf)$rstudent))
             })) -> df.pre.outliers
-
-        # Step 1.2: get the negative residuals for each task
-        df.pre.outliers %>%
-          select(Value, ResourceType, model) %>%
-          mutate(Residual = map(model, resid)) %>%
-          select(-model) %>%
-          unnest(Residual) %>%
-          mutate(Row = 1:n()) %>%
-          filter(Residual < 0) -> df.residuals
-
+        
         # Step 2: identify outliers rows
         df.pre.outliers %>%
+            select(-Residual) %>%
             unnest(outliers) %>%
             mutate(Row = as.integer(Row), Outlier=TRUE) %>%
             ungroup() -> df.pos.outliers
-
+        
         # Step 3: unnest all data and tag create the Outiler field according to the Row value
         df.pre.outliers %>%
-            unnest(data) %>%
+            unnest(data, Residual) %>% 
             # this must be identical to the grouping used in the step 1
             group_by(Value, ResourceType) %>%
             mutate(Row = 1:n()) %>%
@@ -250,14 +242,14 @@ read_state_csv <- function (where = ".",
             left_join(df.pos.outliers, by=c("Value", "Row", "ResourceType")) %>%
             mutate(Outlier = ifelse(is.na(Outlier), FALSE, Outlier)) %>%
             # remove outliers that are below the regression line
-            mutate(Outlier = ifelse(Outlier & Row %in% df.residuals$Row, FALSE, Outlier)) %>%
+            mutate(Outlier = ifelse(Outlier & Residual < 0, FALSE, Outlier)) %>%
             select(-Row) %>%
             ungroup() -> df.outliers
-
+        
         # Step 4: regroup the Outlier data to the original dfw
         dfw <- dfw %>%
             left_join(df.outliers %>%
-                        select(JobId, Outlier), by=c("JobId"))
+                        select(JobId, Outlier), by=c("JobId"));
 
     }else{
         loginfo("No outlier detection; use standard model (note that this model could be not accurate for irregular tasks).");

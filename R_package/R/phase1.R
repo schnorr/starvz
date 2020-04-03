@@ -1,5 +1,5 @@
 
-the_reader_function <- function (directory = ".", app_states_fun = NULL, state_filter = 0, whichApplication = NULL)
+starvz_phase1_read <- function (directory = ".", app_states_fun = NULL, state_filter = 0, whichApplication = NULL)
 {
     # Logging configuration
     basicConfig();
@@ -101,6 +101,8 @@ the_reader_function <- function (directory = ".", app_states_fun = NULL, state_f
 
     return(data);
 }
+
+the_reader_function <- starvz_phase1_read
 
 read_state_csv <- function (where = ".",
                             app_states_fun = NULL,

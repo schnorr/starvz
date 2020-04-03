@@ -276,13 +276,13 @@ starvz_plot <- function(data = NULL)
 
     #  Filter out everything after the makespan
     # TODO: Maybe this will make sense to transfer to Phase1
-    data$Application <- data$Application %>% filter(Start < makespan)
-    data$Starpu <- data$Starpu %>% filter(Start < makespan)
-    data$Dag <- data$Dag %>% filter(Start < makespan)
-    data$Events <- data$Events %>% filter(Start < makespan)
-    data$Gaps <- data$Gaps %>% filter(Start.x < makespan)
-    data$Link <- data$Link %>% filter(Start < makespan)
-    data$Variable <- data$Variable %>% filter(End < makespan)
+    #data$Application <- data$Application %>% filter(Start < makespan)
+    #data$Starpu <- data$Starpu %>% filter(Start < makespan)
+    #data$Dag <- data$Dag %>% filter(Start < makespan)
+    #data$Events <- data$Events %>% filter(Start < makespan)
+    #data$Gaps <- data$Gaps %>% filter(Start.x < makespan)
+    #data$Link <- data$Link %>% filter(Start < makespan)
+    #data$Variable <- data$Variable %>% filter(End < makespan)
 
     # Adjust temporal scale
     tstart <- pjr_value(pajer$limits$start, data$Application %>% pull(Start) %>% min);
@@ -714,7 +714,7 @@ starvz_plot <- function(data = NULL)
     # Node memory usage
     if (pjr(pajer$activenodes$nodememuse$active)) {
       loginfo("Creating the Node Memory Usage plot");
-      
+
       if ( (data$Application %>% filter(grepl("front", Value) & GFlop != 0) %>% nrow) == 0 ){
         logwarn("There is no memory information on data, ignoring it.");
         pajer$activenodes$nodememuse$active <<- FALSE;

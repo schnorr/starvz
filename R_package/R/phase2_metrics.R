@@ -204,7 +204,7 @@ hl_global_cpb <- function (data = NULL)
 {
     if(is.null(data)) return(NULL);
 
-    dfdag <- data$DAG;
+    dfdag <- data$Dag;
 
     # Create unique _integer_ identifiers
     identifiers <- c((dfdag %>% .$JobId), (dfdag %>% .$Dependent)) %>%
@@ -330,7 +330,10 @@ geom_makespan <- function(data = NULL)
 geom_cpb <- function (data = NULL)
 {
     if (is.null(data)) stop("data is NULL when given to geom_cpb");
-    if (is.null(data$DAG)) return(list());
+    if (is.null(data$Dag)){
+      logwarn("CPB is active but data$Dag is NULL")
+      return(list());
+    }
 
     # Calculate the global CPB
     cpbs <- hl_global_cpb(data);
@@ -339,12 +342,18 @@ geom_cpb <- function (data = NULL)
     if (pajer$st$cpb){
         ret <- c(ret, geom_cpb_internal(data, cpbs$CPB, "CPB:"));
     }
-    if (pjr_value(pajer$st$cpb_mpi$active)){
+    if (pjr(pajer$st$cpb_mpi$active)){
+        if(is.na(pajer$st$cpb_mpi$tile_size)){
+          logwarn("CPB_MPI is active and st$cpb_mpi$tile_size is NULL")
+        }
+        if(is.na(pajer$st$cpb_mpi$bandwidth)){
+          logwarn("CPB_MPI is active and st$cpb_mpi$bandwidth is NULL")
+        }
         tile_size = pajer$st$cpb_mpi$tile_size;
         bandwidth = pajer$st$cpb_mpi$bandwidth;
         cpbmpit = cpbs$CPB + cpbs$NMPI * (tile_size*tile_size*8) / bandwidth / 1000000;
         ret <- c(ret, geom_cpb_internal(data, cpbs$CPBMPI, "CPB-MPI:"));
-        if (pjr_value(pajer$st$cpb_mpi$theoretical)){
+        if (pjr(pajer$st$cpb_mpi$theoretical)){
             ret <- c(ret, geom_cpb_internal(data, cpbmpit, "CPB-MPI*:"));
         }
     }

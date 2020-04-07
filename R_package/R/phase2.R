@@ -98,7 +98,10 @@ pjr <- function (property)
     ifelse(!is.null(property) && property, property, FALSE);
 }
 
-starpu_mpi_grid_arrange <- function(atree, utiltreenode, utiltreedepth, st, st_pm, st_mm, transf, starpu, ijk, ijk_pm, lackready, ready, submitted, mpi, mpiconc, mpiconcout, mpistate, gpu, memory, gflops, activenodes, nodememuse, computingnodes, title = NULL)
+starpu_mpi_grid_arrange <- function(atree, utiltreenode, utiltreedepth, st, st_pm,
+           st_mm, transf, starpu, ijk, ijk_pm, lackready, ready, submitted, mpi,
+           mpiconc, mpiconcout, mpistate, gpu, memory, imb_plot, heatmap, gflops, activenodes,
+           nodememuse, computingnodes, title = NULL)
 {
     # The list that will contain the plots
     P <- list();
@@ -188,6 +191,14 @@ starpu_mpi_grid_arrange <- function(atree, utiltreenode, utiltreedepth, st, st_p
     if (pjr(pajer$usedmemory$active)){
         P[[length(P)+1]] <- memory;
         H[[length(H)+1]] <- pjr_value(pajer$usedmemory$height, 2);
+    }
+    if (pjr(pajer$imbalance$active)){
+        P[[length(P)+1]] <- imb_plot;
+        H[[length(H)+1]] <- pjr_value(pajer$imbalance$height, 2);
+    }
+    if (pjr(pajer$utilheatmap$active)){
+        P[[length(P)+1]] <- heatmap;
+        H[[length(H)+1]] <- pjr_value(pajer$utilheatmap$height, 2);
     }
     if (pjr(pajer$gpubandwidth$active)){
         P[[length(P)+1]] <- gpu;
@@ -584,6 +595,36 @@ starvz_plot <- function(data = NULL)
         }
     }
 
+
+    # Imbalance Metrics
+    if (pjr(pajer$imbalance$active)){
+        loginfo("Creating the Imbalance Metrics plot");
+
+        Step <- as.double(pjr_value(pajer$imbalance$step, globalAggStep));
+
+        imb_plot <- data$Application %>% var_imbalance(Step)
+        if (!pjr(pajer$imbalance$legend)){
+            imb_plot <- imb_plot + theme(legend.position="none");
+        }else{
+            imb_plot <- imb_plot + theme(legend.position = "top")
+        }
+        imb_plot <- userYLimit(imb_plot, pajer$imbalance$limit, c(tstart, tend));
+    }
+
+    if (pjr(pajer$utilheatmap$active)){
+        loginfo("Creating the HeatMap Imbalance plot");
+
+        Step <- as.double(pjr_value(pajer$utilheatmap$step, globalAggStep));
+
+        heatmap <- data$Application %>% utilization_heatmap(data$Y, Step)
+        if (!pjr(pajer$utilheatmap$legend)){
+            heatmap <- heatmap + theme(legend.position="none");
+        }else{
+            heatmap <- heatmap + theme(legend.position = "top")
+        }
+        heatmap <- userYLimit(heatmap, pajer$utilheatmap$limit, c(tstart, tend));
+    }
+
     # MPIBandwidth
     if (pjr(pajer$mpibandwidth$active)){
         loginfo("Creating the MPIBandwidth plot");
@@ -758,6 +799,8 @@ starvz_plot <- function(data = NULL)
                                  mpistate = gompistate,
                                  gpu = gogov,
                                  memory = goguv,
+                                 imb_plot = imb_plot,
+                                 heatmap = heatmap,
                                  gflops = gogfv,
                                  activenodes = goactivenodes,
                                  nodememuse = gonodememuse,

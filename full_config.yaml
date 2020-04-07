@@ -121,6 +121,20 @@ default:
     height:
     legends:
 
+  imbalance:
+    active: FALSE
+    legend: FALSE
+    height: 1.1
+    limit:
+    step: 100
+
+  utilheatmap:
+    active: FALSE
+    legend: FALSE
+    height: 4
+    limit:
+    step: 100
+
   submitted:
     active: TRUE
     legend: TRUE
@@ -168,7 +182,7 @@ default:
     nodememuse: # Plot the memory usage for qr_mumps
       active: FALSE # Enable
       height: 2 # Vertical size for the plot
-      mempeak: FALSE # Show/Hide memory usage peak 
+      mempeak: FALSE # Show/Hide memory usage peak
 
   computingnodes: # Plot the computationally active nodes over time
     active: FALSE # Enable

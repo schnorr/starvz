@@ -1,4 +1,109 @@
 
+starvz_phase1_read <- function (directory = ".", app_states_fun = NULL, state_filter = 0, whichApplication = NULL)
+{
+    # Logging configuration
+    basicConfig();
+    logForOrg <- function(record) { paste(record$levelname, record$logger, record$msg, sep=':') }
+    addHandler(writeToConsole, formatter=logForOrg);
+    removeHandler('basic.stdout');
+
+    # Start of reading procedure
+    if(is.null(app_states_fun)) stop("app_states_fun is obligatory for reading");
+
+    file_can_be_read <- function(filename)
+    {
+        if ((file.exists(filename)) & (file.size(filename) > 0)){
+            return(TRUE);
+        }else{
+            return(FALSE);
+        }
+    }
+
+    # Read the elimination tree
+    dfa <- atree_load(where = directory);
+
+    # Read states
+    dfw <- read_state_csv (where = directory,
+                           app_states_fun=app_states_fun,
+                           outlier_fun=outlier_definition,
+                           state_filter=state_filter,
+                           whichApplication = whichApplication) %>%
+        hl_y_coordinates(where = directory);
+
+    # QRMumps case:
+    # If the Atree is available and loaded, we create new columns for each task
+    # to hold Y coordinates for the temporal elimination tree plot
+    if (!is.null(dfa)){
+        dfap <- dfa %>% select(-Parent, -Depth) %>% rename(Height.ANode = Height, Position.ANode = Position);
+        dfw <- dfw %>% left_join(dfap, by="ANode");
+        dfap <- NULL;
+    }
+
+    if(dfw %>% nrow == 0) stop("After reading states, number of rows is zero.");
+
+    # Read variables
+    dfv <- read_vars_set_new_zero(where = directory);
+
+    # Read links
+    dfl <- read_links (where = directory);
+
+    # Read DAG
+    dfdag <- read_dag (where = directory, dfw, dfl);
+    if (is.null(dfdag)){
+        # If dag is not available, try Vinicius DAG
+        dagVinCSV <- paste0(directory, "/dag_vinicius.csv");
+        loginfo(paste("Reading DAG", dagVinCSV));
+
+        # Check if this a DAG from Vinicius
+        if (file_can_be_read(dagVinCSV)){
+            dfdag <- read_csv(dagVinCSV, trim_ws=TRUE, col_names=TRUE) %>%
+                mutate(Dependent = strsplit(Dependent, " ")) %>%
+                unnest(Dependent) %>%
+                merge(., (dfw), #%>% filter(Application == TRUE))
+                      by.x="JobId", by.y="JobId", all=TRUE) %>%
+                mutate(Cost = ifelse(is.na(Duration), 0, -Duration)) %>%
+                as_tibble();
+        }else{
+            dfdag <- NULL;
+        }
+    }
+
+    # Read entities.csv and register the hierarchy (with Y coordinates)
+    dfhie <- hl_y_paje_tree (where = directory);
+
+    # PMTool information
+    dpmtb <- pmtool_bounds_csv_parser (where = directory);
+
+    dpmts <- pmtool_states_csv_parser (where = directory, whichApplication = whichApplication, Y=dfhie, States = dfw);
+
+    # Data.rec
+    ddh <- data_handles_csv_parser (where = directory);
+
+    # Papi.rec
+    dpapi <- papi_csv_parser (where = directory);
+
+    # Tasks.rec
+    dtasks <- tasks_csv_parser (where = directory);
+
+    loginfo("Assembling the named list with the data from this case.");
+
+    # Events
+    devents <- events_csv_parser (where = directory);
+
+    # Enframe ZERO
+    ZERO <- enframe(ZERO, name = NULL)
+
+    data <- list(Origin=directory, State=dfw, Variable=dfv, Link=dfl, DAG=dfdag, Y=dfhie, Atree=dfa,
+                 Pmtool=dpmtb, Pmtool_states=dpmts, Data_handles=ddh, Papi=dpapi, Tasks=dtasks$tasks, Task_handles=dtasks$handles, Events=devents, Zero=ZERO);
+
+    loginfo("Call Gaps.");
+    data$Gaps <- gaps(data);
+
+    return(data);
+}
+
+the_reader_function <- starvz_phase1_read
+
 read_state_csv <- function (where = ".",
                             app_states_fun = NULL,
                             outlier_fun = NULL,
@@ -223,17 +328,17 @@ read_state_csv <- function (where = ".",
             mutate(outliers = map(model, function(m) {
                 tibble(Row = names(outlierTest(m, n.max=Inf)$rstudent))
             })) -> df.pre.outliers
-        
+
         # Step 2: identify outliers rows
         df.pre.outliers %>%
             select(-Residual) %>%
             unnest(outliers) %>%
             mutate(Row = as.integer(Row), Outlier=TRUE) %>%
             ungroup() -> df.pos.outliers
-        
+
         # Step 3: unnest all data and tag create the Outiler field according to the Row value
         df.pre.outliers %>%
-            unnest(data, Residual) %>% 
+            unnest(data, Residual) %>%
             # this must be identical to the grouping used in the step 1
             group_by(Value, ResourceType) %>%
             mutate(Row = 1:n()) %>%
@@ -245,7 +350,7 @@ read_state_csv <- function (where = ".",
             mutate(Outlier = ifelse(Outlier & Residual < 0, FALSE, Outlier)) %>%
             select(-Row) %>%
             ungroup() -> df.outliers
-        
+
         # Step 4: regroup the Outlier data to the original dfw
         dfw <- dfw %>%
             left_join(df.outliers %>%
@@ -428,108 +533,6 @@ atree_to_df <- function (node)
 }
 
 
-the_reader_function <- function (directory = ".", app_states_fun = NULL, state_filter = 0, whichApplication = NULL)
-{
-    # Logging configuration
-    basicConfig();
-    logForOrg <- function(record) { paste(record$levelname, record$logger, record$msg, sep=':') }
-    addHandler(writeToConsole, formatter=logForOrg);
-    removeHandler('basic.stdout');
-
-    # Start of reading procedure
-    if(is.null(app_states_fun)) stop("app_states_fun is obligatory for reading");
-
-    file_can_be_read <- function(filename)
-    {
-        if ((file.exists(filename)) & (file.size(filename) > 0)){
-            return(TRUE);
-        }else{
-            return(FALSE);
-        }
-    }
-
-    # Read the elimination tree
-    dfa <- atree_load(where = directory);
-
-    # Read states
-    dfw <- read_state_csv (where = directory,
-                           app_states_fun=app_states_fun,
-                           outlier_fun=outlier_definition,
-                           state_filter=state_filter,
-                           whichApplication = whichApplication) %>%
-        hl_y_coordinates(where = directory);
-
-    # QRMumps case:
-    # If the Atree is available and loaded, we create new columns for each task
-    # to hold Y coordinates for the temporal elimination tree plot
-    if (!is.null(dfa)){
-        dfap <- dfa %>% select(-Parent, -Depth) %>% rename(Height.ANode = Height, Position.ANode = Position);
-        dfw <- dfw %>% left_join(dfap, by="ANode");
-        dfap <- NULL;
-    }
-
-    if(dfw %>% nrow == 0) stop("After reading states, number of rows is zero.");
-
-    # Read variables
-    dfv <- read_vars_set_new_zero(where = directory);
-
-    # Read links
-    dfl <- read_links (where = directory);
-
-    # Read DAG
-    dfdag <- read_dag (where = directory, dfw, dfl);
-    if (is.null(dfdag)){
-        # If dag is not available, try Vinicius DAG
-        dagVinCSV <- paste0(directory, "/dag_vinicius.csv");
-        loginfo(paste("Reading DAG", dagVinCSV));
-
-        # Check if this a DAG from Vinicius
-        if (file_can_be_read(dagVinCSV)){
-            dfdag <- read_csv(dagVinCSV, trim_ws=TRUE, col_names=TRUE) %>%
-                mutate(Dependent = strsplit(Dependent, " ")) %>%
-                unnest(Dependent) %>%
-                merge(., (dfw), #%>% filter(Application == TRUE))
-                      by.x="JobId", by.y="JobId", all=TRUE) %>%
-                mutate(Cost = ifelse(is.na(Duration), 0, -Duration)) %>%
-                as_tibble();
-        }else{
-            dfdag <- NULL;
-        }
-    }
-
-    # Read entities.csv and register the hierarchy (with Y coordinates)
-    dfhie <- hl_y_paje_tree (where = directory);
-
-    # PMTool information
-    dpmtb <- pmtool_bounds_csv_parser (where = directory);
-
-    dpmts <- pmtool_states_csv_parser (where = directory, whichApplication = whichApplication, Y=dfhie, States = dfw);
-
-    # Data.rec
-    ddh <- data_handles_csv_parser (where = directory);
-
-    # Papi.rec
-    dpapi <- papi_csv_parser (where = directory);
-
-    # Tasks.rec
-    dtasks <- tasks_csv_parser (where = directory);
-
-    loginfo("Assembling the named list with the data from this case.");
-
-    # Events
-    devents <- events_csv_parser (where = directory);
-
-    # Enframe ZERO
-    ZERO <- enframe(ZERO, name = NULL)
-
-    data <- list(Origin=directory, State=dfw, Variable=dfv, Link=dfl, DAG=dfdag, Y=dfhie, Atree=dfa,
-                 Pmtool=dpmtb, Pmtool_states=dpmts, Data_handles=ddh, Papi=dpapi, Tasks=dtasks$tasks, Task_handles=dtasks$handles, Events=devents, Zero=ZERO);
-
-    loginfo("Call Gaps.");
-    data$Gaps <- gaps(data);
-
-    return(data);
-}
 
 hl_y_paje_tree <- function (where = ".")
 {
@@ -1272,176 +1275,6 @@ read_dag <- function (where = ".", dfw = NULL, dfl = NULL)
         mutate(Cost = ifelse(is.na(Duration), 0, -Duration)) %>%
         # Force the result as tibble for performance reasons
         as_tibble();
-}
-
-
-starpu_states <- function()
-{
-    c("Callback", "FetchingInput", "Idle", "Initializing", "Overhead", "PushingOutput", "Scheduling", "Submitting task", "Progressing", "Sleeping", "Submiting task", "Waiting all tasks", "Building task", "Deinitializing", "execute_on_all_wrapper");
-}
-
-all_starpu_states <- function()
-{
-    c("Callback", "FetchingInput", "Idle", "Initializing", "Overhead", "PushingOutput", "Scheduling", "Submitting task", "Progressing", "Sleeping", "Submiting task", "Waiting all tasks", "Building task", "Deinitializing", "execute_on_all_wrapper", "Executing");
-}
-
-cholesky_states <- function()
-{
-    cholesky_colors() %>% .$Kernel;
-}
-
-qr_states <- function()
-{
-    qr_colors() %>% .$Kernel;
-}
-
-scalfmm_states <- function()
-{
-    scalfmm_colors() %>% .$Kernel;
-}
-lu_colors <- function()
-{
-    tibble(
-        Kernel = c("getrf", "trsm", "gemm", "plgsy"),
-        Color = c("#e41a1c", "#377eb8", "#4daf4a", "yellow"));
-}
-
-cholesky_colors <- function()
-{
-    tibble(
-        Kernel = c("potrf", "trsm", "syrk", "gemm", "plgsy"),
-        Color = c("#e41a1c", "#377eb8", "#984ea3", "#4daf4a", "yellow"));
-}
-
-cfd_colors <- function()
-{
-    tibble(
-        Kernel = c("fluid_bound", "diffuse_1", "diffuse_relax", "macCormack_commit", "macCormack_2", "macCormack_1", "obstacle_boundary_1", "conserve_1", "conserve_relax", "conserve_commit", "obstacle_velocity", "initial_state"),
-        Color = c("#e41a1c", "#377eb8", "#984ea3", "#9a4ea3", "#4daf4a", "#ffff33", "#a65628", "#f781bf", "#ea1a1c", "#37beb8", "#4eaf4a", "#ff7f00"));
-}
-
-qr_colors <- function()
-{
-    tibble(
-        Kernel = c("dgeqrt", "dlarfb" , "dtpqrt" , "dtpmqrt", "lapack_dgeqrt", "lapack_dlarfb" , "lapack_dtpqrt" , "lapack_dtpmqrt"),
-        Color = c("#96e3a2", "#f68285", "#d194d0",  "#9bb6dd", "#96e3a2", "#f68285", "#d194d0",  "#9bb6dd"));
-}
-
-scalfmm_colors <- function()
-{
-    tibble(
-# For the trace I've been given
-        Kernel = c("L2L-level", "L2P",     "M2L-level", "M2L-out-level", "M2M",     "P2M",     "P2P",     "P2P-out"),
-        Color =  c("#e41a1c",   "#377eb8", "#4daf4a",   "#984ea3",       "#ff7f00", "#ffff33", "#a65628", "#f781bf"));
-
-# For paper https://hal.inria.fr/hal-01474556/document
-#        Kernel = c("L2L",     "L2P",     "M2L_in",  "M2L_out", "M2M",     "P2M",     "P2P_in",  "P2P_out"),
-#        Color =  c("#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00", "#ffff33", "#a65628", "#f781bf"));
-}
-
-library(RColorBrewer);
-starpu_colors <- function()
-{
-  pre_colors <- brewer.pal(12, "Set3");
-  pre_colors[13] = "#000000"
-  pre_colors[14] = "#000000"
-  pre_colors[15] = "#000000"
-  tibble(Value = starpu_states()) %>%
-      # Get colors from Set3
-      mutate(Color = pre_colors) %>%
-      # Adopt Luka suggestion: Idle = orange; Sleeping = rose
-      mutate(Color = case_when(Value == "Idle" ~ "#FDB462",
-                               Value == "PushingOutput" ~ "#BEBADA",
-                               TRUE ~ Color)) -> t;
-    # Transform to a nice named list for ggplot
-    ret <- t %>% pull(Color)
-    names(ret) <- t %>% pull(Value);
-    return(ret);
-}
-
-
-cholesky_pastix_colors <- function()
-{
-    tibble(
-        Kernel = c("blok_dpotrfsp1d_panel",
-                   "cblk_dpotrfsp1d_panel",
-                   "blok_dtrsmsp",
-                   "blok_dgemmsp",
-                   "cblk_dgemmsp"),
-        Color = c("#e41a1c",
-                  "#000000",
-                  "#377eb8",
-                  "#4daf4a",
-                  "#c0c0c0"));
-}
-
-qrmumps_states_level_order <- function ()
-{
-    c(
-        "Do_subtree",
-        "INIT",
-        "GEQRT",
-        "GEMQRT",
-        "TPQRT",
-        "TPMQRT",
-        "ASM",
-        "CLEAN",
-        "Idle");
-}
-qrmumps_states <- function ()
-{
-    c(
-        "ASM",
-        "GEMQRT",
-        "Do_subtree",
-        "CLEAN",
-        "GEQRT",
-        "INIT",
-        "TPMQRT",
-        "TPQRT",
-        "Idle");
-}
-
-qrmumps_color_mapping <- function()
-{
-    #This vector changes the color ordering
-    states = qrmumps_states();
-    kcol <- data.frame(RGB=as.character(brewer.pal(9, "Set1")),
-#These are only the color names I put manually here to try to understand the color mapping
-#                       ColorName=c("red", "blue", "green", "purple", "orange", "yellow", "brown", "pink", "gray"),
-                       StateName=factor(states, levels=qrmumps_states_level_order()),
-                       xmin=1:length(states),
-                       xmax=1:length(states)+1,
-                       ymin=0,
-                       ymax=1);
-   kcol;
-}
-
-qrmumps_colors <- function()
-{
-qrmumps_color_mapping() %>%
-    # Rename
-    rename(Kernel = StateName, Color=RGB) %>%
-    # Remove Idle
-    filter(Kernel != "Idle") %>%
-    # Change to character
-    mutate(Kernel = as.character(Kernel), Color=as.character(Color)) %>%
-    # Select only those necessary
-    select(Kernel, Color) %>%
-    # Change names according to latest modifications
-    mutate(Kernel = case_when(
-               .$Kernel == "ASM" ~ "assemble_block",
-               .$Kernel == "GEMQRT" ~ "lapack_gemqrt",
-               .$Kernel == "GEQRT" ~ "lapack_geqrt",
-               .$Kernel == "TPMQRT" ~ "lapack_tpmqrt",
-               .$Kernel == "TPQRT" ~ "lapack_tpqrt",
-               .$Kernel == "Do_subtree" ~ "do_subtree",
-               .$Kernel == "CLEAN" ~ "clean_front",
-               .$Kernel == "INIT" ~ "init_front",
-               TRUE ~ .$Kernel)) %>%
-    # Add new kernels
-    bind_rows (tibble(Kernel = c("init_block", "clean_block", "block_copy"),
-                      Color = c("#FFFF33", "#984EA3", "#ad0a18")));
 }
 
 outlier_definition <- function(x) {

@@ -1,8 +1,8 @@
-the_fast_reader_function <- function (directory = ".")
+starvz_read_feather <- function (directory = ".")
 {
 
     filenames <- list.files(path = directory, pattern = "pre.*.feather", full.names = TRUE, recursive = TRUE);
-    
+
     l1 <- list(Origin = directory);
     l2 <- lapply(filenames, function(filename) {
         if (file.exists(filename)){
@@ -15,3 +15,5 @@ the_fast_reader_function <- function (directory = ".")
     names(l2) <- filenames %>% basename() %>% str_replace_all("pre.|.feather", "") %>% str_to_title();
     c(l1, l2);
 }
+
+the_fast_reader_function <- starvz_read_feather

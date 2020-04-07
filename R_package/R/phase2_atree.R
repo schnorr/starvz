@@ -160,8 +160,8 @@ atree_temporal_chart <- function(data = NULL, step = 100, globalEndTime = NULL)
                           xmax=Slice+step,
                           ymin=Position,
                           ymax=Position+Height)) +
-            # scale_fill_viridis(option="plasma") +
-            scale_fill_gradient(low="lightsalmon", high="red1") +
+            #scale_fill_viridis(option="plasma") +
+            #scale_fill_gradient(low="lightsalmon", high="red1") +
             scale_fill_gradient2(name="Computational Load", limits=c(0,100), midpoint=50, low="blue", mid="yellow", high="red") +
             geom_rect(data=dfw_init,
                       aes(xmin=Start,
@@ -394,7 +394,7 @@ resource_utilization_tree_node_plot <- function(data = NULL, step = 100)
   # join data frames
   df2 <- df1 %>%
     ungroup() %>%
-    left_join(event_data) %>%
+    left_join(event_data, by="ANode") %>%
     group_by(Slice);
   
   # must expand data frame to make geom_area work properly
@@ -402,7 +402,7 @@ resource_utilization_tree_node_plot <- function(data = NULL, step = 100)
     filter(!is.na(Color)) %>%
     select(-ANode) %>%
     expand(Slice, Color) %>%
-    left_join(df2 %>% filter(Value != 0)) %>%
+    left_join(df2 %>% filter(Value != 0), by=c("Slice", "Color")) %>%
     mutate(Value1 = ifelse(is.na(Value1), 0, Value1)) -> df_plot
 
   ncolors <- df_plot %>% ungroup() %>% select(Color) %>% max(.$Color)

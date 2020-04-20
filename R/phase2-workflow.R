@@ -26,7 +26,7 @@ if (length(args) < 2) {
 directory = args[[1]];
 pajer.config = args[[2]];
 
-name = "output.png";
+name = paste0(directory, "/starvz.png");
 if (length(args)==3) {
 	name = args[[3]];
 }
@@ -36,7 +36,10 @@ data <- the_fast_reader_function(directory);
 cat("StarVZ - Phase 2 - Data has been read\n", file = stdout())
 
 pajer <- config::get(file = pajer.config);
-
-ggsave(name, plot=the_master_function(data), width = 10, height = 18, units = "in", dpi=120)
+if(pjr(pajer$guided_plot)){
+  r <- starvz_guided_plot(data, name)
+}else{
+  ggsave(name, plot=the_master_function(data), width = 10, height = 18, units = "in", dpi=120)
+}
 
 cat("End of StarVZ - Phase 2\n", file = stdout())

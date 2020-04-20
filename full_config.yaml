@@ -6,6 +6,7 @@ default:
   idleness_factor: 5.5 # Resouces Idleness Text Size division Factor of base_size
   idleness_all: TRUE # Show all Resouces idleness values
   # time: deprecated option
+  guided_plot: FALSE # Phase2 flag to guided plot (compute ideal height)
   title: # Overall Visualization Title
     active: FALSE # Active with directory name as Title
     height: 0.6 # Title Size

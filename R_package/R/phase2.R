@@ -117,68 +117,87 @@ starpu_mpi_grid_arrange <- function(atree, utiltreenode, utiltreedepth, st, st_p
         }
     }
 
+    # Letsset default height values
+    # This is also experiment computed on starvz_guided_plot
+    # For plots that show resources
+    if(!exists("starvz_height_resources")){
+      starvz_height_resources <- 4
+    }
+    # For plots that show nodes 10px per node
+    if(!exists("starvz_height_nodes")){
+      starvz_height_nodes <- 2
+    }
+    # For variable plots, 100px
+    if(!exists("starvz_height_var")){
+      starvz_height_var <- 2
+    }
+    # For plots TODO, default 200px
+    if(!exists("starvz_height_todo")){
+      starvz_height_todo <- 4
+    }
+
     # Customized legend position
     loginfo("Customized legend position, plot list preparation");
 
     if (pjr(pajer$atree$active)){
         P[[length(P)+1]] <- atree;
-        H[[length(H)+1]] <- pjr_value(pajer$atree$height, 3);
+        H[[length(H)+1]] <- pjr_value(pajer$atree$height, starvz_height_todo);
     }
     if (pjr(pajer$utiltreenode$active)){
         P[[length(P)+1]] <- utiltreenode;
-        H[[length(H)+1]] <- pjr_value(pajer$utiltreenode$height, 2);
+        H[[length(H)+1]] <- pjr_value(pajer$utiltreenode$height, starvz_height_var);
     }
     if (pjr(pajer$utiltreedepth$active)){
         P[[length(P)+1]] <- utiltreedepth;
-        H[[length(H)+1]] <- pjr_value(pajer$utiltreedepth$height, 2);
+        H[[length(H)+1]] <- pjr_value(pajer$utiltreedepth$height, starvz_height_var);
     }
     if (pjr(pajer$activenodes$active)){
         P[[length(P)+1]] <- activenodes;
-        H[[length(H)+1]] <- pjr_value(pajer$activenodes$height, 1);
+        H[[length(H)+1]] <- pjr_value(pajer$activenodes$height, starvz_height_var);
     }
     if (pjr(pajer$activenodes$nodememuse$active)){
         P[[length(P)+1]] <- nodememuse;
-        H[[length(H)+1]] <- pjr_value(pajer$activenodes$nodememuse$height, 1);
+        H[[length(H)+1]] <- pjr_value(pajer$activenodes$nodememuse$height, starvz_height_var);
     }
     if (pjr(pajer$computingnodes$active)){
         P[[length(P)+1]] <- computingnodes;
-        H[[length(H)+1]] <- pjr_value(pajer$computingnodes$height, 1);
+        H[[length(H)+1]] <- pjr_value(pajer$computingnodes$height, starvz_height_var);
     }
     if (pjr(pajer$kiteration$active)){
         P[[length(P)+1]] <- ijk;
-        H[[length(H)+1]] <- pjr_value(pajer$kiteration$height, 2);
+        H[[length(H)+1]] <- pjr_value(pajer$kiteration$height, starvz_height_todo);
     }
     if (pjr(pajer$st$active)){
         P[[length(P)+1]] <- st;
-        H[[length(H)+1]] <- pjr_value(pajer$st$height, 4);
+        H[[length(H)+1]] <- pjr_value(pajer$st$height, starvz_height_resources);
     }
     if (pjr(pajer$pmtool$kiteration$active)){
         P[[length(P)+1]] <- ijk_pm;
-        H[[length(H)+1]] <- pjr_value(pajer$pmtool$kiteration$height, 2);
+        H[[length(H)+1]] <- pjr_value(pajer$pmtool$kiteration$height, starvz_height_todo);
     }
     if (pjr(pajer$pmtool$state$active)){
         P[[length(P)+1]] <- st_pm;
-        H[[length(H)+1]] <- pjr_value(pajer$pmtool$state$height, 4);
+        H[[length(H)+1]] <- pjr_value(pajer$pmtool$state$height, starvz_height_resources);
     }
     if (pjr(pajer$memory$state$active)){
         P[[length(P)+1]] <- st_mm;
-        H[[length(H)+1]] <- pjr_value(pajer$memory$state$height, 3);
+        H[[length(H)+1]] <- pjr_value(pajer$memory$state$height, starvz_height_todo);
     }
     if (pjr(pajer$memory$transfers$active) && !pjr(pajer$memory$combined)){
         P[[length(P)+1]] <- transf;
-        H[[length(H)+1]] <- pjr_value(pajer$memory$transfers$height, 2);
+        H[[length(H)+1]] <- pjr_value(pajer$memory$transfers$height, starvz_height_todo);
     }
     if (pjr(pajer$submitted$active)){
         P[[length(P)+1]] <- submitted;
-        H[[length(H)+1]] <- pjr_value(pajer$submitted$height, 1);
+        H[[length(H)+1]] <- pjr_value(pajer$submitted$height, starvz_height_var);
     }
     if (pjr(pajer$starpu$active)){
         P[[length(P)+1]] <- starpu;
-        H[[length(H)+1]] <- pjr_value(pajer$starpu$height, 4);
+        H[[length(H)+1]] <- pjr_value(pajer$starpu$height, starvz_height_resources);
     }
     if (pjr(pajer$ready$active)){
         P[[length(P)+1]] <- ready;
-        H[[length(H)+1]] <- pjr_value(pajer$ready$height, 1);
+        H[[length(H)+1]] <- pjr_value(pajer$ready$height, starvz_height_var);
     }
     if (pjr(pajer$lackready$active)){
         P[[length(P)+1]] <- lackready;
@@ -186,40 +205,42 @@ starpu_mpi_grid_arrange <- function(atree, utiltreenode, utiltreedepth, st, st_p
     }
      if (pjr(pajer$gflops$active)){
         P[[length(P)+1]] <- gflops;
-        H[[length(H)+1]] <- pjr_value(pajer$gflops$height, 2);
+        H[[length(H)+1]] <- pjr_value(pajer$gflops$height, starvz_height_var);
     }
     if (pjr(pajer$usedmemory$active)){
         P[[length(P)+1]] <- memory;
-        H[[length(H)+1]] <- pjr_value(pajer$usedmemory$height, 2);
+        H[[length(H)+1]] <- pjr_value(pajer$usedmemory$height, starvz_height_var);
     }
     if (pjr(pajer$imbalance$active)){
         P[[length(P)+1]] <- imb_plot;
-        H[[length(H)+1]] <- pjr_value(pajer$imbalance$height, 2);
+        H[[length(H)+1]] <- pjr_value(pajer$imbalance$height, starvz_height_var);
     }
     if (pjr(pajer$utilheatmap$active)){
         P[[length(P)+1]] <- heatmap;
-        H[[length(H)+1]] <- pjr_value(pajer$utilheatmap$height, 2);
+        H[[length(H)+1]] <- pjr_value(pajer$utilheatmap$height, starvz_height_resources);
     }
     if (pjr(pajer$gpubandwidth$active)){
         P[[length(P)+1]] <- gpu;
-        H[[length(H)+1]] <- pjr_value(pajer$gpubandwidth$height, 2);
+        H[[length(H)+1]] <- pjr_value(pajer$gpubandwidth$height, starvz_height_var);
     }
     if (pjr(pajer$mpibandwidth$active)){
         P[[length(P)+1]] <- mpi;
-        H[[length(H)+1]] <- pjr_value(pajer$mpibandwidth$height, 1);
+        H[[length(H)+1]] <- pjr_value(pajer$mpibandwidth$height, starvz_height_var);
     }
     if (pjr(pajer$mpiconcurrent$active)){
         P[[length(P)+1]] <- mpiconc;
-        H[[length(H)+1]] <- pjr_value(pajer$mpiconcurrent$height, 1);
+        H[[length(H)+1]] <- pjr_value(pajer$mpiconcurrent$height, starvz_height_var);
     }
     if (pjr(pajer$mpiconcurrentout$active)){
         P[[length(P)+1]] <- mpiconcout;
-        H[[length(H)+1]] <- pjr_value(pajer$mpiconcurrentout$height, 1);
+        H[[length(H)+1]] <- pjr_value(pajer$mpiconcurrentout$height, starvz_height_var);
     }
     if (pjr(pajer$mpistate$active)){
         P[[length(P)+1]] <- mpistate;
-        H[[length(H)+1]] <- pjr_value(pajer$mpistate$height, 1);
+        H[[length(H)+1]] <- pjr_value(pajer$mpistate$height, starvz_height_nodes);
     }
+
+    starvz_height_total <<- sum(unlist(H))
 
     # Add empty X and horizontal legend to all plots
     loginfo("Add empty X and horizontal legend");
@@ -246,6 +267,39 @@ starpu_mpi_grid_arrange <- function(atree, utiltreenode, utiltreedepth, st, st_p
     loginfo("Call cowplot's plot_grid function");
     g <- plot_grid(plotlist = P, align="v", ncol = 1, rel_heights = unlist(H));
     return(g);
+}
+
+starvz_guided_plot <- function(data, name)
+{
+    #USe Y to compute state and starpu size
+    #Get number of nodes
+
+    # Lets compute some default height values
+    # For plots that show resources, 10px per resource on Y
+    # For plots that show nodes 10px per node
+    # For variable plots, 100px
+    # For plots TODO, default 200px
+
+    nodes <- data$Tasks %>% select(MPIRank) %>% distinct() %>% nrow()
+
+    starvz_height_resources <<- (data$Y$Position %>% max()) * 10 / 100
+    starvz_height_nodes <<- max(nodes * 10 / 100, 1)
+
+    p <- starvz_plot(data)
+
+    total_dpi <- 120
+    if(starvz_height_total==0){
+      logwarn("Total height is 0, set to 1000")
+      starvz_height_total <- 1000
+    }
+
+    final_px_height <- (starvz_height_total+5) * 100
+    final_px_width <- 1000
+    final_in_height <- final_px_height / total_dpi
+    final_in_width <- final_px_width / total_dpi
+
+    ggsave(name, plot=p, width = final_in_width, height = final_in_height, units = "in", dpi=total_dpi, limitsize = FALSE)
+    return(list(plot=p, height=final_px_height))
 }
 
 starvz_plot <- function(data = NULL)

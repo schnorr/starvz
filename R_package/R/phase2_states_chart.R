@@ -151,7 +151,9 @@ geom_states <- function (data = NULL, Show.Outliers = FALSE, StarPU = FALSE)
                           xmin=Start,
                           xmax=End,
                           ymin=Position,
-                          ymax=Position+Height-0.2), alpha=1);
+                          ymax=Position+Height-0.2),
+                      color=ifelse(pjr_value(pajer$st$rect_outline, NA), "black", NA),
+                      alpha=1);
     }
 
     loginfo("Finishing geom_states");

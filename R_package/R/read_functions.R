@@ -23,6 +23,9 @@ starvz_read_feather <- function (directory = ".")
 the_fast_reader_function <- starvz_read_feather
 
 starvz_read_some_parquet <- function (directory = ".", files = c("State")){
+  if(!codec_is_available("gzip")){
+    logwarn("Arrow Gzip is not available, try using arrow::install_arrow()")
+  }
   l1 <- list(Origin = directory);
   l2 <- lapply(files, function(filename) {
       if (file.exists(filename)){

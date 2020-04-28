@@ -18,6 +18,9 @@ starvz_write_feather <- function(data, directory="."){
 
 starvz_write_parquet <- function(data, directory="."){
   check_arrow();
+  if(!codec_is_available("gzip")){
+    logwarn("Arrow Gzip is not available, try using arrow::install_arrow()")
+  }
   invisible(data %>% purrr::list_modify("Origin" = NULL) %>% names %>%
   lapply(function(x) {
       filename <- paste0(directory, "/", tolower(x), ".parquet");

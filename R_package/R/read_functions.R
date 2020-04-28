@@ -1,12 +1,11 @@
-starvz_read_some_feather <- function (directory = ".", files = c("State"))
+starvz_read_some_feather <- function (directory = ".", files = c("state.feather"))
 {
     l1 <- list(Origin = directory);
     l2 <- lapply(files, function(filename) {
-        filenames <- paste0(filename, ".feather")
         if (file.exists(filename)){
             read_feather(filename);
         }else{
-            loginfo(paste("The file", x, "does not exist on that directory. Ignore."));
+            loginfo(paste("The file:", filename, " does not exist on that directory. Ignore."));
             NULL;
         }
     });
@@ -22,7 +21,7 @@ starvz_read_feather <- function (directory = ".")
 # retrocompatibility
 the_fast_reader_function <- starvz_read_feather
 
-starvz_read_some_parquet <- function (directory = ".", files = c("State")){
+starvz_read_some_parquet <- function (directory = ".", files = c("state.parquet")){
   if(!codec_is_available("gzip")){
     logwarn("Arrow Gzip is not available, try using arrow::install_arrow()")
   }
@@ -31,7 +30,7 @@ starvz_read_some_parquet <- function (directory = ".", files = c("State")){
       if (file.exists(filename)){
           read_parquet(filename)
       }else{
-          loginfo(paste("The file", x, "does not exist on that directory. Ignore."));
+          loginfo(paste("The file:", filename, " does not exist on that directory. Ignore."));
           NULL;
       }
   });

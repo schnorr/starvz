@@ -1,6 +1,12 @@
 #' @useDynLib starvz
 #' @importFrom Rcpp sourceCpp
 
+check_arrow <- function(){
+  if(!arrow_available()){
+    logwarn("Arrow was not property installed, use: install_arrow()")
+  }
+}
+
 extract_colors <- function(dfw = NULL)
 {
     if(is.null(dfw)) return(NULL);

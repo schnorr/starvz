@@ -5,10 +5,11 @@ default:
   expand: 0.05 # Factor to Expand horizontaly the plots with blank content
   idleness_factor: 5.5 # Resouces Idleness Text Size division Factor of base_size
   idleness_all: TRUE # Show all Resouces idleness values
+  guided_plot: TRUE
   # time: deprecated option
   title: # Overall Visualization Title
     active: TRUE # Active with directory name as Title
-    height: 0.6 # Title Size
+    #height: 0.6 # Title Size
   vanilla: # Options about X and Y axis title and values
     vertical: FALSE # If True, Remove Y axis' title and values
     horizontal: FALSE  # If True, Remove X axis' title and values
@@ -19,27 +20,27 @@ default:
   # Visualizations in order of appearance
   atree: # plot space/time tree structure computation
     active: FALSE # Disable
-    height: # Vertical Size in the final visualization
+    #height: # Vertical Size in the final visualization
 
   utiltreenode: # Plot of resource utilization by tree depth
     active: FALSE # Disable
     step: 10 # Time step used for aggregation
-    height: 2 # Vertical size for the plot
+    #height: 2 # Vertical size for the plot
 
   utiltreedepth: # Plot of resource utilization by tree node
     active: FALSE # Disable
     step: 10 # Time step used for aggregation
-    height: 2 # Vertical size for the plot
+    #height: 2 # Vertical size for the plot
 
   kiteration: # Visualization about application itarations
     active: TRUE # Enable
     legend: TRUE # Enable Legends
-    height: 2 # Vertical Size in the final visualization
+    #height: 2 # Vertical Size in the final visualization
 
   st: # Application State Plot over resources
     active: TRUE # Enable
     cpb: TRUE # Show Critical Path Bound makespan metric
-    height: 4 # Vertical Size in the final visualization
+    #height: 4 # Vertical Size in the final visualization
     idleness: TRUE # Show resource idleness %
     expand: 0.05 # Expand for y ggplot
     labels: "ALL" # Labels of the Resources names, "ALL" "1CPU_per_NODE" "1GPU_per_NODE"
@@ -72,11 +73,11 @@ default:
       alg: ["area", "cp"] # List of bounds to plot
     state: # PMtool State Chart theoretical computed by shedule
       active: FALSE # Enable
-      height: 4 # Vertical Size in the final visualization
+      #height: 4 # Vertical Size in the final visualization
       sched: "dmdas:" # Scheduler Used
     kiteration: # Iteration Chart
       active: FALSE
-      height: 2
+      #height: 2
       legend: TRUE
 
   memory:
@@ -84,27 +85,27 @@ default:
     state:
       active: TRUE
       border: FALSE
-      height:
+      #height:
       total: TRUE
       select: "Allocating"
       #depth: deprecated
       #  active: deprecated
-      #  height: deprecated
+      #  #height: deprecated
     transfers:
       active: FALSE
       total: TRUE
-      height: 2 # Vertical Size in the final visualization
+      #height: 2 # Vertical Size in the final visualization
       arrow: TRUE
       border: TRUE
 
   starpu:
     active: TRUE
     legend: TRUE
-    height: 4
+    #height: 4
 
   ready:
     active: TRUE
-    height: 2
+    #height: 2
     legend: TRUE
     limit:
     step:
@@ -112,18 +113,18 @@ default:
   lackready:
     active: TRUE
     aggregation: 10
-    height: 0.3
+    #height: 0.3
     threshold:
 
   usedmemory:
     active: TRUE
-    height:
+    #height:
     legends:
 
   submitted:
     active: TRUE
     legend: TRUE
-    height: 1.5
+    #height: 1.5
     limit:
     step:
 
@@ -131,49 +132,49 @@ default:
     active: TRUE
     step: 100
     legend: FALSE
-    height: 1.5
+    #height: 1.5
     limit:
 
   mpiconcurrent:
     active: TRUE
     legend: FALSE
-    height: 1.5
+    #height: 1.5
     step:
     limit:
 
   mpiconcurrentout:
     active: TRUE
     legend: FALSE
-    height: 1.5
+    #height: 1.5
     step:
     limit:
 
   mpistate:
     active: TRUE
     legend: FALSE
-    height: 1.5
+    #height: 1.5
 
   gpubandwidth:
     active: TRUE
     bound:
-    height:
+    #height:
     legend: FALSE
     step: 85
     total: TRUE
 
   activenodes: # Plot the active node count over time
     active: FALSE # Enable
-    height: 2 # Vertical size for the plot
+    #height: 2 # Vertical size for the plot
 
   computingnodes: # Plot the computationally active nodes over time
     active: FALSE # Enable
-    height: 2 # Vertical size for the plot
+    #height: 2 # Vertical size for the plot
     step: 10 # Time step used for aggregation
 
   gflops:
     active: FALSE
     facet: TRUE
-    height:
+    #height:
     legend:
     limit:
     step:

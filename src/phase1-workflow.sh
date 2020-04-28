@@ -161,7 +161,7 @@ if [ -e "${ATREE}" ]; then
 fi
 
 echo "Post-processing CSV files"
-${DIR}/../R/phase1-workflow.R . ${APPLICATION}
+${DIR}/../R/phase1-workflow.R . ${APPLICATION} ${3:-}
 es=$?
 if [ $es -ne 0 ]
 then

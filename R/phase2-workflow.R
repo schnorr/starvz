@@ -22,7 +22,7 @@ args = commandArgs(trailingOnly=TRUE)
 if (length(args) < 2) {
     stop("Usage: phase2-workflow.R <directory> <config>", call.=FALSE)
 }
-
+check_arrow();
 directory = args[[1]];
 pajer.config = args[[2]];
 
@@ -31,7 +31,7 @@ if (length(args)==3) {
 	name = args[[3]];
 }
 
-data <- the_fast_reader_function(directory);
+data <- starvz_read(directory);
 
 cat("StarVZ - Phase 2 - Data has been read\n", file = stdout())
 

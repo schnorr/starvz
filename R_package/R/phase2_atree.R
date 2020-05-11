@@ -147,7 +147,7 @@ atree_temporal_chart <- function(data = NULL, step = 100, globalEndTime = NULL)
       # Plot
       ggplot() +
       default_theme() +
-      ylab("Task\nLocation") +
+      ylab("Elimination\nTree [nodes]") +
       scale_y_continuous(breaks=NULL, labels=NULL) +
       # Add the atree representation on top
       geom_atree(data, Offset = 1.05, Flip = TRUE)

@@ -424,10 +424,15 @@ starvz_plot <- function(data = NULL)
     golrv <- geom_blank();
     gorv <- geom_blank();
     gosv <- geom_blank();
-    gogfv <- geom_blank();
-    goguv <- geom_blank();
     gomov <- geom_blank();
+    gompiconc <- geom_blank();
+    gompiconcout <- geom_blank();
+    gompistate <- geom_blank();
     gogov <- geom_blank();
+    goguv <- geom_blank();
+    gogfv <- geom_blank();
+    imb_plot <- geom_blank();
+    heatmap <- geom_blank();
     goactivenodes <- geom_blank();
     gonodememuse <- geom_blank();
     gocomputingnodes <- geom_blank();

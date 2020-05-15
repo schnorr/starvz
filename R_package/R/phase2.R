@@ -107,7 +107,7 @@ pjr <- function (property)
 starpu_mpi_grid_arrange <- function(atree, utiltreenode, utiltreedepth, st, st_pm,
            st_mm, transf, starpu, ijk, ijk_pm, lackready, ready, submitted, mpi,
            mpiconc, mpiconcout, mpistate, gpu, memory, imb_plot, heatmap, gflops, activenodes,
-           nodememuse, computingnodes, title = NULL)
+           nodememuse, summary_nodes, computingnodes, title = NULL)
 {
     # The list that will contain the plots
     P <- list();
@@ -176,6 +176,10 @@ starpu_mpi_grid_arrange <- function(atree, utiltreenode, utiltreedepth, st, st_p
     if (pjr(pajer$st$active)){
         P[[length(P)+1]] <- st;
         H[[length(H)+1]] <- pjr_value(pajer$st$height, starvz_height_resources);
+    }
+    if (pjr(pajer$summary_nodes$active)){
+        P[[length(P)+1]] <- summary_nodes;
+        H[[length(H)+1]] <- pjr_value(pajer$summary_nodes$height, starvz_height_nodes);
     }
     if (pjr(pajer$pmtool$kiteration$active)){
         P[[length(P)+1]] <- ijk_pm;
@@ -415,6 +419,7 @@ starvz_plot <- function(data = NULL)
     goutiltreenode <- geom_blank();
     goutiltreedepth <- geom_blank();
     gow <- geom_blank();
+    go_sn <- geom_blank();
     gow_pm <- geom_blank();
     gow_mm <- geom_blank();
     gow_tf <- geom_blank();
@@ -511,6 +516,14 @@ starvz_plot <- function(data = NULL)
         # Without legend
         if (!pjr(pajer$st$legend)){
             gow <- gow + theme(legend.position="none");
+        }
+    }
+
+    if (pjr(pajer$summary_nodes$active)){
+        loginfo("Creating node summary");
+        node_summary(data$Application) + tScale -> go_sn
+        if (!pjr(pajer$summary_nodes$legend)){
+            go_sn <- go_sn + theme(legend.position="none");
         }
     }
 
@@ -870,6 +883,7 @@ starvz_plot <- function(data = NULL)
                                  activenodes = goactivenodes,
                                  nodememuse = gonodememuse,
                                  computingnodes = gocomputingnodes,
+                                 summary_nodes = go_sn,
                                  title = directory);
 
     loginfo("Ending Starvz plot function");

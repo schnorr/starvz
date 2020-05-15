@@ -66,7 +66,10 @@ default:
       active: FALSE # Enable
       levels: 10 # Max Number of Dependencies
       list: ["600"] # List of Tasks Ids
-
+  summary_nodes: # Present ABE and Makespan per node(Usefull for large execs)
+    active: FALSE
+    legend: FALSE # Enable Legends
+    #height: 2 # Vertical Size in the final visualization
   pmtool: # Create plots based on pmtool generated data
     bounds: # Shows pmtool theoretical bounds
       active: FALSE # Enable

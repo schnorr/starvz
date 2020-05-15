@@ -340,3 +340,28 @@ geom_path_highlight <- function (paths = NULL)
                                              color=Path));
     return(ret);
 }
+
+node_summary <- function(app){
+    hl_per_node_ABE(app) -> Abes
+    app %>% group_by(Node) %>%
+               arrange(-End) %>% slice(1) %>%
+               select(Node, End) %>% ungroup() %>%
+               mutate(Node=as.integer(as.character(Node))) -> Makespans
+
+    Makespans %>% mutate(Metric="Makespan") %>%
+              rename(Value=End) -> makes
+    makes$Value <- makes$Value - Abes$Result
+    Abes %>% select(Node, Result) %>%
+         mutate(Node=as.integer(as.character(Node))) %>%
+         mutate(Metric="Abe") %>%
+         rename(Value=Result) %>%
+         bind_rows(makes) %>%
+         mutate(Metric=factor(Metric, levels=c("Makespan", "Abe"))) -> all_data
+
+     all_data %>% mutate(Node = as.integer(Node)) %>%
+              ggplot(aes(y=Node, x=Value, fill=Metric)) +
+              default_theme() +
+              scale_y_reverse() +
+              geom_col(width=0.8) -> splot
+    return(splot);
+}

@@ -173,13 +173,13 @@ starpu_mpi_grid_arrange <- function(atree, utiltreenode, utiltreedepth, st, st_p
         P[[length(P)+1]] <- ijk;
         H[[length(H)+1]] <- pjr_value(pajer$kiteration$height, starvz_height_todo);
     }
-    if (pjr(pajer$st$active)){
-        P[[length(P)+1]] <- st;
-        H[[length(H)+1]] <- pjr_value(pajer$st$height, starvz_height_resources);
-    }
     if (pjr(pajer$summary_nodes$active)){
         P[[length(P)+1]] <- summary_nodes;
         H[[length(H)+1]] <- pjr_value(pajer$summary_nodes$height, starvz_height_nodes);
+    }
+    if (pjr(pajer$st$active)){
+        P[[length(P)+1]] <- st;
+        H[[length(H)+1]] <- pjr_value(pajer$st$height, starvz_height_resources);
     }
     if (pjr(pajer$pmtool$kiteration$active)){
         P[[length(P)+1]] <- ijk_pm;

@@ -25,7 +25,7 @@ x <- data$Data_handle %>% select(MPIOwner, Coordinates) %>% unique() %>%
     ggplot(aes(x=X, y=Y, fill=MPIOwner)) +
     geom_tile(alpha=0.8) +
     geom_text(aes(label=factor(MPIOwner)), size=2) +
-    scale_fill_viridis(name = "Node", breaks = seq(1, n_nodes)) +
+    scale_fill_viridis(name = "Node", breaks = seq(0, n_nodes)) +
     scale_y_reverse(expand=c(0.01,0.01)) +
     scale_x_continuous(expand=c(0.01,0.01)) +
     theme(legend.position="bottom") +

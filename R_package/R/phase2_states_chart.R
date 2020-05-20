@@ -65,8 +65,6 @@ k_chart <- function (dfw = NULL)
 {
     if (is.null(dfw)) stop("dfw provided to k_chart is NULL");
 
-    dfw <- dfw;
-
     # Prepare for colors
     dfw %>% select(Value, Color) %>% unique %>% .$Color -> choleskyColors
     choleskyColors %>% setNames(dfw %>% select(Value, Color) %>% unique %>% .$Value) -> choleskyColors;

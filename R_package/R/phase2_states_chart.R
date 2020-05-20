@@ -60,8 +60,7 @@ state_chart <- function (data = NULL, globalEndTime = NULL, ST.Outliers = TRUE, 
     return(gow);
 }
 
-
-k_chart <- function (dfw = NULL)
+k_chart <- function (dfw = NULL, middle_lines = NULL, per_node = FALSE)
 {
     if (is.null(dfw)) stop("dfw provided to k_chart is NULL");
 
@@ -70,17 +69,49 @@ k_chart <- function (dfw = NULL)
     choleskyColors %>% setNames(dfw %>% select(Value, Color) %>% unique %>% .$Value) -> choleskyColors;
 
     # Prepare for borders
-    dfborders <- dfw %>%
-        group_by(Iteration) %>%
+    if(per_node) {
+        dfw %>% group_by(Node, Iteration) -> temp1
+    }else{
+        dfw %>% group_by(Iteration) -> temp1
+    }
+    dfborders <- temp1 %>%
         summarize(Start = min(Start), End=max(End)) %>%
         mutate(IterationB = lead(Iteration), StartB = lead(Start)) %>%
         mutate(IterationE = lead(Iteration), EndB = lead(End)) %>%
         na.omit;
 
+    # Prepare for middle
+    lapply(middle_lines, function(percentage) {
+        dfw %>%
+            filter(Application) %>%
+            select(Node, Iteration, Start, End) -> temp1
+        if(per_node){
+            temp1 %>% group_by(Node, Iteration) -> temp1
+        }else{
+            temp1 %>% group_by(Iteration) -> temp1
+        }
+        temp1 %>%
+            mutate(Number.Tasks = n()) %>%
+            arrange(Start) %>%
+            slice(unique(Number.Tasks*percentage)) %>%
+            ungroup %>%
+            mutate(Middle = Start + (End-Start)/2) -> temp1
+        if(per_node) {
+            temp1 %>% group_by(Node) -> temp1
+        }
+        temp1 %>%
+            arrange(Iteration) %>%
+            mutate(Middle.Next = lead(Middle)) %>%
+            mutate(IterationB = lead(Iteration)) %>%
+            mutate(Percentage = percentage) %>%
+            ungroup %>%
+            na.omit
+    }) %>% bind_rows -> dfmiddle
+
     # Height of each bar
     height = 0.8;
 
-    dfw %>% ggplot() +
+    goijk <- dfw %>% ggplot() +
         guides(fill = guide_legend(nrow = 1)) +
         scale_fill_manual(values = choleskyColors) +
         theme_bw(base_size=12) +
@@ -99,7 +130,12 @@ k_chart <- function (dfw = NULL)
                       xmin=Start,
                       xmax=End,
                       ymin=Iteration-height/2,
-                      ymax=Iteration+height/2), alpha=.5) -> goijk;
+                      ymax=Iteration+height/2), alpha=.5)
+    if(!is.null(middle_lines)) {
+        goijk <- goijk +
+            # The median line
+            geom_curve(data=dfmiddle, aes(x=Middle, xend=Middle.Next, y=Iteration-height/2, yend=IterationB-height/2), curvature=-0.1, angle=20, color="black")
+    }
     return(goijk);
 }
 

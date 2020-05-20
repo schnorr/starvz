@@ -412,11 +412,17 @@ geom_abe <- function(data = NULL)
     tstart <- dfwapp %>% .$Start %>% min;
     tend <- dfwapp %>% .$End %>% max;
 
+    abesize <- pjr_value(pajer$st$abe$size, 5)
+
     if (!is.null(pernodeABEdf)){
         ret <- list(
-            geom_segment(data=pernodeABEdf, aes(x = Result+tstart, xend=Result+tstart, y = MinPosition, yend=MaxPosition), size=5, alpha=.7, color="gray"),
-            geom_text (data=pernodeABEdf, aes(x = Result+tstart, y = MinPosition+(MaxPosition-MinPosition)/2, label=paste0(ifelse(pjr_value(pajer$st$abe$label, TRUE), "ABE: ", ""), round(Result, 0))), angle=90, color="black", size=bsize)
-        );
+            geom_segment(data=pernodeABEdf, aes(x = Result+tstart, xend=Result+tstart, y = MinPosition, yend=MaxPosition), size=abesize, alpha=.7, color="gray")
+        )
+        if(pjr_value(pajer$st$abe$text, TRUE)){
+            ret <- list(ret,
+                        geom_text (data=pernodeABEdf, aes(x = Result+tstart, y = MinPosition+(MaxPosition-MinPosition)/2, label=paste0(ifelse(pjr_value(pajer$st$abe$label, TRUE), "ABE: ", ""), round(Result, 0))), angle=90, color="black", size=bsize)
+                        )
+        }
         return(ret);
     }
     return(list());

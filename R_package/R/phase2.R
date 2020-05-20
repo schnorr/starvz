@@ -597,6 +597,7 @@ starvz_plot_list <- function(data = NULL)
     if (pjr(pajer$kiteration$active)){
         loginfo("Creating the KIteration");
         ml <- pjr_value(pajer$kiteration$middlelines, NULL)
+        loginfo(paste("Middle lines are", ml))
         pn <- pjr_value(pajer$kiteration$pernode, FALSE)
         goijk <- k_chart(data$Application,
                          middle_lines=ml,

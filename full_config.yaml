@@ -85,6 +85,8 @@ default:
     kiteration: # Iteration Chart
       active: FALSE
       height: 2
+      middlelines: [0.5, 0.7] # Use middle lines in the plot to show advancement
+      pernode: FALSE # very experimental, per-node limits, do a facet_wrap(~Node, ncol=1)      
       legend: TRUE
 
   memory:

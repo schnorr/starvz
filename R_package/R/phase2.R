@@ -596,7 +596,11 @@ starvz_plot_list <- function(data = NULL)
     # KIteration
     if (pjr(pajer$kiteration$active)){
         loginfo("Creating the KIteration");
-        goijk <- k_chart(data$Application) + tScale;
+        ml <- pjr_value(pajer$kiteration$middlelines, NULL)
+        pn <- pjr_value(pajer$kiteration$pernode, FALSE)
+        goijk <- k_chart(data$Application,
+                         middle_lines=ml,
+                         per_node=pn) + tScale;
 
         if (!pjr(pajer$kiteration$legend)){
             goijk <- goijk +
@@ -604,6 +608,9 @@ starvz_plot_list <- function(data = NULL)
         }else{
              goijk <- goijk +
                       theme(legend.spacing.x = unit(0.2, 'cm'))
+        }
+        if (pn == TRUE){
+            goijk <- goijk + facet_wrap(~Node, ncol=1)
         }
     }
 

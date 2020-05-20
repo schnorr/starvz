@@ -104,11 +104,37 @@ pjr <- function (property)
     ifelse(!is.null(property) && property, property, FALSE);
 }
 
-starpu_mpi_grid_arrange <- function(atree, utiltreenode, utiltreedepth, st, st_pm,
-           st_mm, transf, starpu, ijk, ijk_pm, lackready, ready, submitted, mpi,
-           mpiconc, mpiconcout, mpistate, gpu, memory, imb_plot, heatmap, gflops, activenodes,
-           nodememuse, summary_nodes, computingnodes, title = NULL)
+starpu_mpi_grid_arrange <- function(plist)
 {
+    # Decode plist to local variables (to avoid editing all function)
+    atree = plist$atree
+    utiltreenode = plist$atree
+    utiltreedepth = plist$atree
+    st = plist$st
+    st_pm = plist$st_pm
+    st_mm = plist$st_mm
+    transf = plist$transf
+    starpu = plist$starpu
+    ijk = plist$ijk
+    ijk_pm = plist$ijk_pm
+    lackready = plist$lackready
+    ready = plist$ready
+    submitted = plist$submitted
+    mpi = plist$mpi
+    mpiconc = plist$mpiconc
+    mpiconcout = plist$mpiconcout
+    mpistate = plist$mpistate
+    gpu = plist$gpu
+    memory = plist$memory
+    imb_plot = plist$imb_plot
+    heatmap = plist$heatmap
+    gflops = plist$gflops
+    activenodes = plist$activenodes
+    nodememuse = plist$nodememuse
+    summary_nodes = plist$summary_nodes
+    computingnodes = plist$computingnodes
+    title = plist$title
+
     # The list that will contain the plots
     P <- list();
     # The list that will contain the proportinal height of each plot
@@ -312,7 +338,7 @@ starvz_guided_plot <- function(data, name)
     return(list(plot=p, height=final_px_height))
 }
 
-starvz_plot <- function(data = NULL)
+starvz_plot_list <- function(data = NULL)
 {
     if(is.null(data)) return(NULL);
     if(is.null(pajer)) return(NULL);
@@ -855,36 +881,50 @@ starvz_plot <- function(data = NULL)
         }
     }
 
+    # Create a named list with the ggplot objects + title
+    plot_list <- list(
+        atree = goatreet,
+        utiltreenode = goutiltreenode,
+        utiltreedepth = goutiltreedepth,
+        st = gow,
+        st_pm = gow_pm,
+        st_mm = gow_mm,
+        transf = gow_tf,
+        starpu = gstarpu,
+        ijk = goijk,
+        ijk_pm = goijk_pm,
+        lackready = golrv,
+        ready = gorv,
+        submitted = gosv,
+        mpi = gomov,
+        mpiconc = gompiconc,
+        mpiconcout = gompiconcout,
+        mpistate = gompistate,
+        gpu = gogov,
+        memory = goguv,
+        imb_plot = imb_plot,
+        heatmap = heatmap,
+        gflops = gogfv,
+        activenodes = goactivenodes,
+        nodememuse = gonodememuse,
+        computingnodes = gocomputingnodes,
+        summary_nodes = go_sn,
+        title = directory
+    )
+    return (plot_list);
+}
+
+starvz_plot <- function(data = NULL)
+{
+    if(is.null(data)) return(NULL);
+    if(is.null(pajer)) return(NULL);
+
+    plist <- starvz_plot_list(data)
+
     loginfo("Assembling the plot");
 
     # assembling
-    g <- starpu_mpi_grid_arrange(atree = goatreet,
-                                 utiltreenode = goutiltreenode,
-                                 utiltreedepth = goutiltreedepth,
-                                 st = gow,
-                                 st_pm = gow_pm,
-                                 st_mm = gow_mm,
-                                 transf = gow_tf,
-                                 starpu = gstarpu,
-                                 ijk = goijk,
-                                 ijk_pm = goijk_pm,
-                                 lackready = golrv,
-                                 ready = gorv,
-                                 submitted = gosv,
-                                 mpi = gomov,
-                                 mpiconc = gompiconc,
-                                 mpiconcout = gompiconcout,
-                                 mpistate = gompistate,
-                                 gpu = gogov,
-                                 memory = goguv,
-                                 imb_plot = imb_plot,
-                                 heatmap = heatmap,
-                                 gflops = gogfv,
-                                 activenodes = goactivenodes,
-                                 nodememuse = gonodememuse,
-                                 computingnodes = gocomputingnodes,
-                                 summary_nodes = go_sn,
-                                 title = directory);
+    g <- starpu_mpi_grid_arrange(plist);
 
     loginfo("Ending Starvz plot function");
 

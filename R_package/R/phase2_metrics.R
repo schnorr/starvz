@@ -170,7 +170,6 @@ abe_cpu_cuda_inner <- function(dfl, debug=FALSE)
   return(tibble(Result=list(result), Values=list(values), Types=list(types)));
 }
 
-
 hl_per_node_ABE <- function (dfw = NULL)
 {
     if(is.null(dfw)) stop("Input data frame is NULL");

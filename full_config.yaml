@@ -51,7 +51,6 @@ default:
     outliers: TRUE # Differentiate outliers tasks
     abe: # Show Abe makespan metric
       active: FALSE # Enable
-      label: TRUE # Enable Label
       label: TRUE # Enable "ABE:" Label
       text: TRUE # Enable the visual marking, with the value and label
       size: 5 # the size of the ABE transparent marking

@@ -117,16 +117,13 @@ abe_cpu_cuda_inner <- function(dfl, debug=FALSE)
       select(-ResourceType) %>%
       set_colnames(NULL) %>%
       as.matrix();
-  if (ntypes > 1){
-      zeroes <- do.call("cbind", replicate((ntypes-1), matrix(0, ncol=nvalues, nrow=ntypes), simplify=FALSE))
-      m <- cbind(m, zeroes) %>% set_colnames(NULL);
+  M = matrix(data=rep(0, (nzeros*ntypes)), nrow=ntypes)
+  for (i in 1:ntypes) { # for each ResourceType
+      for (j in 1:nvalues) { # for each Kernel
+          M[i,nvalues*(i-1)+j] = m[i,j]
+      }
   }
-  # Put zeroes in the beginning of the second line for the GPU
-  # TODO: the next condition line is not generic for more than two resource types (but works with only one)
-  if (ntypes > 1){
-      m[2,] <- lag(m[2,], n = length(values), default=0.0);
-  }
-  m.con2 <- cbind(m, df1.res_quantity %>% arrange(ResourceType) %>% mutate(Quantity=as.numeric(Quantity)*-1) %>% .$Quantity); # %>% set_colnames(names);
+  m.con2 <- cbind(M, df1.res_quantity %>% arrange(ResourceType) %>% mutate(Quantity=as.numeric(Quantity)*-1) %>% .$Quantity); # %>% set_colnames(names);
   m.dir2 <- rep("<=", length(types));
   m.rhs2 <- rep(0, length(types));
 

@@ -258,6 +258,20 @@ hl_global_cpb <- function (data = NULL)
     return(ret);
 }
 
+hl_global_abe <- function (dfw = NULL)
+{
+    if(is.null(dfw)) stop("Input data frame is NULL");
+
+    loginfo("hl_global_abe starts");
+    dfw %>%
+        filter(grepl("CPU|CUDA", ResourceId)) %>%
+        select(Node, Resource, ResourceType, Duration, Value, Position, Height) %>%
+        do(abe_cpu_cuda(.)) -> globalABE
+    loginfo("hl_global_abe ends");
+
+    return(globalABE);
+}
+
 calculate_resource_idleness <- function(dfw = NULL, max_only = TRUE)
 {
     if(is.null(dfw)) stop("Input data frame is NULL");

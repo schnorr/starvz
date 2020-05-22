@@ -128,7 +128,10 @@ abe_cpu_cuda_inner <- function(dfl, debug=FALSE)
           M[i,nvalues*(i-1)+j] = m[i,j]
       }
   }
-  m.con2 <- cbind(M, df1.res_quantity %>% arrange(ResourceType) %>% mutate(Quantity=as.numeric(Quantity)*-1) %>% .$Quantity); # %>% set_colnames(names);
+  m.con2 <- cbind(M, df1.res_quantity %>%
+                     arrange(ResourceType) %>%
+                     mutate(Quantity=as.numeric(Quantity)*-1) %>%
+                     .$Quantity); # %>% set_colnames(names);
   m.dir2 <- rep("<=", length(types));
   m.rhs2 <- rep(0, length(types));
 

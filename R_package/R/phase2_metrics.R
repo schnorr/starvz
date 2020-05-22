@@ -63,7 +63,12 @@ abe_cpu_cuda_inner <- function(dfl, debug=FALSE)
   # The amount of nodes
   nnodes = dfl %>% select(Node) %>% unique %>% .$Node %>% sort %>% length;
   # The amount of resources
-  df1.res_quantity <- dfl %>% select(Resource, ResourceType) %>% group_by(ResourceType) %>% summarize(Quantity=nnodes*length(unique(Resource))) %>% as.data.frame();
+  df1.res_quantity <- dfl %>%
+      select(Node, Resource, ResourceType) %>%
+      unique %>%
+      group_by(ResourceType) %>%
+      summarize(Quantity=n())
+
   # The mean duration of each task per resource
   df1.num_mean <- dfl %>% group_by(ResourceType, Value) %>% summarize(Num = n(), Mean=mean(Duration)) %>% as.data.frame();
 

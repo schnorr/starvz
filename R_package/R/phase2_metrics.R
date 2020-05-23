@@ -86,6 +86,7 @@ abe_cpu_cuda_inner <- function(dfl, debug=FALSE)
   values <- df1.num_mean %>% select(Value) %>% arrange(Value) %>% .$Value %>% unique;
   types <- df1.num_mean %>% select(ResourceType) %>% arrange(ResourceType) %>% .$ResourceType %>% unique %>% as.character;
   names <- c(unlist(lapply(types, function(x) paste(x, values, sep="_"))), "Time");
+  nnames <- length(names);
   nvalues <- length(values);
   ntypes <- length(types);
   size = nvalues*ntypes;

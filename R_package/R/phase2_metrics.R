@@ -124,7 +124,7 @@ abe_cpu_cuda_inner <- function(dfl, debug=FALSE)
       select(-ResourceType) %>%
       set_colnames(NULL) %>%
       as.matrix();
-  M = matrix(data=rep(0, (ntypes*nvalues)), nrow=ntypes)
+  M = matrix(data=rep(0, ntypes*(nnames-1)), nrow=ntypes)
   for (i in 1:ntypes) { # for each ResourceType
       for (j in 1:nvalues) { # for each Kernel
           M[i,nvalues*(i-1)+j] = m[i,j]

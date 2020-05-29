@@ -43,7 +43,7 @@ pushd $CASE
 # If sorted is already present dont reexecute
 if [ ! -f "paje.sorted.trace" ] || [ ! -f "data.rec" ] || [ ! -f "tasks.rec" ]; then
   echo "Convert from FXT to paje.sorted.trace"
-  date
+  date "+%a %d %b %Y %H:%M:%S %Z"
   fxt2paje.sh
   es=$?
   if [ $es -ne 0 ]
@@ -114,7 +114,7 @@ fi
 rm -f activity.data distrib.data trace.html tasks.rec papi.rec data.rec trace.rec
 
 echo "Convert from paje.sorted.trace to paje.csv"
-date
+date "+%a %d %b %Y %H:%M:%S %Z"
 
 if [ ! -x "$(command -v pj_dump)" ]; then
   echo "ERROR: pj_dump is not installed, please install PajeNG or configure PATH"
@@ -130,7 +130,7 @@ fi
 rm -f paje.sorted.trace
 
 echo "Get states, links and variables in CSV"
-date
+date "+%a %d %b %Y %H:%M:%S %Z"
 
 PAJESTATE=paje.state.csv
 echo "Nature, ResourceId, Type, Start, End, Duration, Depth, Value, Size, Params, Footprint, Tag, JobId, SubmitOrder, GFlop, X, Y, Iteration, Subiteration" > $PAJESTATE
@@ -151,7 +151,7 @@ cat paje.csv | grep ^Event >> $PAJEEVENT
 rm -f paje.csv
 
 echo "Convert (DAG) DOT to CSV"
-date
+date "+%a %d %b %Y %H:%M:%S %Z"
 
 OUTPUTDAGCSV=dag.csv
 echo "Dependent,JobId" > $OUTPUTDAGCSV
@@ -182,7 +182,7 @@ rm -f atree.csv dag.csv entities.csv paje.link.csv paje.state.csv paje.variable.
 
 echo
 echo "End of $CASE"
-date
+date "+%a %d %b %Y %H:%M:%S %Z"
 echo
 
 popd

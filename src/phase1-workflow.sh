@@ -36,6 +36,7 @@ APPLICATION=${2:-}
 
 echo
 echo "Start of $CASE"
+date "+%a %d %b %Y %H:%M:%S %Z"
 echo
 
 pushd $CASE
@@ -79,6 +80,7 @@ if [ -x "$(command -v pmtool)" ] && [ -f "platform_file.rec" ]; then
 
   # Running pmtool with default-normal configuration
   echo "Execute pmtool"
+  date "+%a %d %b %Y %H:%M:%S %Z"
   pmtool -p platform_file.rec tasks.rec -d fast -a dmdas --threads --no-header -w -s pmtool_states.out > pmtool.out 2> /dev/null
 
   # Cleaning pmtools bounds.
@@ -96,6 +98,7 @@ fi
 # Converting the data.rec and tasks.rec files
 if [ -x "$(command -v rec2csv)" ]; then
   echo "Convert Rec files"
+  date "+%a %d %b %Y %H:%M:%S %Z"
   DATACSV="rec.data_handles.csv"
   rec2csv -S Handle data.rec | sed 's/"//g' > $DATACSV
 
@@ -163,6 +166,7 @@ cat dag.dot | \
 rm -f dag.dot
 
 echo "Convert (ATREE) DOT to CSV"
+date "+%a %d %b %Y %H:%M:%S %Z"
 ATREE=atree.dot
 if [ -e "${ATREE}" ]; then
     OUTPUTATREECSV=atree.csv
@@ -171,6 +175,7 @@ if [ -e "${ATREE}" ]; then
 fi
 
 echo "Post-processing CSV files"
+date "+%a %d %b %Y %H:%M:%S %Z"
 ${DIR}/../R/phase1-workflow.R . ${APPLICATION} ${3:-}
 es=$?
 if [ $es -ne 0 ]

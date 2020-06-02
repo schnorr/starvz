@@ -39,21 +39,14 @@ memory_chart <- function (data = NULL, globalEndTime = NULL, combined = FALSE, t
 
     loginfo("Entry of memory_chart");
 
-    # Filter
-    dfwapp = data$Application %>%
-        # Considering only Worker State
-        filter(Type == "Memory Node State");
-
     #Plot
     gow <- ggplot() + default_theme();
 
     # Add states and outliers if requested
-    gow <- gow + geom_memory(data, combined=combined, tstart=tstart, tend=tend);
+    gow <- gow + geom_memory(data$Memory_state, data$Link, combined=combined, tstart=tstart, tend=tend);
     if(combined){
       gow <- gow + geom_links(data, combined=TRUE, tstart=tstart, tend=tend);
     }
-
-    #gow = gow + scale_fill_manual(values = starpu_colors());
 
     loginfo("Exit of memory_chart");
     return(gow);
@@ -82,7 +75,6 @@ link_chart <- function (data = NULL, tstart = NULL, tend = NULL)
 geom_events <- function (main_data = NULL, data = NULL, combined = FALSE, tstart=NULL, tend=NULL)
 {
     if (is.null(data)) stop("data is NULL when given to geom_events");
-
 
     loginfo("Starting geom_events");
 
@@ -152,6 +144,7 @@ geom_events <- function (main_data = NULL, data = NULL, combined = FALSE, tstart
     if(pjr(pajer$memory$state$border)){
         border <- 1
     }
+    print(dfw)
     # Add states
     ret[[length(ret)+1]] <- geom_rect(data=dfw, aes(fill=Type, xmin=Start, xmax=End, ymin=Position, ymax=Position+(2.0-0.2-Height)), color= "black", linetype=border, size=0.4, alpha=0.5);
 
@@ -197,22 +190,19 @@ geom_events <- function (main_data = NULL, data = NULL, combined = FALSE, tstart
     return(ret);
 }
 
-geom_memory <- function (data = NULL, combined = FALSE, tstart=NULL, tend=NULL)
+geom_memory <- function (data_comm = NULL, data_link = NULL, combined = FALSE, tstart=NULL, tend=NULL)
 {
     if (is.null(data)) stop("data is NULL when given to geom_memory");
 
-    dfw <- data$Starpu %>%
-        # Memory State
-        filter(Type == "Memory Node State");
+    dfw <- data_comm
 
+    loginfo("Starting geom_memory");
 
-    loginfo("Starting geom_memory2");
-
-    dfl <- data$Link;
+    dfl <- data_link;
 
     col_pos_1 <- data.frame(Container=unique(dfl$Dest)) %>% arrange(Container) %>% tibble::rowid_to_column("Position");
 
-    col_pos_2 <- data.frame(Container=unique(dfw$Container)) %>% arrange(Container) %>% tibble::rowid_to_column("Position")
+    col_pos_2 <- data.frame(Container=unique(dfw$Resource)) %>% arrange(Container) %>% tibble::rowid_to_column("Position")
 
     if(nrow(col_pos_1)>nrow(col_pos_2)){
       col_pos <- col_pos_1
@@ -221,12 +211,9 @@ geom_memory <- function (data = NULL, combined = FALSE, tstart=NULL, tend=NULL)
       #ret[[length(ret)+1]] <- scale_y_continuous(breaks = yconfm$Position+(yconfm$Height/3), labels=yconfm$Container, expand=c(pjr_value(pajer$expand, 0.05),0));
     }
 
-
     col_pos[2] <- data.frame(lapply(col_pos[2], as.character), stringsAsFactors=FALSE);
-    dfw <- dfw %>% select(-Position) %>% left_join(col_pos, by=c("ResourceId" = "Container"))
+    dfw <- dfw  %>% left_join(col_pos, by=c("ResourceId" = "Container"))
     ret <- list();
-
-
 
     # Color mapping
     #ret[[length(ret)+1]] <- scale_fill_manual(values = extract_colors(dfw));
@@ -234,7 +221,8 @@ geom_memory <- function (data = NULL, combined = FALSE, tstart=NULL, tend=NULL)
     # Y axis breaks and their labels
     # Hardcoded here because yconf is specific to Resources Workers
     yconfm <- dfw %>%
-        select(Node, ResourceId, Position, Height) %>%
+        select(Node, ResourceId, Position) %>%
+        mutate(Height = 1) %>%
         distinct() %>%
         group_by(Node) %>%
         arrange(Node, ResourceId) %>%
@@ -297,11 +285,8 @@ geom_memory <- function (data = NULL, combined = FALSE, tstart=NULL, tend=NULL)
       }
     }
 
-    loginfo("Finishing geom_memory");
-
     return(ret);
 }
-
 
 geom_links <- function (data = NULL, combined = FALSE, tstart=NULL, tend=NULL)
 {
@@ -485,7 +470,7 @@ pre_handle_gantt <- function(data){
 		         mutate(P = substring(Tid, 5)) %>%
                      mutate(G = substr(Container,1,nchar(Container)-1)) %>%
 		         mutate(Container=paste0(G, P)) %>% select(-P, -G) %>%
-		         select(-Nature, -Tid) %>%
+		         select(-Tid) %>%
 		         inner_join(data$Data_handle, by=c("Handle" = "Handle") ) %>%
 		         inner_join(position, by=c("Container"="Container")) %>%
 		         mutate(Value = paste0("Memory Block ", Coordinates, "")) %>%
@@ -494,7 +479,7 @@ pre_handle_gantt <- function(data){
 		         mutate(Pre = as.character(Info)) -> request_events
 
 	data$Task_handles %>% select(Handles) %>% distinct() %>% .$Handles -> h_used
-	data$Events %>%  filter(Handle %in% h_used) %>% select(-Nature, -Tid) %>%
+	data$Events %>%  filter(Handle %in% h_used) %>% select(-Tid) %>%
 		         inner_join(data$Data_handle, by=c("Handle" = "Handle") ) %>%
 		         inner_join(position, by=c("Container"="Container")) %>%
 		         mutate(Value = paste0("Memory Block ", Coordinates, "")) %>%
@@ -514,7 +499,7 @@ pre_handle_gantt <- function(data){
 		        select(Handle, Info, Container) -> links_handles
 
 	mpi_links <- data$Link %>% filter(Type=="MPI communication") %>%
-			select(-Nature, -Container, -Size) %>%
+			select(-Container, -Size) %>%
                  	mutate(Origin=str_replace(Origin, "mpict", "MEMMANAGER0")) %>%
                  	mutate(Dest=str_replace(Dest, "mpict", "MEMMANAGER0")) %>%
 			inner_join(position, by=c("Origin"="Container")) %>%
@@ -529,7 +514,7 @@ pre_handle_gantt <- function(data){
 
 	links <- data$Link %>% filter(Type=="Intra-node data Fetch" |
 		                      Type=="Intra-node data PreFetch") %>%
-		      select(-Nature, -Container, -Size) %>%
+		      select(-Container, -Size) %>%
 		      mutate(Con = as.integer(substring(Key, 5))) %>%
 		      select(-Key)
 

@@ -7,7 +7,7 @@ time_aggregation_prep <- function(dfw = NULL)
         rename(Task = Value) %>%
         group_by (ResourceId, Task) %>%
         mutate(Value = 1) %>%
-        select(-Duration, -Color, -Nature, -Type,
+        select(-Duration, -Color, -Type,
                -Size, -Depth, -Params, -JobId, -Footprint, -Tag,
                -GFlop, -X, -Y, -Iteration, -Subiteration,
                -Node, -Resource, -ResourceType, -Outlier, -Height,
@@ -57,7 +57,7 @@ time_aggregation_post <- function(dfw = NULL, dfw_agg = NULL)
     if (is.null(dfw_agg)) return(NULL);
 
     df_ResourceId <- dfw %>%
-        select(Nature, ResourceId, Type,
+        select(ResourceId, Type,
                Node, Resource, ResourceType, Position, Height) %>%
         unique;
     df_Task <- dfw %>%
@@ -158,8 +158,6 @@ geom_aggregated_states <- function (data = NULL, Show.Outliers = FALSE, min_time
         mutate(Node = as.factor(Node)) %>%
         mutate(ResourceType = as.factor(gsub('[[:digit:]]+', '', Resource))) -> ydf;
 
-    Colors <- data$Application %>% select(Value, Color) %>% distinct()
-
     # Do the aggregation
     data$Application %>%
         select(ResourceId, Start, End, Duration, Value, JobId) %>%
@@ -167,8 +165,7 @@ geom_aggregated_states <- function (data = NULL, Show.Outliers = FALSE, min_time
         left_join(
             ydf %>% select(ResourceId, Resource, Node, ResourceType, Height, Position),
             by=c("ResourceId" = "ResourceId")
-        ) %>%
-        left_join(Colors, by=c("Value")) -> dfw;
+        ) -> dfw;
 
     # The list of geoms
     ret <- list();
@@ -188,7 +185,7 @@ geom_aggregated_states <- function (data = NULL, Show.Outliers = FALSE, min_time
                                                     alpha=aggregated));
     ret[[length(ret)+1]] <- guides(alpha=FALSE);
     ret[[length(ret)+1]] <- scale_alpha_discrete(range=c(1, .6));
-    ret[[length(ret)+1]] <- scale_fill_manual(values = extract_colors(dfw));
+    ret[[length(ret)+1]] <- scale_fill_manual(values = extract_colors(dfw, data$Colors));
 
     loginfo("Finishing geom_aggregated_states");
 

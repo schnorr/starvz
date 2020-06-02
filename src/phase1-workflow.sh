@@ -135,9 +135,21 @@ rm -f paje.sorted.trace
 echo "Get states, links and variables in CSV"
 date "+%a %d %b %Y %H:%M:%S %Z"
 
-PAJESTATE=paje.state.csv
-echo "Nature, ResourceId, Type, Start, End, Duration, Depth, Value, Size, Params, Footprint, Tag, JobId, SubmitOrder, GFlop, X, Y, Iteration, Subiteration" > $PAJESTATE
-cat paje.csv | grep ^State >> $PAJESTATE
+PAJE_MEMORY_STATE=paje.memory_state.csv
+echo "Nature, ResourceId, Type, Start, End, Duration, Depth, Value" > $PAJE_MEMORY_STATE
+grep -e "Memory Node State" paje.csv >> $PAJE_MEMORY_STATE
+
+PAJE_COMM_STATE=paje.comm_state.csv
+echo "Nature, ResourceId, Type, Start, End, Duration, Depth, Value" > $PAJE_COMM_STATE
+grep -e "Communication Thread State" paje.csv >> $PAJE_COMM_STATE
+
+PAJE_WORKER_STATE=paje.worker_state.csv
+echo "Nature, ResourceId, Type, Start, End, Duration, Depth, Value, Size, Params, Footprint, Tag, JobId, SubmitOrder, GFlop, X, Y, Iteration, Subiteration" > $PAJE_WORKER_STATE
+grep -e "Worker State" paje.csv >> $PAJE_WORKER_STATE
+
+PAJE_OTHER_STATE=paje.other_state.csv
+echo "Nature, ResourceId, Type, Start, End, Duration, Depth, Value" > $PAJE_OTHER_STATE
+grep -E "^State" paje.csv | grep -E -v "(Memory Node State|Communication Thread State|Worker State)" >> $PAJE_OTHER_STATE
 
 PAJEVARIABLE=paje.variable.csv
 echo "Nature, ResourceId, Type, Start, End, Duration, Value" > $PAJEVARIABLE
@@ -183,7 +195,9 @@ then
     echo "Error when executing phase1-workflow.R (exit status: $es)"
     exit 2
 fi
-rm -f atree.csv dag.csv entities.csv paje.link.csv paje.state.csv paje.variable.csv types.csv
+rm -f atree.csv dag.csv entities.csv paje.link.csv paje.state.csv paje.variable.csv\
+      types.csv comms.rec paje.events.csv paje.memory_state.csv paje.other_state.csv\
+      paje.worker_state.csv rec.data_handles.csv rec.tasks.csv sched_tasks.rec
 
 echo
 echo "End of $CASE"

@@ -175,8 +175,6 @@ hl_per_node_ABE <- function (dfw = NULL)
 {
     if(is.null(dfw)) stop("Input data frame is NULL");
 
-    loginfo("hl_per_node_ABE starts");
-
     dftemp <- dfw %>%
         filter(grepl("CPU|CUDA", ResourceId)) %>%
         select(Node, Resource, ResourceType, Duration, Value, Position, Height);
@@ -188,8 +186,6 @@ hl_per_node_ABE <- function (dfw = NULL)
         group_by(Node) %>%
         summarize(MinPosition = min(Position), MaxPosition = max(Position)+min(Height)/1.25) %>%
         left_join(pernodeABE, by="Node");
-
-    loginfo("hl_per_node_ABE ends");
 
     return(pernodeABE);
 }
@@ -267,12 +263,10 @@ hl_global_abe <- function (dfw = NULL)
 {
     if(is.null(dfw)) stop("Input data frame is NULL");
 
-    loginfo("hl_global_abe starts");
     dfw %>%
         filter(grepl("CPU|CUDA", ResourceId)) %>%
         select(Node, Resource, ResourceType, Duration, Value, Position, Height) %>%
         do(abe_cpu_cuda(.)) -> globalABE
-    loginfo("hl_global_abe ends");
 
     return(globalABE);
 }
@@ -426,8 +420,7 @@ geom_abe <- function(data = NULL)
     bsize = pjr_value(pajer$base_size, 22)/5;
 
     # Obtain time interval
-    dfwapp <- data$Application %>%
-        filter(Type == "Worker State");
+    dfwapp <- data$Application
     tstart <- dfwapp %>% .$Start %>% min;
     tend <- dfwapp %>% .$End %>% max;
 

@@ -11,7 +11,7 @@ geom_atree <- function (data=NULL, Offset=1.02, Flip = TRUE)
     dtree <- data$Atree %>%
         # Get Start time of the first task belonging to each ANode
         left_join(data$Application %>%
-                  filter(Type == "Worker State", Value != "block_copy") %>%
+                  filter(Value != "block_copy") %>%
                   select(ANode, Start, End) %>%
                   group_by(ANode) %>%
                   summarize(Start = min(Start),
@@ -110,11 +110,11 @@ atree_temporal_chart <- function(data = NULL, step = 100, globalEndTime = NULL)
 
     dfw <- data$Application;
     dfa <- data$Atree;
-    
+
     df_node_plot <- resource_utilization_tree_node(data=data, step=step);
 
     # Calculate NodeUsage, this represent the "most active" node at the time slice
-    df_node_plot %>% 
+    df_node_plot %>%
       filter(Value != 0) %>%
       select(ANode, Slice, Value1, Usage) %>%
       ungroup() %>%
@@ -127,9 +127,9 @@ atree_temporal_chart <- function(data = NULL, step = 100, globalEndTime = NULL)
                   group_by(ANode) %>%
                   filter(End == max(End)),
                 by="ANode") %>%
-      mutate(Start = ifelse(End >= Slice, End, Slice)) -> df_node_plot_filtered  
+      mutate(Start = ifelse(End >= Slice, End, Slice)) -> df_node_plot_filtered
 
-    # filter initialization tasks 
+    # filter initialization tasks
     dfw_init <- dfw %>%
       filter(grepl("init_", Value)) %>%
       unique() %>%
@@ -235,7 +235,7 @@ atree_time_aggregation_prep <- function(dfw = NULL)
         group_by (ANode) %>%
         arrange(Start) %>%
         mutate(Value = 1) %>%
-        select(-Duration, -Color, -Nature, -Type,
+        select(-Duration,
                -Size, -Depth, -Params, -JobId, -Footprint, -Tag,
                -GFlop, -X, -Y, -Iteration, -Subiteration,
                -Node, -Resource, -ResourceType, -Outlier, -Height,
@@ -284,7 +284,7 @@ atree_time_aggregation <- function(dfw = NULL, step = 100)
 {
     if (is.null(dfw)) return(NULL);
 
-    dfw <- dfw %>% filter(Type == "Worker State");
+    dfw <- dfw
 
     dfw_agg_prep <- atree_time_aggregation_prep(dfw);
     dfw_agg <- atree_time_aggregation_do (dfw_agg_prep, step);
@@ -293,7 +293,7 @@ atree_time_aggregation <- function(dfw = NULL, step = 100)
         group_by(Slice) %>%
         filter(Value != 0) %>%
         summarize(Quantity = n(), Activity = sum(Value))
-} 
+}
 
 computing_nodes_chart <- function(data=NULL, step = 100)
 {
@@ -320,12 +320,12 @@ resource_utilization_tree_node <- function(data = NULL, step = 100)
   loginfo("Entry of resource_utilization_tree_node");
   # Prepare and filter data
   data$Application %>%
-    filter(Type == "Worker State",
+    filter(
            grepl("lapack", Value) | grepl("subtree", Value)) %>%
     select(ANode, Start, End, JobId) %>%
     unique() %>%
     arrange(Start) -> df_filter
-  
+
   # Get number of workers for resource utilization
   NWorkers <- data$Application %>%
       filter(grepl("CPU", ResourceType) | grepl("CUDA", ResourceType)) %>%
@@ -385,7 +385,7 @@ resource_utilization_tree_node_plot <- function(data = NULL, step = 100)
   df_colors <<- tibble(ANode=character(), Event=character(), color=integer())
   apply(event_data, 1, define_colors) -> colors
   colors = tibble(Color=colors)
-  event_data <- event_data %>% 
+  event_data <- event_data %>%
     cbind(colors) %>%
     as_tibble() %>%
     select(ANode, Color) %>%
@@ -396,7 +396,7 @@ resource_utilization_tree_node_plot <- function(data = NULL, step = 100)
     ungroup() %>%
     left_join(event_data, by="ANode") %>%
     group_by(Slice);
-  
+
   # must expand data frame to make geom_area work properly
   df2 %>%
     filter(!is.na(Color)) %>%
@@ -449,7 +449,7 @@ resource_utilization_tree_depth_plot <- function(data = NULL, step = 100)
   loginfo("Entry of resource_utilization_tree_depth_plot");
   # Prepare and filter data
   df_filter <- data$Application %>%
-    filter(Type == "Worker State",
+    filter(
            grepl("lapack", Value) | grepl("subtree", Value)) %>%
     select(ANode, Start, End, JobId) %>%
     arrange(Start)
@@ -519,14 +519,14 @@ nodes_memory_usage_plot <- function(data = NULL)
     mutate(MemMB = GFlop*1024) %>%
     mutate(UsedMemMB = cumsum(MemMB)) %>%
     mutate(Time = Start*0.9999) %>%
-    gather(Start, Time, key="Start", value="Time") %>% 
+    gather(Start, Time, key="Start", value="Time") %>%
     select(-Start) %>%
     arrange(Time) %>%
     mutate(UsedMemMB = lag(UsedMemMB))
 
   node_mem_use <- df_mem %>%
     ggplot(aes(x=Time, y=UsedMemMB, color=Node)) +
-    geom_line() + 
+    geom_line() +
     default_theme() +
     theme(legend.position = "none") +
     ylab("Used\nMB") +
@@ -534,7 +534,7 @@ nodes_memory_usage_plot <- function(data = NULL)
 
   if (pjr_value(pajer$activenodes$nodememuse$mempeak, FALSE)) {
     mem_peak = max(df_mem$UsedMemMB);
-    node_mem_use <- node_mem_use + 
+    node_mem_use <- node_mem_use +
       geom_text(aes(x=0, y=mem_peak), hjust=-.5, vjust=1.1 , color="red", label=paste0("Memory peak = ", round(mem_peak, digits=2), "MB")) +
       geom_hline(yintercept = mem_peak, color="red", linetype = "dashed");
   }
@@ -556,7 +556,7 @@ get_min_color <- function(node) {
     }
   }
 }
- 
+
 find_node_color <- function(node) {
   color <- df_colors %>%
     filter(ANode == node & Event == "Start") %>%
@@ -568,11 +568,11 @@ find_node_color <- function(node) {
 
 set_color_available <- function(node) {
   color <- find_node_color(node);
-  
+
   df_colors <<- df_colors %>%
-    rbind(tibble(ANode=node, Event="End", color=color)) 
+    rbind(tibble(ANode=node, Event="End", color=color))
   active_colors <<- active_colors[active_colors != as.integer(color)]
- 
+
  return(color)
 }
 

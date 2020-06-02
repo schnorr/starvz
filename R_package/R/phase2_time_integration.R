@@ -26,7 +26,6 @@ microscopic_time_expanding <- function (df = NULL, variable = NULL)
         P = na.locf(P, na.rm = FALSE),
         Pipeline = na.locf(Pipeline, na.rm = FALSE),
         Type = na.locf(Type, na.rm = FALSE),
-        Nature = na.locf(Nature, na.rm = FALSE),
         End = lead(Start),
         Duration = End-Start) %>%
     # Omit missing values

@@ -26,15 +26,17 @@ scalfmm_states <- function()
 lu_colors <- function()
 {
     tibble(
-        Kernel = c("getrf", "trsm", "gemm", "plgsy"),
-        Color = c("#e41a1c", "#377eb8", "#4daf4a", "yellow"));
+        Kernel = c("getrf", "trsm", "gemm", "plgsy", "plrnt"),
+        Color = c("#e41a1c", "#377eb8", "#4daf4a", "yellow", "yellow"),
+        Use = c(TRUE, TRUE, TRUE, FALSE, FALSE));
 }
 
 cholesky_colors <- function()
 {
     tibble(
         Kernel = c("potrf", "trsm", "syrk", "gemm", "plgsy"),
-        Color = c("#e41a1c", "#377eb8", "#984ea3", "#4daf4a", "yellow"));
+        Color = c("#e41a1c", "#377eb8", "#984ea3", "#4daf4a", "yellow"),
+        Use = c(TRUE, TRUE, TRUE, TRUE, FALSE));
 }
 
 cfd_colors <- function()
@@ -48,7 +50,8 @@ qr_colors <- function()
 {
     tibble(
         Kernel = c("dgeqrt", "dlarfb" , "dtpqrt" , "dtpmqrt", "lapack_dgeqrt", "lapack_dlarfb" , "lapack_dtpqrt" , "lapack_dtpmqrt"),
-        Color = c("#96e3a2", "#f68285", "#d194d0",  "#9bb6dd", "#96e3a2", "#f68285", "#d194d0",  "#9bb6dd"));
+        Color = c("#96e3a2", "#f68285", "#d194d0",  "#9bb6dd", "#96e3a2", "#f68285", "#d194d0",  "#9bb6dd"),
+        Use = c(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE));
 }
 
 scalfmm_colors <- function()
@@ -165,5 +168,6 @@ qrmumps_color_mapping() %>%
                TRUE ~ .$Kernel)) %>%
     # Add new kernels
     bind_rows (tibble(Kernel = c("init_block", "clean_block", "block_copy"),
-                      Color = c("#FFFF33", "#984EA3", "#ad0a18")));
+                      Color = c("#FFFF33", "#984EA3", "#ad0a18"))) %>%
+               mutate(Use = TRUE)
 }

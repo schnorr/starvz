@@ -15,7 +15,7 @@ starvz_read_some_feather <- function (directory = ".", files = c("state.feather"
 
 starvz_read_feather <- function (directory = ".")
 {
-    filenames <- list.files(path = directory, pattern = "*.feather", full.names = TRUE, recursive = TRUE);
+    filenames <- list.files(path = directory, pattern = "*.feather", full.names = TRUE, recursive = FALSE);
     starvz_read_some_feather(directory=directory, files = filenames)
 }
 # retrocompatibility
@@ -40,7 +40,7 @@ starvz_read_some_parquet <- function (directory = ".", files = c("state.parquet"
 
 starvz_read_parquet <- function (directory = ".")
 {
-    filenames <- list.files(path = directory, pattern = "*.parquet", full.names = TRUE, recursive = TRUE);
+    filenames <- list.files(path = directory, pattern = "*.parquet", full.names = TRUE, recursive = FALSE);
     starvz_read_some_parquet(directory=directory, files=filenames)
 }
 
@@ -48,7 +48,7 @@ starvz_read <- function(directory = ".")
 {
     check_arrow();
     # Check if there is arrow gz files
-    filenames <- list.files(path = directory, pattern = "*.parquet", full.names = TRUE, recursive = TRUE);
+    filenames <- list.files(path = directory, pattern = "*.parquet", full.names = TRUE, recursive = FALSE);
     if(length(filenames)>0){
         loginfo("Detected parquet files")
         starvz_read_parquet(directory)

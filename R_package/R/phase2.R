@@ -7,17 +7,19 @@ check_arrow <- function(){
   }
 }
 
-extract_colors <- function(dfw = NULL)
+extract_colors <- function(dfw = NULL, colors = NULL)
 {
     if(is.null(dfw)) return(NULL);
+    if(is.null(colors)) return(NULL);
 
     dfw <- dfw %>% ungroup;
 
     dfw %>%
-        select(Value, Color) %>%
+        select(Value) %>%
         unique %>%
+        left_join(colors, by=c("Value")) %>%
         .$Color %>%
-        setNames(dfw %>% select(Value, Color) %>% unique %>% .$Value);
+        setNames(dfw %>% select(Value) %>% unique %>% .$Value);
 }
 
 yconf <- function (dfw = NULL)
@@ -118,8 +120,8 @@ starpu_mpi_grid_arrange <- function(plist)
 {
     # Decode plist to local variables (to avoid editing all function)
     atree = plist$atree
-    utiltreenode = plist$atree
-    utiltreedepth = plist$atree
+    utiltreenode = plist$utiltreenode
+    utiltreedepth = plist$utiltreedepth
     st = plist$st
     st_pm = plist$st_pm
     st_mm = plist$st_mm
@@ -178,6 +180,11 @@ starpu_mpi_grid_arrange <- function(plist)
       starvz_height_todo <- 4
     }
 
+    # For plots TODO, default small
+    if(!exists("starvz_height_small")){
+      starvz_height_small <- 0.05
+    }
+
     # Customized legend position
     loginfo("Customized legend position, plot list preparation");
 
@@ -227,11 +234,11 @@ starpu_mpi_grid_arrange <- function(plist)
     }
     if (pjr(pajer$memory$state$active)){
         P[[length(P)+1]] <- st_mm;
-        H[[length(H)+1]] <- pjr_value(pajer$memory$state$height, starvz_height_todo);
+        H[[length(H)+1]] <- pjr_value(pajer$memory$state$height, starvz_height_nodes);
     }
     if (pjr(pajer$memory$transfers$active) && !pjr(pajer$memory$combined)){
         P[[length(P)+1]] <- transf;
-        H[[length(H)+1]] <- pjr_value(pajer$memory$transfers$height, starvz_height_todo);
+        H[[length(H)+1]] <- pjr_value(pajer$memory$transfers$height, starvz_height_nodes);
     }
     if (pjr(pajer$submitted$active)){
         P[[length(P)+1]] <- submitted;
@@ -247,7 +254,7 @@ starpu_mpi_grid_arrange <- function(plist)
     }
     if (pjr(pajer$lackready$active)){
         P[[length(P)+1]] <- lackready;
-        H[[length(H)+1]] <- pjr_value(pajer$lackready$height, .05);
+        H[[length(H)+1]] <- pjr_value(pajer$lackready$height, starvz_height_small);
     }
      if (pjr(pajer$gflops$active)){
         P[[length(P)+1]] <- gflops;
@@ -330,6 +337,7 @@ starvz_guided_plot <- function(data, name)
 
     starvz_height_resources <<- (data$Y$Position %>% max()) * 10 / 100
     starvz_height_nodes <<- max(nodes * 10 / 100, 1)
+    starvz_height_small <<- 0.5
 
     p <- starvz_plot(data)
 
@@ -358,29 +366,27 @@ starvz_plot_list <- function(data = NULL)
         addHandler(writeToConsole)
     }
 
+    if(is.null(data$Version)){
+       logwarn("This is a old StarVZ trace, tring to be retrocompatible")
+       data$Application <- data$State %>% filter(Application)
+       data$Application <- data$Application %>% mutate(Size = as.integer(Size))
+       data$Starpu <- data$State %>% filter(Type=="Worker State", Application==FALSE) %>%
+                                     mutate(Size = as.integer(Size))
+       data$Comm_state <- data$State %>% filter(Type=="Communication Thread State") %>% select(-Position, -Height)
+       data$Memory_state <- data$State %>% filter(Type=="Memory Node State") %>% select(-Position)
+       data$Colors <- data$State %>% filter(Application) %>% select(Value, Color) %>% distinct()
+    }
+
     # Get data
     directory <- data$Origin;
 
-    if(is.null(data$State)){
-       stop("The State data was not loaded, check if the feather files exists.");
+    if(is.null(data$Application)){
+       stop("The Application data was not loaded, check if the feather files exists.");
     }
 
     if (!is.null(pajer$time)){
         stop("pajer: you are using a deprecated parameter.");
     }
-
-    # Lets do some transformations on data here
-    # TODO: Maybe this will make sense to transfer to Phase1
-    data$Application <- data$State %>%
-                        filter(Type == "Worker State") %>%
-                        filter(Application == TRUE)
-
-    data$Starpu <- data$State %>%
-                        filter(Type == "Worker State") %>%
-                        filter(Application == FALSE)
-
-    data$State <- NULL
-    gc()
 
     # Define makespan
     makespan <- data$Application %>% pull(End) %>% max
@@ -418,7 +424,7 @@ starvz_plot_list <- function(data = NULL)
       pajer$pmtool$bounds$active <<- FALSE;
     }
 
-    if((data$Starpu %>% filter(Type == "Memory Node State") %>% nrow) == 0 && pjr(pajer$memory$state$active) ){
+    if((data$Memory_state %>% nrow) == 0 && pjr(pajer$memory$state$active) ){
       logwarn("There is not information about memory states")
       pajer$memory$state$active <<- FALSE;
       pajer$memory$combined <<- FALSE;
@@ -430,7 +436,7 @@ starvz_plot_list <- function(data = NULL)
       pajer$memory$combined <<- FALSE;
     }
 
-    dfevents = data$Starpu %>% filter(Type == "Memory Node State")
+    dfevents = data$Memory_state
 
     if((dfevents %>% nrow) == 0 && ( pjr(pajer$memory$new_data) && (data$Events %>% nrow) == 0) ){
       logwarn("This dataset dont have memory node states")
@@ -533,7 +539,6 @@ starvz_plot_list <- function(data = NULL)
         loginfo("Creating the Space/Time");
         if (pjr(pajer$st$aggregation$active)){
             if (pjr_value(pajer$st$aggregation$method, "lucas") == "lucas"){
-                loginfo("Will call st_time_aggregation");
                 aggStep <- pjr_value(pajer$st$aggregation$step, globalAggStep);
                 dfw_agg <- st_time_aggregation(data$Application, step=aggStep);
                 data %>% st_time_aggregation_plot (dfw_agg) + tScale -> gow;
@@ -544,7 +549,6 @@ starvz_plot_list <- function(data = NULL)
                 loginfo("Finish vinicius aggregation");
             }
         }else{
-            loginfo("Will call state_chart");
             data %>% state_chart (globalEndTime = tend, ST.Outliers = pjr(pajer$st$outliers), StarPU.View = FALSE) + tScale -> gow;
             loginfo("state_chart completed (no aggregation)");
         }
@@ -609,14 +613,11 @@ starvz_plot_list <- function(data = NULL)
         ml <- pajer$kiteration$middlelines
         if(length(ml) == 0){
             ml <- NULL
-            loginfo("No middle lines")
-        }else{
-            loginfo(paste("Middle lines for KIteration:", ml))
         }
         pn <- pjr_value(pajer$kiteration$pernode, FALSE)
         goijk <- k_chart(data$Application,
                          middle_lines=ml,
-                         per_node=pn) + tScale;
+                         per_node=pn, colors=data$Colors) + tScale;
 
         if (!pjr(pajer$kiteration$legend)){
             goijk <- goijk +
@@ -633,7 +634,7 @@ starvz_plot_list <- function(data = NULL)
     # KIteration PMTOOL
     if (pjr(pajer$pmtool$kiteration$active)){
         loginfo("Creating the KIteration for PMTool");
-        goijk_pm <- k_chart_pmtool(data$Pmtool_states) + tScale;
+        goijk_pm <- k_chart_pmtool(data$Pmtool_states, colors=data$Colors) + tScale;
 
         if (!pjr(pajer$pmtool$kiteration$legend)){
             goijk_pm <- goijk_pm + theme(legend.position="none");
@@ -807,11 +808,11 @@ starvz_plot_list <- function(data = NULL)
     # MPI State
     if (pjr(pajer$mpistate$active)){
         loginfo("Creating the MPI state");
-        if ( (data$Starpu %>% filter(Type == "Communication Thread State") %>% nrow) == 0 ){
+        if ( is.null(data$Comm_state) || (data$Comm_state %>% nrow) == 0 ){
           logwarn("There aren't any information on MPI, ignoring it.");
           pajer$mpistate$active <<- FALSE;
         }else{
-          gompistate <- data %>% state_mpi_chart() + tScale;
+          gompistate <- data$Comm_state %>% state_mpi_chart() + tScale;
           if (!pjr(pajer$mpistate$legend)){
               gompistate <- gompistate + theme(legend.position="none");
           }

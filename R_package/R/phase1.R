@@ -1289,8 +1289,11 @@ data_handles_csv_parser <- function (where = ".")
         loginfo(paste("File", entities.csv, "do not exist."));
         return(NULL);
     }
-    ret <- pm %>% mutate(Handle = as.factor(Handle),
-                         Description = as.factor(Description));
+    ret <- pm %>% mutate(Handle = as.factor(Handle));
+    if("Description" %in% colnames(ret))
+    {
+      ret <- ret %>% mutate(Description = as.factor(Description));
+    }
 
     return(ret);
 }

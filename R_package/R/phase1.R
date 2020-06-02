@@ -681,7 +681,7 @@ read_worker_csv <- function (where = ".",
       # Match States and Colors
       dfcolors <- dfcolors %>% mutate(Color = c) %>%
           arrange(Value, Color) %>%
-          mutate(Color = na.locf(Color, na.rm=FALSE)) %>%
+          mutate(Color = na.locf(Color, na.rm=FALSE), Use=TRUE) %>%
           unique;
 
     }else{

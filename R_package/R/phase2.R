@@ -326,14 +326,25 @@ starvz_guided_plot <- function(data, name)
     # For plots that show nodes 10px per node
     # For variable plots, 100px
     # For plots TODO, default 200px
-    if(!is.null(data$Tasks)){
+    if(!is.null(pajer$selected_nodes)){
+      nodes <- length(pajer$selected_nodes)
+    }else if(!is.null(data$Tasks)){
       nodes <- data$Tasks %>% select(MPIRank) %>% distinct() %>% nrow()
     }else if(!is.null(data$Application)){
       nodes <- data$Application %>% select(Node) %>% distinct() %>% nrow()
     }else{
       nodes <- 1
     }
-    starvz_height_resources <<- (data$Y$Position %>% max()) * 10 / 100
+    if(!is.null(pajer$selected_nodes)){
+      data$Y %>% separate(Parent, into=c("Node"), remove=FALSE) %>%
+             filter(Node %in% pajer$selected_nodes) %>%
+             arrange(Position) %>%
+             mutate(New = cumsum(lag(Height, default = 0))) %>%
+             select(Parent, New) -> new_y
+        starvz_height_resources <<- (new_y$New %>% max()) * 10 / 100
+    }else{
+        starvz_height_resources <<- (data$Y$Position %>% max()) * 10 / 100
+    }
     starvz_height_nodes <<- max(nodes * 10 / 100, 1)
     starvz_height_small <<- 0.5
 
@@ -407,6 +418,9 @@ starvz_plot_list <- function(data = NULL)
     );
 
     dfv <- data$Variable;
+    if(!is.null(pajer$selected_nodes)){
+      dfv <- dfv %>% filter(Node %in% pajer$selected_nodes)
+    }
 
     loginfo("Starting the Starvz plot function");
 
@@ -542,13 +556,14 @@ starvz_plot_list <- function(data = NULL)
             if (pjr_value(pajer$st$aggregation$method, "lucas") == "lucas"){
                 aggStep <- pjr_value(pajer$st$aggregation$step, globalAggStep);
                 dfw_agg <- st_time_aggregation(data$Application, step=aggStep);
-                data %>% st_time_aggregation_plot (dfw_agg) + tScale -> gow;
+                data %>% st_time_aggregation_plot (dfw_agg) + coord_cartesian(xlim=c(tstart, tend), ylim=c(0, NA)) -> gow;
             }else{
                 loginfo("Call vinicius aggregation");
-                data %>% st_time_aggregation_vinicius_plot() + tScale -> gow;
+                data %>% st_time_aggregation_vinicius_plot() + coord_cartesian(xlim=c(tstart, tend), ylim=c(0, NA)) -> gow;
             }
         }else{
-            data %>% state_chart (globalEndTime = tend, ST.Outliers = pjr(pajer$st$outliers), StarPU.View = FALSE) + tScale -> gow;
+            data %>% state_chart (globalEndTime = tend, ST.Outliers = pjr(pajer$st$outliers), StarPU.View = FALSE) +
+                     coord_cartesian(xlim=c(tstart, tend), ylim=c(0, NA)) -> gow;
         }
 
         # Without legend
@@ -594,9 +609,9 @@ starvz_plot_list <- function(data = NULL)
           loginfo("Will call st_time_aggregation");
           aggStep <- pjr_value(pajer$starpu$aggregation$step, globalAggStep);
           dfw_agg <- st_time_aggregation(data$Starpu, StarPU.View=TRUE, step=aggStep);
-          data %>% st_time_aggregation_plot (dfw_agg, StarPU.View=TRUE) + tScale -> gstarpu;
+          data %>% st_time_aggregation_plot (dfw_agg, StarPU.View=TRUE) + coord_cartesian(xlim=c(tstart, tend), ylim=c(0, NA)) -> gstarpu;
         }else{
-          data %>% state_chart (globalEndTime = tend, StarPU.View = TRUE) + tScale -> gstarpu;
+          data %>% state_chart (globalEndTime = tend, StarPU.View = TRUE) + coord_cartesian(xlim=c(tstart, tend), ylim=c(0, NA)) -> gstarpu;
         }
         if (!pjr(pajer$starpu$legend)){
             gstarpu <- gstarpu + theme(legend.position="none");

@@ -323,10 +323,9 @@ geom_idleness <- function(Application = NULL)
                          label=gsub("$", "%", Idleness)));
     return(ret);
 }
-geom_makespan <- function(data = NULL)
+geom_makespan <- function(dfw = NULL)
 {
     if(is.null(data)) stop("data provided for geom_makespan is NULL");
-    dfw <- data$Application;
 
     bsize = pjr_value(pajer$base_size, 22);
 

@@ -16,6 +16,7 @@ default:
   limits: # Set the time limits used
     start: 0 # Initial Time
     #end: 10000 # Final Time
+  #selected_nodes: ["1"] #Select only some nodes in some plots
 
   # Visualizations in order of appearance
   atree: # plot space/time tree structure computation
@@ -85,7 +86,7 @@ default:
       active: FALSE
       height: 2
       middlelines: [0.5, 0.7] # Use middle lines in the plot to show advancement
-      pernode: FALSE # very experimental, per-node limits, do a facet_wrap(~Node, ncol=1)      
+      pernode: FALSE # very experimental, per-node limits, do a facet_wrap(~Node, ncol=1)
       legend: TRUE
 
   memory:

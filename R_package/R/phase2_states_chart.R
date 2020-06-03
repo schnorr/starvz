@@ -12,19 +12,41 @@ state_chart <- function (data = NULL, globalEndTime = NULL, ST.Outliers = TRUE, 
     #Plot
     gow <- ggplot() + default_theme();
 
+    App <- data$Application
+    # Select Nodes
+    if(!is.null(pajer$selected_nodes)){
+      data$Y %>% separate(Parent, into=c("Node"), remove=FALSE) %>%
+             filter(Node %in% pajer$selected_nodes) %>%
+             arrange(Position) %>%
+             mutate(New = cumsum(lag(Height, default = 0))) %>%
+             select(Parent, New) -> new_y
+       if(StarPU.View){
+         data$Starpu <- data$Starpu %>% left_join(new_y, by=c("ResourceId"="Parent")) %>%
+                             mutate(Position = if_else(is.na(New), -3, New)) %>%
+                             select(-New)
+       }else{
+         data$Application <- data$Application %>% left_join(new_y, by=c("ResourceId"="Parent")) %>%
+                             mutate(Position = if_else(is.na(New), -3, New)) %>%
+                             mutate(Height = if_else(is.na(New), 0, Height)) %>%
+                             select(-New)
+         App <- data$Application %>%
+                filter(Position >= 0)
+       }
+    }
+
     # Add states and outliers if requested
     if(StarPU.View){
       gow <- gow + geom_states(data$Starpu,
                               ST.Outliers, StarPU.View, data$Colors);
     }else{
-      gow <- gow + geom_states(data$Application,
+      gow <- gow + geom_states(App,
                                ST.Outliers, StarPU.View, data$Colors);
     }
 
     if (!StarPU.View){
 
         # add idleness
-        if (pjr(pajer$st$idleness)) gow = gow + geom_idleness(data$Application);
+        if (pjr(pajer$st$idleness)) gow = gow + geom_idleness(App);
 
         # check if task dependencies should be added
         if (pjr(pajer$st$tasks$active)){
@@ -34,6 +56,11 @@ state_chart <- function (data = NULL, globalEndTime = NULL, ST.Outliers = TRUE, 
             tasksel <- gaps_backward_deps (data = data,
                                            tasks = tasklist,
                                            levels = levels);
+            if(!is.null(pajer$selected_nodes)){
+              tasksel <- tasksel %>% left_join(new_y, by=c("ResourceId"="Parent")) %>%
+                                  mutate(Position = if_else(is.na(New), -3, New)) %>%
+                                  select(-New)
+            }
 
             gow = gow + geom_path_highlight(tasksel);
         }
@@ -48,7 +75,7 @@ state_chart <- function (data = NULL, globalEndTime = NULL, ST.Outliers = TRUE, 
         if (pjr(pajer$pmtool$bounds$active)) gow = gow + geom_pmtool_bounds(data);
 
         # add makespan
-        if (pjr(pajer$st$makespan)) gow = gow + geom_makespan(data);
+        if (pjr(pajer$st$makespan)) gow = gow + geom_makespan(App);
 
     }
 

@@ -6,6 +6,7 @@ default:
   idleness_factor: 5.5 # Resouces Idleness Text Size division Factor of base_size
   idleness_all: TRUE # Show all Resouces idleness values
   guided_plot: TRUE
+  selected_nodes: ["1"]
   # time: deprecated option
   title: # Overall Visualization Title
     active: TRUE # Active with directory name as Title
@@ -48,6 +49,7 @@ default:
     makespan: TRUE # Show the application makespan
     alpha: 0.25 # Alpha value to control transparency of tasks that are not outliers
     outliers: TRUE # Differentiate outliers tasks
+    
     abe: # Show Abe makespan metric
       active: TRUE # Enable
       label: TRUE # Enable Label

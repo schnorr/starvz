@@ -52,7 +52,7 @@ if [ ! -f "paje.sorted.trace" ] || [ ! -f "data.rec" ] || [ ! -f "tasks.rec" ]; 
       echo "ERROR: conversion from FXT failed! (exit status: $es)"
       exit 1
   fi
-  rm -f paje.trace
+  rm -f paje.trace.gz
 else
   echo "fxt2paje files already present"
 fi
@@ -99,15 +99,15 @@ fi
 if [ -x "$(command -v rec2csv)" ]; then
   echo "Convert Rec files"
   date "+%a %d %b %Y %H:%M:%S %Z"
-  DATACSV="rec.data_handles.csv"
-  rec2csv -S Handle data.rec | sed 's/"//g' > $DATACSV
+  DATACSV="rec.data_handles.csv.gz"
+  rec2csv -S Handle data.rec | sed 's/"//g' | gzip -c > $DATACSV
 
-  TASKSCSV="rec.tasks.csv"
-  rec2csv tasks.rec | sed 's/"//g' > $TASKSCSV
+  TASKSCSV="rec.tasks.csv.gz"
+  rec2csv tasks.rec | sed 's/"//g' | gzip -c > $TASKSCSV
   PAPIFILE="papi.rec"
   if [ -f "$PAPIFILE" ]; then
-    PAPICSV="rec.papi.csv"
-    rec2csv $PAPIFILE | sed 's/"//g' > $PAPICSV
+    PAPICSV="rec.papi.csv.gz"
+    rec2csv $PAPIFILE | sed 's/"//g' | gzip -c > $PAPICSV
   fi
 else
   # TODO: Read this files without the rec2csv tool?
@@ -123,58 +123,58 @@ if [ ! -x "$(command -v pj_dump)" ]; then
   echo "ERROR: pj_dump is not installed, please install PajeNG or configure PATH"
   exit 1
 fi
-pj_dump -o -n --user-defined --entity-hierarchy=entities.csv --type-hierarchy=types.csv "paje.sorted.trace" > paje.csv
+zcat "paje.sorted.trace.gz" | pj_dump -o -n --user-defined --entity-hierarchy=entities.csv --type-hierarchy=types.csv | gzip -c > paje.csv.gz
 es=$?
 if [ $es -ne 0 ]
 then
     echo "Error when executing pj_dump (exit status: $es)"
     exit 1
 fi
-rm -f paje.sorted.trace
+rm -f paje.sorted.trace.gz
 
 echo "Get states, links and variables in CSV"
 date "+%a %d %b %Y %H:%M:%S %Z"
 
-PAJE_MEMORY_STATE=paje.memory_state.csv
-echo "Nature, ResourceId, Type, Start, End, Duration, Depth, Value" > $PAJE_MEMORY_STATE
-grep -e "Memory Node State" paje.csv >> $PAJE_MEMORY_STATE
+PAJE_MEMORY_STATE=paje.memory_state.csv.gz
+echo "Nature, ResourceId, Type, Start, End, Duration, Depth, Value" | gzip -c > $PAJE_MEMORY_STATE
+zgrep -e "Memory Node State" paje.csv.gz | gzip -c >> $PAJE_MEMORY_STATE
 
-PAJE_COMM_STATE=paje.comm_state.csv
-echo "Nature, ResourceId, Type, Start, End, Duration, Depth, Value" > $PAJE_COMM_STATE
-grep -e "Communication Thread State" paje.csv >> $PAJE_COMM_STATE
+PAJE_COMM_STATE=paje.comm_state.csv.gz
+echo "Nature, ResourceId, Type, Start, End, Duration, Depth, Value" | gzip -c > $PAJE_COMM_STATE
+zgrep -e "Communication Thread State" paje.csv.gz | gzip -c >> $PAJE_COMM_STATE
 
-PAJE_WORKER_STATE=paje.worker_state.csv
-echo "Nature, ResourceId, Type, Start, End, Duration, Depth, Value, Size, Params, Footprint, Tag, JobId, SubmitOrder, GFlop, X, Y, Iteration, Subiteration" > $PAJE_WORKER_STATE
-grep -e "Worker State" paje.csv >> $PAJE_WORKER_STATE
+PAJE_WORKER_STATE=paje.worker_state.csv.gz
+echo "Nature, ResourceId, Type, Start, End, Duration, Depth, Value, Size, Params, Footprint, Tag, JobId, SubmitOrder, GFlop, X, Y, Iteration, Subiteration" | gzip -c > $PAJE_WORKER_STATE
+zgrep -e "Worker State" paje.csv.gz | gzip -c >> $PAJE_WORKER_STATE
 
-PAJE_OTHER_STATE=paje.other_state.csv
-echo "Nature, ResourceId, Type, Start, End, Duration, Depth, Value" > $PAJE_OTHER_STATE
-grep -E "^State" paje.csv | grep -E -v "(Memory Node State|Communication Thread State|Worker State)" >> $PAJE_OTHER_STATE
+PAJE_OTHER_STATE=paje.other_state.csv.gz
+echo "Nature, ResourceId, Type, Start, End, Duration, Depth, Value" | gzip -c > $PAJE_OTHER_STATE
+zgrep -E "^State" paje.csv.gz | grep -E -v "(Memory Node State|Communication Thread State|Worker State)" | gzip -c >> $PAJE_OTHER_STATE
 
-PAJEVARIABLE=paje.variable.csv
-echo "Nature, ResourceId, Type, Start, End, Duration, Value" > $PAJEVARIABLE
-cat paje.csv | grep ^Variable >> $PAJEVARIABLE
+PAJEVARIABLE=paje.variable.csv.gz
+echo "Nature, ResourceId, Type, Start, End, Duration, Value" | gzip -c > $PAJEVARIABLE
+zgrep -E "^Variable" paje.csv.gz | gzip -c >> $PAJEVARIABLE
 
-PAJELINK=paje.link.csv
-echo "Nature, Container, Type, Start, End, Duration, Size, Origin, Dest, Key, Tag" > $PAJELINK
-cat paje.csv | grep ^Link >> $PAJELINK
+PAJELINK=paje.link.csv.gz
+echo "Nature, Container, Type, Start, End, Duration, Size, Origin, Dest, Key, Tag" | gzip -c > $PAJELINK
+zgrep -E "^Link" paje.csv.gz | gzip -c >> $PAJELINK
 
-PAJEEVENT=paje.events.csv
-echo "Nature, Container, Type, Start, Value, Handle, Info, Size, Tid, Src" > $PAJEEVENT
-cat paje.csv | grep ^Event >> $PAJEEVENT
+PAJEEVENT=paje.events.csv.gz
+echo "Nature, Container, Type, Start, Value, Handle, Info, Size, Tid, Src" | gzip -c > $PAJEEVENT
+zgrep -E "^Event" paje.csv.gz | gzip -c >> $PAJEEVENT
 
-rm -f paje.csv
+rm -f paje.csv.gz
 
 echo "Convert (DAG) DOT to CSV"
 date "+%a %d %b %Y %H:%M:%S %Z"
 
-OUTPUTDAGCSV=dag.csv
-echo "Dependent,JobId" > $OUTPUTDAGCSV
+OUTPUTDAGCSV=dag.csv.gz
+echo "Dependent,JobId" | gzip -c > $OUTPUTDAGCSV
 cat dag.dot | \
     grep "\->" | \
     sed -e "s/[[:space:]]//g" -e "s/\"//g" -e "s/task_//g" -e "s/->/,/" | \
     sed -e "s/[[:space:]]//g" | \
-    sort >> $OUTPUTDAGCSV
+    sort | gzip -c >> $OUTPUTDAGCSV
 rm -f dag.dot
 
 echo "Convert (ATREE) DOT to CSV"
@@ -195,9 +195,9 @@ then
     echo "Error when executing phase1-workflow.R (exit status: $es)"
     exit 2
 fi
-rm -f atree.csv dag.csv entities.csv paje.link.csv paje.state.csv paje.variable.csv\
-      types.csv comms.rec paje.events.csv paje.memory_state.csv paje.other_state.csv\
-      paje.worker_state.csv rec.data_handles.csv rec.tasks.csv sched_tasks.rec
+rm -f atree.csv $OUTPUTDAGCSV entities.csv $PAJELINK $PAJEVARIABLE\
+      types.csv comms.rec $PAJEEVENT $PAJE_COMM_STATE $PAJE_MEMORY_STATE $PAJE_OTHER_STATE\
+      $PAJE_WORKER_STATE $DATACSV $TASKSCSV sched_tasks.rec
 
 echo
 echo "End of $CASE"

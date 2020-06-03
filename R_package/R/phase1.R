@@ -548,7 +548,7 @@ read_worker_csv <- function (where = ".",
     if(!is.data.frame(app_states_fun())) stop("app_states_fun is not returning a data frame");
     if(is.null(outlier_fun)) stop("outlier_fun should be provided to read_state_csv");
 
-    state.csv = paste0(where, "/paje.worker_state.csv");
+    state.csv = paste0(where, "/paje.worker_state.csv.gz");
     if(file.exists(state.csv)){
         loginfo(paste("Reading", state.csv));
         dfw <- read_csv(file=state.csv,
@@ -801,7 +801,7 @@ read_worker_csv <- function (where = ".",
 
 read_memory_state_csv <- function (where = ".")
 {
-    csv_file = paste0(where, "/paje.memory_state.csv");
+    csv_file = paste0(where, "/paje.memory_state.csv.gz");
     if(file.exists(csv_file)){
         loginfo(paste("Reading ", csv_file));
         dfw <- read_csv(file=csv_file,
@@ -858,7 +858,7 @@ read_memory_state_csv <- function (where = ".")
 
 read_comm_state_csv <- function (where = ".")
 {
-    csv_file = paste0(where, "/paje.comm_state.csv");
+    csv_file = paste0(where, "/paje.comm_state.csv.gz");
     if(file.exists(csv_file)){
         loginfo(paste("Reading ", csv_file));
         dfw <- read_csv(file=csv_file,
@@ -916,7 +916,7 @@ read_comm_state_csv <- function (where = ".")
 
 read_other_state_csv <- function (where = ".")
 {
-    csv_file = paste0(where, "/paje.other_state.csv");
+    csv_file = paste0(where, "/paje.other_state.csv.gz");
     if(file.exists(csv_file)){
         loginfo(paste("Reading ", csv_file));
         dfw <- read_csv(file=csv_file,
@@ -971,12 +971,9 @@ read_other_state_csv <- function (where = ".")
 
 read_vars_set_new_zero <- function (where = ".")
 {
-    variable.feather = paste0(where, "/paje.variable.feather");
-    variable.csv = paste0(where, "/paje.variable.csv");
-    if(file.exists(variable.feather)){
-        loginfo(paste("Reading ", variable.feather));
-        dfv <- read_feather(variable.feather);
-    }else if(file.exists(variable.csv)){
+
+    variable.csv = paste0(where, "/paje.variable.csv.gz");
+    if(file.exists(variable.csv)){
         loginfo(paste("Reading ", variable.csv));
         dfv <- read_csv(variable.csv,
                         trim_ws=TRUE,
@@ -991,7 +988,7 @@ read_vars_set_new_zero <- function (where = ".")
                             Value = col_double()
                         ));
     }else{
-        stop(paste("Files", variable.feather, "or", variable.csv, "do not exist"));
+        stop(paste("File", variable.csv, "do not exist"));
     }
 
     dfv <- dfv %>% select(-Nature) %>%
@@ -1268,7 +1265,7 @@ pmtool_states_csv_parser <- function (where = ".", whichApplication = NULL, Y = 
 
 data_handles_csv_parser <- function (where = ".")
 {
-    entities.csv = paste0(where, "/rec.data_handles.csv");
+    entities.csv = paste0(where, "/rec.data_handles.csv.gz");
 
     if (file.exists(entities.csv)){
         loginfo(paste("Reading ", entities.csv));
@@ -1300,13 +1297,9 @@ data_handles_csv_parser <- function (where = ".")
 
 papi_csv_parser <- function (where = ".")
 {
-    entities.feather = paste0(where, "/papi.feather");
-    entities.csv = paste0(where, "/rec.papi.csv");
+    entities.csv = paste0(where, "/rec.papi.csv.gz");
 
-    if (file.exists(entities.feather)){
-        loginfo(paste("Reading ", entities.feather));
-        pm <- read_feather(entities.feather);
-    }else if (file.exists(entities.csv)){
+    if (file.exists(entities.csv)){
         loginfo(paste("Reading ", entities.csv));
         pm <- read_csv(entities.csv,
                         trim_ws=TRUE,
@@ -1316,7 +1309,7 @@ papi_csv_parser <- function (where = ".")
                             Value = col_integer()
                         ));
     }else{
-        loginfo(paste("Files", entities.feather, "or", entities.csv, "do not exist."));
+        loginfo(paste("File", entities.csv, "do not exist."));
         return(NULL);
     }
     ret <- pm;
@@ -1339,7 +1332,7 @@ task_handles_parser <- function (where = ".")
 
 tasks_csv_parser <- function (where = ".")
 {
-    entities.csv = paste0(where, "/rec.tasks.csv");
+    entities.csv = paste0(where, "/rec.tasks.csv.gz");
 
     task_handles <- task_handles_parser(where = where);
 
@@ -1400,7 +1393,7 @@ tasks_csv_parser <- function (where = ".")
 
 events_csv_parser <- function (where = ".")
 {
-    entities.csv = paste0(where, "/paje.events.csv");
+    entities.csv = paste0(where, "/paje.events.csv.gz");
 
     if (file.exists(entities.csv)){
         loginfo(paste("Reading ", entities.csv));
@@ -1712,7 +1705,7 @@ gaps <- function (data)
 }
 read_links <- function (where = ".")
 {
-    link.csv = paste0(where, "/paje.link.csv");
+    link.csv = paste0(where, "/paje.link.csv.gz");
     if(file.exists(link.csv)){
         loginfo(paste("Reading ", link.csv));
         dfl <- read_csv(link.csv,
@@ -1759,12 +1752,8 @@ read_links <- function (where = ".")
 }
 read_dag <- function (where = ".", Application = NULL, dfl = NULL)
 {
-    dag.feather = paste0(where, "/dag.feather");
-    dag.csv = paste0(where, "/dag.csv");
-    if(file.exists(dag.feather)){
-        loginfo(paste("Reading ", dag.feather));
-        dfdag <- read_feather(dag.feather);
-    }else if(file.exists(dag.csv)){
+    dag.csv = paste0(where, "/dag.csv.gz");
+    if(file.exists(dag.csv)){
         loginfo(paste("Reading ", dag.csv));
         dfdag <- read_csv(dag.csv,
                           trim_ws=TRUE,
@@ -1774,7 +1763,7 @@ read_dag <- function (where = ".", Application = NULL, dfl = NULL)
                               DependsOn = col_integer()
                           ));
     }else{
-        logwarn(paste("Files", dag.feather, "or", dag.csv, "do not exist"));
+        logwarn(paste("File", dag.csv, "do not exist"));
         return(NULL);
     }
 

@@ -31,12 +31,11 @@ if (length(args)==3) {
 	name = args[[3]];
 }
 
+cat("StarVZ - Phase 2 - Start\n", file = stdout())
+
 pajer <- config::get(file = pajer.config);
 
 data <- starvz_selective_read(directory);
-
-cat("StarVZ - Phase 2 - Data has been read\n", file = stdout())
-
 
 if(pjr(pajer$guided_plot)){
   r <- starvz_guided_plot(data, name)

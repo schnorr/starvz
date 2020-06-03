@@ -63,7 +63,7 @@ gaps_backward_deps_rec <- function(data = NULL, path = NULL, task = NULL, levels
         filter(JobId == task)
 
     if ((dta %>% nrow) == 0){
-        print(paste0("The selected task on pajer$st$tasks$list is invalid (skipping it):", task));
+        loginfo(paste0("The selected task on pajer$st$tasks$list is invalid (skipping it):", task));
         return(NULL);
     }
 

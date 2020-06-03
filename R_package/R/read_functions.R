@@ -176,7 +176,7 @@ starvz_selective_read <- function(directory = ".")
   }
 
   tables_to_load <- tables_to_load %>% unique()
-  loginfo(paste("Read:", tables_to_load))
+  loginfo(paste("Read:", paste(tables_to_load, collapse=" ")))
   starvz_read_some(directory = directory, tables = tables_to_load)
 }
 

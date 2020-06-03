@@ -331,9 +331,8 @@ geom_makespan <- function(data = NULL)
     bsize = pjr_value(pajer$base_size, 22);
 
     tend = dfw %>% pull(End) %>% max;
-    loginfo(paste("makespan is", tend));
+    loginfo(paste("Makespan is", tend));
     height = dfw %>% select(Position) %>% na.omit %>% pull(Position) %>% max;
-    loginfo(paste("max height for makespan is", height));
     ret <- geom_text(data=data.frame(), x=tend, y=height*.5, aes(label=round(tend,0)), angle=90, size=bsize/4);
     return(ret);
 }

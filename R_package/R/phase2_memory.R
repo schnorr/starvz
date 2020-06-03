@@ -37,8 +37,6 @@ memory_chart <- function (data = NULL, globalEndTime = NULL, combined = FALSE, t
 {
     if (is.null(data)) stop("data provided to memory_chart is NULL");
 
-    loginfo("Entry of memory_chart");
-
     #Plot
     gow <- ggplot() + default_theme();
 
@@ -48,7 +46,6 @@ memory_chart <- function (data = NULL, globalEndTime = NULL, combined = FALSE, t
       gow <- gow + geom_links(data, combined=TRUE, tstart=tstart, tend=tend);
     }
 
-    loginfo("Exit of memory_chart");
     return(gow);
 }
 
@@ -195,8 +192,6 @@ geom_memory <- function (data_comm = NULL, data_link = NULL, combined = FALSE, t
     if (is.null(data)) stop("data is NULL when given to geom_memory");
 
     dfw <- data_comm
-
-    loginfo("Starting geom_memory");
 
     dfl <- data_link;
 

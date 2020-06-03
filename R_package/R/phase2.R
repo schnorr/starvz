@@ -185,9 +185,6 @@ starpu_mpi_grid_arrange <- function(plist)
       starvz_height_small <- 0.05
     }
 
-    # Customized legend position
-    loginfo("Customized legend position, plot list preparation");
-
     if (pjr(pajer$atree$active)){
         P[[length(P)+1]] <- atree;
         H[[length(H)+1]] <- pjr_value(pajer$atree$height, starvz_height_todo);
@@ -295,8 +292,6 @@ starpu_mpi_grid_arrange <- function(plist)
 
     starvz_height_total <<- sum(unlist(H))
 
-    # Add empty X and horizontal legend to all plots
-    loginfo("Add empty X and horizontal legend");
     # Empty the X axis of all + add horizontal direction for legends
     emptyx <- theme (axis.text.x = element_blank(), axis.title.x = element_blank());
     leghor <- theme (legend.direction = "horizontal", legend.background = element_rect(fill = "white"));
@@ -305,7 +300,6 @@ starpu_mpi_grid_arrange <- function(plist)
     # Vanilla configuration
     if (pjr_value(pajer$vanilla$horizontal, FALSE) == FALSE){
         # Add time scale on last plot
-        loginfo("Add time scale on last plot");
         notemptyx <- theme (axis.text.x = element_text(), axis.title.x = element_text());
         P[[length(P)]] <- P[[length(P)]] + notemptyx;
     }
@@ -434,7 +428,7 @@ starvz_plot_list <- function(data = NULL)
       pajer$memory$combined <<- FALSE;
     }
 
-    if(is.null(data$Link)){
+    if(is.null(data$Link) && (pjr(pajer$memory$transfers$active) || pjr(pajer$memory$combined))) {
       logwarn("This dataset dont have links, disabling some options")
       pajer$memory$transfers$active <<- FALSE;
       pajer$memory$combined <<- FALSE;
@@ -448,7 +442,13 @@ starvz_plot_list <- function(data = NULL)
       pajer$memory$combined <<- FALSE;
     }
 
-    if(is.null(data$Atree)){
+    if(is.null(data$Atree) && (
+      pjr(pajer$utiltreenode$active) ||
+      pjr(pajer$utiltreedepth$active) ||
+      pjr(pajer$atree$active) ||
+      pjr(pajer$activenodes$active) ||
+      pjr(pajer$computingnodes$active)
+    )){
       logwarn("This dataset dont have atree, disabling some options")
       pajer$utiltreenode$active <<- FALSE;
       pajer$utiltreedepth$active <<- FALSE;
@@ -509,7 +509,6 @@ starvz_plot_list <- function(data = NULL)
                                    z.end/100 * max.y.coordinate))
         );
         goatreet <- goatreet + tzScale
-        loginfo("Temporal atree plot completed");
     }
 
     # Resource utilization by tree node
@@ -522,7 +521,6 @@ starvz_plot_list <- function(data = NULL)
         }else{
             goutiltreenode <- goutiltreenode + theme(legend.position = "top")
         }
-        loginfo("Resource utilization by node plot completed");
     }
 
     # Resource utilization by tree depth
@@ -535,7 +533,6 @@ starvz_plot_list <- function(data = NULL)
         }else{
             goutiltreedepth <- goutiltreedepth + theme(legend.position = "top")
         }
-        loginfo("Resource utilization by depth plot completed");
     }
 
     # SpaceTime
@@ -546,15 +543,12 @@ starvz_plot_list <- function(data = NULL)
                 aggStep <- pjr_value(pajer$st$aggregation$step, globalAggStep);
                 dfw_agg <- st_time_aggregation(data$Application, step=aggStep);
                 data %>% st_time_aggregation_plot (dfw_agg) + tScale -> gow;
-                loginfo("st_time_aggregation completed");
             }else{
                 loginfo("Call vinicius aggregation");
                 data %>% st_time_aggregation_vinicius_plot() + tScale -> gow;
-                loginfo("Finish vinicius aggregation");
             }
         }else{
             data %>% state_chart (globalEndTime = tend, ST.Outliers = pjr(pajer$st$outliers), StarPU.View = FALSE) + tScale -> gow;
-            loginfo("state_chart completed (no aggregation)");
         }
 
         # Without legend
@@ -601,10 +595,8 @@ starvz_plot_list <- function(data = NULL)
           aggStep <- pjr_value(pajer$starpu$aggregation$step, globalAggStep);
           dfw_agg <- st_time_aggregation(data$Starpu, StarPU.View=TRUE, step=aggStep);
           data %>% st_time_aggregation_plot (dfw_agg, StarPU.View=TRUE) + tScale -> gstarpu;
-          loginfo("st_time_aggregation completed");
         }else{
           data %>% state_chart (globalEndTime = tend, StarPU.View = TRUE) + tScale -> gstarpu;
-          loginfo("state_chart for StarPU behavior completed (no aggregation)");
         }
         if (!pjr(pajer$starpu$legend)){
             gstarpu <- gstarpu + theme(legend.position="none");

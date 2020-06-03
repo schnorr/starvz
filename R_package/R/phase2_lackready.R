@@ -13,9 +13,9 @@ plot_lackready <- function (data = NULL)
         min -> minResources;
 
     aggStep <- pjr_value(pajer$lackready$aggregation, 200);
-    loginfo(paste("lack ready aggregation is", aggStep));
+    #loginfo(paste("lack ready aggregation is", aggStep));
     threshold <- pjr_value(pajer$lackready$threshold, minResources);
-    loginfo(paste("lack ready threshold is", threshold));
+    #loginfo(paste("lack ready threshold is", threshold));
 
     data$Variable %>%
         filter(Type == "Ready") %>%
@@ -42,8 +42,6 @@ geom_lackready <- function (data = NULL)
         return(NULL);
     }
 
-    loginfo("Starting geom_lackready");
-
     ret <- list();
 
     ret[[length(ret)+1]] <- default_theme();
@@ -58,6 +56,5 @@ geom_lackready <- function (data = NULL)
         axis.text.y = element_blank(),
         axis.ticks.y = element_blank());
 
-    loginfo("Finishing geom_lackready");
     return(ret);
 }

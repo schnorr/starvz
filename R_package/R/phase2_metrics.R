@@ -297,11 +297,11 @@ calculate_resource_idleness <- function(dfw = NULL, max_only = TRUE)
     dfw %>% ungroup();
 }
 
-geom_idleness <- function(data = NULL)
+geom_idleness <- function(Application = NULL)
 {
-    if(is.null(data)) stop("data provided for geom_idleness is NULL");
+    if(is.null(Application)) stop("data provided for geom_idleness is NULL");
 
-    dfidle <- calculate_resource_idleness(data$Application, !pjr_value(pajer$idleness_all, FALSE));
+    dfidle <- calculate_resource_idleness(Application, !pjr_value(pajer$idleness_all, FALSE));
 
     bsize = pjr_value(pajer$base_size, 22);
     expand = pjr_value(pajer$expand, 0.05);

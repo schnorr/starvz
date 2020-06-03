@@ -332,9 +332,13 @@ starvz_guided_plot <- function(data, name)
     # For plots that show nodes 10px per node
     # For variable plots, 100px
     # For plots TODO, default 200px
-
-    nodes <- data$Tasks %>% select(MPIRank) %>% distinct() %>% nrow()
-
+    if(!is.null(data$Tasks)){
+      nodes <- data$Tasks %>% select(MPIRank) %>% distinct() %>% nrow()
+    }else if(!is.null(data$Application)){
+      nodes <- data$Application %>% select(Node) %>% distinct() %>% nrow()
+    }else{
+      nodes <- 1
+    }
     starvz_height_resources <<- (data$Y$Position %>% max()) * 10 / 100
     starvz_height_nodes <<- max(nodes * 10 / 100, 1)
     starvz_height_small <<- 0.5

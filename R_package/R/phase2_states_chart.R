@@ -13,12 +13,18 @@ state_chart <- function (data = NULL, globalEndTime = NULL, ST.Outliers = TRUE, 
     gow <- ggplot() + default_theme();
 
     # Add states and outliers if requested
-    gow <- gow + geom_states(data, ST.Outliers, StarPU.View);
+    if(StarPU.View){
+      gow <- gow + geom_states(data$Starpu,
+                              ST.Outliers, StarPU.View, data$Colors);
+    }else{
+      gow <- gow + geom_states(data$Application,
+                               ST.Outliers, StarPU.View, data$Colors);
+    }
 
     if (!StarPU.View){
 
         # add idleness
-        if (pjr(pajer$st$idleness)) gow = gow + geom_idleness(data);
+        if (pjr(pajer$st$idleness)) gow = gow + geom_idleness(data$Application);
 
         # check if task dependencies should be added
         if (pjr(pajer$st$tasks$active)){
@@ -44,10 +50,6 @@ state_chart <- function (data = NULL, globalEndTime = NULL, ST.Outliers = TRUE, 
         # add makespan
         if (pjr(pajer$st$makespan)) gow = gow + geom_makespan(data);
 
-    }else{
-        # add some color palette for StarPU States
-        # Move to geom_states, as it was doing 2 times...
-        # gow = gow + scale_fill_manual(values = starpu_colors());
     }
 
     return(gow);
@@ -56,6 +58,7 @@ state_chart <- function (data = NULL, globalEndTime = NULL, ST.Outliers = TRUE, 
 k_chart <- function (dfw = NULL, middle_lines = NULL, per_node = FALSE, colors = NULL)
 {
     if (is.null(dfw)) stop("dfw provided to k_chart is NULL");
+    if (is.null(colors)) stop("colors provided to k_chart is NULL");
 
     # Prepare for colors
     colors %>% select(Value, Color) %>% unique %>% .$Color -> appColors
@@ -132,14 +135,10 @@ k_chart <- function (dfw = NULL, middle_lines = NULL, per_node = FALSE, colors =
     return(goijk);
 }
 
-geom_states <- function (data = NULL, Show.Outliers = FALSE, StarPU = FALSE)
+geom_states <- function (dfw = NULL, Show.Outliers = FALSE, StarPU = FALSE, Colors = NULL)
 {
-    if (is.null(data)) stop("data is NULL when given to geom_states");
-    if (StarPU){
-        dfw <- data$Starpu
-    }else{
-        dfw <- data$Application;
-    }
+    if (is.null(dfw)) stop("data is NULL when given to geom_states");
+    if (is.null(Colors)) stop("data is NULL when given to geom_states");
 
     ret <- list();
 
@@ -147,7 +146,7 @@ geom_states <- function (data = NULL, Show.Outliers = FALSE, StarPU = FALSE)
     if (StarPU){
       ret[[length(ret)+1]] <- scale_fill_manual(values = starpu_colors());
     }else{
-      ret[[length(ret)+1]] <- scale_fill_manual(values = extract_colors(dfw, data$Colors));
+      ret[[length(ret)+1]] <- scale_fill_manual(values = extract_colors(dfw, Colors));
     }
 
     # Y axis breaks and their labels

@@ -8,6 +8,7 @@ isolate_read_write <- function(input.parquet, fun, name, directory){
     loginfo("Saving as feather");
     starvz_write_feather(data)
   }
+  return(NULL)
 }
 
 isolate_read_write_m <- function(input.parquet, fun, directory){
@@ -19,6 +20,7 @@ isolate_read_write_m <- function(input.parquet, fun, directory){
     loginfo("Saving as feather");
     starvz_write_feather(data)
   }
+  return(NULL)
 }
 
 starvz_phase1_read_write <- function (directory = ".", app_states_fun = NULL, state_filter = 0, whichApplication = NULL, input.parquet = "1")

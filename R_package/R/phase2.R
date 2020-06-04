@@ -356,7 +356,7 @@ starvz_guided_plot <- function(data, name)
     }else{
         starvz_height_resources <<- (data$Y$Position %>% max()) * 10 / 100
     }
-    starvz_height_agg <<- max(nodes * types * 50 / 100, 1)
+    starvz_height_agg <<- max(nodes * types * pjr_value(pajer$guided$agg_type_height, 50) / 100, 1)
     starvz_height_nodes <<- max(nodes * 10 / 100, 1)
     starvz_height_small <<- 0.5
 

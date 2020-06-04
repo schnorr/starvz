@@ -71,11 +71,14 @@ time_aggregation_post <- function(dfw = NULL, dfw_agg = NULL)
 }
 
 node_spatial_aggregation <- function(dfw) {
-    if (is.null(dfw)) return(NULL);
-    dfw %>%
-        group_by(Node, Slice, Task, ResourceType, Duration) %>%
-        summarize(N = n(), Activity = sum(Value)/N) %>%
-        ungroup
+  if (is.null(dfw)) return(NULL);
+  dfw %>% group_by(Node, ResourceType) %>%
+          mutate(N = n_distinct(ResourceId)) %>%
+          ungroup() %>%
+      group_by(Node, Slice, Task, ResourceType, Duration, N) %>%
+      summarize(Activity = sum(Value)) %>%
+      mutate(Activity = Activity/N) %>%
+      ungroup
 }
 
 

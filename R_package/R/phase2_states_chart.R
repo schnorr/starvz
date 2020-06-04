@@ -106,7 +106,6 @@ k_chart <- function (dfw = NULL, middle_lines = NULL, per_node = FALSE, colors =
     # Prepare for middle
     lapply(middle_lines, function(percentage) {
         dfw %>%
-            filter(Application) %>%
             select(Node, Iteration, Start, End) -> temp1
         if(per_node){
             temp1 %>% group_by(Node, Iteration) -> temp1
@@ -116,7 +115,7 @@ k_chart <- function (dfw = NULL, middle_lines = NULL, per_node = FALSE, colors =
         temp1 %>%
             mutate(Number.Tasks = n()) %>%
             arrange(Start) %>%
-            slice(unique(Number.Tasks*percentage)) %>%
+            slice(unique(as.integer(Number.Tasks*percentage))) %>%
             ungroup %>%
             mutate(Middle = Start + (End-Start)/2) -> temp1
         if(per_node) {
@@ -268,7 +267,8 @@ node_summary <- function(app){
      all_data %>% mutate(Node = as.integer(Node)) %>%
               ggplot(aes(y=Node, x=Value, fill=Metric)) +
               default_theme() +
-              scale_y_reverse(breaks = seq(0, Nodes)) +
+              scale_y_reverse(breaks = function(x) unique(
+                              floor(pretty(seq(0, (max(x) + 1) * 1.1))))) +
               geom_col(width=0.8) -> splot
     return(splot);
 }
@@ -328,7 +328,7 @@ new_state_plot <- df.spatial_prep %>%
     scale_fill_manual(values = extract_colors(df.spatial_prep %>% rename(Value=Task), data$Colors)) +
     scale_y_continuous(
         breaks = yconf$ResourceType.Position + yconf$ResourceType.Height/2,
-        labels = yconf$Label) +
+        labels = yconf$Label, expand=c(pjr_value(pajer$st$expand, 0.05),0)) +
     ylab("Node Ocupation") +
         geom_rect(aes(fill=Task,
                       xmin=Start,

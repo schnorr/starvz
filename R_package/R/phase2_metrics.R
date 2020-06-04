@@ -386,7 +386,7 @@ geom_cpb_internal <- function(dfw = NULL, value = NULL, desc = NULL)
             geom_segment(data=data.frame(x=value,
                                          xend=value,
                                          y=minPos,
-                                         yend=maxPos+corr),
+                                         yend=maxPos),
                          aes(x=x,
                              xend=xend,
                              y=y,
@@ -396,7 +396,7 @@ geom_cpb_internal <- function(dfw = NULL, value = NULL, desc = NULL)
                          color="gray"),
             # the text on top of the gray brand
             geom_text(data=data.frame(x=value,
-                                      y=minPos+(maxPos+corr-minPos)/2),
+                                      y=minPos+(maxPos-minPos)/2),
                       aes(x=x, y=y),
                       label=paste0(desc, " ", round(value, 0)),
                       angle=90,

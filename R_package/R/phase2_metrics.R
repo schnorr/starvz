@@ -425,7 +425,7 @@ geom_abe_internal <- function(pernodeABEdf = NULL)
 
   if (!is.null(pernodeABEdf)){
       ret <- list(
-          geom_segment(data=pernodeABEdf, aes(x = Result, xend=Result, y = MinPosition, yend=MaxPosition), size=abesize, alpha=.7, color="gray")
+          geom_segment(data=pernodeABEdf, aes(x = Result, xend=Result, y = MinPosition, yend=MaxPosition), size=abesize, alpha=.7, color=pjr_value(pajer$st$abe$bar_color, "grey"))
       )
       if(pjr_value(pajer$st$abe$text, TRUE)){
           ret <- list(ret,

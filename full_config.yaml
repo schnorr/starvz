@@ -7,7 +7,7 @@ default:
   idleness_all: TRUE # Show all Resouces idleness values
   # time: deprecated option
   guided:
-    active: TRUE# Phase2 flag to guided plot (compute ideal height)
+    active: TRUE # Phase2 flag to guided plot (compute ideal height)
     agg_type_height: 20
   title: # Overall Visualization Title
     active: FALSE # Active with directory name as Title

@@ -15,6 +15,14 @@ function usage()
     echo "  no parameters are required"
 }
 
+ls -1 prof_file_* > /dev/null
+es=$?
+if [ $es -ne 0 ]
+then
+    echo "The directory dont have prof_file_* files"
+    exit 1
+fi
+
 # get all the FXTs
 FXTS=$(ls -1 prof_file_* | sort --version-sort)
 

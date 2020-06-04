@@ -26,6 +26,8 @@ fi
 # get all the FXTs
 FXTS=$(ls -1 prof_file_* | sort --version-sort)
 
+echo "Execute stapu_fxt_tool with $FXTS"
+date "+%a %d %b %Y %H:%M:%S %Z"
 # call the conversion
 # -memory-states
 starpu_fxt_tool -memory-states $(echo $FXTS | sed -e "s/ / -i /g" -e "s/^/-i /") -o /dev/stdout\
@@ -43,5 +45,7 @@ if ldd $(which starpu_fxt_tool) | grep -q "poti"; then
   POTI="true"
 fi
 
+echo "Sort paje.trace"
+date "+%a %d %b %Y %H:%M:%S %Z"
 # sort the file
 paje_sort.sh $POTI paje.trace.gz | gzip -c > paje.sorted.trace.gz

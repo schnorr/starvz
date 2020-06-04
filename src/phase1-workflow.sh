@@ -42,7 +42,6 @@ pushd $CASE
 # If sorted is already present dont reexecute
 if [ ! -f "paje.sorted.trace" ] || [ ! -f "data.rec" ] || [ ! -f "tasks.rec" ]; then
   echo "Convert from FXT to paje.sorted.trace"
-  date "+%a %d %b %Y %H:%M:%S %Z"
   fxt2paje.sh
   es=$?
   if [ $es -ne 0 ]

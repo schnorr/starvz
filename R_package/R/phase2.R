@@ -223,7 +223,7 @@ starpu_mpi_grid_arrange <- function(plist)
     }
     if (pjr(pajer$st$active)){
         P[[length(P)+1]] <- st;
-        if(pjr_value(pajer$st$aggregation$method, "lucas") == "nodes"){
+        if(pjr(pajer$st$aggregation$active) && pjr_value(pajer$st$aggregation$method, "lucas") == "nodes"){
             H[[length(H)+1]] <- pjr_value(pajer$st$height, starvz_height_agg);
         }else{
             H[[length(H)+1]] <- pjr_value(pajer$st$height, starvz_height_resources);

@@ -37,7 +37,7 @@ pajer <- config::get(file = pajer.config);
 
 data <- starvz_selective_read(directory);
 
-if(pjr(pajer$guided_plot)){
+if(pjr(pajer$guided$active)){
   r <- starvz_guided_plot(data, name)
 }else{
   ggsave(name, plot=the_master_function(data), width = 10, height = 18, units = "in", dpi=120)

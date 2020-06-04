@@ -56,7 +56,7 @@ getSlices <- function(dfv = NULL, step = 100)
     # of that last slice until tend. This is unimportant for visualization
     # purposes but it can be important for stats. On that case, replace
     # the second argument by =tend+step= to make sure all data is considered.
-    slices = seq(0, tend, step);
+    slices = c(seq(0, tend, step), tend);
     return(slices);
 }
 

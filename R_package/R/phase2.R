@@ -171,6 +171,10 @@ starpu_mpi_grid_arrange <- function(plist)
     if(!exists("starvz_height_nodes")){
       starvz_height_nodes <- 2
     }
+    # For plots that show nodes 10px per node
+    if(!exists("starvz_height_agg")){
+      starvz_height_agg <- 2
+    }
     # For variable plots, 100px
     if(!exists("starvz_height_var")){
       starvz_height_var <- 2
@@ -219,7 +223,11 @@ starpu_mpi_grid_arrange <- function(plist)
     }
     if (pjr(pajer$st$active)){
         P[[length(P)+1]] <- st;
-        H[[length(H)+1]] <- pjr_value(pajer$st$height, starvz_height_resources);
+        if(pjr_value(pajer$st$aggregation$method, "lucas") == "nodes"){
+            H[[length(H)+1]] <- pjr_value(pajer$st$height, starvz_height_agg);
+        }else{
+            H[[length(H)+1]] <- pjr_value(pajer$st$height, starvz_height_resources);
+        }
     }
     if (pjr(pajer$pmtool$kiteration$active)){
         P[[length(P)+1]] <- ijk_pm;
@@ -335,6 +343,9 @@ starvz_guided_plot <- function(data, name)
     }else{
       nodes <- 1
     }
+
+    types <- data$Application %>% select(ResourceType) %>% distinct() %>% nrow()
+
     if(!is.null(pajer$selected_nodes)){
       data$Y %>% separate(Parent, into=c("Node"), remove=FALSE) %>%
              filter(Node %in% pajer$selected_nodes) %>%
@@ -345,6 +356,7 @@ starvz_guided_plot <- function(data, name)
     }else{
         starvz_height_resources <<- (data$Y$Position %>% max()) * 10 / 100
     }
+    starvz_height_agg <<- max(nodes * types * 50 / 100, 1)
     starvz_height_nodes <<- max(nodes * 10 / 100, 1)
     starvz_height_small <<- 0.5
 
@@ -557,9 +569,12 @@ starvz_plot_list <- function(data = NULL)
                 aggStep <- pjr_value(pajer$st$aggregation$step, globalAggStep);
                 dfw_agg <- st_time_aggregation(data$Application, step=aggStep);
                 data %>% st_time_aggregation_plot (dfw_agg) + coord_cartesian(xlim=c(tstart, tend), ylim=c(0, NA)) -> gow;
-            }else{
+            }else if(pjr_value(pajer$st$aggregation$method, "lucas") == "vinicius"){
                 loginfo("Call vinicius aggregation");
                 data %>% st_time_aggregation_vinicius_plot() + coord_cartesian(xlim=c(tstart, tend), ylim=c(0, NA)) -> gow;
+            }else if(pjr_value(pajer$st$aggregation$method, "lucas") == "nodes"){
+                loginfo("Call Node aggregation");
+                node_aggregation(data$Application) -> gow;
             }
         }else{
             data %>% state_chart (globalEndTime = tend, ST.Outliers = pjr(pajer$st$outliers), StarPU.View = FALSE) +

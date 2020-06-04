@@ -264,11 +264,105 @@ node_summary <- function(app){
          rename(Value=Result) %>%
          bind_rows(makes) %>%
          mutate(Metric=factor(Metric, levels=c("Makespan", "Abe"))) -> all_data
-
+     Nodes <- all_data %>% mutate(Node = as.integer(Node)) %>% .$Node %>% max()
      all_data %>% mutate(Node = as.integer(Node)) %>%
               ggplot(aes(y=Node, x=Value, fill=Metric)) +
               default_theme() +
-              scale_y_reverse() +
+              scale_y_reverse(breaks = seq(0, Nodes)) +
               geom_col(width=0.8) -> splot
     return(splot);
+}
+
+node_aggregation <- function(Application){
+  step <- 100
+  df <- time_aggregation_prep(Application)
+  df <- time_aggregation_do (df %>%
+        group_by(Node,  ResourceId, ResourceType, Task), step)
+  df.spatial <- node_spatial_aggregation (df)
+
+  space.within  = 0.01
+  space.between = 0.0
+  space = space.between
+  df.spatial %>%
+      mutate(Node = as.integer(as.character(Node))) %>%
+      select(Node, ResourceType) %>%
+      unique %>%
+      mutate(ResourceType.Height = 1) %>%
+      arrange(-Node) %>%
+      mutate(ResourceType.Position = cumsum(lag(ResourceType.Height, default = 0) + space) - space) %>%
+      mutate(Label = paste(Node, ResourceType, sep="_")) %>%
+      as.data.frame -> df.node_position
+
+  df.spatial %>%
+    mutate(Start = Slice, End = Start + Duration) %>%
+    mutate(Node = as.integer(as.character(Node))) %>%
+    left_join(df.node_position, by=c("Node", "ResourceType")) %>%
+    group_by(Node, ResourceType, Slice) %>%
+    arrange(-Node) %>%
+    mutate(Position = ResourceType.Position+cumsum(Activity) - Activity) %>%
+    mutate(Height = 1) %>%
+    ungroup -> df.spatial_prep
+
+hl_per_node_ABE(data$Application) %>%
+    mutate(Node = as.integer(as.character(Node))) %>%
+    select(-MinPosition, -MaxPosition) %>%
+    left_join(df.node_position %>% select(Node, ResourceType.Position, ResourceType.Height) %>% unique, by=c("Node")) %>%
+    select(Node, Result, ResourceType.Position, ResourceType.Height) %>%
+    arrange(-Node) %>%
+    group_by(Node, Result) %>%
+    summarize(Node.Position = min(ResourceType.Position),
+              Node.Height = sum(ResourceType.Height)) %>%
+    ungroup %>%
+    mutate(MinPosition = Node.Position) %>%
+    mutate(MaxPosition = Node.Position + Node.Height + space.between) -> df.pernodeABE
+
+df.spatial_prep %>%
+    ungroup %>%
+    select(Node, ResourceType.Position, ResourceType.Height, Label) %>%
+    unique -> yconf
+
+new_state_plot <- df.spatial_prep %>%
+    ggplot() +
+    default_theme() +
+    xlab("Time [ms]") +
+    scale_fill_manual(values = extract_colors(df.spatial_prep %>% rename(Value=Task), data$Colors)) +
+    scale_y_continuous(
+        breaks = yconf$ResourceType.Position + yconf$ResourceType.Height/2,
+        labels = yconf$Label) +
+    ylab("Node Ocupation") +
+        geom_rect(aes(fill=Task,
+                      xmin=Start,
+                      xmax=End,
+                      ymin=Position,
+                      ymax=Position+Activity), alpha=.5)
+
+    if (pjr(pajer$st$makespan)) new_state_plot <- new_state_plot + geom_makespan(df.spatial_prep)
+
+    if (pjr(pajer$st$abe$active)) new_state_plot <- new_state_plot + geom_abe_internal(df.pernodeABE)
+
+    if (pjr(pajer$st$cpb) || pjr(pajer$st$cpb_mpi$active)){
+        cpbs <- hl_global_cpb(data);
+    }
+    if (pajer$st$cpb){
+        new_state_plot <- new_state_plot + geom_cpb_internal(df.spatial_prep, cpbs$CPB, "CPB:")
+    }
+    if (pjr(pajer$st$cpb_mpi$active)){
+        if(is.na(pajer$st$cpb_mpi$tile_size)){
+          logwarn("CPB_MPI is active and st$cpb_mpi$tile_size is NULL")
+        }
+        if(is.na(pajer$st$cpb_mpi$bandwidth)){
+          logwarn("CPB_MPI is active and st$cpb_mpi$bandwidth is NULL")
+        }
+        tile_size = pajer$st$cpb_mpi$tile_size;
+        bandwidth = pajer$st$cpb_mpi$bandwidth;
+        cpbmpit = cpbs$CPB + cpbs$NMPI * (tile_size*tile_size*8) / bandwidth / 1000000;
+
+        new_state_plot <- new_state_plot + geom_cpb_internal(df.spatial_prep, cpbs$CPBMPI, "CPB-MPI:")
+
+        if (pjr(pajer$st$cpb_mpi$theoretical)){
+            new_state_plot <- new_state_plot + geom_cpb_internal(df.spatial_prep, cpbmpit, "CPB-MPI*:")
+        }
+    }
+
+   return(new_state_plot)
 }

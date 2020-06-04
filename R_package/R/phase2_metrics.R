@@ -351,7 +351,7 @@ geom_cpb <- function (data = NULL)
 
     ret <- list();
     if (pajer$st$cpb){
-        ret <- c(ret, geom_cpb_internal(data, cpbs$CPB, "CPB:"));
+        ret <- c(ret, geom_cpb_internal(data$Application, cpbs$CPB, "CPB:"));
     }
     if (pjr(pajer$st$cpb_mpi$active)){
         if(is.na(pajer$st$cpb_mpi$tile_size)){
@@ -363,31 +363,30 @@ geom_cpb <- function (data = NULL)
         tile_size = pajer$st$cpb_mpi$tile_size;
         bandwidth = pajer$st$cpb_mpi$bandwidth;
         cpbmpit = cpbs$CPB + cpbs$NMPI * (tile_size*tile_size*8) / bandwidth / 1000000;
-        ret <- c(ret, geom_cpb_internal(data, cpbs$CPBMPI, "CPB-MPI:"));
+        ret <- c(ret, geom_cpb_internal(data$Application, cpbs$CPBMPI, "CPB-MPI:"));
         if (pjr(pajer$st$cpb_mpi$theoretical)){
-            ret <- c(ret, geom_cpb_internal(data, cpbmpit, "CPB-MPI*:"));
+            ret <- c(ret, geom_cpb_internal(data$Application, cpbmpit, "CPB-MPI*:"));
         }
     }
     return(ret);
 }
 
-geom_cpb_internal <- function(data = NULL, value = NULL, desc = NULL)
+geom_cpb_internal <- function(dfw = NULL, value = NULL, desc = NULL)
 {
 
     if (!is.null(value) && !is.null(desc)){
-        dfw <- data$Application;
 
         bsize = pjr_value(pajer$base_size, 22);
 
         minPos = dfw %>% select(Position) %>% na.omit %>% pull(Position) %>% min;
         maxPos = dfw %>% select(Position) %>% na.omit %>% pull(Position) %>% max;
-        corr = dfw %>% select(Height) %>% na.omit %>% pull(Height) %>% min / 2;
+        corr = dfw %>% select(Height) %>% na.omit %>% pull(Height) %>% min;
         ret <- list(
             # the gray band
             geom_segment(data=data.frame(x=value,
                                          xend=value,
                                          y=minPos,
-                                         yend=maxPos-corr),
+                                         yend=maxPos+corr),
                          aes(x=x,
                              xend=xend,
                              y=y,
@@ -397,7 +396,7 @@ geom_cpb_internal <- function(data = NULL, value = NULL, desc = NULL)
                          color="gray"),
             # the text on top of the gray brand
             geom_text(data=data.frame(x=value,
-                                      y=minPos+(maxPos-minPos)/2),
+                                      y=minPos+(maxPos+corr-minPos)/2),
                       aes(x=x, y=y),
                       label=paste0(desc, " ", round(value, 0)),
                       angle=90,
@@ -414,26 +413,26 @@ geom_abe <- function(data = NULL)
 
     # states and k
     pernodeABEdf <- hl_per_node_ABE(data$Application);
+    return(geom_abe_internal(pernodeABEdf))
 
-    bsize = pjr_value(pajer$base_size, 22)/5;
-
-    # Obtain time interval
-    dfwapp <- data$Application
-    tstart <- dfwapp %>% .$Start %>% min;
-    tend <- dfwapp %>% .$End %>% max;
-
-    abesize <- pjr_value(pajer$st$abe$size, 5)
-
-    if (!is.null(pernodeABEdf)){
-        ret <- list(
-            geom_segment(data=pernodeABEdf, aes(x = Result+tstart, xend=Result+tstart, y = MinPosition, yend=MaxPosition), size=abesize, alpha=.7, color="gray")
-        )
-        if(pjr_value(pajer$st$abe$text, TRUE)){
-            ret <- list(ret,
-                        geom_text (data=pernodeABEdf, aes(x = Result+tstart, y = MinPosition+(MaxPosition-MinPosition)/2, label=paste0(ifelse(pjr_value(pajer$st$abe$label, TRUE), "ABE: ", ""), round(Result, 0))), angle=90, color="black", size=bsize)
-                        )
-        }
-        return(ret);
-    }
     return(list());
+}
+
+geom_abe_internal <- function(pernodeABEdf = NULL)
+{
+  bsize = pjr_value(pajer$base_size, 22)/5;
+  abesize <- pjr_value(pajer$st$abe$size, 5)
+
+  if (!is.null(pernodeABEdf)){
+      ret <- list(
+          geom_segment(data=pernodeABEdf, aes(x = Result, xend=Result, y = MinPosition, yend=MaxPosition), size=abesize, alpha=.7, color="gray")
+      )
+      if(pjr_value(pajer$st$abe$text, TRUE)){
+          ret <- list(ret,
+                      geom_text (data=pernodeABEdf, aes(x = Result, y = MinPosition+(MaxPosition-MinPosition)/2,
+                      label=paste0(ifelse(pjr_value(pajer$st$abe$label, TRUE), "ABE: ", ""), round(Result, 0))), angle=90, color="black", size=bsize)
+                      )
+      }
+      return(ret);
+  }
 }

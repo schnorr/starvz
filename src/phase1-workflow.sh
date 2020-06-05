@@ -102,7 +102,7 @@ if [ -x "$(command -v rec2csv)" ]; then
   TASKSCSV="rec.tasks.csv.gz"
   rec2csv tasks.rec | sed 's/"//g' | gzip -c > $TASKSCSV
   PAPIFILE="papi.rec"
-  if [ -f "$PAPIFILE" ]; then
+  if [ -f "$PAPIFILE" ] && [ -s "$PAPIFILE" ]; then
     PAPICSV="rec.papi.csv.gz"
     rec2csv $PAPIFILE | sed 's/"//g' | gzip -c > $PAPICSV
   fi

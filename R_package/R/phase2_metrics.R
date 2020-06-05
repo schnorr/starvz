@@ -205,7 +205,7 @@ hl_global_cpb <- function (data = NULL)
 {
     if(is.null(data)) return(NULL);
 
-    dfdag <- data$Dag;
+    dfdag <- data$Dag %>% filter(!is.na(Dependent));
 
     # Create unique _integer_ identifiers
     identifiers <- c((dfdag %>% .$JobId), (dfdag %>% .$Dependent)) %>%

@@ -17,7 +17,7 @@ check_arrow();
 # Get the arguments to this script
 args = commandArgs(trailingOnly=TRUE)
 
-input.parquet = 0
+input.parquet = 1
 
 if (length(args) < 1) {
     usage();

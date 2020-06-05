@@ -42,7 +42,6 @@ pushd $CASE
 # If sorted is already present dont reexecute
 if [ ! -f "paje.sorted.trace" ] || [ ! -f "data.rec" ] || [ ! -f "tasks.rec" ]; then
   echo "Convert from FXT to paje.sorted.trace"
-  date "+%a %d %b %Y %H:%M:%S %Z"
   fxt2paje.sh
   es=$?
   if [ $es -ne 0 ]
@@ -60,6 +59,8 @@ fi
 
 PMTOOLCSV=""
 
+echo "Execute pmtool"
+date "+%a %d %b %Y %H:%M:%S %Z"
 # Generating platform_file.rec if both pmtool and performance models are available. Note: hostname should match performance model
 if [ -x "$(command -v pmtool)" ] && [ ! -f "platform_file.rec" ]; then
   if [ $STARPU_PERF_MODEL_DIR != "" ] && [ $STARPU_HOSTNAME != "" ]; then
@@ -77,8 +78,6 @@ if [ -x "$(command -v pmtool)" ] && [ -f "platform_file.rec" ]; then
   #starpu_perfmodel_recdump tasks.rec -o platform_file.rec
 
   # Running pmtool with default-normal configuration
-  echo "Execute pmtool"
-  date "+%a %d %b %Y %H:%M:%S %Z"
   pmtool -p platform_file.rec tasks.rec -d fast -a dmdas --threads --no-header -w -s pmtool_states.out > pmtool.out 2> /dev/null
 
   # Cleaning pmtools bounds.

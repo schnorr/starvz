@@ -380,7 +380,7 @@ resource_utilization_tree_node_plot <- function(data = NULL, step = 100)
     arrange(Start, End) %>%
     gather(Start, End, key="Event", value="Time") %>%
     arrange(Time, Event);
-
+  
   # Set node colors
   active_colors <<- c()
   df_colors <<- tibble(ANode=character(), Event=character(), color=integer())
@@ -406,6 +406,19 @@ resource_utilization_tree_node_plot <- function(data = NULL, step = 100)
     left_join(df2 %>% filter(Value != 0), by=c("Slice", "Color")) %>%
     mutate(Value1 = ifelse(is.na(Value1), 0, Value1)) -> df_plot
 
+  df_plot <- df_plot %>% 
+    # expand all time slices with the possible colors (for geom_ribbon)
+    expand(Slice, Color=0:(df_plot$Color %>% max)) %>%
+    left_join(df_plot, by=c("Slice", "Color")) %>%
+    group_by(Color) %>% arrange(Color) %>%
+    mutate(Value1 = na.locf(Value1)) %>%
+    group_by(Slice) %>% arrange(Slice, -Color) %>%    
+    # define Ymin and Ymax for geom ribbon
+    mutate(Usage = sum(Value1)) %>%
+    mutate(Ymin = lag(Value1), Ymin = ifelse(is.na(Ymin), 0, Ymin)) %>%
+    mutate(Ymin = cumsum(Ymin), Ymax = Ymin+Value1);
+
+  # decide the size of the pallet, if it will include more colors than just green
   ncolors <- df_plot %>% ungroup() %>% select(Color) %>% max(.$Color)
   if (ncolors <= 10) {
     palette = brewer.pal(9, "Greens")[3:9];
@@ -417,8 +430,9 @@ resource_utilization_tree_node_plot <- function(data = NULL, step = 100)
   fill_palette <- rev(colorRampPalette(palette)(ncolors+1))
 
   df_plot %>%
-    ggplot() +
-    geom_area(aes(x=Slice, y=Value1, fill=as.factor(Color)), stat = "identity", position = "stack") +
+    ggplot() +    
+    # geom_area(aes(x=Slice, y=Value1, fill=as.factor(Color)), stat = "identity", position = "stack") +
+    geom_ribbon(aes(ymin = Ymin, ymax=Ymax, x=Slice, fill=as.factor(Color))) +
     scale_fill_manual(values=fill_palette) +
     default_theme() +
     theme(legend.position = "none") +

@@ -442,7 +442,11 @@ resource_utilization_tree_node_plot <- function(data = NULL, step = 100)
     # define Ymin and Ymax for geom ribbon
     mutate(Usage = sum(Value1)) %>%
     mutate(Ymin = lag(Value1), Ymin = ifelse(is.na(Ymin), 0, Ymin)) %>%
-    mutate(Ymin = cumsum(Ymin), Ymax = Ymin+Value1);
+    mutate(Ymin = cumsum(Ymin), Ymax = Ymin+Value1) %>%
+    # remove Ending nodes at the middle of a Slice to keep their res. utilization
+    ungroup() %>%
+    mutate(Slc = Slice%%step) %>%
+    filter(Slc == 0 | Slice == max(Slice));
 
   # decide the size of the pallet, if it will include more colors than just green
   ncolors <- df_plot %>% ungroup() %>% select(Color) %>% max(.$Color)

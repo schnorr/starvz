@@ -119,7 +119,8 @@ atree_temporal_chart <- function(data = NULL, step = 100, globalEndTime = NULL)
       select(ANode, Slice, Value1, Usage) %>%
       ungroup() %>%
       # calculate usage in percentage by node given the total Usage
-      mutate(NodeUsage = 100 * (Value1/Usage)) %>%
+      # mutate(NodeUsage = 100 * (Value1/Usage)) %>%
+      mutate(NodeUsage = Value1) %>%
       left_join(data$Atree, by="ANode") %>%
       inner_join(data$Application %>%
                   filter(grepl("init_", Value)) %>%

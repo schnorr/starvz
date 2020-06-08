@@ -109,25 +109,6 @@ atree_temporal_chart <- function(data = NULL, step = 100, globalEndTime = NULL)
     loginfo("Entry of atree_temporal_chart");
 
     dfw <- data$Application;
-
-    # Rearrage tree
-    data_reorder <- data$Application %>%
-      filter(grepl("lapack", Value)) %>%
-      select(ANode, SubmitOrder) %>% unique() %>%
-      group_by(ANode) %>%
-      mutate(SubmitOrder = as.integer(SubmitOrder)) %>%
-      arrange(SubmitOrder) %>%
-      slice(1) %>%
-      ungroup() %>%
-      arrange(SubmitOrder) %>%
-      mutate(Position = 1:n(), Height=1) %>%
-      select(-SubmitOrder);
-
-    data$Atree <- data$Atree %>%
-          # Replace Position and Height by new ordering
-          select(-Position, -Height) %>%
-          left_join(data_reorder, by="ANode")
-
     dfa <- data$Atree;
 
     df_node_plot <- resource_utilization_tree_node(data=data, step=step);

@@ -141,13 +141,20 @@ atree_temporal_chart <- function(data = NULL, step = 100, globalEndTime = NULL)
       # mutate(NodeUsage = 100 * (Value1/Usage)) %>%
       mutate(NodeUsage = Value1) %>%
       left_join(data$Atree, by="ANode") %>%
+      # resize for node computation Start 
       inner_join(data$Application %>%
                   filter(grepl("init_", Value)) %>%
-                  select(ANode, End) %>%
-                  group_by(ANode) %>%
+                  select(ANode, End) %>% group_by(ANode) %>%
                   filter(End == max(End)),
                 by="ANode") %>%
-      mutate(Start = ifelse(End >= Slice, End, Slice)) -> df_node_plot_filtered
+      mutate(Start = ifelse(End >= Slice, End, Slice)) %>% 
+      # resize for node computation End 
+      select(-End) %>%
+      inner_join(data$Application %>%
+                  select(ANode, End) %>% group_by(ANode) %>%
+                  filter(End == max(End)),
+                by="ANode") %>%
+      mutate(End = ifelse(Slice+step >= End, End, Slice+step)) -> df_node_plot_filtered
 
     # filter initialization tasks
     dfw_init <- dfw %>%
@@ -177,7 +184,7 @@ atree_temporal_chart <- function(data = NULL, step = 100, globalEndTime = NULL)
             geom_rect(data=df_node_plot_filtered,
                       aes(fill=NodeUsage,
                           xmin=Start,
-                          xmax=Slice+step,
+                          xmax=End,
                           ymin=Position,
                           ymax=Position+Height)) +
             #scale_fill_viridis(option="plasma") +

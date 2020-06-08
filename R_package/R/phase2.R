@@ -179,6 +179,10 @@ starpu_mpi_grid_arrange <- function(plist)
     if(!exists("starvz_height_var")){
       starvz_height_var <- 2
     }
+    # For the tree, default 1.5px per tree node Position
+    if(!exists("starvz_height_atree")){
+      starvz_height_atree <- 4
+    }
     # For plots TODO, default 200px
     if(!exists("starvz_height_todo")){
       starvz_height_todo <- 4
@@ -191,7 +195,7 @@ starpu_mpi_grid_arrange <- function(plist)
 
     if (pjr(pajer$atree$active)){
         P[[length(P)+1]] <- atree;
-        H[[length(H)+1]] <- pjr_value(pajer$atree$height, starvz_height_todo);
+        H[[length(H)+1]] <- pjr_value(pajer$atree$height, starvz_height_atree);
     }
     if (pjr(pajer$utiltreenode$active)){
         P[[length(P)+1]] <- utiltreenode;
@@ -333,6 +337,7 @@ starvz_guided_plot <- function(data, name)
     # For plots that show resources, 10px per resource on Y
     # For plots that show nodes 10px per node
     # For variable plots, 100px
+    # For atree plot 1.5px per node Position
     # For plots TODO, default 200px
     if(!is.null(pajer$selected_nodes)){
       nodes <- length(pajer$selected_nodes)
@@ -356,9 +361,11 @@ starvz_guided_plot <- function(data, name)
     }else{
         starvz_height_resources <<- (data$Y$Position %>% max()) * 10 / 100
     }
+
     starvz_height_agg <<- max(nodes * types * pjr_value(pajer$guided$agg_type_height, 50) / 100, 1)
     starvz_height_nodes <<- max(nodes * 10 / 100, 1)
     starvz_height_small <<- 0.5
+    starvz_height_atree <<- ((data$Atree$Position %>% max()) * 1.5) / 100
 
     p <- starvz_plot(data)
 

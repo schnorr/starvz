@@ -359,7 +359,7 @@ resource_utilization_tree_node <- function(data = NULL, step = 100)
       select(ResourceId) %>% unique() %>% nrow()
 
   # Compute the node parallelism
-  df_filter %>%
+  df_node_parallelism <- df_filter %>%
     select(ANode, Start, JobId) %>%
     mutate(Event = "Start") %>%
     rename(Time = Start) %>%
@@ -372,10 +372,10 @@ resource_utilization_tree_node <- function(data = NULL, step = 100)
     group_by(ANode) %>%
     mutate(Value = ifelse(Event == "Start", 1, -1)) %>%
     mutate(nodeParallelism = cumsum(Value)) %>%
-    ungroup() -> df_node_parallelism
+    ungroup();
 
   # Integrate resource utilization by ANode
-  df_node_parallelism %>%
+  df_node_plot <- df_node_parallelism %>%
     select(ANode, Time, nodeParallelism) %>%
     arrange(Time) %>%
     mutate(End = lead(Time)) %>%
@@ -389,7 +389,7 @@ resource_utilization_tree_node <- function(data = NULL, step = 100)
     ungroup() %>%
     group_by(Slice) %>%
     arrange(Slice) %>%
-    mutate(Usage = sum(Value1)) -> df_node_plot
+    mutate(Usage = sum(Value1));
 
   loginfo("Exit of resource_utilization_tree_node");
   return(df_node_plot)
@@ -403,7 +403,6 @@ resource_utilization_tree_node_plot <- function(data = NULL, step = 100)
     filter(Value != 0) %>%
     group_by(ANode) %>%
     summarize(Start=min(Slice), End=max(Slice)+step) %>%
-    arrange(Start, End) %>%
     gather(Start, End, key="Event", value="Time") %>%
     arrange(Time, Event);
   
@@ -425,12 +424,12 @@ resource_utilization_tree_node_plot <- function(data = NULL, step = 100)
     group_by(Slice);
 
   # must expand data frame to make geom_area work properly
-  df2 %>%
+  df_plot <- df2 %>%
     filter(!is.na(Color)) %>%
     select(-ANode) %>%
     expand(Slice, Color) %>%
     left_join(df2 %>% filter(Value != 0), by=c("Slice", "Color")) %>%
-    mutate(Value1 = ifelse(is.na(Value1), 0, Value1)) -> df_plot
+    mutate(Value1 = ifelse(is.na(Value1), 0, Value1));
 
   df_plot <- df_plot %>% 
     # expand all time slices with the possible colors (for geom_ribbon)
@@ -473,15 +472,13 @@ resource_utilization_tree_node_plot <- function(data = NULL, step = 100)
 resource_utilization_tree_depth <- function(data = NULL)
 {
 
-  maxDepth <- data %>% ungroup() %>% select(Depth) %>% unique() %>% max(.$Depth)
+  maxDepth <- data %>% .$Depth %>% max
   depthPalette <- rev(colorRampPalette(brewer.pal(9, "YlOrRd"))(maxDepth));
 
   data %>%
-    filter(Depth != 0) %>%
-    ungroup() %>%
-    arrange(Depth) %>%
     ggplot() +
-    geom_area(aes(x=Slice, y=Value2, fill=as.factor(Depth))) +
+    # geom_area(aes(x=Slice, y=Value2, fill=as.factor(Depth))) +
+    geom_ribbon(aes(ymin = Ymin, ymax=Ymax, x=Slice, fill=as.factor(Depth))) +
     default_theme() +
     theme(legend.position = "top") +
     scale_fill_manual(values = depthPalette) +
@@ -494,8 +491,7 @@ resource_utilization_tree_depth_plot <- function(data = NULL, step = 100)
   loginfo("Entry of resource_utilization_tree_depth_plot");
   # Prepare and filter data
   df_filter <- data$Application %>%
-    filter(
-           grepl("lapack", Value) | grepl("subtree", Value)) %>%
+    filter(grepl("lapack", Value) | grepl("do_sub", Value)) %>%
     select(ANode, Start, End, JobId) %>%
     arrange(Start)
 
@@ -532,21 +528,28 @@ resource_utilization_tree_depth_plot <- function(data = NULL, step = 100)
     do(remyTimeIntegrationPrepNoDivision(., myStep = step)) %>%
     # This give us the total worker usage grouped by ANode in a time slice
     mutate(Value1 = (Value / (step*NWorkers)) * 100) %>%
-    ungroup() %>%
-    group_by(Slice) %>%
-    arrange(Slice) %>%
-    mutate(Usage = sum(Value1))
+    # usage by slice
+    group_by(Slice) %>% arrange(Slice) %>%
+    mutate(Usage = sum(Value1)) %>%
+    # usage by depth
+    left_join(data$Atree %>% select(ANode, Depth), by="ANode") %>%
+    group_by(Slice, Depth) %>% 
+    mutate(Value1 = sum(Value1)) %>%
+    ungroup() %>% select(-ANode, -Value) %>% unique();
 
-  # Compute for Depth
+  # expand all time slices with the possible colors (for geom_ribbon)
   df_depth_plot <- df_node_plot %>%
-    left_join(data$Atree, by="ANode") %>%
-    select(-Value, -Height, -Position, -Intermediary) %>%
-    filter(!is.na(Depth)) %>%
+    expand(Slice, Depth=1:(df_node_plot$Depth %>% max)) %>%
+    left_join(df_node_plot, by=c("Slice", "Depth")) %>%
+    group_by(Depth) %>% arrange(Depth) %>%
+    mutate(Value1 = na.locf(Value1)) %>%
+    arrange(Slice, Depth) %>%
+    group_by(Slice) %>%
+    mutate(Ymin = lag(Value1), Ymin = ifelse(is.na(Ymin), 0, Ymin)) %>%
+    mutate(Ymin = cumsum(Ymin), Ymax = Ymin+Value1) %>%
+    mutate(Slc = Slice%%step) %>%
     ungroup() %>%
-    group_by(Slice, Depth) %>%
-    mutate(Value2 = sum(Value1)) %>%
-    select(Slice, Depth, Value2) %>%
-    unique()
+    filter(Slc == 0 | Slice == max(Slice));
 
   loginfo("Exit of resource_utilization_tree_depth_plot");
   resource_utilization_tree_depth(df_depth_plot)

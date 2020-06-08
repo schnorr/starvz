@@ -102,7 +102,7 @@ utilization_heatmap <- function(data_app, Y, step)
            ggplot(aes(y=Position, x=Time, fill=Utilization)) +
            geom_raster() +
            default_theme() +
-           scale_y_continuous(breaks = yconfv$Position, labels=yconfv$ResourceId) +
-           labs(y="Resource", x = "Time") +
-           scale_fill_gradient(low = "darkred", high = "cornflowerblue")
+           scale_y_continuous(breaks = yconfv$Position, labels=yconfv$ResourceId, expand=c(pjr_value(pajer$st$expand, 0.05),0)) +
+           labs(y="Resource Utilization", x = "Time") +
+           scale_fill_gradient(low = "cornflowerblue", high = "darkred")
 }

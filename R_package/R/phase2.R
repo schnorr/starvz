@@ -388,7 +388,7 @@ starvz_plot_list <- function(data = NULL)
     }
 
     if(is.null(data$Version)){
-       logwarn("This is a old StarVZ trace, tring to be retrocompatible")
+       logwarn("This is a old StarVZ trace, trying to be retrocompatible")
        data$Application <- data$State %>% filter(Application)
        data$Application <- data$Application %>% mutate(Size = as.integer(Size))
        data$Starpu <- data$State %>% filter(Type=="Worker State", Application==FALSE) %>%

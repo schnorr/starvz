@@ -395,7 +395,7 @@ starvz_plot_list <- function(data = NULL)
     }
 
     if(is.null(data$Version)){
-       logwarn("This is a old StarVZ trace, tring to be retrocompatible")
+       logwarn("This is a old StarVZ trace, trying to be retrocompatible")
        data$Application <- data$State %>% filter(Application)
        data$Application <- data$Application %>% mutate(Size = as.integer(Size))
        data$Starpu <- data$State %>% filter(Type=="Worker State", Application==FALSE) %>%
@@ -782,7 +782,7 @@ starvz_plot_list <- function(data = NULL)
 
         Step <- as.double(pjr_value(pajer$imbalance$step, globalAggStep));
 
-        imb_plot <- data$Application %>% var_imbalance(Step)
+        imb_plot <- data$Application %>% filter(Start>=0) %>% var_imbalance(Step)
         if (!pjr(pajer$imbalance$legend)){
             imb_plot <- imb_plot + theme(legend.position="none");
         }else{
@@ -796,7 +796,7 @@ starvz_plot_list <- function(data = NULL)
 
         Step <- as.double(pjr_value(pajer$utilheatmap$step, globalAggStep));
 
-        heatmap <- data$Application %>% utilization_heatmap(data$Y, Step)
+        heatmap <- data$Application %>% filter(Start>=0) %>% utilization_heatmap(data$Y, Step)
         if (!pjr(pajer$utilheatmap$legend)){
             heatmap <- heatmap + theme(legend.position="none");
         }else{

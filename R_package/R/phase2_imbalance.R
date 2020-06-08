@@ -63,7 +63,7 @@ utilization_per_step <- function(data_app, step){
                                      TRUE ~ step)) %>%
             rename(Step=FullUtil) %>% select(-SStep, -EStep, -UtilFirst, -UtilLast) %>%
             group_by(ResourceId, Node, ResourceType, Step) %>%
-            summarize(Utilization = sum(Util)/step) %>%
+            summarize(Utilization = sum(Util)/step, .groups="drop") %>%
             complete(ResourceId, Step=0:(max_time/step), fill = list(Utilization = 0)) %>%
             mutate(UtilizationTime = Utilization*step)
 }

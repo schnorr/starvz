@@ -5,7 +5,8 @@ default:
   expand: 0.05 # Factor to Expand horizontaly the plots with blank content
   idleness_factor: 5.5 # Resouces Idleness Text Size division Factor of base_size
   idleness_all: TRUE # Show all Resouces idleness values
-  guided_plot: TRUE
+  guided: 
+    active: TRUE
   selected_nodes: ["1"]
   # time: deprecated option
   title: # Overall Visualization Title

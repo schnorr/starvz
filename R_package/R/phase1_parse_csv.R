@@ -1112,6 +1112,15 @@ events_csv_parser <- function (where = ".")
         loginfo(paste("File", entities.csv, "do not exist."));
         return(NULL);
     }
+    if(Events_memory %>% nrow() == 0){
+      Events_memory <- NULL
+    }
+    if(Events_data %>% nrow() == 0){
+      Events_data <- NULL
+    }
+    if(Events_normal %>% nrow() == 0){
+      Events_normal <- NULL
+    }
 
     return(list(Events=Events_normal, Events_data=Events_data, Events_memory=Events_memory));
 }

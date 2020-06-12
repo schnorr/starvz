@@ -51,7 +51,6 @@ yconf <- function (dfw = NULL)
             ungroup;
     }else if(pjr_value(pajer$st$labels, "1") == "NODES_only"){ #First
         dfw %>%
-            filter(Application) %>%
             select(Node, ResourceId, ResourceType, Position, Height) %>%
             distinct() %>%
             group_by(Node) %>%

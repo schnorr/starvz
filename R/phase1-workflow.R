@@ -17,7 +17,7 @@ check_arrow();
 # Get the arguments to this script
 args = commandArgs(trailingOnly=TRUE)
 
-input.parquet = 0
+input.parquet = 1
 
 if (length(args) < 1) {
     usage();
@@ -67,16 +67,10 @@ if (input.application == "cholesky"){
 
 setwd(input.directory);
 
-data <- the_reader_function (directory = input.directory,
+data <- starvz_phase1_read_write(directory = input.directory,
                              app_states_fun = states.fun,
                              state_filter = states.filter,
-                             whichApplication = input.application);
+                             whichApplication = input.application,
+                             input.parquet = input.parquet);
 
-if(input.parquet=="1"){
-  loginfo("Saving as parquet");
-  starvz_write_parquet(data)
-}else{
-  loginfo("Saving as feather");
-  starvz_write_feather(data)
-}
 loginfo("Pre-process finished correctly.");

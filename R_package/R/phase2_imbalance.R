@@ -63,7 +63,7 @@ utilization_per_step <- function(data_app, step){
                                      TRUE ~ step)) %>%
             rename(Step=FullUtil) %>% select(-SStep, -EStep, -UtilFirst, -UtilLast) %>%
             group_by(ResourceId, Node, ResourceType, Step) %>%
-            summarize(Utilization = sum(Util)/step) %>%
+            summarize(Utilization = sum(Util)/step, .groups="drop") %>%
             complete(ResourceId, Step=0:(max_time/step), fill = list(Utilization = 0)) %>%
             mutate(UtilizationTime = Utilization*step)
 }
@@ -102,7 +102,7 @@ utilization_heatmap <- function(data_app, Y, step)
            ggplot(aes(y=Position, x=Time, fill=Utilization)) +
            geom_raster() +
            default_theme() +
-           scale_y_continuous(breaks = yconfv$Position, labels=yconfv$ResourceId) +
-           labs(y="Resource", x = "Time") +
-           scale_fill_gradient(low = "darkred", high = "cornflowerblue")
+           scale_y_continuous(breaks = yconfv$Position, labels=yconfv$ResourceId, expand=c(pjr_value(pajer$st$expand, 0.05),0)) +
+           labs(y="Resource Utilization", x = "Time") +
+           scale_fill_gradient(low = "cornflowerblue", high = "darkred")
 }

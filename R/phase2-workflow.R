@@ -31,12 +31,13 @@ if (length(args)==3) {
 	name = args[[3]];
 }
 
-data <- starvz_read(directory);
-
-cat("StarVZ - Phase 2 - Data has been read\n", file = stdout())
+cat("StarVZ - Phase 2 - Start\n", file = stdout())
 
 pajer <- config::get(file = pajer.config);
-if(pjr(pajer$guided_plot)){
+
+data <- starvz_selective_read(directory);
+
+if(pjr(pajer$guided$active)){
   r <- starvz_guided_plot(data, name)
 }else{
   ggsave(name, plot=the_master_function(data), width = 10, height = 18, units = "in", dpi=120)

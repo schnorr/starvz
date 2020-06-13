@@ -7,10 +7,10 @@ time_aggregation_prep <- function(dfw = NULL)
         rename(Task = Value) %>%
         group_by (ResourceId, Task) %>%
         mutate(Value = 1) %>%
-        select(-Duration, -Color, -Nature, -Type,
+        select(-Duration,
                -Size, -Depth, -Params, -JobId, -Footprint, -Tag,
                -GFlop, -X, -Y, -Iteration, -Subiteration,
-               -Node, -Resource, -ResourceType, -Outlier, -Height,
+               -Resource, -Outlier, -Height,
                -Position);
 
     # Define the first zero
@@ -44,7 +44,6 @@ time_aggregation_do <- function(dfw_agg_prep = NULL, step = NA)
     if (is.na(step)) return(NULL);
 
     dfw_agg_prep %>%
-        group_by(ResourceId, Task) %>%
         do(remyTimeIntegrationPrep(., myStep = step)) %>%
         mutate(Start = Slice, End = lead(Slice), Duration = End-Start) %>%
         ungroup() %>%
@@ -57,7 +56,7 @@ time_aggregation_post <- function(dfw = NULL, dfw_agg = NULL)
     if (is.null(dfw_agg)) return(NULL);
 
     df_ResourceId <- dfw %>%
-        select(Nature, ResourceId, Type,
+        select(ResourceId, Type,
                Node, Resource, ResourceType, Position, Height) %>%
         unique;
     df_Task <- dfw %>%
@@ -71,12 +70,25 @@ time_aggregation_post <- function(dfw = NULL, dfw_agg = NULL)
     return(dfwagg_full);
 }
 
+node_spatial_aggregation <- function(dfw) {
+  if (is.null(dfw)) return(NULL);
+  dfw %>% group_by(Node, ResourceType) %>%
+          mutate(N = n_distinct(ResourceId)) %>%
+          ungroup() %>%
+      group_by(Node, Slice, Task, ResourceType, Duration, N) %>%
+      summarize(Activity = sum(Value)) %>%
+      mutate(Activity = Activity/N) %>%
+      ungroup
+}
+
+
 st_time_aggregation <- function(dfw = NULL, StarPU.View = FALSE, step = 100)
 {
     if (is.null(dfw)) return(NULL);
 
-    dfw_agg_prep <- time_aggregation_prep (dfw);
-    dfw_agg <- time_aggregation_do (dfw_agg_prep, step);
+    dfw_agg_prep <- time_aggregation_prep (dfw %>% select(-Node, -ResourceType));
+    dfw_agg <- time_aggregation_do (dfw_agg_prep %>%
+               group_by(ResourceId, Task), step);
     dfwagg_full <- time_aggregation_post (dfw, dfw_agg);
 
     # Preparation for visualization (imitate geom_area)
@@ -158,8 +170,6 @@ geom_aggregated_states <- function (data = NULL, Show.Outliers = FALSE, min_time
         mutate(Node = as.factor(Node)) %>%
         mutate(ResourceType = as.factor(gsub('[[:digit:]]+', '', Resource))) -> ydf;
 
-    Colors <- data$Application %>% select(Value, Color) %>% distinct()
-
     # Do the aggregation
     data$Application %>%
         select(ResourceId, Start, End, Duration, Value, JobId) %>%
@@ -167,8 +177,7 @@ geom_aggregated_states <- function (data = NULL, Show.Outliers = FALSE, min_time
         left_join(
             ydf %>% select(ResourceId, Resource, Node, ResourceType, Height, Position),
             by=c("ResourceId" = "ResourceId")
-        ) %>%
-        left_join(Colors, by=c("Value")) -> dfw;
+        ) -> dfw;
 
     # The list of geoms
     ret <- list();
@@ -188,7 +197,7 @@ geom_aggregated_states <- function (data = NULL, Show.Outliers = FALSE, min_time
                                                     alpha=aggregated));
     ret[[length(ret)+1]] <- guides(alpha=FALSE);
     ret[[length(ret)+1]] <- scale_alpha_discrete(range=c(1, .6));
-    ret[[length(ret)+1]] <- scale_fill_manual(values = extract_colors(dfw));
+    ret[[length(ret)+1]] <- scale_fill_manual(values = extract_colors(dfw, data$Colors));
 
     loginfo("Finishing geom_aggregated_states");
 

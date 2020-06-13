@@ -15,11 +15,23 @@ function usage()
     echo "  no parameters are required"
 }
 
+ls -1 prof_file_* > /dev/null
+es=$?
+if [ $es -ne 0 ]
+then
+    echo "The directory dont have prof_file_* files"
+    exit 1
+fi
+
 # get all the FXTs
 FXTS=$(ls -1 prof_file_* | sort --version-sort)
 
+echo "Execute stapu_fxt_tool with $FXTS"
+date "+%a %d %b %Y %H:%M:%S %Z"
 # call the conversion
-starpu_fxt_tool -memory-states $(echo $FXTS | sed -e "s/ / -i /g" -e "s/^/-i /")
+# -memory-states
+starpu_fxt_tool $(echo $FXTS | sed -e "s/ / -i /g" -e "s/^/-i /") -o /dev/stdout\
+         | gzip -c > paje.trace.gz
 es=$?
 if [ $es -ne 0 ]
 then
@@ -33,6 +45,7 @@ if ldd $(which starpu_fxt_tool) | grep -q "poti"; then
   POTI="true"
 fi
 
+echo "Sort paje.trace"
+date "+%a %d %b %Y %H:%M:%S %Z"
 # sort the file
-paje_sort.sh $POTI paje.trace > paje.sorted.trace
-
+paje_sort.sh $POTI paje.trace.gz | gzip -c > paje.sorted.trace.gz

@@ -29,9 +29,9 @@ if [ -z "$INPUTFILE" ]; then echo "Error: <paje.trace> is empty"; exit; fi
 # Core                       #
 ##############################
 if [ "$POTI" = "true" ]; then
-    LC_ALL=C grep -e '^\(\(%\)\|\(\(12\|13\|14\|15\|16\|17\)\>\)\)' $INPUTFILE
-    LC_ALL=C grep -e '^\(\(%\)\|\(\(12\|13\|14\|15\|16\|17\)\>\)\)' -v $INPUTFILE | sort -S 50% --parallel=4 -T . -s -V --key=2,2
+    LC_ALL=C zgrep -e '^\(\(%\)\|\(\(12\|13\|14\|15\|16\|17\)\>\)\)' $INPUTFILE
+    LC_ALL=C zgrep -e '^\(\(%\)\|\(\(12\|13\|14\|15\|16\|17\)\>\)\)' -v $INPUTFILE | sort -S 50% --parallel=4 -T . -s -V --key=2,2
 else
-    LC_ALL=C grep -e '^\(\(%\)\|\(\(0\|1\|2\|3\|4\|5\|6\|7\)\>\)\)' $INPUTFILE
-    LC_ALL=C grep -e '^\(\(%\)\|\(\(0\|1\|2\|3\|4\|5\|6\|7\)\>\)\)' -v  $INPUTFILE | sort -S 50% --parallel=4 -T . -s -V --key=2,2
+    LC_ALL=C zgrep -e '^\(\(%\)\|\(\(0\|1\|2\|3\|4\|5\|6\|7\)\>\)\)' $INPUTFILE
+    LC_ALL=C zgrep -e '^\(\(%\)\|\(\(0\|1\|2\|3\|4\|5\|6\|7\)\>\)\)' -v  $INPUTFILE | sort -S 50% --parallel=4 -T . -s -V --key=2,2
 fi

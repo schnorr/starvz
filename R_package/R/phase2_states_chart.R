@@ -2,12 +2,8 @@ state_chart <- function (data = NULL, globalEndTime = NULL, ST.Outliers = TRUE, 
 {
     if (is.null(data)) stop("data provided to state_chart is NULL");
 
-    loginfo("Entry of state_chart");
-
     # Filter
-    dfwapp = data$Application %>%
-        # Considering only Worker State
-        filter(Type == "Worker State");
+    dfwapp = data$Application
 
     # Obtain time interval
     tstart <- dfwapp %>% .$Start %>% min;
@@ -16,13 +12,41 @@ state_chart <- function (data = NULL, globalEndTime = NULL, ST.Outliers = TRUE, 
     #Plot
     gow <- ggplot() + default_theme();
 
+    App <- data$Application
+    # Select Nodes
+    if(!is.null(pajer$selected_nodes)){
+      data$Y %>% separate(Parent, into=c("Node"), remove=FALSE) %>%
+             filter(Node %in% pajer$selected_nodes) %>%
+             arrange(Position) %>%
+             mutate(New = cumsum(lag(Height, default = 0))) %>%
+             select(Parent, New) -> new_y
+       if(StarPU.View){
+         data$Starpu <- data$Starpu %>% left_join(new_y, by=c("ResourceId"="Parent")) %>%
+                             mutate(Position = if_else(is.na(New), -3, New)) %>%
+                             select(-New)
+       }else{
+         data$Application <- data$Application %>% left_join(new_y, by=c("ResourceId"="Parent")) %>%
+                             mutate(Position = if_else(is.na(New), -3, New)) %>%
+                             mutate(Height = if_else(is.na(New), 0, Height)) %>%
+                             select(-New)
+         App <- data$Application %>%
+                filter(Position >= 0)
+       }
+    }
+
     # Add states and outliers if requested
-    gow <- gow + geom_states(data, ST.Outliers, StarPU.View);
+    if(StarPU.View){
+      gow <- gow + geom_states(data$Starpu,
+                              ST.Outliers, StarPU.View, data$Colors);
+    }else{
+      gow <- gow + geom_states(App,
+                               ST.Outliers, StarPU.View, data$Colors);
+    }
 
     if (!StarPU.View){
 
         # add idleness
-        if (pjr(pajer$st$idleness)) gow = gow + geom_idleness(data);
+        if (pjr(pajer$st$idleness)) gow = gow + geom_idleness(App);
 
         # check if task dependencies should be added
         if (pjr(pajer$st$tasks$active)){
@@ -32,10 +56,13 @@ state_chart <- function (data = NULL, globalEndTime = NULL, ST.Outliers = TRUE, 
             tasksel <- gaps_backward_deps (data = data,
                                            tasks = tasklist,
                                            levels = levels);
+            if(!is.null(pajer$selected_nodes)){
+              tasksel <- tasksel %>% left_join(new_y, by=c("ResourceId"="Parent")) %>%
+                                  mutate(Position = if_else(is.na(New), -3, New)) %>%
+                                  select(-New)
+            }
 
             gow = gow + geom_path_highlight(tasksel);
-        }else{
-            loginfo("DO NOT add dependencies");
         }
 
         # add Global CPB
@@ -48,25 +75,21 @@ state_chart <- function (data = NULL, globalEndTime = NULL, ST.Outliers = TRUE, 
         if (pjr(pajer$pmtool$bounds$active)) gow = gow + geom_pmtool_bounds(data);
 
         # add makespan
-        if (pjr(pajer$st$makespan)) gow = gow + geom_makespan(data);
+        if (pjr(pajer$st$makespan)) gow = gow + geom_makespan(App);
 
-    }else{
-        # add some color palette for StarPU States
-        # Move to geom_states, as it was doing 2 times...
-        # gow = gow + scale_fill_manual(values = starpu_colors());
     }
 
-    loginfo("Exit of state_chart");
     return(gow);
 }
 
-k_chart <- function (dfw = NULL, middle_lines = NULL, per_node = FALSE)
+k_chart <- function (dfw = NULL, middle_lines = NULL, per_node = FALSE, colors = NULL)
 {
     if (is.null(dfw)) stop("dfw provided to k_chart is NULL");
+    if (is.null(colors)) stop("colors provided to k_chart is NULL");
 
     # Prepare for colors
-    dfw %>% select(Value, Color) %>% unique %>% .$Color -> choleskyColors
-    choleskyColors %>% setNames(dfw %>% select(Value, Color) %>% unique %>% .$Value) -> choleskyColors;
+    colors %>% select(Value, Color) %>% unique %>% .$Color -> appColors
+    appColors %>% setNames(colors %>% select(Value, Color) %>% unique %>% .$Value) -> appColors;
 
     # Prepare for borders
     if(per_node) {
@@ -83,7 +106,6 @@ k_chart <- function (dfw = NULL, middle_lines = NULL, per_node = FALSE)
     # Prepare for middle
     lapply(middle_lines, function(percentage) {
         dfw %>%
-            filter(Application) %>%
             select(Node, Iteration, Start, End) -> temp1
         if(per_node){
             temp1 %>% group_by(Node, Iteration) -> temp1
@@ -93,7 +115,7 @@ k_chart <- function (dfw = NULL, middle_lines = NULL, per_node = FALSE)
         temp1 %>%
             mutate(Number.Tasks = n()) %>%
             arrange(Start) %>%
-            slice(unique(Number.Tasks*percentage)) %>%
+            slice(unique(as.integer(Number.Tasks*percentage))) %>%
             ungroup %>%
             mutate(Middle = Start + (End-Start)/2) -> temp1
         if(per_node) {
@@ -113,7 +135,7 @@ k_chart <- function (dfw = NULL, middle_lines = NULL, per_node = FALSE)
 
     goijk <- dfw %>% ggplot() +
         guides(fill = guide_legend(nrow = 1)) +
-        scale_fill_manual(values = choleskyColors) +
+        scale_fill_manual(values = appColors) +
         theme_bw(base_size=12) +
         xlab("Time [ms]") +
         ylab("Iteration") +
@@ -139,18 +161,10 @@ k_chart <- function (dfw = NULL, middle_lines = NULL, per_node = FALSE)
     return(goijk);
 }
 
-geom_states <- function (data = NULL, Show.Outliers = FALSE, StarPU = FALSE)
+geom_states <- function (dfw = NULL, Show.Outliers = FALSE, StarPU = FALSE, Colors = NULL)
 {
-    if (is.null(data)) stop("data is NULL when given to geom_states");
-    if (StarPU){
-        dfw <- data$Starpu %>%
-            # And only Starpu Worker State
-            filter(Type == "Worker State");
-    }else{
-        dfw <- data$Application;
-    }
-
-    loginfo("Starting geom_states");
+    if (is.null(dfw)) stop("data is NULL when given to geom_states");
+    if (is.null(Colors)) stop("data is NULL when given to geom_states");
 
     ret <- list();
 
@@ -158,7 +172,7 @@ geom_states <- function (data = NULL, Show.Outliers = FALSE, StarPU = FALSE)
     if (StarPU){
       ret[[length(ret)+1]] <- scale_fill_manual(values = starpu_colors());
     }else{
-      ret[[length(ret)+1]] <- scale_fill_manual(values = extract_colors(dfw));
+      ret[[length(ret)+1]] <- scale_fill_manual(values = extract_colors(dfw, Colors));
     }
 
     # Y axis breaks and their labels
@@ -190,149 +204,7 @@ geom_states <- function (data = NULL, Show.Outliers = FALSE, StarPU = FALSE)
                       alpha=1);
     }
 
-    loginfo("Finishing geom_states");
-
     return(ret);
-}
-
-
-geom_mpistates <- function (data = NULL)
-{
-    if (is.null(data)) stop("data is NULL when given to geom_mpistates");
-    dfw <- data$Starpu;
-    if (is.null(dfw)) stop("dfw is NULL when given to geom_mpistates");
-
-    # Get only MPI states
-    dfw <- dfw %>% filter(Type == "Communication Thread State");
-    if (nrow(dfw) == 0) stop("there is no data after filtering for MPI states");
-
-    # Check if there is MPI data
-    loginfo("Starting geom_mpistates");
-
-    ret <- list();
-
-    # Calculate Y position
-    ypos <- tibble(ResourceId = (dfw %>% arrange(as.integer(as.character(Node))) %>% pull(ResourceId) %>% unique())) %>%
-        mutate(Height = 1) %>%
-        mutate(Position = cumsum(Height));
-
-    dfw <- dfw %>%
-        # Remove existing position
-        select(-Position, -Height) %>%
-        # Establish new position
-        left_join(ypos, by = c("ResourceId"));
-
-    mycolors <- c(brewer.pal(8, "Dark2"), "blue")
-
-    # Color mapping
-    ret[[length(ret)+1]] <- scale_fill_manual(values = mycolors);
-
-    # Y label
-    ret[[length(ret)+1]] <- ylab("MPI\nThread");
-
-    # Y axis breaks and their labels
-    yconfm <- yconf(dfw);
-    ret[[length(ret)+1]] <- scale_y_continuous(breaks = yconfm$Position+(yconfm$Height/3), labels=yconfm$ResourceId, expand=c(pjr_value(pajer$expand, 0.05),0));
-
-    # Add states
-    ret[[length(ret)+1]] <-
-        geom_rect(data=dfw, aes(fill=Value,
-                                xmin=Start,
-                                xmax=End,
-                                ymin=Position,
-                                ymax=Position+0.6));
-
-    loginfo("Finishing geom_mpistates");
-
-    return(ret);
-}
-
-state_mpi_chart <- function (data = NULL)
-{
-    if (is.null(data)) stop("data provided to state_chart is NULL");
-
-    loginfo("Entry of state_mpi_chart");
-
-    #Plot
-    gow <- ggplot() +
-        default_theme() +
-        # Add states and outliers if requested
-        geom_mpistates(data);
-
-    loginfo("Exit of state_mpi_chart");
-    return(gow);
-}
-concurrent_mpi <- function(data = NULL)
-{
-    if (is.null(data)) return(NULL);
-
-    data$Link %>%
-        filter(grepl("mpicom", Key)) %>%
-        select(-Nature, -Container, -Type, -Duration) -> dflink;
-
-    dflink %>%
-        select(-End) %>%
-        rename(Timestamp = Start) %>%
-        mutate(Start = TRUE) -> dfstart;
-    dflink %>%
-        select(-Start) %>%
-        rename(Timestamp = End) %>%
-        mutate(Start = FALSE) %>%
-        bind_rows (dfstart) %>%
-        arrange(Timestamp) %>%
-        group_by(Origin, Dest) %>%
-        mutate(Value = cumsum(as.integer(
-                   case_when(
-                       Start == TRUE ~ 1,
-                       Start == FALSE ~ -1,
-                       TRUE ~ 0)))) %>%
-        arrange(Origin, Timestamp) %>%
-        select(-Start) %>%
-        rename(Start = Timestamp) %>%
-        group_by(Origin) %>% mutate(End = lead(Start)) %>% na.omit %>% mutate(Duration = End-Start) %>% ungroup() %>%
-        mutate(Type = "MPI Concurrent") %>%
-        rename(ResourceId = Origin) %>%
-        separate(ResourceId, into=c("Node", "Resource"), remove=FALSE) %>%
-        mutate(Node = as.factor(Node)) %>%
-        mutate(ResourceType = as.factor(gsub('[[:digit:]]+', '', Resource))) %>%
-        select(Start, End, Duration, Node, ResourceId, ResourceType, Type, Value)
-}
-
-concurrent_mpi_out <- function(data = NULL)
-{
-    if (is.null(data)) return(NULL);
-
-    data$Link %>%
-        filter(grepl("mpicom", Key)) %>%
-        select(-Nature, -Container, -Type, -Duration) -> dflink;
-
-    dflink %>%
-        select(-End) %>%
-        rename(Timestamp = Start) %>%
-        mutate(Start = TRUE) -> dfstart;
-    dflink %>%
-        select(-Start) %>%
-        rename(Timestamp = End) %>%
-        mutate(Start = FALSE) %>%
-        bind_rows (dfstart) %>%
-        arrange(Timestamp) %>%
-        group_by(Origin, Dest) %>%
-        mutate(Value = cumsum(as.integer(
-                   case_when(
-                       Start == TRUE ~ 1,
-                       Start == FALSE ~ -1,
-                       TRUE ~ 0)))) %>%
-        arrange(Dest, Timestamp) %>%
-        select(-Start) %>%
-        rename(Start = Timestamp) %>%
-        group_by(Dest) %>% mutate(End = lead(Start)) %>% na.omit %>% mutate(Duration = End-Start) %>% ungroup() %>%
-        mutate(Type = "MPI Concurrent") %>%
-        rename(ResourceId = Dest) %>%
-        separate(ResourceId, into=c("Node", "Resource"), remove=FALSE) %>%
-        mutate(Node = as.factor(Node)) %>%
-        mutate(ResourceType = as.factor(gsub('[[:digit:]]+', '', Resource))) %>%
-        select(Start, End, Duration, Node, ResourceId, ResourceType, Type, Value)
-
 }
 
 geom_path_highlight <- function (paths = NULL)
@@ -391,11 +263,106 @@ node_summary <- function(app){
          rename(Value=Result) %>%
          bind_rows(makes) %>%
          mutate(Metric=factor(Metric, levels=c("Makespan", "Abe"))) -> all_data
-
+     Nodes <- all_data %>% mutate(Node = as.integer(Node)) %>% .$Node %>% max()
      all_data %>% mutate(Node = as.integer(Node)) %>%
               ggplot(aes(y=Node, x=Value, fill=Metric)) +
               default_theme() +
-              scale_y_reverse() +
+              scale_y_reverse(breaks = function(x) unique(
+                              floor(pretty(seq(0, (max(x) + 1) * 1.1))))) +
               geom_col(width=0.8) -> splot
     return(splot);
+}
+
+node_aggregation <- function(Application){
+  step <- 100
+  df <- time_aggregation_prep(Application)
+  df <- time_aggregation_do (df %>%
+        group_by(Node,  ResourceId, ResourceType, Task), step)
+  df.spatial <- node_spatial_aggregation (df)
+
+  space.within  = 0.01
+  space.between = 0.0
+  space = space.between
+  df.spatial %>%
+      mutate(Node = as.integer(as.character(Node))) %>%
+      select(Node, ResourceType) %>%
+      unique %>%
+      mutate(ResourceType.Height = 1) %>%
+      arrange(-Node) %>%
+      mutate(ResourceType.Position = cumsum(lag(ResourceType.Height, default = 0) + space) - space) %>%
+      mutate(Label = paste(Node, ResourceType, sep="_")) %>%
+      as.data.frame -> df.node_position
+
+  df.spatial %>%
+    mutate(Start = Slice, End = Start + Duration) %>%
+    mutate(Node = as.integer(as.character(Node))) %>%
+    left_join(df.node_position, by=c("Node", "ResourceType")) %>%
+    group_by(Node, ResourceType, Slice) %>%
+    arrange(-Node) %>%
+    mutate(Position = ResourceType.Position+cumsum(Activity) - Activity) %>%
+    mutate(Height = 1) %>%
+    ungroup -> df.spatial_prep
+
+hl_per_node_ABE(data$Application) %>%
+    mutate(Node = as.integer(as.character(Node))) %>%
+    select(-MinPosition, -MaxPosition) %>%
+    left_join(df.node_position %>% select(Node, ResourceType.Position, ResourceType.Height) %>% unique, by=c("Node")) %>%
+    select(Node, Result, ResourceType.Position, ResourceType.Height) %>%
+    arrange(-Node) %>%
+    group_by(Node, Result) %>%
+    summarize(Node.Position = min(ResourceType.Position),
+              Node.Height = sum(ResourceType.Height)) %>%
+    ungroup %>%
+    mutate(MinPosition = Node.Position) %>%
+    mutate(MaxPosition = Node.Position + Node.Height + space.between) -> df.pernodeABE
+
+df.spatial_prep %>%
+    ungroup %>%
+    select(Node, ResourceType.Position, ResourceType.Height, Label) %>%
+    unique -> yconf
+
+new_state_plot <- df.spatial_prep %>%
+    ggplot() +
+    default_theme() +
+    xlab("Time [ms]") +
+    scale_fill_manual(values = extract_colors(df.spatial_prep %>% rename(Value=Task), data$Colors)) +
+    scale_y_continuous(
+        breaks = yconf$ResourceType.Position + yconf$ResourceType.Height/2,
+        labels = yconf$Label, expand=c(pjr_value(pajer$st$expand, 0.05),0)) +
+    ylab("Node Ocupation") +
+        geom_rect(aes(fill=Task,
+                      xmin=Start,
+                      xmax=End,
+                      ymin=Position,
+                      ymax=Position+Activity), alpha=.5)
+
+    if (pjr(pajer$st$makespan)) new_state_plot <- new_state_plot + geom_makespan(df.spatial_prep)
+
+    if (pjr(pajer$st$abe$active)) new_state_plot <- new_state_plot + geom_abe_internal(df.pernodeABE)
+
+    if (pjr(pajer$st$cpb) || pjr(pajer$st$cpb_mpi$active)){
+        cpbs <- hl_global_cpb(data);
+    }
+    if (pajer$st$cpb){
+        new_state_plot <- new_state_plot + geom_cpb_internal(df.spatial_prep, cpbs$CPB, "CPB:")
+    }
+    if (pjr(pajer$st$cpb_mpi$active)){
+        if(is.na(pajer$st$cpb_mpi$tile_size)){
+          logwarn("CPB_MPI is active and st$cpb_mpi$tile_size is NULL")
+        }
+        if(is.na(pajer$st$cpb_mpi$bandwidth)){
+          logwarn("CPB_MPI is active and st$cpb_mpi$bandwidth is NULL")
+        }
+        tile_size = pajer$st$cpb_mpi$tile_size;
+        bandwidth = pajer$st$cpb_mpi$bandwidth;
+        cpbmpit = cpbs$CPB + cpbs$NMPI * (tile_size*tile_size*8) / bandwidth / 1000000;
+
+        new_state_plot <- new_state_plot + geom_cpb_internal(df.spatial_prep, cpbs$CPBMPI, "CPB-MPI:")
+
+        if (pjr(pajer$st$cpb_mpi$theoretical)){
+            new_state_plot <- new_state_plot + geom_cpb_internal(df.spatial_prep, cpbmpit, "CPB-MPI*:")
+        }
+    }
+
+   return(new_state_plot)
 }

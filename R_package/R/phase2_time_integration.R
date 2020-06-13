@@ -26,7 +26,6 @@ microscopic_time_expanding <- function (df = NULL, variable = NULL)
         P = na.locf(P, na.rm = FALSE),
         Pipeline = na.locf(Pipeline, na.rm = FALSE),
         Type = na.locf(Type, na.rm = FALSE),
-        Nature = na.locf(Nature, na.rm = FALSE),
         End = lead(Start),
         Duration = End-Start) %>%
     # Omit missing values
@@ -57,7 +56,7 @@ getSlices <- function(dfv = NULL, step = 100)
     # of that last slice until tend. This is unimportant for visualization
     # purposes but it can be important for stats. On that case, replace
     # the second argument by =tend+step= to make sure all data is considered.
-    slices = seq(0, tend, step);
+    slices = c(seq(0, tend, step), tend);
     return(slices);
 }
 

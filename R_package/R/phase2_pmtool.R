@@ -42,7 +42,7 @@ state_pmtool_chart <- function (data = NULL)
 
 
 
-k_chart_pmtool <- function (dfw = NULL)
+k_chart_pmtool <- function (dfw = NULL, colors = NULL)
 {
     if (is.null(dfw)) stop("dfw provided to k_chart is NULL");
 
@@ -50,8 +50,8 @@ k_chart_pmtool <- function (dfw = NULL)
         filter(sched == pajer$pmtool$state$sched);
 
     # Prepare for colors
-    dfw %>% select(Value, Color) %>% unique %>% .$Color -> choleskyColors
-    choleskyColors %>% setNames(dfw %>% select(Value, Color) %>% unique %>% .$Value) -> choleskyColors;
+    colors %>% select(Value, Color) %>% unique %>% .$Color -> appColors
+    appColors %>% setNames(colors %>% select(Value, Color) %>% unique %>% .$Value) -> appColors;
 
     # Prepare for borders
     dfborders <- dfw %>%
@@ -66,7 +66,7 @@ k_chart_pmtool <- function (dfw = NULL)
 
     dfw %>% ggplot() +
         guides(fill = guide_legend(nrow = 1)) +
-        scale_fill_manual(values = choleskyColors) +
+        scale_fill_manual(values = appColors) +
         theme_bw(base_size=12) +
         xlab("Time [ms]") +
         ylab("PMTool\nIteration") +
@@ -102,7 +102,7 @@ geom_pmtool_states <- function (data = NULL)
     ret <- list();
 
     # Color mapping
-    ret[[length(ret)+1]] <- scale_fill_manual(values = extract_colors(dfw));
+    ret[[length(ret)+1]] <- scale_fill_manual(values = extract_colors(dfw, data$Colors));
 
     # Y axis breaks and their labels
     gg <- data$Application;
@@ -139,9 +139,7 @@ geom_pmtool_bounds <- function(data = NULL)
     maxPos = dftemp %>% pull(Position) %>% max + minHeight/1.25;
 
     # Filter
-    dfwapp = data$Application %>%
-        # Considering only Worker State
-        filter(Type == "Worker State");
+    dfwapp = data$Application
 
     # Obtain time interval
     tstart <- dfwapp %>% .$Start %>% min;

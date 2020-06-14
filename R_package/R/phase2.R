@@ -603,7 +603,7 @@ starvz_plot_list <- function(data = NULL)
             }
         }else{
             data %>% state_chart (globalEndTime = tend, ST.Outliers = pjr(pajer$st$outliers), StarPU.View = FALSE) +
-                     coord_cartesian(xlim=c(tstart, tend), ylim=c(0, NA)) -> gow;
+                tScale -> gow;
         }
 
         # Without legend

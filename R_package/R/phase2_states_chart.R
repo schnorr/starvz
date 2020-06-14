@@ -273,9 +273,9 @@ node_summary <- function(app){
     return(splot);
 }
 
-node_aggregation <- function(Application){
+node_aggregation <- function(data){
   step <- 100
-  df <- time_aggregation_prep(Application)
+  df <- time_aggregation_prep(data$Application)
   df <- time_aggregation_do (df %>%
         group_by(Node,  ResourceId, ResourceType, Task), step)
   df.spatial <- node_spatial_aggregation (df)

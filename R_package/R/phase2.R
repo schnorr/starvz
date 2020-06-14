@@ -599,7 +599,7 @@ starvz_plot_list <- function(data = NULL)
                 data %>% st_time_aggregation_vinicius_plot() + coord_cartesian(xlim=c(tstart, tend), ylim=c(0, NA)) -> gow;
             }else if(pjr_value(pajer$st$aggregation$method, "lucas") == "nodes"){
                 loginfo("Call Node aggregation");
-                node_aggregation(data$Application) -> gow;
+                node_aggregation(data) -> gow;
             }
         }else{
             data %>% state_chart (globalEndTime = tend, ST.Outliers = pjr(pajer$st$outliers), StarPU.View = FALSE) +

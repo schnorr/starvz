@@ -522,7 +522,7 @@ starvz_plot_list <- function(data = NULL)
 
     # Atree space/time view
     if (!is.null(data$Atree) && pjr(pajer$atree$active)){
-        
+
         # Reorganize tree Position
         data_reorder <- data$Application %>%
           filter(grepl("lapack", Value)) %>%
@@ -593,17 +593,17 @@ starvz_plot_list <- function(data = NULL)
             if (pjr_value(pajer$st$aggregation$method, "lucas") == "lucas"){
                 aggStep <- pjr_value(pajer$st$aggregation$step, globalAggStep);
                 dfw_agg <- st_time_aggregation(data$Application, step=aggStep);
-                data %>% st_time_aggregation_plot (dfw_agg) + tScale + coord_cartesian(xlim=c(tstart, tend), ylim=c(0, NA)) -> gow;
+                data %>% st_time_aggregation_plot (dfw_agg) + coord_cartesian(xlim=c(tstart, tend), ylim=c(0, NA)) -> gow;
             }else if(pjr_value(pajer$st$aggregation$method, "lucas") == "vinicius"){
                 loginfo("Call vinicius aggregation");
-                data %>% st_time_aggregation_vinicius_plot() + tScale + coord_cartesian(xlim=c(tstart, tend), ylim=c(0, NA)) -> gow;
+                data %>% st_time_aggregation_vinicius_plot() + coord_cartesian(xlim=c(tstart, tend), ylim=c(0, NA)) -> gow;
             }else if(pjr_value(pajer$st$aggregation$method, "lucas") == "nodes"){
                 loginfo("Call Node aggregation");
-                node_aggregation(data) + tScale -> gow;
+                node_aggregation(data) + coord_cartesian(xlim=c(tstart, tend), ylim=c(0, NA)) -> gow;
             }
         }else{
             data %>% state_chart (globalEndTime = tend, ST.Outliers = pjr(pajer$st$outliers), StarPU.View = FALSE) +
-                tScale -> gow;
+                coord_cartesian(xlim=c(tstart, tend), ylim=c(0, NA)) -> gow;
         }
 
         # Without legend

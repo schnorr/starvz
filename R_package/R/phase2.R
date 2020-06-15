@@ -386,7 +386,7 @@ starvz_guided_plot <- function(data, name)
 starvz_plot_list <- function(data = NULL)
 {
     if(is.null(data)) stop("data passed as parameter is null")
-    if(is.null(pajer)) return(NULL);
+    if(is.null(pajer)) stop("pajer configuration is null");
 
     # Activate logs
     if(pjr(pajer$log)){

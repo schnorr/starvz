@@ -315,13 +315,10 @@ hl_per_node_ABE(data$Application) %>%
     mutate(MinPosition = Node.Position) %>%
     mutate(MaxPosition = Node.Position + Node.Height + space.between) -> df.pernodeABE
 
-df.spatial_prep %>%
-    ungroup %>%
+df.node_position %>%
     group_by(Node) %>%
-    summarize(Node.Position = max(ResourceType.Position)) %>%
-    ungroup %>%
-    mutate(Label = Node) %>%
-    print -> yconf
+    summarize(Node.Position = min(ResourceType.Position) + sum(ResourceType.Height)) %>%
+    mutate(Label = Node) -> yconf
 
 new_state_plot <- df.spatial_prep %>%
     ggplot() +

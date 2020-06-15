@@ -290,8 +290,6 @@ node_aggregation <- function(data){
       mutate(ResourceType.Height = 1) %>%
       arrange(-Node) %>%
       mutate(ResourceType.Position = cumsum(lag(ResourceType.Height, default = 0) + space) - space) %>%
-      # The Label contains the Y labels used for the "Node Occupation" panel
-      mutate(Label = Node) %>%
       as.data.frame -> df.node_position
 
   df.spatial %>%

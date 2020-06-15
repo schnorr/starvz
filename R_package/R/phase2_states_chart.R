@@ -317,8 +317,11 @@ hl_per_node_ABE(data$Application) %>%
 
 df.spatial_prep %>%
     ungroup %>%
-    select(Node, ResourceType.Position, ResourceType.Height, Label) %>%
-    unique -> yconf
+    group_by(Node) %>%
+    summarize(Node.Position = max(ResourceType.Position)) %>%
+    ungroup %>%
+    mutate(Label = Node) %>%
+    print -> yconf
 
 new_state_plot <- df.spatial_prep %>%
     ggplot() +
@@ -326,7 +329,7 @@ new_state_plot <- df.spatial_prep %>%
     xlab("Time [ms]") +
     scale_fill_manual(values = extract_colors(df.spatial_prep %>% rename(Value=Task), data$Colors)) +
     scale_y_continuous(
-        breaks = yconf$ResourceType.Position + yconf$ResourceType.Height/2,
+        breaks = yconf$Node.Position,
         labels = yconf$Label, expand=c(pjr_value(pajer$st$expand, 0.05),0)) +
     ylab("Node Ocupation") +
         geom_rect(aes(fill=Task,

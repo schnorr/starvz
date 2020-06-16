@@ -184,18 +184,49 @@ atree_temporal_chart <- function(data = NULL, step = 100, globalEndTime = NULL)
 
 active_nodes_chart <- function(data = NULL)
 {
-    if (is.null(data)) stop("a NULL data has been provided to active_nodes_chart");
+  if (is.null(data)) stop("a NULL data has been provided to active_nodes_chart");
+  loginfo("Entry of active_nodes_chart");
+  activenodesplot <- geom_blank();
 
-    loginfo("Entry of active_nodes_chart");
+  if (pjr(pajer$activenodes$aggregation$active)) {
+    # use time aggregation
+    dfv <- data %>%
+      rename(Task = Value) %>%
+      filter(grepl("front", Task) | grepl("subtree", Task)) %>%
+      mutate( node_count = case_when( Task == "do_subtree" ~ 1,
+                                      Task == "init_front" ~ 1,
+                                      Task == "clean_front" ~ -1,
+                                      TRUE ~ 0)) %>%
+      mutate(nodeType = case_when(grepl("subtree", Task) ~ "Pruned")) %>%
+      mutate(Type = NA); 
+    
+    # get the nodes that where pruned
+    seq_tree <- dfv %>%
+      filter(Task == "do_subtree") %>% .$ANode;
 
-    data %>%
+    dfv <- dfv %>% 
+      select(-nodeType) %>%
+      left_join(dfv %>% select(ANode, nodeType), by="ANode") %>%
+      mutate(nodeType = ifelse(ANode %in% seq_tree, "Pruned", "Not Pruned")) %>%
+      arrange(Start) %>%
+      group_by(nodeType) %>%
+      mutate(Value = 0) %>%
+      mutate(Value = cumsum(node_count)) %>%
+      mutate(ResourceType = nodeType, Node = nodeType);
+
+    step = pjr_value(pajer$activenodes$aggregation$step, 100)
+    activenodesplot <- var_integration_chart(dfv, ylabel = NA, step=step, facetting = FALSE) + 
+      scale_colour_brewer(palette = "Dark2");
+  } else {
+    # do not use time aggregation
+    df_active <- data %>%
       filter(grepl("front", Value) | grepl("subtree", Value)) %>%
       select(ResourceId, Start, End, Value, ANode) %>%
       mutate(node_count = case_when(Value == "do_subtree" ~ "1",
                                     Value == "init_front" ~ "1",
                                     Value == "clean_front" ~ "-1",
                                     TRUE ~ "<NA>"),
-             node_count = as.integer(node_count)) -> df_active
+             node_count = as.integer(node_count));
 
     # get all nodes that roots of sequential subtrees
     df_active %>%
@@ -205,11 +236,11 @@ active_nodes_chart <- function(data = NULL)
 
     df_active %>%
       filter_at(vars(ANode), any_vars(. %in% seq_tree$ANode)) %>%
-      mutate(nodeType = "sequential")  -> seq_nodes
+      mutate(nodeType = "Pruned")  -> seq_nodes
 
     df_active %>%
       filter_at(vars(ANode), any_vars(!. %in% seq_tree$ANode)) %>%
-      mutate(nodeType = "parallel") -> front_nodes
+      mutate(nodeType = "Not Pruned") -> front_nodes
 
     # let's merge them
     df_all <- front_nodes %>% bind_rows(seq_nodes)
@@ -226,13 +257,11 @@ active_nodes_chart <- function(data = NULL)
       theme(legend.position="top") +
       ylab("Active\nNodes") +
       scale_colour_brewer(palette = "Dark2");
-
-    loginfo("Exit of active_nodes_chart");
-
-    return(activenodesplot);
+  }
+  loginfo("Exit of active_nodes_chart");
+  return(activenodesplot);
 }
 
-## time integration for cpu active atree nodes
 atree_time_aggregation_prep <- function(dfw = NULL)
 {
     if (is.null(dfw)) return(NULL);

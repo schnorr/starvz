@@ -619,15 +619,14 @@ nodes_memory_usage_plot <- function(data = NULL)
                     label=paste0("Memory peak = ", round(mem_peak, digits=2), "MB")) +
       geom_hline(yintercept = mem_peak, color="red", linetype = "dashed");
     }
-
-    node_mem_use <- node_mem_use +
-      theme(legend.position = "none") +
-      ylab("Used\nMB") +
-      scale_color_brewer(palette="Dark2");
-
-    loginfo("Exit of nodes_memory_usage_plot");
-    return(node_mem_use);
   }
+  node_mem_use <- node_mem_use +
+    theme(legend.position = "none") +
+    ylab("Used\nMB") +
+    scale_color_brewer(palette="Dark2");
+  
+  loginfo("Exit of nodes_memory_usage_plot");
+  return(node_mem_use);
 }
 
 get_min_color <- function(node) {

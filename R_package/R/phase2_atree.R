@@ -564,41 +564,67 @@ resource_utilization_tree_depth_plot <- function(data = NULL, step = 100)
   loginfo("Exit of resource_utilization_tree_depth_plot");
   resource_utilization_tree_depth(df_depth_plot)
 }
+
 nodes_memory_usage_plot <- function(data = NULL)
 {
   loginfo("Entry of nodes_memory_usage_plot");
   if (is.null(data)) stop("a NULL data has been provided to nodes_memory_usage_plot");
+  node_mem_use <- geom_blank();
 
-  df_mem <- data$Application %>%
-    filter(grepl("front", Value) | grepl("do_sub", Value)) %>%
-    select(Start, Value, GFlop, ANode, Node) %>%
-    arrange(Start) %>%
-    mutate(GFlop = ifelse(Value=="clean_front", -GFlop, GFlop)) %>%
-    mutate(MemMB = GFlop*1024) %>%
-    mutate(UsedMemMB = cumsum(MemMB)) %>%
-    mutate(Time = Start*0.9999) %>%
-    gather(Start, Time, key="Start", value="Time") %>%
-    select(-Start) %>%
-    arrange(Time) %>%
-    mutate(UsedMemMB = lag(UsedMemMB))
+  if (pjr(pajer$activenodes$nodememuse$aggregation$active)) {
+    # mem use with time aggregation  
+    dfv <- data$Application %>%
+      filter(grepl("front", Value) | grepl("do_sub", Value)) %>%
+      rename(Task = Value) %>%
+      # GFlop here holds the memory allocated/freed by a task
+      mutate(MemMB = ifelse(grepl("clean", Task), -GFlop*1024, GFlop*1024)) %>%
+      arrange(Start) %>% 
+      mutate(Value = cumsum(MemMB)) %>% 
+      group_by (Node) %>%
+      select( -Duration,
+              -Size, -Depth, -Params, -JobId, -Footprint, -Tag,
+              -GFlop, -X, -Y, -Iteration, -Subiteration,
+              -Resource, -Outlier, -Height,
+              -Position) %>%
+      mutate(Type = NA); 
 
-  node_mem_use <- df_mem %>%
-    ggplot(aes(x=Time, y=UsedMemMB, color=Node)) +
-    geom_line() +
-    default_theme() +
-    theme(legend.position = "none") +
-    ylab("Used\nMB") +
-    scale_color_brewer(palette="Dark2");
+    step = pjr_value(pajer$activenodes$nodememuse$aggregation$step, 100)
+    node_mem_use <- var_integration_chart(dfv, ylabel = NA, step=step, facetting = FALSE) + 
+      scale_colour_brewer(palette = "Dark2");
+  } else {
+    # mem use without time aggregation
+    df_mem <- data$Application %>%
+      filter(grepl("front", Value) | grepl("do_sub", Value)) %>%
+      select(Start, Value, GFlop, ANode, Node) %>%
+      arrange(Start) %>%
+      mutate(GFlop = ifelse(Value=="clean_front", -GFlop, GFlop)) %>%
+      mutate(MemMB = GFlop*1024) %>%
+      mutate(UsedMemMB = cumsum(MemMB)) %>%
+      mutate(Time = Start*0.9999) %>%
+      gather(Start, Time, key="Start", value="Time") %>%
+      select(-Start) %>%
+      arrange(Time) %>%
+      mutate(UsedMemMB = lag(UsedMemMB));
+  
+    node_mem_use <- df_mem %>%
+      ggplot(aes(x=Time, y=UsedMemMB, color=Node)) +
+      geom_line() +
+      default_theme() +
+      theme(legend.position = "none") +
+      ylab("Used\nMB") +
+      scale_color_brewer(palette="Dark2");
 
-  if (pjr_value(pajer$activenodes$nodememuse$mempeak, FALSE)) {
-    mem_peak = max(df_mem$UsedMemMB);
-    node_mem_use <- node_mem_use +
-      geom_text(aes(x=0, y=mem_peak), hjust=-.5, vjust=1.1 , color="red", label=paste0("Memory peak = ", round(mem_peak, digits=2), "MB")) +
+    if (pjr(pajer$activenodes$nodememuse$mempeak)) {
+      mem_peak = max(df_mem$UsedMemMB);
+      node_mem_use <- node_mem_use +
+      geom_text(aes(x=0, y=mem_peak), hjust=-.5, vjust=1.1 , color="red", 
+                    label=paste0("Memory peak = ", round(mem_peak, digits=2), "MB")) +
       geom_hline(yintercept = mem_peak, color="red", linetype = "dashed");
-  }
+    }
 
-  loginfo("Exit of nodes_memory_usage_plot");
-  return(node_mem_use);
+    loginfo("Exit of nodes_memory_usage_plot");
+    return(node_mem_use);
+  }
 }
 
 get_min_color <- function(node) {

@@ -215,8 +215,7 @@ active_nodes_chart <- function(data = NULL)
       mutate(ResourceType = nodeType, Node = nodeType);
 
     step = pjr_value(pajer$activenodes$aggregation$step, 100)
-    activenodesplot <- var_integration_chart(dfv, ylabel = NA, step=step, facetting = FALSE) + 
-      scale_colour_brewer(palette = "Dark2");
+    activenodesplot <- var_integration_chart(dfv, ylabel = NA, step=step, facetting = FALSE);
   } else {
     # do not use time aggregation
     df_active <- data %>%
@@ -253,11 +252,14 @@ active_nodes_chart <- function(data = NULL)
     activenodesplot <- df_all %>%
       ggplot(aes(x=Start, y=active, color=nodeType)) +
       default_theme() +
-      geom_line() +
-      theme(legend.position="top") +
-      ylab("Active\nNodes") +
-      scale_colour_brewer(palette = "Dark2");
+      geom_line();
   }
+
+  activenodesplot <- activenodesplot +
+    theme(legend.position="top") +
+    ylab("Active\nNodes") +
+    scale_colour_brewer(palette = "Dark2");
+
   loginfo("Exit of active_nodes_chart");
   return(activenodesplot);
 }
@@ -589,8 +591,7 @@ nodes_memory_usage_plot <- function(data = NULL)
       mutate(Type = NA); 
 
     step = pjr_value(pajer$activenodes$nodememuse$aggregation$step, 100)
-    node_mem_use <- var_integration_chart(dfv, ylabel = NA, step=step, facetting = FALSE) + 
-      scale_colour_brewer(palette = "Dark2");
+    node_mem_use <- var_integration_chart(dfv, ylabel = NA, step=step, facetting = FALSE);
   } else {
     # mem use without time aggregation
     df_mem <- data$Application %>%
@@ -609,10 +610,7 @@ nodes_memory_usage_plot <- function(data = NULL)
     node_mem_use <- df_mem %>%
       ggplot(aes(x=Time, y=UsedMemMB, color=Node)) +
       geom_line() +
-      default_theme() +
-      theme(legend.position = "none") +
-      ylab("Used\nMB") +
-      scale_color_brewer(palette="Dark2");
+      default_theme();
 
     if (pjr(pajer$activenodes$nodememuse$mempeak)) {
       mem_peak = max(df_mem$UsedMemMB);
@@ -621,6 +619,11 @@ nodes_memory_usage_plot <- function(data = NULL)
                     label=paste0("Memory peak = ", round(mem_peak, digits=2), "MB")) +
       geom_hline(yintercept = mem_peak, color="red", linetype = "dashed");
     }
+
+    node_mem_use <- node_mem_use +
+      theme(legend.position = "none") +
+      ylab("Used\nMB") +
+      scale_color_brewer(palette="Dark2");
 
     loginfo("Exit of nodes_memory_usage_plot");
     return(node_mem_use);

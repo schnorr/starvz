@@ -437,3 +437,77 @@ geom_abe_internal <- function(pernodeABEdf = NULL)
       return(ret);
   }
 }
+
+# Nesi Implementation of ABE
+# Resources extra info is the time per task type per resource type with:
+# ResourceType, codelet, mean
+# Tasks per node is how much tasks per node and type
+# Node, Value, freq
+
+starpu_freq_abe_all_info <- function(tasks_per_node, resources_extra_info){
+
+    resources_extra_info %>% select(ResourceType, codelet)  %>%
+       unique() %>%
+       arrange(codelet) -> codelet_combination
+
+    number_codelet_combination <- codelet_combination %>% nrow()
+
+    f.obj <- c(rep(0, number_codelet_combination), 1)
+
+    codelets <- codelet_combination %>% select(codelet) %>% unique() %>% .$codelet
+
+    set_codelet <- function(codelet_name, codelet_combination){
+        codelet_combination %>%
+          mutate(v = case_when(codelet == codelet_name ~ 1L,
+                               TRUE ~ 0L)) %>% pull(v) -> value
+          # add zero for time
+          return(c(value, 0))
+    }
+
+    types <- resources_extra_info %>% arrange(codelet) %>%
+          select(ResourceType) %>% unique() %>% .$ResourceType
+
+    set_resource <- function(resource_name, resources_extra_info){
+         resources_extra_info  %>%
+          mutate(v = case_when(ResourceType == resource_name ~ (mean/n),
+                               TRUE ~ 0)) %>% pull(v) -> value
+          # add -1 for time
+          return(c(value, -1))
+    }
+
+    cond1 <- unlist(lapply(codelets, set_codelet, codelet_combination))
+
+    cond2 <- unlist(lapply(types, set_resource, resources_extra_info %>% arrange(codelet)))
+    total_rows <- length(codelets) + length(types)
+
+    f.con <- matrix (c(cond1, cond2), nrow=total_rows, byrow=TRUE)
+
+    f.dir <- c(rep("=", length(codelets)), rep("<=", length(types)))
+
+    tasks_per_node %>% arrange(Value) %>% .$freq -> tasks_freq
+
+    f.rhs <- c(tasks_freq, rep(0, length(types)))
+
+    result <- lp("min", f.obj, f.con, f.dir, f.rhs)
+
+    return(result)
+}
+
+# Only return obj
+starpu_freq_abe <- function(tasks_per_node, resources_extra_info){
+   result <- starpu_freq_abe_all_info(tasks_per_node, resources_extra_info)
+   return(result$objval)
+}
+
+# Compute ABE per slice
+starpu_apply_abe_per_slice <- function(step, resources_extra_info, tasks, max_res=NULL){
+    if(!is.null(max_res)){
+        max_res %>% filter(Step==step) %>% .$ResourceType -> rt
+        resources_extra_info <- resources_extra_info %>%
+            mutate(n=ifelse(ResourceType==rt, n-1, n))
+    }
+    tasks %>% filter(Step==step) -> ts
+    ts %>% .$Value -> used
+    return(starpu_freq_abe(ts,
+                           resources_extra_info %>% filter(codelet %in% used)))
+}

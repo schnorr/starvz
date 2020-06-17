@@ -138,6 +138,8 @@ starpu_mpi_grid_arrange <- function(plist)
     gpu = plist$gpu
     memory = plist$memory
     imb_plot = plist$imb_plot
+    imb_plot_power = plist$imb_plot_power
+    imb_plot_hete = plist$imb_plot_hete
     heatmap = plist$heatmap
     gflops = plist$gflops
     activenodes = plist$activenodes
@@ -275,6 +277,14 @@ starpu_mpi_grid_arrange <- function(plist)
     if (pjr(pajer$imbalance$active)){
         P[[length(P)+1]] <- imb_plot;
         H[[length(H)+1]] <- pjr_value(pajer$imbalance$height, starvz_height_var);
+    }
+    if (pjr(pajer$power_imbalance$active)){
+        P[[length(P)+1]] <- imb_plot_power;
+        H[[length(H)+1]] <- pjr_value(pajer$power_imbalance$height, starvz_height_var);
+    }
+    if (pjr(pajer$hete_imbalance$active)){
+        P[[length(P)+1]] <- imb_plot_hete;
+        H[[length(H)+1]] <- pjr_value(pajer$hete_imbalance$height, starvz_height_var);
     }
     if (pjr(pajer$utilheatmap$active)){
         P[[length(P)+1]] <- heatmap;
@@ -515,6 +525,8 @@ starvz_plot_list <- function(data = NULL)
     goguv <- geom_blank();
     gogfv <- geom_blank();
     imb_plot <- geom_blank();
+    imb_plot_power <- geom_blank();
+    imb_plot_hete <- geom_blank();
     heatmap <- geom_blank();
     goactivenodes <- geom_blank();
     gonodememuse <- geom_blank();
@@ -790,6 +802,36 @@ starvz_plot_list <- function(data = NULL)
         imb_plot <- userYLimit(imb_plot, pajer$imbalance$limit, c(tstart, tend));
     }
 
+    # Imbalance Metrics Power
+    if (pjr(pajer$power_imbalance$active)){
+        loginfo("Creating the Imbalance Power Metrics plot");
+
+        Step <- as.double(pjr_value(pajer$power_imbalance$step, globalAggStep));
+
+        imb_plot_power <- data$Application %>% filter(Start>=0) %>% var_imbalance_power(Step)
+        if (!pjr(pajer$power_imbalance$legend)){
+            imb_plot_power <- imb_plot_power + theme(legend.position="none");
+        }else{
+            imb_plot_power <- imb_plot_power + theme(legend.position = "top")
+        }
+        imb_plot_power <- userYLimit(imb_plot_power, pajer$power_imbalance$limit, c(tstart, tend));
+    }
+
+    # Imbalance Metrics hete
+    if (pjr(pajer$hete_imbalance$active)){
+        loginfo("Creating the Imbalance Hetero Metrics plot");
+
+        Step <- as.double(pjr_value(pajer$hete_imbalance$step, globalAggStep));
+
+        imb_plot_hete <- data$Application %>% filter(Start>=0) %>% var_imbalance_double_hetero(Step)
+        if (!pjr(pajer$hete_imbalance$legend)){
+            imb_plot_hete <- imb_plot_hete + theme(legend.position="none");
+        }else{
+            imb_plot_hete <- imb_plot_hete + theme(legend.position = "top")
+        }
+        imb_plot_hete <- userYLimit(imb_plot_hete, pajer$hete_imbalance$limit, c(tstart, tend));
+    }
+
     if (pjr(pajer$utilheatmap$active)){
         loginfo("Creating the HeatMap Imbalance plot");
 
@@ -978,6 +1020,8 @@ starvz_plot_list <- function(data = NULL)
         gpu = gogov,
         memory = goguv,
         imb_plot = imb_plot,
+        imb_plot_power = imb_plot_power,
+        imb_plot_hete = imb_plot_hete,
         heatmap = heatmap,
         gflops = gogfv,
         activenodes = goactivenodes,

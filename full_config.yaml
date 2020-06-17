@@ -139,6 +139,21 @@ default:
     limit:
     step: 100
 
+  power_imbalance:
+    active: FALSE
+    legend: FALSE
+    height: 1.1
+    task: "dgemm"
+    limit:
+    step: 100
+
+  hete_imbalance:
+    active: FALSE
+    legend: FALSE
+    height: 1.1
+    limit:
+    step: 100
+
   utilheatmap:
     active: FALSE
     legend: FALSE

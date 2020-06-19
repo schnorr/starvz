@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -o pipefail
 DIR=$(dirname $0)
 
 #

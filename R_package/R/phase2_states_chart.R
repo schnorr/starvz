@@ -268,8 +268,9 @@ node_summary <- function(app){
               ggplot(aes(y=Node, x=Value, fill=Metric)) +
               default_theme() +
               scale_y_reverse(breaks = function(x) unique(
-                              floor(pretty(seq(0, (max(x) + 1) * 1.1))))) +
-              geom_col(width=0.8) -> splot
+                              floor(pretty(seq(0, (max(x) + 1) * 1.1)))),
+                              expand=c(pjr_value(pajer$expand, 0.05),0)) +
+              geom_col(width=0.8, orientation="y") -> splot
     return(splot);
 }
 

@@ -25,7 +25,7 @@ geom_mpistates <- function (dfw = NULL)
     ret[[length(ret)+1]] <- ylab("MPI\nThread");
 
     # Y axis breaks and their labels
-    yconfm <- yconf(dfw);
+    yconfm <- yconf(dfw, pjr_value(pajer$mpistate$labels, "1"));
     ret[[length(ret)+1]] <- scale_y_continuous(breaks = yconfm$Position+(yconfm$Height/3), labels=yconfm$ResourceId, expand=c(pjr_value(pajer$expand, 0.05),0));
 
     # Add states

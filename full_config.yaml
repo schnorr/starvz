@@ -193,6 +193,7 @@ default:
     active: FALSE
     legend: TRUE
     height: 1.5
+    labels: "ALL"
 
   gpubandwidth:
     active: FALSE

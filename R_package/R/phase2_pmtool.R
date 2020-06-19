@@ -106,7 +106,7 @@ geom_pmtool_states <- function (data = NULL)
 
     # Y axis breaks and their labels
     gg <- data$Application;
-    yconfm <- yconf(gg);
+    yconfm <- yconf(gg, pjr_value(pajer$st$labels, "1"));
     ret[[length(ret)+1]] <- scale_y_continuous(breaks = yconfm$Position+(yconfm$Height/3), labels=yconfm$ResourceId, expand=c(pjr_value(pajer$expand, 0.05),0));
     # Y label
     ret[[length(ret)+1]] <- ylab("Pmtool Workers");

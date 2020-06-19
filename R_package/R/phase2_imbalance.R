@@ -282,7 +282,7 @@ utilization_heatmap <- function(data_app, Y, step)
   utilization_per_step(data_app, step) %>%
       ungroup() %>% left_join(Y, by=c("ResourceId"="Parent")) -> to_plot
 
-  yconfv <- yconf(to_plot %>% ungroup())
+  yconfv <- yconf(to_plot %>% ungroup(), pjr_value(pajer$st$labels, "1"))
 
   to_plot %>% mutate(Time = Step*step+step/2) %>%
            ggplot(aes(y=Position, x=Time, fill=Utilization)) +

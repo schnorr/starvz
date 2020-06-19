@@ -22,7 +22,7 @@ extract_colors <- function(dfw = NULL, colors = NULL)
         setNames(dfw %>% select(Value) %>% unique %>% .$Value);
 }
 
-yconf <- function (dfw = NULL)
+yconf <- function (dfw = NULL, option = "ALL")
 {
     if(is.null(dfw)) return(NULL);
 
@@ -31,7 +31,7 @@ yconf <- function (dfw = NULL)
     dfw %>% mutate(Node = as.integer(as.character(Node))) -> dfw
     dfw %>% mutate(ResourceId = factor(ResourceId)) %>%
             mutate(ResourceId = factor(ResourceId, levels=mixedsort(levels(ResourceId)))) -> dfw
-    if(pjr_value(pajer$st$labels, "1") == "1CPU_per_NODE"){ #First
+    if(option == "1CPU_per_NODE"){ #First
         # One CPU per node
         dfw %>%
             select(Node, ResourceId, ResourceType, Position, Height) %>%
@@ -40,7 +40,7 @@ yconf <- function (dfw = NULL)
             arrange(Node, ResourceId, ResourceType) %>%
             slice(1) %>%
             ungroup;
-    }else if(pjr_value(pajer$st$labels, "1") == "1GPU_per_NODE"){ #Last
+    }else if(option == "1GPU_per_NODE"){ #Last
         # One GPU per node
         dfw %>%
             select(Node, ResourceId, ResourceType, Position, Height) %>%
@@ -49,16 +49,28 @@ yconf <- function (dfw = NULL)
             arrange(Node, ResourceId, ResourceType) %>%
             slice(n()) %>%
             ungroup;
-    }else if(pjr_value(pajer$st$labels, "1") == "NODES_only"){ #First
+    }else if(option == "NODES_only"){ #First
         dfw %>%
             select(Node, ResourceId, ResourceType, Position, Height) %>%
             distinct() %>%
             group_by(Node) %>%
             arrange(ResourceId, ResourceType) %>%
             slice(1) %>%
-            mutate(ResourceId = gsub("_CPU0", "", ResourceId)) %>%
+            mutate(ResourceId = Node) %>%
             ungroup;
-    }else if(pjr_value(pajer$st$labels, "1") == "ALL"){
+    }else if(option == "NODES_1_in_10"){ #First
+        dfw %>%
+            select(Node, ResourceId, ResourceType, Position, Height) %>%
+            distinct() %>%
+            group_by(Node) %>%
+            arrange(ResourceId, ResourceType) %>%
+            slice(1) %>%
+            mutate(ResourceId = Node) %>%
+            ungroup %>%
+            mutate(Node = as.integer(as.character(Node))) %>%
+            arrange(Node) %>%
+            slice(seq(1, n(), 10))
+    }else if(option == "ALL"){
         dfw %>%
             select(Node, ResourceId, ResourceType, Position, Height) %>%
             distinct() %>%

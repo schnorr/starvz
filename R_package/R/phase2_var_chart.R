@@ -6,7 +6,8 @@ var_chart <- function (dfv = NULL, ylabel = NA)
     variable <- dfv %>% select(Type) %>% .$Type %>% unique;
     if (is.na(ylabel)) ylabel = variable;
 
-    mycolors <- rep(brewer.pal(8, "Dark2"), 20)
+    dfv %>% .$ResourceId %>% unique() %>% length() -> n_resources
+    mycolors <- rep(brewer.pal(8, "Dark2"), (n_resources/8)+1)
 
     k <- dfv %>% rename(x=Start, xend=End, y=Value) %>% mutate(yend=y) %>% select(-Duration);
     v <- k %>% group_by(ResourceId, Type) %>% mutate(xend=x, y=y, yend=lag(y)) %>% na.omit();
@@ -33,8 +34,8 @@ var_chart_text <- function (dfv = NULL, tstart = NULL, tend = NULL, y_end = NULL
     ms <- ms %>%
         group_by (ResourceId) %>%
         summarize(xvar = round(sum(Value * (Duration/1000) / 1024),2));
-
-    mycolors <- rep(brewer.pal(8, "Dark2"), 20)
+    ms %>% .$ResourceId %>% unique() %>% length() -> n_resources
+    mycolors <- rep(brewer.pal(8, "Dark2"), (n_resources/8)+1)
 
     if(nrow(ms) != 0){
         globalEndTime <- tend * 1.01;

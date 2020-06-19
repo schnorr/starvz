@@ -176,7 +176,7 @@ geom_states <- function (dfw = NULL, Show.Outliers = FALSE, StarPU = FALSE, Colo
     }
 
     # Y axis breaks and their labels
-    yconfm <- yconf(dfw);
+    yconfm <- yconf(dfw, pjr_value(pajer$st$labels, "1"));
     ret[[length(ret)+1]] <- scale_y_continuous(breaks = yconfm$Position+(yconfm$Height/3), labels=yconfm$ResourceId, expand=c(pjr_value(pajer$st$expand, 0.05),0));
     # Y label
     ret[[length(ret)+1]] <- ylab(ifelse(StarPU, "StarPU Workers", "Application Workers"));

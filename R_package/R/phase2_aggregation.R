@@ -186,7 +186,7 @@ geom_aggregated_states <- function (data = NULL, Show.Outliers = FALSE, min_time
     ret[[length(ret)+1]] <- default_theme();
 
     # Y axis breaks and their labels
-    yconfm <- yconf(dfw);
+    yconfm <- yconf(dfw, pjr_value(pajer$st$labels, "1"));
     ret[[length(ret)+1]] <- scale_y_continuous(breaks = yconfm$Position+(yconfm$Height/3), labels=yconfm$ResourceId, expand=c(pjr_value(pajer$expand, 0.05),0));
 
     ret[[length(ret)+1]] <- geom_rect(data=dfw, aes(fill=Value,
@@ -291,7 +291,7 @@ st_time_aggregation_plot <- function (data = NULL, dfw_agg = NULL, StarPU.View =
     choleskyColors <- extract_colors(dfw);
 
     #yconf
-    yconfm <- yconf(dfw);
+    yconfm <- yconf(dfw, pjr_value(pajer$st$labels, "1"));
 
     loginfo("Plotting Agg");
 

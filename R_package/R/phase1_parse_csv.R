@@ -642,7 +642,7 @@ read_comm_state_csv <- function (where = ".")
     # But first, check if this is a multi-node trace (if there is a _, it is a multi-node trace)
     # TODO This is a very weak test, should find something else instead
     firstResourceId <- dfw %>% .$ResourceId %>% unique %>% as.character() %>% sort %>% head(n=1);
-    if (grepl("CUDA|CPU", unlist(strsplit(firstResourceId, "_"))[2])){
+    if (grepl("mpict", unlist(strsplit(firstResourceId, "_"))[2])){
         # This is the case for multi-node trace
         dfw <- dfw %>%
             separate(ResourceId, into=c("Node", "Resource"), remove=FALSE) %>%

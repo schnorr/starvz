@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -o pipefail
 DIR=$(pwd)/$(dirname $0)
 export PATH="$PATH:$DIR"
 #

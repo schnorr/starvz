@@ -26,7 +26,7 @@ fi
 # get all the FXTs
 FXTS=$(ls -1 prof_file_* | sort --version-sort)
 
-echo "Execute stapu_fxt_tool with $FXTS"
+echo "Execute stapu_fxt_tool"
 date "+%a %d %b %Y %H:%M:%S %Z"
 # call the conversion
 # -memory-states

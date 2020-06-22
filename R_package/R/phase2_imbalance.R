@@ -145,10 +145,10 @@ var_imbalance <- function(data_app, step)
   utilization_per_step(data_app, step) %>% ungroup() %>%
       group_by(Step) %>%
       summarize(
-          "Imb. Per."=metric_imbalance_percentage(UtilizationTime),
-          "Imb. Time"=metric_imbalance_time(UtilizationTime, step),
-          "Std"=metric_imbalance_std(UtilizationTime, step),
-          "Norm"=metric_imbalance_norm(UtilizationTime, step)) %>%
+          "IP"=metric_imbalance_percentage(UtilizationTime),
+          "IT"=metric_imbalance_time(UtilizationTime, step),
+          "STD"=metric_imbalance_std(UtilizationTime, step),
+          "AVG"=metric_imbalance_norm(UtilizationTime, step)) %>%
       pivot_longer(-Step, names_to = "metric", values_to = "value") %>%
       mutate(Time = Step*step+step/2) -> to_plot
 
@@ -178,10 +178,10 @@ var_imbalance_power <- function(data_app, step)
   utilization_per_step(data_app, step) %>% ungroup() %>%
       group_by(Step) %>%
       summarize(
-            "Imb. Per."=metric_power_imbalance_percentage(Utilization, power),
-            "Imb. Time"=metric_power_imbalance_time(Utilization, power),
-            "Std"=metric_power_imbalance_std(Utilization),
-            "Norm"=metric_power_imbalance_norm(Utilization, power)) %>%
+            "IP"=metric_power_imbalance_percentage(Utilization, power),
+            "IT"=metric_power_imbalance_time(Utilization, power),
+            "STD"=metric_power_imbalance_std(Utilization),
+            "AVG"=metric_power_imbalance_norm(Utilization, power)) %>%
       pivot_longer(-Step, names_to = "metric", values_to = "value") %>%
       mutate(Time = Step*step+step/2) -> to_plot
 
@@ -192,11 +192,11 @@ var_imbalance_double_hetero <- function(data_app, step)
 {
   utilization_per_step_double_hetero(step, data_app) %>%
       group_by(Step) %>%
-      summarize(#"Per. Imb."=metric_percent_imbalance(UtilizationTime, step),
-          "Imb. Per."=metric_abe_imbalance_percentage(Utilization, ABE, nmABE, step),
-          "Imb. Time"=metric_abe_imbalance_time(Utilization, ABE, step),
-          "Std"=metric_abe_imbalance_std(Utilization),
-          "Norm"=metric_abe_imbalance_norm(ABE, step)) %>%
+      summarize(#"PI"=metric_percent_imbalance(UtilizationTime, step),
+          "IP"=metric_abe_imbalance_percentage(Utilization, ABE, nmABE, step),
+          "IT"=metric_abe_imbalance_time(Utilization, ABE, step),
+          "STD"=metric_abe_imbalance_std(Utilization),
+          "AVG"=metric_abe_imbalance_norm(ABE, step)) %>%
       pivot_longer(-Step, names_to = "metric", values_to = "value") %>%
       mutate(Time = Step*step+step/2) -> to_plot
 
@@ -205,6 +205,7 @@ var_imbalance_double_hetero <- function(data_app, step)
 
 var_imbalance_plot <- function(data, name, step)
 {
+  col <- brewer.pal(n = 5, name = 'Set1')
   data %>% select(Step) %>% unique() %>% mutate(Step = Step*step) -> steps
   data %>% ggplot(aes(x=Time, y=value, colour=metric)) +
   default_theme() +
@@ -212,6 +213,7 @@ var_imbalance_plot <- function(data, name, step)
   geom_vline(data=steps, aes(xintercept=Step), alpha=0.2) +
   geom_line() +
   theme(panel.grid.major.y = element_line(color = "grey80")) +
+  scale_color_manual(limits=c("PI", "IP", "IT", "AVG", "STD"), values=col) +
   labs(y=name, x = "Step") +
   ylim(0, 1)
 }
@@ -289,6 +291,8 @@ utilization_heatmap <- function(data_app, Y, step)
            geom_raster() +
            default_theme() +
            scale_y_continuous(breaks = yconfv$Position, labels=yconfv$ResourceId, expand=c(pjr_value(pajer$st$expand, 0.05),0)) +
-           labs(y="Resource Utilization", x = "Time") +
-           scale_fill_gradient(low = "cornflowerblue", high = "darkred")
+           labs(y="Utilization", x = "Time") +
+           scale_fill_gradient2(midpoint=0.5, low="blue", mid="white",
+                                    high="red", limits=c(0, 1)) +
+           guides(fill = guide_colourbar(barwidth = 10))
 }

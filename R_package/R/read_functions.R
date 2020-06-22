@@ -147,6 +147,14 @@ starvz_selective_read <- function(directory = ".")
     tables_to_load <- c(tables_to_load, "application")
   }
 
+  if(pjr(pajer$power_imbalance$active)){
+    tables_to_load <- c(tables_to_load, "application")
+  }
+
+  if(pjr(pajer$hete_imbalance$active)){
+    tables_to_load <- c(tables_to_load, "application")
+  }
+
   if(pjr(pajer$utilheatmap$active)){
     tables_to_load <- c(tables_to_load, "application")
   }

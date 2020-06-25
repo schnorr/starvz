@@ -1113,7 +1113,7 @@ starvz_plot_list <- function(data = NULL)
         nodememuse = gonodememuse,
         computingnodes = gocomputingnodes,
         summary_nodes = go_sn,
-        title = tplot
+        tplot = tplot
     )
     return (plot_list);
 }

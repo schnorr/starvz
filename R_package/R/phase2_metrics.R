@@ -509,5 +509,5 @@ starpu_apply_abe_per_slice <- function(step, resources_extra_info, tasks, max_re
     tasks %>% filter(Step==step) -> ts
     ts %>% .$Value -> used
     return(starpu_freq_abe(ts,
-                           resources_extra_info %>% filter(codelet %in% used)))
+                           resources_extra_info %>% filter(codelet %in% used, Step==step)))
 }

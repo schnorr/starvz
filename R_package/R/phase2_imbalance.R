@@ -210,7 +210,7 @@ var_imbalance_plot <- function(data, name, step)
   data %>% ggplot(aes(x=Time, y=value, colour=metric)) +
   default_theme() +
   geom_point() +
-  geom_vline(data=steps, aes(xintercept=Step), alpha=0.2) +
+  #geom_vline(data=steps, aes(xintercept=Step), alpha=0.2) +
   geom_line() +
   theme(panel.grid.major.y = element_line(color = "grey80")) +
   scale_color_manual(limits=c("PI", "IP", "IT", "AVG", "STD"), values=col) +
@@ -219,6 +219,7 @@ var_imbalance_plot <- function(data, name, step)
 }
 
 # Consider heterogenery tasks and resources
+# TODO: Last step is bogus
 utilization_per_step_double_hetero <- function(step, df){
     if(exists("unnest_legacy")){
        unnest <- unnest_legacy
@@ -262,10 +263,11 @@ utilization_per_step_double_hetero <- function(step, df){
         select(ResourceType, n) %>%
         distinct() -> n_resources
 
-    df %>% select(Value, ResourceType, Duration, Outlier) %>%
+    temp %>% select(Value, ResourceType, Duration, Step) %>%
         ungroup() %>% rename(codelet=Value) %>%
-        filter(Outlier==FALSE) %>%
-        group_by(ResourceType, codelet) %>%
+        group_by(ResourceType, codelet, Step) %>%
+        mutate(Outlier = ifelse(Duration > outlier_definition(Duration), TRUE, FALSE)) %>%
+        filter(!Outlier) %>%
         summarize(mean=mean(Duration), .groups="drop") %>%
         left_join(n_resources, by=c("ResourceType")) -> ri
 
@@ -273,6 +275,8 @@ utilization_per_step_double_hetero <- function(step, df){
         unique() %>% rowwise() %>%
         mutate(ABE = starpu_apply_abe_per_slice(Step, ri, ts)) %>%
         mutate(nmABE = starpu_apply_abe_per_slice(Step, ri, ts, max_res)) %>%
+        mutate(ABE = ifelse(ABE>step, step, ABE),
+               nmABE = ifelse(nmABE>step, step, nmABE)) %>%
         ungroup() -> ABE_steps
 
     util %>% left_join(ABE_steps, by=c("Step")) -> ret
@@ -284,15 +288,20 @@ utilization_heatmap <- function(data_app, Y, step)
   utilization_per_step(data_app, step) %>%
       ungroup() %>% left_join(Y, by=c("ResourceId"="Parent")) -> to_plot
 
+  to_plot %>% select(Position) %>% unique() %>% arrange(Position) %>% .$Position -> lvl
+  to_plot %>% mutate(Height=1, Position = factor(Position, levels=lvl)) %>%
+              mutate(Position = as.integer(Position)) -> to_plot
+
   yconfv <- yconf(to_plot %>% ungroup(), pjr_value(pajer$st$labels, "1"))
 
   to_plot %>% mutate(Time = Step*step+step/2) %>%
            ggplot(aes(y=Position, x=Time, fill=Utilization)) +
            geom_raster() +
            default_theme() +
+           theme(legend.title = element_text("black")) +
            scale_y_continuous(breaks = yconfv$Position, labels=yconfv$ResourceId, expand=c(pjr_value(pajer$st$expand, 0.05),0)) +
            labs(y="Utilization", x = "Time") +
-           scale_fill_gradient2(midpoint=0.5, low="blue", mid="white",
+           scale_fill_gradient2(name="Load [%]", midpoint=0.5, low="blue", mid="white",
                                     high="red", limits=c(0, 1)) +
-           guides(fill = guide_colourbar(barwidth = 10))
+           guides(fill = guide_colourbar(barwidth = 10, barheight = 0.5))
 }

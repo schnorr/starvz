@@ -42,7 +42,8 @@ starvz_phase1_read_write <- function (directory = ".", app_states_fun = NULL, st
     }
 
     # Read entities.csv and register the hierarchy (with Y coordinates)
-    dfhie <- hl_y_paje_tree(where = directory);
+    entities <- hl_y_paje_tree(where = directory);
+    dfhie <- entities$workertreedf
 
     # Read Worker States
     Worker <- read_worker_csv(where = directory,
@@ -113,7 +114,7 @@ starvz_phase1_read_write <- function (directory = ".", app_states_fun = NULL, st
                  StarPU=Worker$StarPU,
                  Colors=Worker$Colors,
                  Link=dfl, DAG=dfdag, Y=dfhie, Atree=dfa,
-                 Pmtool_states=dpmts,
+                 Pmtool_states=dpmts, entities=entities$dfe,
                  Zero=ZERO, Version=Version);
 
     loginfo("Call Gaps.");
@@ -152,7 +153,7 @@ starvz_phase1_read <- function (directory = ".", app_states_fun = NULL, state_fi
     dfa <- atree_load(where = directory);
 
     # Read entities.csv and register the hierarchy (with Y coordinates)
-    dfhie <- hl_y_paje_tree(where = directory);
+    dfhie <- hl_y_paje_tree(where = directory)$workertreedf;
 
     # Read Worker States
     Worker <- read_worker_csv(where = directory,
@@ -343,7 +344,7 @@ hl_y_paje_tree <- function (where = ".")
 
     if ((workertreedf %>% nrow) == 0) stop("After converting the tree back to DF, number of rows is zero.");
 
-    return(workertreedf);
+    return(list(workertreedf=workertreedf, dfe=dfe));
 }
 
 hl_y_coordinates <- function (dfw = NULL, dfhie=NULL)

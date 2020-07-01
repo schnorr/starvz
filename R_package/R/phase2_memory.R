@@ -428,22 +428,22 @@ pre_handle_gantt <- function(data, name_func=NULL){
 # StarPU versions but may be unavailable
 # if these two fail the only option is to assume the handle address
 # that will not match between MPI executions...
-if(is.null(name_func)){
-   use_coord <- FALSE
-   if("Coordinates" %in% names(data$Data_handles)){
-      data$Data_handles %>% .$Coordinates -> cc
-      if(!is.null(cc[[1]]) && !is.na(cc[[1]]) && cc[[1]]!=""){
-         use_coord <- TRUE
-      }
-   }
-   name_func <- data_name_handle
-   if("MPITag" %in% names(data$Data_handles)){
-      name_func <- data_name_tag
-   }
-   if(use_coord){
-      name_func <- data_name_coordinates
-   }
-}
+    if(is.null(name_func)){
+       use_coord <- FALSE
+       if("Coordinates" %in% names(data$Data_handles)){
+          data$Data_handles %>% .$Coordinates -> cc
+          if(!is.null(cc[[1]]) && !is.na(cc[[1]]) && cc[[1]]!=""){
+             use_coord <- TRUE
+          }
+       }
+       name_func <- data_name_handle
+       if("MPITag" %in% names(data$Data_handles)){
+          name_func <- data_name_tag
+       }
+       if(use_coord){
+          name_func <- data_name_coordinates
+       }
+    }
 
     data$Events_memory <- data$Events_memory %>%
         mutate(Type = as.character(Type)) %>%
@@ -452,7 +452,7 @@ if(is.null(name_func)){
                               TRUE ~ Type))
 
     if(is.null(data$handle_states)){
-        data$handle_states <- handles_presence_states2(data)
+        data$handle_states <- handles_presence_states(data)
     }
 
     position <- data$handle_states %>% ungroup() %>%
@@ -576,7 +576,7 @@ if(is.null(name_func)){
 handles_gantt <- function(data, JobId=NA, lines=NA, lHandle=NA){
 
     if(is.null(data$handle_gantt_data)){
-        data$handle_gantt_data <- pre_handle_gantt2(data)
+        data$handle_gantt_data <- pre_handle_gantt(data)
     }
 
     if(is.na(JobId) && is.na(lHandle)){

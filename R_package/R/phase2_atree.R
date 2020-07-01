@@ -178,6 +178,25 @@ atree_temporal_chart <- function(data = NULL, step = 100, globalEndTime = NULL)
                           ymax=Position+Height),
                       fill="#4DAF4A");
     }
+    
+    # plot "communication" block_copy tasks in the tree nodes
+    if (pjr(pajer$atree$communication$active)) {
+      # filter communication tasks
+      dfw_comm <- dfw %>%
+        filter(grepl("block_", Value)) %>%
+        unique() %>%
+        select(-Position, -Height) %>%
+        left_join(data$Atree, by="ANode");
+
+      atreeplot <- atreeplot +
+        geom_rect(data=dfw_comm,
+                  aes(xmin=Start,
+                    xmax=End,
+                    ymin=Position+0.25*Height,
+                    ymax=Position+0.75*Height),
+                  fill="#000000", alpha=.3); 
+    }
+
     loginfo("Exit of atree_temporal_chart");
     return(atreeplot);
 }

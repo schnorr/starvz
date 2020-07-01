@@ -25,6 +25,8 @@ default:
     active: FALSE # Disable
     step: 10 # Time step used for aggregation
     height: # Vertical Size in the final visualization
+    communication: # Show communication tasks in the tree nodes
+      active: FALSE # Enable
 
   utiltreenode: # Plot of resource utilization by tree depth
     active: FALSE # Disable

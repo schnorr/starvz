@@ -1,0 +1,87 @@
+#!/bin/bash
+# StarVZ - R-based visualization techniques for the StarPU runtime
+#  Main command encapsulator
+#
+# This file is part of the StarVZ project.
+# Copyright (c) 2020 Federal University of Rio Grande do Sul (UFRGS)
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+#
+
+STARVZ_HOME="$( cd "$(dirname "$0")/../" >/dev/null 2>&1 ; pwd -P )"
+
+# Help Message
+usage () {
+    cat <<EOF
+StarVZ - R-based visualization techniques for the StarPU runtime
+
+Usage: $0 [OPTIONS] [TRACE_FOLDER]
+
+Options:
+  -h, --help                       # show this message
+  -1, --phase1 TRACE_FOLDER        # Execute phase 1 on TRACE_FOLDER
+  -2, --phase2 TRACE_FOLDER        # Execute phase 2 on TRACE_FOLDER
+  -b, --both-phases TRACE_FOLDER   # Execute phase 1 and 2 on TRACE_FOLDER
+  -a, --application APPLICATION    # Hard define APPLICATION for scripts
+  -c, --config CONFIG_FILE         # Use CONFIG_FILE as config file
+                                       default is only st chart
+
+  -m, --memory                     # Do the extend memory traces options
+                                       -memory-states on starpu_fxt_tool
+
+  -f, --fxt                        # Use fxt files intead of parquet
+
+      --git-version                # Shows the git hash
+
+Report bugs to: <https://github.com/schnorr/starvz/issues>
+StarVZ home page: <https://github.com/schnorr/starvz/>
+EOF
+}
+
+if [ $# -eq 0 ]
+  then
+    usage;
+    exit 0;
+fi
+
+STARVZ_EXEC_PHASE_1=0
+STARVZ_EXEC_PHASE_2=0
+STARVZ_TRACE_FOLDER=""
+STARVZ_APPLICATION=""
+STARVZ_CONFIG_FILE="$STARVZ_HOME/etc/default.yaml"
+
+while true; do
+        case "$1" in
+                "--phase1")
+                        STARVZ_TRACE_FOLDER=$2
+                        if [ ! -r "$STARVZ_TRACE_FOLDER" ]; then
+                                echo "$STARVZ_TRACE_FOLDER can't be read"
+                                exit 1
+                        fi
+                        shift 2
+                        ;;
+                "--git-version")
+                        echo "$(cd $STARVZ_HOME; git rev-parse --verify HEAD)"
+                        shift 1
+                        ;;
+                "-h")
+                        usage;
+                        exit 0;
+                        ;;
+                *)
+                        break
+                        ;;
+        esac
+done
+
+# Process, lets check if all we need is here

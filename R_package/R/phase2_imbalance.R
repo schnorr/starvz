@@ -94,6 +94,7 @@ metric_abe_imbalance_percentage  <- function(utilization, ABE, nmABE, step){
     c1 <- it/max_util
     c2 <- nmABE/ABE
     ip <- c1 * c2
+    ip <- max(0, min(1, ip))
     return(ip)
 }
 
@@ -103,7 +104,8 @@ metric_abe_imbalance_time  <- function(Utilization, ABE, step){
    norm <- ABE/step
 
    it <- max_util - norm
-    return(it)
+   it <- max(0, min(1, it))
+   return(it)
 }
 
 metric_abe_imbalance_std  <- function(utilization){
@@ -209,7 +211,7 @@ var_imbalance_plot <- function(data, name, step)
   data %>% select(Step) %>% unique() %>% mutate(Step = Step*step) -> steps
   data %>% ggplot(aes(x=Time, y=value, colour=metric)) +
   default_theme() +
-  geom_point() +
+  geom_point(size=1) +
   #geom_vline(data=steps, aes(xintercept=Step), alpha=0.2) +
   geom_line() +
   theme(panel.grid.major.y = element_line(color = "grey80")) +

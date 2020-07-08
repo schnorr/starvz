@@ -877,7 +877,7 @@ starvz_plot_list <- function(data = NULL)
         }else{
             imb_plot <- imb_plot + theme(legend.position = "top")
         }
-        imb_plot <- userYLimit(imb_plot, pajer$imbalance$limit, c(tstart, tend));
+        imb_plot <- imb_plot + coord_cartesian(xlim=c(tstart, tend), ylim=c(0, pjr_value(pajer$imbalance$limit, 1)))
     }
 
     # Imbalance Metrics Power
@@ -892,7 +892,7 @@ starvz_plot_list <- function(data = NULL)
         }else{
             imb_plot_power <- imb_plot_power + theme(legend.position = "top")
         }
-        imb_plot_power <- userYLimit(imb_plot_power, pajer$power_imbalance$limit, c(tstart, tend));
+        imb_plot_power <- imb_plot_power + coord_cartesian(xlim=c(tstart, tend), ylim=c(0, pjr_value(pajer$power_imbalance$limit, 1)))
     }
 
     # Imbalance Metrics hete
@@ -907,7 +907,7 @@ starvz_plot_list <- function(data = NULL)
         }else{
             imb_plot_hete <- imb_plot_hete + theme(legend.position = "top")
         }
-        imb_plot_hete <- userYLimit(imb_plot_hete, pajer$hete_imbalance$limit, c(tstart, tend));
+        imb_plot_hete <- imb_plot_hete + coord_cartesian(xlim=c(tstart, tend), ylim=c(0, pjr_value(pajer$hete_imbalance$limit, 1)))
     }
 
     if (pjr(pajer$utilheatmap$active)){
@@ -921,7 +921,7 @@ starvz_plot_list <- function(data = NULL)
         }else{
             heatmap <- heatmap + theme(legend.position = "top")
         }
-        heatmap <- userYLimit(heatmap, pajer$utilheatmap$limit, c(tstart, tend));
+        heatmap <- heatmap + tScale
     }
 
     # MPIBandwidth

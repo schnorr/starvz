@@ -333,9 +333,10 @@ starvz_assemble <- function(..., remove_Y_info=TRUE, remove_legends=TRUE)
     for(i in list(...)){
 
         # Check if arguments are a list or a plot
-        if(is.list(i[[1]])){
+        # is.list is not adequated here
+        if(isTRUE(class(i[[1]])=="list")){
            plists <- append(plists, i)
-        }else if(is(i[[1]], "LayerInstance")){
+        }else if(is(i[[1]], "gg")){
            plists <- append(plists, list(i))
         }else{
            logerror("starvz_assemble needs a list of plots or a list of list of plots")
@@ -369,7 +370,7 @@ starvz_assemble <- function(..., remove_Y_info=TRUE, remove_legends=TRUE)
     for(plot_list in plists){
        # Check if its a group of plots
        # TODO: check is weak but will protect for many errors
-       if(!is(plot_list[[1]], "LayerInstance")){
+       if(!is(plot_list[[1]], "gg")){
            logerror("starvz_assemble element is not a plot list")
            return(NULL)
        }
@@ -647,8 +648,7 @@ starvz_plot_list <- function(data = NULL)
         tzScale <- list(
             coord_cartesian(xlim=c(tstart, tend),
                             ylim=c(z.start/100 * max.y.coordinate,
-                                   z.end/100 * max.y.coordinate))
-        );
+                                   z.end/100 * max.y.coordinate)));
         goatreet <- goatreet + tzScale
     }
 

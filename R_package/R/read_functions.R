@@ -188,28 +188,38 @@ starvz_selective_read <- function(directory = ".")
   starvz_read_some(directory = directory, tables = tables_to_load)
 }
 
-starvz_read_some <- function(directory = ".", tables = c("application"))
+starvz_read_some <- function(directory = ".", tables = c("application"), config = NULL)
 {
     check_arrow();
     # Check if there is arrow gz files
     filenames <- list.files(path = directory, pattern = "*.parquet", full.names = TRUE, recursive = FALSE);
     if(length(filenames)>0){
         loginfo("Detected parquet files")
-        starvz_read_some_parquet(directory, tables = tables)
+        data  <- starvz_read_some_parquet(directory, tables = tables)
     }else{
-        starvz_read_some_feather(directory, tables = tables)
+        data <- starvz_read_some_feather(directory, tables = tables)
     }
+
+    # TODO if config==NULL set config <- directory/config.yaml
+    # TODO read config and add in data$config
+    # TODO Define S3 Class
+    return(data)
 }
 
-starvz_read <- function(directory = ".")
+starvz_read <- function(directory = ".", config = NULL)
 {
     check_arrow();
     # Check if there is arrow gz files
     filenames <- list.files(path = directory, pattern = "*.parquet", full.names = TRUE, recursive = FALSE);
     if(length(filenames)>0){
         loginfo("Detected parquet files")
-        starvz_read_parquet(directory)
+        data <- starvz_read_parquet(directory)
     }else{
-        starvz_read_feather(directory)
+        data <- starvz_read_feather(directory)
     }
+
+    # TODO if config==NULL set config <- directory/config.yaml
+    # TODO read config and add in data$config
+    # TODO Define S3 Class
+    return(data)
 }

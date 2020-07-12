@@ -39,3 +39,4 @@ License: GPL-3
 Encoding: UTF-8
 LazyData: true
 LinkingTo: Rcpp
+RoxygenNote: 7.1.1

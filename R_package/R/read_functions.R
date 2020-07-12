@@ -188,7 +188,7 @@ starvz_selective_read <- function(directory = ".")
   starvz_read_some(directory = directory, tables = tables_to_load)
 }
 
-starvz_read_some <- function(directory = ".", tables = c("application"), config = NULL)
+starvz_read_some <- function(directory = ".", tables = c("application"), config_file = NULL)
 {
     check_arrow();
     # Check if there is arrow gz files
@@ -200,13 +200,30 @@ starvz_read_some <- function(directory = ".", tables = c("application"), config 
         data <- starvz_read_some_feather(directory, tables = tables)
     }
 
-    # TODO if config==NULL set config <- directory/config.yaml
-    # TODO read config and add in data$config
-    # TODO Define S3 Class
-    return(data)
+    if(is.null(config_file)){
+      config_file <- file.path(directory, "config.yaml")
+    }
+    data$config <- starvz_read_config(config_file)
+
+    final_data <- starvz_data(data)
+
+    return(final_data)
 }
 
-starvz_read <- function(directory = ".", config = NULL)
+#' Read starvz trace files
+#'
+#' Read the directory of trace files (feather or parquet) and
+#' the configfuration file, and return a starvz_data class used
+#' in starvz functions
+#'
+#' @param directory Directory path of trace files
+#' @param config_file Path for configuration yaml file
+#' @return The starvz_data with all tables
+#' @examples
+#' starvz_read("folder_to_parquet_files/")
+#' starvz_read(directory="folder_to_parquet_files/", config_file="path_to_config.yaml")
+#' starvz_read() #Read current directory
+starvz_read <- function(directory = ".", config_file = NULL)
 {
     check_arrow();
     # Check if there is arrow gz files
@@ -218,8 +235,12 @@ starvz_read <- function(directory = ".", config = NULL)
         data <- starvz_read_feather(directory)
     }
 
-    # TODO if config==NULL set config <- directory/config.yaml
-    # TODO read config and add in data$config
-    # TODO Define S3 Class
-    return(data)
+    if(is.null(config_file)){
+      config_file <- file.path(directory, "config.yaml")
+    }
+    data$config <- starvz_read_config(config_file)
+
+    final_data <- starvz_data(data)
+
+    return(final_data)
 }

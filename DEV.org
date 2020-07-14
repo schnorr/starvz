@@ -2,7 +2,7 @@
 
 ** Check package
 #+begin_src R
-devtools::use_testthat("R_package/")
+devtools::check("R_package/")
 #+end_src
 
 ** Test Units

@@ -71,3 +71,5 @@ Collate:
     'phase2_var_chart.R'
     'read_functions.R'
     'write_functions.R'
+Suggests:
+    testthat

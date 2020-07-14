@@ -1,0 +1,23 @@
+* Util Functions
+
+** Check package
+#+begin_src R
+devtools::use_testthat("R_package/")
+#+end_src
+
+** Test Units
+#+begin_src R
+devtools::test()
+#+end_src
+
+** Style all files
+#+begin_src R
+styler::style_dir(".")
+#+end_src
+
+** Coverage
+#+begin_src R
+covr::package_coverage()
+c %>% as.tibble() -> t
+t %>% filter(filename=="R/phase2.R", value==0) %>% select(functions, first_line, last_line) %>% data.frame()
+#+end_src

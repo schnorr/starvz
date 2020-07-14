@@ -40,17 +40,6 @@ geom_atree <- function(data = NULL, Offset = 1.02, Flip = TRUE) {
     select(-.data$Parent.Parent) %>%
     # Keep only intermediary nodes
     filter(.data$Intermediary == TRUE) %>%
-    # Calculate coordinates for Labels
-    mutate(
-      Label.X = .data$Start,
-      Label.Y = .data$Position + .data$Height / 2
-    ) %>%
-    # Calculate coordinates for horizontal line
-    mutate(
-      Line.Y = .data$Position + .data$Height / 2,
-      Line.X.start = .data$Start,
-      Line.X.end = .data$End
-    ) %>%
     # Calculate coordinates for lines connecting child with parent
     mutate(
       Edge.X = .data$Start,
@@ -63,12 +52,6 @@ geom_atree <- function(data = NULL, Offset = 1.02, Flip = TRUE) {
       Edge.End.Y = .data$Position + .data$Height / 2,
       Edge.End.Xend = .data$End.Parent,
       Edge.End.Yend = .data$Position.Parent + .data$Height.Parent / 2
-    ) %>%
-    mutate(
-      Middle.X = .data$Start + (.data$End - .data$Start) / 2,
-      Middle.Y = .data$Position + .data$Height / 2,
-      Middle.End.X = .data$Start.Parent + (.data$End.Parent - .data$Start.Parent) / 2,
-      Middle.End.Y = .data$Position.Parent + .data$Height.Parent / 2
     )
 
   # data frame for the tree plot structure
@@ -105,9 +88,6 @@ geom_atree <- function(data = NULL, Offset = 1.02, Flip = TRUE) {
           y = .data$Edge.Y
         ), color = "blue"
       ),
-      # geom_point(data=d,
-      #           aes(x=Edge.Xend,
-      #               y=Edge.Yend), color="blue"),
       # Lines connecting child with parent (End)
       geom_segment(
         data = dstruct,
@@ -127,9 +107,6 @@ geom_atree <- function(data = NULL, Offset = 1.02, Flip = TRUE) {
           y = .data$Edge.End.Y
         ), color = "red"
       ),
-      # geom_point(data=d,
-      #           aes(x=Edge.End.Xend,
-      #               y=Edge.End.Yend), color="red"),
       # Fix time coordinates
       coord_cartesian(xlim = c(0, makespan)),
       # Horizontal lines
@@ -156,8 +133,6 @@ atree_temporal_chart <- function(data = NULL, step = 100, globalEndTime = NULL) 
     filter(.data$Value != 0) %>%
     select(.data$ANode, .data$Slice, .data$Value1, .data$Usage) %>%
     ungroup() %>%
-    # calculate usage in percentage by node given the total Usage
-    # mutate(NodeUsage = 100 * (Value1/Usage)) %>%
     mutate(NodeUsage = .data$Value1) %>%
     left_join(data$Atree, by = "ANode") %>%
     # resize for node computation Start
@@ -192,12 +167,11 @@ atree_temporal_chart <- function(data = NULL, step = 100, globalEndTime = NULL) 
     unique() %>%
     # Remove all tasks that do not have ANode
     filter(!is.na(.data$Height.ANode)) %>%
-    # Plot
     ggplot() +
     default_theme(data$config$base_size, data$config$expand) +
     ylab("Elimination\nTree [nodes]") +
     scale_y_continuous(breaks = NULL, labels = NULL) +
-    # Add the atree representation on top
+    # Add the atree structure representation
     geom_atree(data, Offset = 1.05, Flip = TRUE)
 
   if (data$config$atree$utilization) {
@@ -212,8 +186,6 @@ atree_temporal_chart <- function(data = NULL, step = 100, globalEndTime = NULL) 
           ymax = .data$Position + .data$Height
         )
       ) +
-      # scale_fill_viridis(option="plasma") +
-      # scale_fill_gradient(low="lightsalmon", high="red1") +
       scale_fill_gradient2(name = "Computational Load", limits = c(0, 100), midpoint = 50, low = "blue", mid = "yellow", high = "red") +
       geom_rect(
         data = dfw_init,
@@ -409,8 +381,6 @@ atree_time_aggregation <- function(dfw = NULL, step = 100) {
     return(NULL)
   }
 
-  dfw <- dfw
-
   dfw_agg_prep <- atree_time_aggregation_prep(dfw)
   dfw_agg <- atree_time_aggregation_do(dfw_agg_prep, step)
 
@@ -550,7 +520,6 @@ resource_utilization_tree_node_plot <- function(data = NULL, step = 100) {
     filter(.data$Slc == 0 | .data$Slice == max(.data$Slice))
 
   # decide the size of the pallet, if it will include more colors than just green
-
   ncolors <- df_plot %>%
     ungroup() %>%
     select(.data$Color) %>%
@@ -568,7 +537,6 @@ resource_utilization_tree_node_plot <- function(data = NULL, step = 100) {
 
   df_plot %>%
     ggplot() +
-    # geom_area(aes(x=Slice, y=Value1, fill=as.factor(Color)), stat = "identity", position = "stack") +
     geom_ribbon(aes(ymin = .data$Ymin, ymax = .data$Ymax, x = .data$Slice, fill = as.factor(.data$Color))) +
     scale_fill_manual(values = fill_palette) +
     default_theme(data$config$base_size, data$config$expand) +
@@ -586,7 +554,6 @@ resource_utilization_tree_depth <- function(data = NULL, base_size = 22, expand 
 
   data %>%
     ggplot() +
-    # geom_area(aes(x=Slice, y=Value2, fill=as.factor(Depth))) +
     geom_ribbon(aes(ymin = .data$Ymin, ymax = .data$Ymax, x = .data$Slice, fill = as.factor(.data$Depth))) +
     default_theme(base_size, expand) +
     theme(legend.position = "top") +

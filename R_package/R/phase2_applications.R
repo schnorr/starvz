@@ -1,148 +1,149 @@
 #' @include starvz_data.R
 
-starpu_states <- function()
-{
-    c("Callback", "FetchingInput", "Idle", "Initializing", "Overhead", "PushingOutput", "Scheduling", "Submitting task", "Progressing", "Sleeping", "Submiting task", "Waiting all tasks", "Building task", "Deinitializing", "execute_on_all_wrapper");
+starpu_states <- function() {
+  c("Callback", "FetchingInput", "Idle", "Initializing", "Overhead", "PushingOutput", "Scheduling", "Submitting task", "Progressing", "Sleeping", "Submiting task", "Waiting all tasks", "Building task", "Deinitializing", "execute_on_all_wrapper")
 }
 
-all_starpu_states <- function()
-{
-    c("Callback", "FetchingInput", "Idle", "Initializing", "Overhead", "PushingOutput", "Scheduling", "Submitting task", "Progressing", "Sleeping", "Submiting task", "Waiting all tasks", "Building task", "Deinitializing", "execute_on_all_wrapper", "Executing");
+all_starpu_states <- function() {
+  c("Callback", "FetchingInput", "Idle", "Initializing", "Overhead", "PushingOutput", "Scheduling", "Submitting task", "Progressing", "Sleeping", "Submiting task", "Waiting all tasks", "Building task", "Deinitializing", "execute_on_all_wrapper", "Executing")
 }
 
-cholesky_states <- function()
-{
-    cholesky_colors() %>% .$Kernel;
+cholesky_states <- function() {
+  cholesky_colors() %>% .$Kernel
 }
 
-qr_states <- function()
-{
-    qr_colors() %>% .$Kernel;
+qr_states <- function() {
+  qr_colors() %>% .$Kernel
 }
 
-scalfmm_states <- function()
-{
-    scalfmm_colors() %>% .$Kernel;
+scalfmm_states <- function() {
+  scalfmm_colors() %>% .$Kernel
 }
-lu_colors <- function()
-{
-    tibble(
-        Kernel = c("getrf", "trsm", "gemm", "plgsy", "plrnt"),
-        Color = c("#e41a1c", "#377eb8", "#4daf4a", "yellow", "yellow"),
-        Use = c(TRUE, TRUE, TRUE, FALSE, FALSE));
-}
-
-cholesky_colors <- function()
-{
-    tibble(
-        Kernel = c("potrf", "trsm", "syrk", "gemm", "plgsy"),
-        Color = c("#e41a1c", "#377eb8", "#984ea3", "#4daf4a", "yellow"),
-        Use = c(TRUE, TRUE, TRUE, TRUE, FALSE));
+lu_colors <- function() {
+  tibble(
+    Kernel = c("getrf", "trsm", "gemm", "plgsy", "plrnt"),
+    Color = c("#e41a1c", "#377eb8", "#4daf4a", "yellow", "yellow"),
+    Use = c(TRUE, TRUE, TRUE, FALSE, FALSE)
+  )
 }
 
-cfd_colors <- function()
-{
-    tibble(
-        Kernel = c("fluid_bound", "diffuse_1", "diffuse_relax", "macCormack_commit", "macCormack_2", "macCormack_1", "obstacle_boundary_1", "conserve_1", "conserve_relax", "conserve_commit", "obstacle_velocity", "initial_state"),
-        Color = c("#e41a1c", "#377eb8", "#984ea3", "#9a4ea3", "#4daf4a", "#ffff33", "#a65628", "#f781bf", "#ea1a1c", "#37beb8", "#4eaf4a", "#ff7f00"),
-        Use = c(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE));
+cholesky_colors <- function() {
+  tibble(
+    Kernel = c("potrf", "trsm", "syrk", "gemm", "plgsy"),
+    Color = c("#e41a1c", "#377eb8", "#984ea3", "#4daf4a", "yellow"),
+    Use = c(TRUE, TRUE, TRUE, TRUE, FALSE)
+  )
 }
 
-qr_colors <- function()
-{
-    tibble(
-        Kernel = c("dgeqrt", "dlarfb" , "dtpqrt" , "dtpmqrt", "lapack_dgeqrt", "lapack_dlarfb" , "lapack_dtpqrt" , "lapack_dtpmqrt"),
-        Color = c("#96e3a2", "#f68285", "#d194d0",  "#9bb6dd", "#96e3a2", "#f68285", "#d194d0",  "#9bb6dd"),
-        Use = c(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE));
+cfd_colors <- function() {
+  tibble(
+    Kernel = c("fluid_bound", "diffuse_1", "diffuse_relax", "macCormack_commit", "macCormack_2", "macCormack_1", "obstacle_boundary_1", "conserve_1", "conserve_relax", "conserve_commit", "obstacle_velocity", "initial_state"),
+    Color = c("#e41a1c", "#377eb8", "#984ea3", "#9a4ea3", "#4daf4a", "#ffff33", "#a65628", "#f781bf", "#ea1a1c", "#37beb8", "#4eaf4a", "#ff7f00"),
+    Use = c(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE)
+  )
 }
 
-scalfmm_colors <- function()
-{
-    tibble(
-# For the trace I've been given
-        Kernel = c("L2L-level", "L2P",     "M2L-level", "M2L-out-level", "M2M",     "P2M",     "P2P",     "P2P-out"),
-        Color =  c("#e41a1c",   "#377eb8", "#4daf4a",   "#984ea3",       "#ff7f00", "#ffff33", "#a65628", "#f781bf"));
-
-# For paper https://hal.inria.fr/hal-01474556/document
-#        Kernel = c("L2L",     "L2P",     "M2L_in",  "M2L_out", "M2M",     "P2M",     "P2P_in",  "P2P_out"),
-#        Color =  c("#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00", "#ffff33", "#a65628", "#f781bf"));
+qr_colors <- function() {
+  tibble(
+    Kernel = c("dgeqrt", "dlarfb", "dtpqrt", "dtpmqrt", "lapack_dgeqrt", "lapack_dlarfb", "lapack_dtpqrt", "lapack_dtpmqrt"),
+    Color = c("#96e3a2", "#f68285", "#d194d0", "#9bb6dd", "#96e3a2", "#f68285", "#d194d0", "#9bb6dd"),
+    Use = c(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE)
+  )
 }
 
-starpu_colors <- function()
-{
-  pre_colors <- brewer.pal(12, "Set3");
-  pre_colors[13] = "#000000"
-  pre_colors[14] = "#000000"
-  pre_colors[15] = "#000000"
+scalfmm_colors <- function() {
+  tibble(
+    # For the trace I've been given
+    Kernel = c("L2L-level", "L2P", "M2L-level", "M2L-out-level", "M2M", "P2M", "P2P", "P2P-out"),
+    Color = c("#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00", "#ffff33", "#a65628", "#f781bf")
+  )
+
+  # For paper https://hal.inria.fr/hal-01474556/document
+  #        Kernel = c("L2L",     "L2P",     "M2L_in",  "M2L_out", "M2M",     "P2M",     "P2P_in",  "P2P_out"),
+  #        Color =  c("#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00", "#ffff33", "#a65628", "#f781bf"));
+}
+
+starpu_colors <- function() {
+  pre_colors <- brewer.pal(12, "Set3")
+  pre_colors[13] <- "#000000"
+  pre_colors[14] <- "#000000"
+  pre_colors[15] <- "#000000"
   tibble(Value = starpu_states()) %>%
-      # Get colors from Set3
-      mutate(Color = pre_colors) %>%
-      # Adopt Luka suggestion: Idle = orange; Sleeping = rose
-      mutate(Color = case_when(.data$Value == "Idle" ~ "#FDB462",
-                               .data$Value == "PushingOutput" ~ "#BEBADA",
-                               TRUE ~ .data$Color)) -> t;
-    # Transform to a nice named list for ggplot
-    ret <- t %>% pull(.data$Color)
-    names(ret) <- t %>% pull(.data$Value);
-    return(ret);
+    # Get colors from Set3
+    mutate(Color = pre_colors) %>%
+    # Adopt Luka suggestion: Idle = orange; Sleeping = rose
+    mutate(Color = case_when(
+      .data$Value == "Idle" ~ "#FDB462",
+      .data$Value == "PushingOutput" ~ "#BEBADA",
+      TRUE ~ .data$Color
+    )) -> t
+  # Transform to a nice named list for ggplot
+  ret <- t %>% pull(.data$Color)
+  names(ret) <- t %>% pull(.data$Value)
+  return(ret)
 }
 
 
-cholesky_pastix_colors <- function()
-{
-    tibble(
-        Kernel = c("blok_dpotrfsp1d_panel",
-                   "cblk_dpotrfsp1d_panel",
-                   "blok_dtrsmsp",
-                   "blok_dgemmsp",
-                   "cblk_dgemmsp"),
-        Color = c("#e41a1c",
-                  "#000000",
-                  "#377eb8",
-                  "#4daf4a",
-                  "#c0c0c0"));
+cholesky_pastix_colors <- function() {
+  tibble(
+    Kernel = c(
+      "blok_dpotrfsp1d_panel",
+      "cblk_dpotrfsp1d_panel",
+      "blok_dtrsmsp",
+      "blok_dgemmsp",
+      "cblk_dgemmsp"
+    ),
+    Color = c(
+      "#e41a1c",
+      "#000000",
+      "#377eb8",
+      "#4daf4a",
+      "#c0c0c0"
+    )
+  )
 }
 
-qrmumps_states_level_order <- function ()
-{
-    c(
-        "Do_subtree",
-        "INIT",
-        "GEQRT",
-        "GEMQRT",
-        "TPQRT",
-        "TPMQRT",
-        "ASM",
-        "CLEAN",
-        "Idle");
+qrmumps_states_level_order <- function() {
+  c(
+    "Do_subtree",
+    "INIT",
+    "GEQRT",
+    "GEMQRT",
+    "TPQRT",
+    "TPMQRT",
+    "ASM",
+    "CLEAN",
+    "Idle"
+  )
 }
-qrmumps_states <- function ()
-{
-    c(
-        "ASM",
-        "GEMQRT",
-        "Do_subtree",
-        "CLEAN",
-        "GEQRT",
-        "INIT",
-        "TPMQRT",
-        "TPQRT",
-        "Idle");
+qrmumps_states <- function() {
+  c(
+    "ASM",
+    "GEMQRT",
+    "Do_subtree",
+    "CLEAN",
+    "GEQRT",
+    "INIT",
+    "TPMQRT",
+    "TPQRT",
+    "Idle"
+  )
 }
 
-qrmumps_color_mapping <- function()
-{
-    #This vector changes the color ordering
-    states = qrmumps_states();
-    kcol <- data.frame(RGB=as.character(brewer.pal(9, "Set1")),
-#These are only the color names I put manually here to try to understand the color mapping
-#                       ColorName=c("red", "blue", "green", "purple", "orange", "yellow", "brown", "pink", "gray"),
-                       StateName=factor(states, levels=qrmumps_states_level_order()),
-                       xmin=1:length(states),
-                       xmax=1:length(states)+1,
-                       ymin=0,
-                       ymax=1);
-   kcol;
+qrmumps_color_mapping <- function() {
+  # This vector changes the color ordering
+  states <- qrmumps_states()
+  kcol <- data.frame(
+    RGB = as.character(brewer.pal(9, "Set1")),
+    # These are only the color names I put manually here to try to understand the color mapping
+    #                       ColorName=c("red", "blue", "green", "purple", "orange", "yellow", "brown", "pink", "gray"),
+    StateName = factor(states, levels = qrmumps_states_level_order()),
+    xmin = 1:length(states),
+    xmax = 1:length(states) + 1,
+    ymin = 0,
+    ymax = 1
+  )
+  kcol
 }
 
 #' Colors for qrmumps
@@ -150,30 +151,32 @@ qrmumps_color_mapping <- function()
 #' This will be deprecated
 #'
 #' @export
-qrmumps_colors <- function()
-{
-qrmumps_color_mapping() %>%
+qrmumps_colors <- function() {
+  qrmumps_color_mapping() %>%
     # Rename
-    rename(Kernel = .data$StateName, Color=.data$RGB) %>%
+    rename(Kernel = .data$StateName, Color = .data$RGB) %>%
     # Remove Idle
     filter(.data$Kernel != "Idle") %>%
     # Change to character
-    mutate(Kernel = as.character(.data$Kernel), Color=as.character(.data$Color)) %>%
+    mutate(Kernel = as.character(.data$Kernel), Color = as.character(.data$Color)) %>%
     # Select only those necessary
     select(.data$Kernel, .data$Color) %>%
     # Change names according to latest modifications
     mutate(Kernel = case_when(
-               .data$Kernel == "ASM" ~ "assemble_block",
-               .data$Kernel == "GEMQRT" ~ "lapack_gemqrt",
-               .data$Kernel == "GEQRT" ~ "lapack_geqrt",
-               .data$Kernel == "TPMQRT" ~ "lapack_tpmqrt",
-               .data$Kernel == "TPQRT" ~ "lapack_tpqrt",
-               .data$Kernel == "Do_subtree" ~ "do_subtree",
-               .data$Kernel == "CLEAN" ~ "clean_front",
-               .data$Kernel == "INIT" ~ "init_front",
-               TRUE ~ .data$Kernel)) %>%
+      .data$Kernel == "ASM" ~ "assemble_block",
+      .data$Kernel == "GEMQRT" ~ "lapack_gemqrt",
+      .data$Kernel == "GEQRT" ~ "lapack_geqrt",
+      .data$Kernel == "TPMQRT" ~ "lapack_tpmqrt",
+      .data$Kernel == "TPQRT" ~ "lapack_tpqrt",
+      .data$Kernel == "Do_subtree" ~ "do_subtree",
+      .data$Kernel == "CLEAN" ~ "clean_front",
+      .data$Kernel == "INIT" ~ "init_front",
+      TRUE ~ .data$Kernel
+    )) %>%
     # Add new kernels
-    bind_rows (tibble(Kernel = c("init_block", "clean_block", "block_copy"),
-                      Color = c("#FFFF33", "#984EA3", "#ad0a18"))) %>%
-               mutate(Use = TRUE)
+    bind_rows(tibble(
+      Kernel = c("init_block", "clean_block", "block_copy"),
+      Color = c("#FFFF33", "#984EA3", "#ad0a18")
+    )) %>%
+    mutate(Use = TRUE)
 }

@@ -1,11 +1,10 @@
 #' @include starvz_data.R
 
-config_value <- function (property, default)
-{
-  ifelse(is.null(property), default, property);
+config_value <- function(property, default) {
+  ifelse(is.null(property), default, property)
 }
 
-starvz_default_config <- function(){
+starvz_default_config <- function() {
   config <- list()
   config$base_size <- 22
   config$expand <- 0.05
@@ -145,18 +144,18 @@ starvz_default_config <- function(){
   return(config)
 }
 
-starvz_read_config <- function(file=NULL){
-  defaut_config <- starvz_default_config();
-  if(is.null(file)){
+starvz_read_config <- function(file = NULL) {
+  defaut_config <- starvz_default_config()
+  if (is.null(file)) {
     loginfo("Using default config")
     return(defaut_config)
-  }else if(!file.exists(file)){
+  } else if (!file.exists(file)) {
     logwarn("Config file dont exist, using defaut")
     return(defaut_config)
-  }else{
+  } else {
     config <- yaml::read_yaml(file)
     # Retrocompatible with default classes
-    if(isTRUE(names(config)=="default")){
+    if (isTRUE(names(config) == "default")) {
       config <- config$default
     }
     final_config <- modifyList(defaut_config, config)

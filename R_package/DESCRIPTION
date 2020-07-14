@@ -1,6 +1,6 @@
 Package: starvz
-Title: R-based visualization techniques for task-based applications.
-Version: 0.1.0.3
+Title: R-based visualization techniques for task-based applications
+Version: 0.2.0
 Authors@R: as.person(c(
     "Lucas Mello Schnorr <schnorr@inf.ufrgs.br> [aut, cre]",
     "Vinicius Garcia Pinto <vgpinto@inf.ufrgs.br> [aut]",
@@ -16,27 +16,58 @@ Description: StarVZ consists in a performance analysis workflow that combines
     Its goal is to provide a fruitful prototypical environment to conduct
     performance analysis hypothesis-checking for task-based applications that
     run on heterogeneous (multi-GPU, multi-core) multi-node HPC platforms.
-Depends: R (>= 3.1.0),
-    yaml,
-    gridExtra,
-    lpSolve,
-    pipeR,
-    RColorBrewer,
-    Rcpp,
-    tidyverse,
-    zoo,
-    cowplot,
-    data.tree,
-    logging,
+Depends: R (>= 3.1.0)
+Imports: methods,
     magrittr,
-    reshape2,
+    dplyr,
+    ggplot2,
+    tibble,
+    Rcpp,
+    yaml,
+    rlang,
+    lpSolve,
+    logging,
+    utils,
     gtools,
-    car,
-    viridis,
+    tidyr,
     patchwork,
+    purrr,
+    grDevices,
+    readr,
+    data.tree,
+    stats,
+    RColorBrewer,
+    stringr,
+    zoo,
+    car,
+    pipeR,
     arrow (>= 0.17.0)
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
 LinkingTo: Rcpp
 RoxygenNote: 7.1.1
+Collate:
+    'RcppExports.R'
+    'starvz_data.R'
+    'phase1.R'
+    'phase1_parse_csv.R'
+    'phase2.R'
+    'phase2_aggregation.R'
+    'phase2_applications.R'
+    'phase2_atree.R'
+    'phase2_config.R'
+    'phase2_gaps.R'
+    'phase2_imbalance.R'
+    'phase2_lackready.R'
+    'phase2_memory.R'
+    'phase2_metrics.R'
+    'phase2_mpi.R'
+    'phase2_pmtool.R'
+    'phase2_states_chart.R'
+    'phase2_themes.R'
+    'phase2_time_integration.R'
+    'phase2_util.R'
+    'phase2_var_chart.R'
+    'read_functions.R'
+    'write_functions.R'

@@ -1,3 +1,4 @@
+#' @include starvz_data.R
 
 starpu_states <- function()
 {
@@ -67,7 +68,6 @@ scalfmm_colors <- function()
 #        Color =  c("#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00", "#ffff33", "#a65628", "#f781bf"));
 }
 
-library(RColorBrewer);
 starpu_colors <- function()
 {
   pre_colors <- brewer.pal(12, "Set3");
@@ -78,12 +78,12 @@ starpu_colors <- function()
       # Get colors from Set3
       mutate(Color = pre_colors) %>%
       # Adopt Luka suggestion: Idle = orange; Sleeping = rose
-      mutate(Color = case_when(Value == "Idle" ~ "#FDB462",
-                               Value == "PushingOutput" ~ "#BEBADA",
-                               TRUE ~ Color)) -> t;
+      mutate(Color = case_when(.data$Value == "Idle" ~ "#FDB462",
+                               .data$Value == "PushingOutput" ~ "#BEBADA",
+                               TRUE ~ .data$Color)) -> t;
     # Transform to a nice named list for ggplot
-    ret <- t %>% pull(Color)
-    names(ret) <- t %>% pull(Value);
+    ret <- t %>% pull(.data$Color)
+    names(ret) <- t %>% pull(.data$Value);
     return(ret);
 }
 
@@ -145,28 +145,33 @@ qrmumps_color_mapping <- function()
    kcol;
 }
 
+#' Colors for qrmumps
+#'
+#' This will be deprecated
+#'
+#' @export
 qrmumps_colors <- function()
 {
 qrmumps_color_mapping() %>%
     # Rename
-    rename(Kernel = StateName, Color=RGB) %>%
+    rename(Kernel = .data$StateName, Color=.data$RGB) %>%
     # Remove Idle
-    filter(Kernel != "Idle") %>%
+    filter(.data$Kernel != "Idle") %>%
     # Change to character
-    mutate(Kernel = as.character(Kernel), Color=as.character(Color)) %>%
+    mutate(Kernel = as.character(.data$Kernel), Color=as.character(.data$Color)) %>%
     # Select only those necessary
-    select(Kernel, Color) %>%
+    select(.data$Kernel, .data$Color) %>%
     # Change names according to latest modifications
     mutate(Kernel = case_when(
-               .$Kernel == "ASM" ~ "assemble_block",
-               .$Kernel == "GEMQRT" ~ "lapack_gemqrt",
-               .$Kernel == "GEQRT" ~ "lapack_geqrt",
-               .$Kernel == "TPMQRT" ~ "lapack_tpmqrt",
-               .$Kernel == "TPQRT" ~ "lapack_tpqrt",
-               .$Kernel == "Do_subtree" ~ "do_subtree",
-               .$Kernel == "CLEAN" ~ "clean_front",
-               .$Kernel == "INIT" ~ "init_front",
-               TRUE ~ .$Kernel)) %>%
+               .data$Kernel == "ASM" ~ "assemble_block",
+               .data$Kernel == "GEMQRT" ~ "lapack_gemqrt",
+               .data$Kernel == "GEQRT" ~ "lapack_geqrt",
+               .data$Kernel == "TPMQRT" ~ "lapack_tpmqrt",
+               .data$Kernel == "TPQRT" ~ "lapack_tpqrt",
+               .data$Kernel == "Do_subtree" ~ "do_subtree",
+               .data$Kernel == "CLEAN" ~ "clean_front",
+               .data$Kernel == "INIT" ~ "init_front",
+               TRUE ~ .data$Kernel)) %>%
     # Add new kernels
     bind_rows (tibble(Kernel = c("init_block", "clean_block", "block_copy"),
                       Color = c("#FFFF33", "#984EA3", "#ad0a18"))) %>%

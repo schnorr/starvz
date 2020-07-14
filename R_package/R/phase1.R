@@ -1,6 +1,8 @@
-isolate_read_write <- function(input.parquet, fun, name, directory){
+#' @include starvz_data.R
+
+isolate_read_write <- function(input.parquet, fun, name, directory, ZERO){
   data <- list()
-  data[[name]] <- fun(where = directory)
+  data[[name]] <- fun(where = directory, ZERO = ZERO)
   if(input.parquet=="1"){
     loginfo("Saving as parquet");
     starvz_write_parquet(data)
@@ -11,8 +13,8 @@ isolate_read_write <- function(input.parquet, fun, name, directory){
   return(NULL)
 }
 
-isolate_read_write_m <- function(input.parquet, fun, directory){
-  data <- fun(where = directory)
+isolate_read_write_m <- function(input.parquet, fun, directory, ZERO){
+  data <- fun(where = directory, ZERO = ZERO)
   if(input.parquet=="1"){
     loginfo("Saving as parquet");
     starvz_write_parquet(data)
@@ -23,6 +25,18 @@ isolate_read_write_m <- function(input.parquet, fun, directory){
   return(NULL)
 }
 
+#' Execute StarVZ phase 1
+#'
+#' Convert CSVs to StarVZ Files
+#'
+#' @param directory Directory of csv files
+#' @param app_states_fun Function to determine application
+#' @param state_filter Type of filder
+#' @param whichApplication Name of Application
+#' @param input.parquet Use or not of parquet files
+#' @return ggplot object with all starvz plots
+#'
+#' @export
 starvz_phase1_read_write <- function (directory = ".", app_states_fun = NULL, state_filter = 0, whichApplication = NULL, input.parquet = "1")
 {
     # Logging configuration
@@ -52,36 +66,36 @@ starvz_phase1_read_write <- function (directory = ".", app_states_fun = NULL, st
                            state_filter=state_filter,
                            whichApplication = whichApplication);
     Worker$Application <- Worker$Application %>%
-        hl_y_coordinates(dfhie=dfhie) %>% select(-Type)
+        hl_y_coordinates(dfhie=dfhie) %>% select(-.data$Type)
 
     Worker$StarPU <- Worker$StarPU %>%
-            hl_y_coordinates(dfhie=dfhie) %>% select(-Type)
+            hl_y_coordinates(dfhie=dfhie) %>% select(-.data$Type)
 
     if(Worker$Application %>% nrow == 0) stop("After reading states, number of application rows is zero.");
 
     # This can be isolated
     gc()
-    isolate_read_write(input.parquet, read_vars_set_new_zero, "Variable", directory)
+    isolate_read_write(input.parquet, read_vars_set_new_zero, "Variable", directory, Worker$ZERO)
     gc()
-    isolate_read_write(input.parquet, pmtool_bounds_csv_parser, "Pmtool", directory)
+    isolate_read_write(input.parquet, pmtool_bounds_csv_parser, "Pmtool", directory, Worker$ZERO)
     gc()
-    isolate_read_write(input.parquet, data_handles_csv_parser, "Data_handles", directory)
+    isolate_read_write(input.parquet, data_handles_csv_parser, "Data_handles", directory, Worker$ZERO)
     gc()
-    isolate_read_write(input.parquet, papi_csv_parser, "Papi", directory)
+    isolate_read_write(input.parquet, papi_csv_parser, "Papi", directory, Worker$ZERO)
     gc()
-    isolate_read_write(input.parquet, read_memory_state_csv, "Memory_state", directory)
+    isolate_read_write(input.parquet, read_memory_state_csv, "Memory_state", directory, Worker$ZERO)
     gc()
-    isolate_read_write(input.parquet, read_comm_state_csv, "Comm_state", directory)
+    isolate_read_write(input.parquet, read_comm_state_csv, "Comm_state", directory, Worker$ZERO)
     gc()
-    isolate_read_write(input.parquet, read_other_state_csv, "Other_state", directory)
+    isolate_read_write(input.parquet, read_other_state_csv, "Other_state", directory, Worker$ZERO)
     gc()
-    isolate_read_write_m(input.parquet, events_csv_parser, directory)
+    isolate_read_write_m(input.parquet, events_csv_parser, directory, Worker$ZERO)
     gc()
-    isolate_read_write_m(input.parquet, tasks_csv_parser, directory)
+    isolate_read_write_m(input.parquet, tasks_csv_parser, directory, Worker$ZERO)
     gc()
 
     # Read links
-    dfl <- read_links (where = directory);
+    dfl <- read_links (where = directory, Worker$ZERO);
 
     # Read the elimination tree
     dfa <- atree_load(where = directory);
@@ -90,7 +104,7 @@ starvz_phase1_read_write <- function (directory = ".", app_states_fun = NULL, st
     # If the Atree is available and loaded, we create new columns for each task
     # to hold Y coordinates for the temporal elimination tree plot
     if (!is.null(dfa)){
-        dfap <- dfa %>% select(-Parent, -Depth) %>% rename(Height.ANode = Height, Position.ANode = Position);
+        dfap <- dfa %>% select(-.data$Parent, -.data$Depth) %>% rename(Height.ANode = .data$Height, Position.ANode = .data$Position);
         Worker$Application <- Worker$Application %>% left_join(dfap, by="ANode");
         dfap <- NULL;
     }
@@ -102,10 +116,10 @@ starvz_phase1_read_write <- function (directory = ".", app_states_fun = NULL, st
 
     # Ending
     # Enframe ZERO
-    ZERO <- enframe(ZERO, name = NULL)
+    ZERO <- enframe(Worker$ZERO, name = NULL)
 
     # Enframe Version
-    Version <- enframe("0.1.0.3", name = NULL)
+    Version <- enframe("0.2.0", name = NULL)
 
     loginfo("Assembling the named list with the data from this case.");
 
@@ -128,132 +142,6 @@ starvz_phase1_read_write <- function (directory = ".", app_states_fun = NULL, st
       starvz_write_feather(data)
     }
 }
-
-starvz_phase1_read <- function (directory = ".", app_states_fun = NULL, state_filter = 0, whichApplication = NULL)
-{
-    # Logging configuration
-    basicConfig();
-    logForOrg <- function(record) { paste(record$levelname, record$logger, record$msg, sep=':') }
-    addHandler(writeToConsole, formatter=logForOrg);
-    removeHandler('basic.stdout');
-
-    # Start of reading procedure
-    if(is.null(app_states_fun)) stop("app_states_fun is obligatory for reading");
-
-    file_can_be_read <- function(filename)
-    {
-        if ((file.exists(filename)) & (file.size(filename) > 0)){
-            return(TRUE);
-        }else{
-            return(FALSE);
-        }
-    }
-
-    # Read the elimination tree
-    dfa <- atree_load(where = directory);
-
-    # Read entities.csv and register the hierarchy (with Y coordinates)
-    dfhie <- hl_y_paje_tree(where = directory)$workertreedf;
-
-    # Read Worker States
-    Worker <- read_worker_csv(where = directory,
-                           app_states_fun=app_states_fun,
-                           outlier_fun=outlier_definition,
-                           state_filter=state_filter,
-                           whichApplication = whichApplication);
-    Worker$Application <- Worker$Application %>%
-        hl_y_coordinates(dfhie=dfhie) %>% select(-Type)
-
-    Worker$StarPU <- Worker$StarPU %>%
-            hl_y_coordinates(dfhie=dfhie) %>% select(-Type)
-
-    Memory_state <- read_memory_state_csv(where = directory)
-    Comm_state <- read_comm_state_csv(where = directory)
-    Other_state <- read_other_state_csv(where = directory)
-
-    # QRMumps case:
-    # If the Atree is available and loaded, we create new columns for each task
-    # to hold Y coordinates for the temporal elimination tree plot
-    if (!is.null(dfa)){
-        dfap <- dfa %>% select(-Parent, -Depth) %>% rename(Height.ANode = Height, Position.ANode = Position);
-        Worker$Application <- Worker$Application %>% left_join(dfap, by="ANode");
-        dfap <- NULL;
-    }
-
-    if(Worker$Application %>% nrow == 0) stop("After reading states, number of application rows is zero.");
-
-    # Read variables
-    dfv <- read_vars_set_new_zero(where = directory);
-
-    # Read links
-    dfl <- read_links (where = directory);
-
-    # Read DAG
-    dfdag <- read_dag (where = directory, Worker$Application %>% mutate(Application=TRUE), dfl);
-    if (is.null(dfdag)){
-        # If dag is not available, try Vinicius DAG
-        dagVinCSV <- paste0(directory, "/dag_vinicius.csv");
-        loginfo(paste("Reading DAG", dagVinCSV));
-
-        # Check if this a DAG from Vinicius
-        if (file_can_be_read(dagVinCSV)){
-            dfdag <- read_csv(dagVinCSV, trim_ws=TRUE, col_names=TRUE) %>%
-                mutate(Dependent = strsplit(Dependent, " ")) %>%
-                unnest(Dependent) %>%
-                merge(., (bind_rows(Worker$Application, Worker$StarPU)), #%>% filter(Application == TRUE))
-                      by.x="JobId", by.y="JobId", all=TRUE) %>%
-                mutate(Cost = ifelse(is.na(Duration), 0, -Duration)) %>%
-                as_tibble();
-        }else{
-            dfdag <- NULL;
-        }
-    }
-
-    # PMTool information
-    dpmtb <- pmtool_bounds_csv_parser (where = directory);
-
-    dpmts <- pmtool_states_csv_parser (where = directory, whichApplication = whichApplication, Y=dfhie, States = Worker$Application);
-
-    # Data.rec
-    ddh <- data_handles_csv_parser (where = directory);
-
-    # Papi.rec
-    dpapi <- papi_csv_parser (where = directory);
-
-    # Tasks.rec
-    dtasks <- tasks_csv_parser (where = directory);
-
-    loginfo("Assembling the named list with the data from this case.");
-
-    # Events
-    devents <- events_csv_parser (where = directory);
-
-    # Enframe ZERO
-    ZERO <- enframe(ZERO, name = NULL)
-
-    # Enframe Version
-    Version <- enframe("0.1.0.3", name = NULL)
-
-    data <- list(Origin=directory,
-                 Application=Worker$Application,
-                 StarPU=Worker$StarPU,
-                 Memory_state=Memory_state,
-                 Comm_state=Comm_state,
-                 Other_state=Other_state,
-                 Colors=Worker$Colors,
-                 Variable=dfv, Link=dfl, DAG=dfdag, Y=dfhie, Atree=dfa,
-                 Pmtool=dpmtb, Pmtool_states=dpmts, Data_handles=ddh, Papi=dpapi,
-                 Tasks=dtasks$Tasks, Task_handles=dtasks$Task_handles, Events=devents$Events,
-                 Events_data=devents$Events_data, Events_memory=devents$Events_memory,
-                 Zero=ZERO, Version=Version);
-
-    loginfo("Call Gaps.");
-    data$Gaps <- gaps(data);
-
-    return(data);
-}
-
-the_reader_function <- starvz_phase1_read
 
 # This function gets a data.tree object and calculate three properties
 # H: height, P: position, D: depth
@@ -326,7 +214,7 @@ hl_y_paje_tree <- function (where = ".")
 
     if ((dfe %>% nrow) == 0) stop(paste("After reading the entities file, the number of rows is zero"));
 
-    workertree <- tree_filtering (dfe,
+    workertree <- tree_filtering(dfe,
                                   c("Link", "Event", "Variable"),
                                   c("GFlops", "Memory Manager", "Scheduler State", "User Thread", "Thread State"));
 
@@ -340,7 +228,7 @@ hl_y_paje_tree <- function (where = ".")
 
     #print(workertree, "Type", "Nature", "H", "P", limit=200);
     # Convert back to data frame
-    workertreedf <- dt_to_df (workertree) %>% select(-Nature);
+    workertreedf <- dt_to_df (workertree) %>% select(-.data$Nature);
 
     if ((workertreedf %>% nrow) == 0) stop("After converting the tree back to DF, number of rows is zero.");
 
@@ -355,7 +243,7 @@ hl_y_coordinates <- function (dfw = NULL, dfhie=NULL)
     workertreedf <- dfhie;
 
     # second part: left join with Y
-    dfw <- dfw %>>%
+    dfw <- dfw %>%
         # the left join to get new Y coordinates
         left_join (workertreedf, by=c("ResourceId" = "Parent"));
 
@@ -368,15 +256,15 @@ tree_filtering <- function (dfe, natures, types)
 
     dfe %>%
     # Mutate things to character since data.tree don't like factors
-    mutate (Type = as.character(Type), Nature = as.character(Nature)) %>%
+    mutate(Type = as.character(.data$Type), Nature = as.character(.data$Nature)) %>%
     # Filter things I can't filter using Prune (because Prune doesn't like grepl)
     # Note that this might be pottentially dangerous and works only for StarPU traces
-    filter (!grepl("InCtx", Parent), !grepl("InCtx", Name)) %>%
+    filter(!grepl("InCtx", .data$Parent), !grepl("InCtx", .data$Name)) %>%
     # Rename the reserved word root
-    mutate (Name = gsub("root", "ROOT", Name),
-            Parent = gsub("root", "ROOT", Parent)) %>%
+    mutate(Name = gsub("root", "ROOT", .data$Name),
+            Parent = gsub("root", "ROOT", .data$Parent)) %>%
     # Remove a node named 0 whose parent is also named 0
-    filter (Name != 0 & Parent != 0) %>%
+    filter(.data$Name != 0 & .data$Parent != 0) %>%
     # Convert to data.frame to avoid compatibility problems between tibble and data.tree
     as.data.frame() -> x
     # Sort by machines ID
@@ -407,14 +295,14 @@ y_coordinates <- function (atree, heights, paddings)
     {
         node$P = curPos;
         if(!is.null(node$Nature) && node$Nature == "State"){
-            node$H = dfhs %>% filter(Type == node$Type) %>% .$Height;
+            node$H = dfhs %>% filter(.data$Type == node$Type) %>% .$Height;
             # This is a StarPU+MPI hack to make CUDA resources look larger
             if (grepl("CUDA", node$parent$name)) node$H = node$H * 2;
             curPos = curPos + node$H;
         }else{
             padding = 0;
             if (!is.null(node$Type)){
-                padding = dfps %>% filter(Type == node$Type);
+                padding = dfps %>% filter(.data$Type == node$Type);
                 if (nrow(padding) == 0){
                     padding = 0;
                 }else{
@@ -471,29 +359,29 @@ gaps.f_backward <- function (data)
     # Create the seed chain
     if(TRUE %in% grepl("mpicom", data$DAG$JobId)){
         data$DAG %>%
-            filter(grepl("mpicom", JobId)) -> tmpdag
+            filter(grepl("mpicom", .data$JobId)) -> tmpdag
     } else {
         data$DAG -> tmpdag
     }
     tmpdag %>%
-        rename(DepChain = JobId, Member = Dependent) %>%
-        select(DepChain, Member) -> seedchain;
+        rename(DepChain = .data$JobId, Member = .data$Dependent) %>%
+        select(.data$DepChain, .data$Member) -> seedchain;
 
     f2 <- function (dfdag, chain.i)
     {
-        dfdag %>% select(JobId, Dependent, Application, Value) -> full.i;
+        dfdag %>% select(.data$JobId, .data$Dependent, .data$Application, .data$Value) -> full.i;
         # qr mumps has duplicated data in these dfs and the left_join did not work correctly. unique() solves this problem
         full.i %>% unique() -> full.i;
         chain.i %>% unique() -> chain.i;
         full.i %>% left_join(chain.i, by=c("JobId" = "Member")) -> full.o;
 
         # If there are no application tasks in dependency chains, keep looking
-        if ((full.o %>% filter(!is.na(DepChain), Application == TRUE) %>% nrow) == 0) {
+        if ((full.o %>% filter(!is.na(.data$DepChain), .data$Application == TRUE) %>% nrow) == 0) {
             # Prepare the new chain
             full.o %>%
-                filter(!is.na(DepChain)) %>%
-                rename(Member = Dependent) %>%
-                select(DepChain, Member) -> chain.o;
+                filter(!is.na(.data$DepChain)) %>%
+                rename(Member = .data$Dependent) %>%
+                select(.data$DepChain, .data$Member) -> chain.o;
             return(f2(full.o, chain.o));
         }else{
             return(full.o);
@@ -507,29 +395,29 @@ gaps.f_forward <- function (data)
     # Create the seed chain
     if(TRUE %in% grepl("mpicom", data$DAG$Dependent)){
         data$DAG %>%
-            filter(grepl("mpicom", Dependent)) -> tmpdag
+            filter(grepl("mpicom", .data$Dependent)) -> tmpdag
     } else {
         data$DAG -> tmpdag
     }
     tmpdag %>%
-        rename(DepChain = Dependent, Member = JobId) %>%
-        select(DepChain, Member) -> seedchain;
+        rename(DepChain = .data$Dependent, Member = .data$JobId) %>%
+        select(.data$DepChain, .data$Member) -> seedchain;
 
     f2 <- function (dfdag, chain.i)
     {
-        dfdag %>% select(JobId, Dependent, Application, Value) -> full.i;
+        dfdag %>% select(.data$JobId, .data$Dependent, .data$Application, .data$Value) -> full.i;
         # qr mumps has duplicated data in these dfs and the left_join did not work correctly. unique() solves this problem
         full.i %>% unique() -> full.i;
         chain.i %>% unique() -> chain.i;
         full.i %>% left_join(chain.i, by=c("Dependent" = "Member")) -> full.o;
 
         # If there are no application tasks in dependency chains, keep looking
-        if ((full.o %>% filter(!is.na(DepChain), Application == TRUE) %>% nrow) == 0) {
+        if ((full.o %>% filter(!is.na(.data$DepChain), .data$Application == TRUE) %>% nrow) == 0) {
             # Prepare the new chain
             full.o %>%
-                filter(!is.na(DepChain)) %>%
-                rename(Member = JobId) %>%
-                select(DepChain, Member) -> chain.o;
+                filter(!is.na(.data$DepChain)) %>%
+                rename(Member = .data$JobId) %>%
+                select(.data$DepChain, .data$Member) -> chain.o;
             return(f2(full.o, chain.o));
         }else{
             return(full.o);
@@ -547,35 +435,35 @@ gaps <- function (data)
     #if(is.null(data$Link)) return(NULL);
 
     gaps.f_backward(data) %>%
-        filter(!is.na(DepChain)) %>%
-        select(JobId, DepChain) %>%
-        rename(Dependent = JobId) %>%
-        rename(JobId = DepChain) %>%
-        select(JobId, Dependent) %>% unique -> data.b;
+        filter(!is.na(.data$DepChain)) %>%
+        select(.data$JobId, .data$DepChain) %>%
+        rename(Dependent = .data$JobId) %>%
+        rename(JobId = .data$DepChain) %>%
+        select(.data$JobId, .data$Dependent) %>% unique -> data.b;
 
     gaps.f_forward(data) %>%
-        filter(!is.na(DepChain)) %>%
-        select(JobId, DepChain) %>%
-        rename(Dependent = DepChain) %>%
-        select(JobId, Dependent) %>% unique -> data.f;
+        filter(!is.na(.data$DepChain)) %>%
+        select(.data$JobId, .data$DepChain) %>%
+        rename(Dependent = .data$DepChain) %>%
+        select(.data$JobId, .data$Dependent) %>% unique -> data.f;
 
     data$DAG %>%
-        filter(Application == TRUE) %>%
-        select(JobId, Dependent) -> data.z;
+        filter(.data$Application == TRUE) %>%
+        select(.data$JobId, .data$Dependent) -> data.z;
 
     # Create the new gaps DAG
     dfw <- data$Application %>%
-        select(JobId, Value, ResourceId, Node, Start, End);
+        select(.data$JobId, .data$Value, .data$ResourceId, .data$Node, .data$Start, .data$End);
     if(is.null(data$Link)){
         dfl <- data.frame()
         data.b.dag <- data.frame()
         data.f.dag <- data.frame()
     } else {
         dfl <- data$Link %>%
-            filter(grepl("mpicom", Key)) %>%
-            mutate(Value = NA, ResourceId = Origin, Node = NA) %>%
-            rename(JobId = Key) %>%
-            select(JobId, Value, ResourceId, Node, Start, End);
+            filter(grepl("mpicom", .data$Key)) %>%
+            mutate(Value = NA, ResourceId = .data$Origin, Node = NA) %>%
+            rename(JobId = .data$Key) %>%
+            select(.data$JobId, .data$Value, .data$ResourceId, .data$Node, .data$Start, .data$End);
             data.b %>%
                 left_join(dfl, by=c("JobId" = "JobId")) %>%
                 left_join(dfw, by=c("Dependent" = "JobId")) -> data.b.dag;

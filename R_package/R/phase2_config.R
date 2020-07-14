@@ -1,37 +1,165 @@
-pjr_value <- function (property, default)
+#' @include starvz_data.R
+
+config_value <- function (property, default)
 {
   ifelse(is.null(property), default, property);
-}
-
-pjr <- function (property)
-{
-    ifelse(!is.null(property) && property, property, FALSE);
 }
 
 starvz_default_config <- function(){
   config <- list()
   config$base_size <- 22
-  config$st <- list()
+  config$expand <- 0.05
+  config$idleness_factor <- 5.5
+  config$selected_nodes <- NULL
+  config$log <- TRUE
+
+  config$title$active <- FALSE
+
+  config$utiltreenode$active <- FALSE
+  config$utiltreenode$legend <- FALSE
+
+  config$utiltreedepth$active <- FALSE
+  config$utiltreedepth$legend <- FALSE
+
+  config$computingnodes$active <- FALSE
+
+  config$atree$active <- FALSE
+  config$atree$zoom$start <- 0
+  config$atree$zoom$end <- 100
+  config$atree$utilization <- TRUE
+  config$atree$communication$active <- FALSE
+  config$atree$legend <- FALSE
+
+  config$activenodes$active <- FALSE
+  config$activenodes$nodememuse$active <- FALSE
+  config$activenodes$nodememuse$aggregation$active <- FALSE
+  config$activenodes$nodememuse$aggregation$step <- 100
+  config$activenodes$aggregation$active <- FALSE
+  config$activenodes$aggregation$step <- 100
+  config$activenodes$legend <- FALSE
+
+  config$lackready$aggregation <- 200
+
+  config$kiteration$active <- FALSE
+  config$kiteration$pernode <- FALSE
+
   config$st$active <- TRUE
+  config$st$idleness_all <- FALSE
   config$st$labels <- "ALL"
   config$st$legend <- TRUE
   config$st$makespan <- TRUE
+  config$st$cpb <- FALSE
+  config$st$cpb_mpi$active <- FALSE
+  config$st$cpb_mpi$tile_size <- NULL
+  config$st$cpb_mpi$bandwidth <- NULL
+  config$st$cpb_mpi$theoretical <- FALSE
+  config$st$expand <- 0.05
+  config$st$idleness <- FALSE
+  config$st$tasks$active <- FALSE
+  config$st$tasks$list <- NULL
+  config$st$tasks$levels <- 2
+  config$st$outliers <- TRUE
+  config$st$cpb <- FALSE
+  config$st$cpb_mpi$active <- FALSE
+  config$st$abe$active <- FALSE
+  config$st$aggregation$active <- FALSE
+  config$st$aggregation$method <- "lucas"
+  config$st$aggregation$states <- c("dgemm")
+  config$st$rect_outline <- FALSE
+  config$st$abe$size <- 5
+  config$st$abe$bar_color <- "grey"
+  config$st$abe$text <- TRUE
+  config$st$abe$label <- TRUE
+
+  config$summary_nodes$active <- FALSE
+  config$summary_nodes$legend <- FALSE
+
+  config$pmtool$kiteration$active <- FALSE
+  config$pmtool$state$active <- FALSE
+  config$pmtool$bounds$active <- FALSE
+  config$pmtool$makespan <- TRUE
+  config$pmtool$state$sched <- NULL
+  config$pmtool$bounds$label <- TRUE
+
+  config$memory$state$active <- FALSE
+  config$memory$transfers$active <- FALSE
+  config$memory$transfers$arrow <- FALSE
+  config$memory$transfers$border <- FALSE
+  config$memory$transfers$total <- FALSE
+  config$memory$combined <- FALSE
+  config$memory$state$height <- 2
+  config$memory$state$border <- FALSE
+  config$memory$state$depth$height <- 0
+  config$memory$state$text <- FALSE
+  config$memory$state$total <- FALSE
+  config$memory$state$select <- "Allocating"
+  config$memory$state$angle <- 90
+
+  config$submitted$active <- FALSE
+
+  config$starpu$active <- FALSE
+  config$starpu$aggregation$active <- FALSE
+
+  config$ready$active <- FALSE
+
+  config$lackready$active <- FALSE
+
+  config$gflops$active <- FALSE
+  config$gflops$facet <- TRUE
+  config$gflops$limit <- FALSE
+
+  config$usedmemory$active <- FALSE
+  config$usedmemory$legend <- FALSE
+
+  config$imbalance$active <- FALSE
+  config$imbalance$limit <- 1
+
+  config$power_imbalance$active <- FALSE
+  config$power_imbalance$task <- NULL
+  config$power_imbalance$limit <- 1
+
+  config$hete_imbalance$active <- FALSE
+  config$hete_imbalance$limit <- 1
+
+  config$utilheatmap$active <- FALSE
+  config$utilheatmap$labels <- "1"
+
+  config$gpubandwidth$active <- FALSE
+  config$gpubandwidth$bound <- NULL
+
+  config$mpibandwidth$active <- FALSE
+
+  config$mpiconcurrent$active <- FALSE
+
+  config$mpiconcurrentout$active <- FALSE
+
+  config$mpistate$active <- FALSE
+  config$mpistate$label <- "ALL"
+
+  config$guided$active <- FALSE
+  config$guided$agg_type_height <- 50
+
+  config$vertical_lines$active <- FALSE
+  config$vertical_lines$x_list <- NULL
+  config$vertical_lines$color_list <- NULL
   return(config)
 }
 
 starvz_read_config <- function(file=NULL){
+  defaut_config <- starvz_default_config();
   if(is.null(file)){
     loginfo("Using default config")
-    return(starvz_default_config())
+    return(defaut_config)
   }else if(!file.exists(file)){
     logwarn("Config file dont exist, using defaut")
-    return(starvz_default_config())
+    return(defaut_config)
   }else{
-    config <- read_yaml(file)
+    config <- yaml::read_yaml(file)
     # Retrocompatible with default classes
     if(isTRUE(names(config)=="default")){
       config <- config$default
     }
-    return(config)
+    final_config <- modifyList(defaut_config, config)
+    return(final_config)
   }
 }

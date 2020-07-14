@@ -2,6 +2,21 @@
 options(crayon.enabled = FALSE)
 suppressMessages(library(starvz))
 
+# Options to help debug
+# https://stackoverflow.com/questions/1975110/printing-stack-trace-and-continuing-after-error-occurs-in-r
+options(keep.source = TRUE, error = quote({
+  dump.frames()  # writes to last.dump
+  n <- length(last.dump)
+  if (n > 0) {
+    calls <- names(last.dump)
+    cat("Environment:\n", file = stderr())
+    cat(paste0("  ", seq_len(n), ": ", calls), sep = "\n", file = stderr())
+    cat("\n", file = stderr())
+  }
+
+  if (!interactive()) q()
+}))
+
 ##############################
 # Usage                      #
 ##############################
@@ -13,7 +28,7 @@ usage <- function ()
           where [application](optional) is either cholesky or qrmumps.
           where [use parquet](optional) is a flag (1 to activate) to use parquet", call.=FALSE)
 }
-check_arrow();
+
 # Get the arguments to this script
 args = commandArgs(trailingOnly=TRUE)
 
@@ -72,5 +87,3 @@ data <- starvz_phase1_read_write(directory = input.directory,
                              state_filter = states.filter,
                              whichApplication = input.application,
                              input.parquet = input.parquet);
-
-loginfo("Pre-process finished correctly.");

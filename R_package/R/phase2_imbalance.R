@@ -1,3 +1,4 @@
+#' @include starvz_data.R
 
 metric_percent_imbalance <- function(times, max=NULL){
     max_util <- max(times)
@@ -119,98 +120,98 @@ metric_abe_imbalance_norm  <- function(ABE, step){
 }
 
 utilization_per_step <- function(data_app, step){
-   if(exists("unnest_legacy")){
-      unnest <- unnest_legacy
-   }
+
    min_time <- min(data_app$Start)
    max_time <- max(data_app$End)
 
-   data_app %>% select(JobId, Duration, Node, ResourceId, ResourceType, Start, End) %>%
-            mutate(SStep = as.integer(floor(Start/step)),
-                   EStep = as.integer(floor(End/step)),
-                   UtilFirst = ifelse(SStep!=EStep, step-Start%%step, Duration),
-                   UtilLast = End%%step) %>%
-            mutate(FullUtil = mapply(function(x, y) seq(x, y, by=1), SStep, EStep) ) %>%
+   data_app %>% select(.data$JobId, .data$Duration, .data$Node, .data$ResourceId, .data$ResourceType, .data$Start, .data$End) %>%
+            mutate(SStep = as.integer(floor(.data$Start/step)),
+                   EStep = as.integer(floor(.data$End/step)),
+                   UtilFirst = ifelse(.data$SStep!=.data$EStep, step-.data$Start%%step, .data$Duration),
+                   UtilLast = .data$End%%step) %>%
+            mutate(FullUtil = mapply(function(x, y) seq(x, y, by=1), .data$SStep, .data$EStep) ) %>%
             unnest() %>%
-            mutate(Util = case_when( (FullUtil==SStep) ~ UtilFirst,
-                                     (FullUtil==EStep) ~ UtilLast,
+            mutate(Util = case_when( (.data$FullUtil==.data$SStep) ~ .data$UtilFirst,
+                                     (.data$FullUtil==.data$EStep) ~ .data$UtilLast,
                                      TRUE ~ step)) %>%
-            rename(Step=FullUtil) %>% select(-SStep, -EStep, -UtilFirst, -UtilLast) %>%
-            group_by(ResourceId, Node, ResourceType, Step) %>%
-            summarize(Utilization = sum(Util)/step, .groups="drop") %>%
-            complete(ResourceId, Step=0:(max_time/step), fill = list(Utilization = 0)) %>%
-            mutate(UtilizationTime = Utilization*step)
+            rename(Step=.data$FullUtil) %>%
+            select(-.data$SStep, -.data$EStep, -.data$UtilFirst, -.data$UtilLast) %>%
+            group_by(.data$ResourceId, .data$Node, .data$ResourceType, .data$Step) %>%
+            summarize(Utilization = sum(.data$Util)/step, .groups="drop") %>%
+            complete(.data$ResourceId, Step=0:(max_time/step), fill = list(Utilization = 0)) %>%
+            mutate(UtilizationTime = .data$Utilization*step)
 }
 
-var_imbalance <- function(data_app, step)
+var_imbalance <- function(data, step)
 {
+  data_app <- data$Application
   utilization_per_step(data_app, step) %>% ungroup() %>%
-      group_by(Step) %>%
+      group_by(.data$Step) %>%
       summarize(
-          "IP"=metric_imbalance_percentage(UtilizationTime),
-          "IT"=metric_imbalance_time(UtilizationTime, step),
-          "STD"=metric_imbalance_std(UtilizationTime, step),
-          "AVG"=metric_imbalance_norm(UtilizationTime, step)) %>%
-      pivot_longer(-Step, names_to = "metric", values_to = "value") %>%
-      mutate(Time = Step*step+step/2) -> to_plot
+          "IP"=metric_imbalance_percentage(.data$UtilizationTime),
+          "IT"=metric_imbalance_time(.data$UtilizationTime, step),
+          "STD"=metric_imbalance_std(.data$UtilizationTime, step),
+          "AVG"=metric_imbalance_norm(.data$UtilizationTime, step)) %>%
+      pivot_longer(-.data$Step, names_to = "metric", values_to = "value") %>%
+      mutate(Time = .data$Step*step+step/2) -> to_plot
 
-      to_plot %>% var_imbalance_plot("Imb Metric", step)
+      to_plot %>% var_imbalance_plot("Imb Metric", step, data_app <- data$Application)
 }
 
-var_imbalance_power <- function(data_app, step)
+var_imbalance_power <- function(data, step)
 {
   # Compute POWER
-  task <- pjr_value(pajer$power_imbalance$task, NULL)
+  task <- data$config$power_imbalance$task
   if(is.null(task)){
     logwarn("Task is not available for imbalance power")
     return(NULL)
   }
-  data_app %>% filter(Value==task) %>%
-       group_by(Node, ResourceId) %>%
-       summarize(power=1/mean(Duration), .groups="drop") %>%
-       .$power -> power
+  data$Application %>% filter(.data$Value==task) %>%
+       group_by(.data$Node, .data$ResourceId) %>%
+       summarize(power=1/mean(.data$Duration), .groups="drop") %>% .$power -> power
 
   if(length(power) !=
-     data_app %>% select(Node, ResourceId) %>% unique() %>% nrow())
+     data$Application %>% select(.data$Node, .data$ResourceId) %>% unique() %>% nrow())
   {
        logwarn("Power could not be computed for all resource in imbalance power")
        return(NULL)
   }
 
-  utilization_per_step(data_app, step) %>% ungroup() %>%
-      group_by(Step) %>%
+  utilization_per_step(data$Application, step) %>% ungroup() %>%
+      group_by(.data$Step) %>%
       summarize(
-            "IP"=metric_power_imbalance_percentage(Utilization, power),
-            "IT"=metric_power_imbalance_time(Utilization, power),
-            "STD"=metric_power_imbalance_std(Utilization),
-            "AVG"=metric_power_imbalance_norm(Utilization, power)) %>%
-      pivot_longer(-Step, names_to = "metric", values_to = "value") %>%
-      mutate(Time = Step*step+step/2) -> to_plot
+            "IP"=metric_power_imbalance_percentage(.data$Utilization, power),
+            "IT"=metric_power_imbalance_time(.data$Utilization, power),
+            "STD"=metric_power_imbalance_std(.data$Utilization),
+            "AVG"=metric_power_imbalance_norm(.data$Utilization, power)) %>%
+      pivot_longer(-.data$Step, names_to = "metric", values_to = "value") %>%
+      mutate(Time = .data$Step*step+step/2) -> to_plot
 
-      to_plot %>% var_imbalance_plot("Imb Metric Power", step)
+      to_plot %>% var_imbalance_plot("Imb Metric Power", step, data$config$base_size, data$config$expand)
 }
 
-var_imbalance_double_hetero <- function(data_app, step)
+var_imbalance_double_hetero <- function(data, step)
 {
+  data_app <- data$Application
   utilization_per_step_double_hetero(step, data_app) %>%
-      group_by(Step) %>%
+      group_by(.data$Step) %>%
       summarize(#"PI"=metric_percent_imbalance(UtilizationTime, step),
-          "IP"=metric_abe_imbalance_percentage(Utilization, ABE, nmABE, step),
-          "IT"=metric_abe_imbalance_time(Utilization, ABE, step),
-          "STD"=metric_abe_imbalance_std(Utilization),
-          "AVG"=metric_abe_imbalance_norm(ABE, step)) %>%
-      pivot_longer(-Step, names_to = "metric", values_to = "value") %>%
-      mutate(Time = Step*step+step/2) -> to_plot
+          "IP"=metric_abe_imbalance_percentage(.data$Utilization, .data$ABE, .data$nmABE, step),
+          "IT"=metric_abe_imbalance_time(.data$Utilization, .data$ABE, step),
+          "STD"=metric_abe_imbalance_std(.data$Utilization),
+          "AVG"=metric_abe_imbalance_norm(.data$ABE, step)) %>%
+      pivot_longer(-.data$Step, names_to = "metric", values_to = "value") %>%
+      mutate(Time = .data$Step*step+step/2) -> to_plot
 
-      to_plot %>% var_imbalance_plot("Imb Metric Hete", step)
+      to_plot %>% var_imbalance_plot("Imb Metric Hete", step, data$config$base_size, data$config$expand)
 }
 
-var_imbalance_plot <- function(data, name, step)
+var_imbalance_plot <- function(data, name, step, base_size, expand)
 {
   col <- brewer.pal(n = 5, name = 'Set1')
-  data %>% select(Step) %>% unique() %>% mutate(Step = Step*step) -> steps
-  data %>% ggplot(aes(x=Time, y=value, colour=metric)) +
-  default_theme() +
+  data %>% select(.data$Step) %>% unique() %>% mutate(Step = .data$Step*step) -> steps
+  data %>% ggplot(aes(x=.data$Time, y=.data$value, colour=.data$metric)) +
+  default_theme(base_size, expand) +
   geom_point(size=1) +
   #geom_vline(data=steps, aes(xintercept=Step), alpha=0.2) +
   geom_line() +
@@ -223,85 +224,84 @@ var_imbalance_plot <- function(data, name, step)
 # Consider heterogenery tasks and resources
 # TODO: Last step is bogus
 utilization_per_step_double_hetero <- function(step, df){
-    if(exists("unnest_legacy")){
-       unnest <- unnest_legacy
-    }
+
     max_time <- max(df$End)
 
     df %>%
-        select(JobId, Value, Duration, Node, ResourceId, ResourceType, Start, End) %>%
-        mutate(SStep = as.integer(floor(Start/step)),
-               EStep = as.integer(floor(End/step)),
-               UtilFirst = ifelse(SStep!=EStep, step-Start%%step, Duration),
-               UtilLast = End%%step) %>%
-        mutate(FullUtil = mapply(function(x, y) seq(x, y, by=1), SStep, EStep) ) %>%
+        select(.data$JobId, .data$Value, .data$Duration, .data$Node,
+               .data$ResourceId, .data$ResourceType, .data$Start, .data$End) %>%
+        mutate(SStep = as.integer(floor(.data$Start/step)),
+               EStep = as.integer(floor(.data$End/step)),
+               UtilFirst = ifelse(.data$SStep!=.data$EStep, step-.data$Start%%step, .data$Duration),
+               UtilLast = .data$End%%step) %>%
+        mutate(FullUtil = mapply(function(x, y) seq(x, y, by=1), .data$SStep, .data$EStep) ) %>%
         unnest() %>%
-        mutate(Util = case_when( (FullUtil==SStep) ~ UtilFirst,
-        (FullUtil==EStep) ~ UtilLast,
+        mutate(Util = case_when( (.data$FullUtil==.data$SStep) ~ .data$UtilFirst,
+        (.data$FullUtil==.data$EStep) ~ .data$UtilLast,
         TRUE ~ step)) %>%
-        rename(Step=FullUtil) %>% select(-SStep, -EStep, -UtilFirst, -UtilLast) -> temp
+        rename(Step=.data$FullUtil) %>% select(-.data$SStep, -.data$EStep, -.data$UtilFirst, -.data$UtilLast) -> temp
 
     temp %>%
-        group_by(ResourceId, Node, ResourceType, Step) %>%
-        mutate(PTask = Util/Duration) %>%
+        group_by(.data$ResourceId, .data$Node, .data$ResourceType, .data$Step) %>%
+        mutate(PTask = .data$Util/.data$Duration) %>%
         ungroup() %>%
-        group_by(Node, Value, Step) %>%
-        summarize(NTasks = sum(PTask), .groups="drop") -> tasks_per_slice
+        group_by(.data$Node, .data$Value, .data$Step) %>%
+        summarize(NTasks = sum(.data$PTask), .groups="drop") -> tasks_per_slice
 
     temp %>%
-        group_by(ResourceId, Node, ResourceType, Step) %>%
-        summarize(Utilization = sum(Util)/step, .groups="drop") %>%
-        complete(ResourceId, Step=0:(max_time/step), fill = list(Utilization = 0)) %>%
-        mutate(UtilizationTime = Utilization*step) -> util
+        group_by(.data$ResourceId, .data$Node, .data$ResourceType, .data$Step) %>%
+        summarize(Utilization = sum(.data$Util)/step, .groups="drop") %>%
+        complete(.data$ResourceId, Step=0:(max_time/step), fill = list(Utilization = 0)) %>%
+        mutate(UtilizationTime = .data$Utilization*step) -> util
 
-    util %>% group_by(Step) %>% arrange(-Utilization) %>%
-        slice(1) %>% select(Step, ResourceType) -> max_res
+    util %>% group_by(.data$Step) %>% arrange(-.data$Utilization) %>%
+        slice(1) %>% select(.data$Step, .data$ResourceType) -> max_res
 
-    tasks_per_slice %>% rename(freq=NTasks) -> ts
-    df %>% select(ResourceType, ResourceId) %>%
+    tasks_per_slice %>% rename(freq=.data$NTasks) -> ts
+    df %>% select(.data$ResourceType, .data$ResourceId) %>%
         distinct() %>%
-        group_by(ResourceType) %>%
+        group_by(.data$ResourceType) %>%
         mutate(n=n()) %>%
-        select(ResourceType, n) %>%
+        select(.data$ResourceType, n) %>%
         distinct() -> n_resources
 
-    temp %>% select(Value, ResourceType, Duration, Step) %>%
-        ungroup() %>% rename(codelet=Value) %>%
-        group_by(ResourceType, codelet, Step) %>%
-        mutate(Outlier = ifelse(Duration > outlier_definition(Duration), TRUE, FALSE)) %>%
-        filter(!Outlier) %>%
-        summarize(mean=mean(Duration), .groups="drop") %>%
+    temp %>% select(.data$Value, .data$ResourceType, .data$Duration, .data$Step) %>%
+        ungroup() %>% rename(codelet=.data$Value) %>%
+        group_by(.data$ResourceType, .data$codelet, .data$Step) %>%
+        mutate(Outlier = ifelse(.data$Duration > outlier_definition(.data$Duration), TRUE, FALSE)) %>%
+        filter(!.data$Outlier) %>%
+        summarize(mean=mean(.data$Duration), .groups="drop") %>%
         left_join(n_resources, by=c("ResourceType")) -> ri
 
-    ts %>% select(Step) %>%
+    ts %>% select(.data$Step) %>%
         unique() %>% rowwise() %>%
-        mutate(ABE = starpu_apply_abe_per_slice(Step, ri, ts)) %>%
-        mutate(nmABE = starpu_apply_abe_per_slice(Step, ri, ts, max_res)) %>%
-        mutate(ABE = ifelse(ABE>step, step, ABE),
-               nmABE = ifelse(nmABE>step, step, nmABE)) %>%
+        mutate(ABE = starpu_apply_abe_per_slice(.data$Step, ri, ts)) %>%
+        mutate(nmABE = starpu_apply_abe_per_slice(.data$Step, ri, ts, max_res)) %>%
+        mutate(ABE = ifelse(.data$ABE>step, step, .data$ABE),
+               nmABE = ifelse(.data$nmABE>step, step, .data$nmABE)) %>%
         ungroup() -> ABE_steps
 
     util %>% left_join(ABE_steps, by=c("Step")) -> ret
     return(ret)
 }
 
-utilization_heatmap <- function(data_app, Y, step)
+utilization_heatmap <- function(data, Y, step)
 {
-  utilization_per_step(data_app, step) %>%
+  utilization_per_step(data$Application, step) %>%
       ungroup() %>% left_join(Y, by=c("ResourceId"="Parent")) -> to_plot
 
-  to_plot %>% select(Position) %>% unique() %>% arrange(Position) %>% .$Position -> lvl
-  to_plot %>% mutate(Height=1, Position = factor(Position, levels=lvl)) %>%
-              mutate(Position = as.integer(Position)) -> to_plot
+  to_plot %>% select(.data$Position) %>% unique() %>% arrange(.data$Position) %>% .$Position -> lvl
+  to_plot %>% mutate(Height=1, Position = factor(.data$Position, levels=lvl)) %>%
+              mutate(Position = as.integer(.data$Position)) -> to_plot
 
-  yconfv <- yconf(to_plot %>% ungroup(), pjr_value(pajer$st$labels, "1"))
+  yconfv <- yconf(to_plot %>% ungroup(), data$config$utilheatmap$labels)
 
-  to_plot %>% mutate(Time = Step*step+step/2) %>%
-           ggplot(aes(y=Position, x=Time, fill=Utilization)) +
+  to_plot %>% mutate(Time = .data$Step*step+step/2) %>%
+           ggplot(aes(y=.data$Position, x=.data$Time, fill=.data$Utilization)) +
            geom_raster() +
-           default_theme() +
+           default_theme(data$config$base_size, data$config$expand) +
            theme(legend.title = element_text("black")) +
-           scale_y_continuous(breaks = yconfv$Position, labels=yconfv$ResourceId, expand=c(pjr_value(pajer$st$expand, 0.05),0)) +
+           scale_y_continuous(breaks = yconfv$Position, labels=yconfv$ResourceId, expand=c(data$config$expand, 0)) +
            labs(y="Utilization", x = "Time") +
            scale_fill_gradient2(name="Load [%]", midpoint=0.5, low="blue", mid="white",
                                     high="red", limits=c(0, 1)) +

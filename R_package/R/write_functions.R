@@ -1,6 +1,8 @@
+#' @include starvz_data.R
+
 starvz_write_feather <- function(data, directory="."){
   check_arrow();
-  invisible(data %>% purrr::list_modify("Origin" = NULL) %>% names %>%
+  invisible(data %>% list_modify("Origin" = NULL) %>% names %>%
   lapply(function(x) {
       filename <- paste0(directory, "/", tolower(x), ".feather");
       loginfo(filename);
@@ -21,7 +23,7 @@ starvz_write_parquet <- function(data, directory="."){
   if(!codec_is_available("gzip")){
     logwarn("Arrow Gzip is not available, try using arrow::install_arrow()")
   }
-  invisible(data %>% purrr::list_modify("Origin" = NULL) %>% names %>%
+  invisible(data %>% list_modify("Origin" = NULL) %>% names %>%
   lapply(function(x) {
       filename <- paste0(directory, "/", tolower(x), ".parquet");
       loginfo(filename);

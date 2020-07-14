@@ -1,12 +1,15 @@
-#' @useDynLib starvz
-#' @importFrom Rcpp sourceCpp
+#' @include starvz_data.R
 
-starvz_compute_plot_heights <- function(plist)
+starvz_compute_plot_heights <- function(plist, config)
 {
       # The list that will contain the plots
       P <- list();
       # The list that will contain the proportinal height of each plot
       H <- list();
+
+      # Just make this homogeneous across package
+      data <- list()
+      data$config <- config
 
       # Letsset default height values
       # This is also experiment computed on starvz_guided_plot
@@ -41,167 +44,134 @@ starvz_compute_plot_heights <- function(plist)
       }
 
       # Prepare title
-      if (pjr(pajer$title$active)){
+      if (data$config$title$active){
           P[[length(P)+1]] <- plist$tplot;
-          H[[length(H)+1]] <- pjr_value(pajer$title$height, 0.3);
+          H[[length(H)+1]] <- config_value(data$config$title$height, 0.3);
       }
 
-      if (pjr(pajer$atree$active)){
+      if (data$config$atree$active){
           P[[length(P)+1]] <- plist$atree;
-          H[[length(H)+1]] <- pjr_value(pajer$atree$height, starvz_height_atree);
+          H[[length(H)+1]] <- config_value(data$config$atree$height, starvz_height_atree);
       }
-      if (pjr(pajer$utiltreenode$active)){
+      if (data$config$utiltreenode$active){
           P[[length(P)+1]] <- plist$utiltreenode;
-          H[[length(H)+1]] <- pjr_value(pajer$utiltreenode$height, starvz_height_var);
+          H[[length(H)+1]] <- config_value(data$config$utiltreenode$height, starvz_height_var);
       }
-      if (pjr(pajer$utiltreedepth$active)){
+      if (data$config$utiltreedepth$active){
           P[[length(P)+1]] <- plist$utiltreedepth;
-          H[[length(H)+1]] <- pjr_value(pajer$utiltreedepth$height, starvz_height_var);
+          H[[length(H)+1]] <- config_value(data$config$utiltreedepth$height, starvz_height_var);
       }
-      if (pjr(pajer$activenodes$active)){
+      if (data$config$activenodes$active){
           P[[length(P)+1]] <- plist$activenodes;
-          H[[length(H)+1]] <- pjr_value(pajer$activenodes$height, starvz_height_var);
+          H[[length(H)+1]] <- config_value(data$config$activenodes$height, starvz_height_var);
       }
-      if (pjr(pajer$activenodes$nodememuse$active)){
+      if (data$config$activenodes$nodememuse$active){
           P[[length(P)+1]] <- plist$nodememuse;
-          H[[length(H)+1]] <- pjr_value(pajer$activenodes$nodememuse$height, starvz_height_var);
+          H[[length(H)+1]] <- config_value(data$config$activenodes$nodememuse$height, starvz_height_var);
       }
-      if (pjr(pajer$computingnodes$active)){
+      if (data$config$computingnodes$active){
           P[[length(P)+1]] <- plist$computingnodes;
-          H[[length(H)+1]] <- pjr_value(pajer$computingnodes$height, starvz_height_var);
+          H[[length(H)+1]] <- config_value(data$config$computingnodes$height, starvz_height_var);
       }
-      if (pjr(pajer$kiteration$active)){
+      if (data$config$kiteration$active){
           P[[length(P)+1]] <- plist$ijk;
-          H[[length(H)+1]] <- pjr_value(pajer$kiteration$height, starvz_height_todo);
+          H[[length(H)+1]] <- config_value(data$config$kiteration$height, starvz_height_todo);
       }
-      if (pjr(pajer$summary_nodes$active)){
+      if (data$config$summary_nodes$active){
           P[[length(P)+1]] <- plist$summary_nodes;
-          H[[length(H)+1]] <- pjr_value(pajer$summary_nodes$height, starvz_height_nodes);
+          H[[length(H)+1]] <- config_value(data$config$summary_nodes$height, starvz_height_nodes);
       }
-      if (pjr(pajer$st$active)){
+      if (data$config$st$active){
           P[[length(P)+1]] <- plist$st;
-          if(pjr(pajer$st$aggregation$active) && pjr_value(pajer$st$aggregation$method, "lucas") == "nodes"){
-              H[[length(H)+1]] <- pjr_value(pajer$st$height, starvz_height_agg);
+          if(data$config$st$aggregation$active && data$config$st$aggregation$method == "nodes"){
+              H[[length(H)+1]] <- config_value(data$config$st$height, starvz_height_agg);
           }else{
-              H[[length(H)+1]] <- pjr_value(pajer$st$height, starvz_height_resources);
+              H[[length(H)+1]] <- config_value(data$config$st$height, starvz_height_resources);
           }
       }
-      if (pjr(pajer$pmtool$kiteration$active)){
+      if (data$config$pmtool$kiteration$active){
           P[[length(P)+1]] <- plist$ijk_pm;
-          H[[length(H)+1]] <- pjr_value(pajer$pmtool$kiteration$height, starvz_height_todo);
+          H[[length(H)+1]] <- config_value(data$config$pmtool$kiteration$height, starvz_height_todo);
       }
-      if (pjr(pajer$pmtool$state$active)){
+      if (data$config$pmtool$state$active){
           P[[length(P)+1]] <- plist$st_pm;
-          H[[length(H)+1]] <- pjr_value(pajer$pmtool$state$height, starvz_height_resources);
+          H[[length(H)+1]] <- config_value(data$config$pmtool$state$height, starvz_height_resources);
       }
-      if (pjr(pajer$memory$state$active)){
+      if (data$config$memory$state$active){
           P[[length(P)+1]] <- plist$st_mm;
-          H[[length(H)+1]] <- pjr_value(pajer$memory$state$height, starvz_height_nodes);
+          H[[length(H)+1]] <- config_value(data$config$memory$state$height, starvz_height_nodes);
       }
-      if (pjr(pajer$memory$transfers$active) && !pjr(pajer$memory$combined)){
+      if (data$config$memory$transfers$active && !data$config$memory$combined){
           P[[length(P)+1]] <- plist$transf;
-          H[[length(H)+1]] <- pjr_value(pajer$memory$transfers$height, starvz_height_nodes);
+          H[[length(H)+1]] <- config_value(data$config$memory$transfers$height, starvz_height_nodes);
       }
-      if (pjr(pajer$submitted$active)){
+      if (data$config$submitted$active){
           P[[length(P)+1]] <- plist$submitted;
-          H[[length(H)+1]] <- pjr_value(pajer$submitted$height, starvz_height_var);
+          H[[length(H)+1]] <- config_value(data$config$submitted$height, starvz_height_var);
       }
-      if (pjr(pajer$starpu$active)){
+      if (data$config$starpu$active){
           P[[length(P)+1]] <- plist$starpu;
-          H[[length(H)+1]] <- pjr_value(pajer$starpu$height, starvz_height_resources);
+          H[[length(H)+1]] <- config_value(data$config$starpu$height, starvz_height_resources);
       }
-      if (pjr(pajer$ready$active)){
+      if (data$config$ready$active){
           P[[length(P)+1]] <- plist$ready;
-          H[[length(H)+1]] <- pjr_value(pajer$ready$height, starvz_height_var);
+          H[[length(H)+1]] <- config_value(data$config$ready$height, starvz_height_var);
       }
-      if (pjr(pajer$lackready$active)){
+      if (data$config$lackready$active){
           P[[length(P)+1]] <- plist$lackready;
-          H[[length(H)+1]] <- pjr_value(pajer$lackready$height, starvz_height_small);
+          H[[length(H)+1]] <- config_value(data$config$lackready$height, starvz_height_small);
       }
-       if (pjr(pajer$gflops$active)){
+       if (data$config$gflops$active){
           P[[length(P)+1]] <- plist$gflops;
-          H[[length(H)+1]] <- pjr_value(pajer$gflops$height, starvz_height_var);
+          H[[length(H)+1]] <- config_value(data$config$gflops$height, starvz_height_var);
       }
-      if (pjr(pajer$usedmemory$active)){
+      if (data$config$usedmemory$active){
           P[[length(P)+1]] <- plist$memory;
-          H[[length(H)+1]] <- pjr_value(pajer$usedmemory$height, starvz_height_var);
+          H[[length(H)+1]] <- config_value(data$config$usedmemory$height, starvz_height_var);
       }
-      if (pjr(pajer$imbalance$active)){
+      if (data$config$imbalance$active){
           P[[length(P)+1]] <- plist$imb_plot;
-          H[[length(H)+1]] <- pjr_value(pajer$imbalance$height, starvz_height_var);
+          H[[length(H)+1]] <- config_value(data$config$imbalance$height, starvz_height_var);
       }
-      if (pjr(pajer$power_imbalance$active)){
+      if (data$config$power_imbalance$active){
           P[[length(P)+1]] <- plist$imb_plot_power;
-          H[[length(H)+1]] <- pjr_value(pajer$power_imbalance$height, starvz_height_var);
+          H[[length(H)+1]] <- config_value(data$config$power_imbalance$height, starvz_height_var);
       }
-      if (pjr(pajer$hete_imbalance$active)){
+      if (data$config$hete_imbalance$active){
           P[[length(P)+1]] <- plist$imb_plot_hete;
-          H[[length(H)+1]] <- pjr_value(pajer$hete_imbalance$height, starvz_height_var);
+          H[[length(H)+1]] <- config_value(data$config$hete_imbalance$height, starvz_height_var);
       }
-      if (pjr(pajer$utilheatmap$active)){
+      if (data$config$utilheatmap$active){
           P[[length(P)+1]] <- plist$heatmap;
-          H[[length(H)+1]] <- pjr_value(pajer$utilheatmap$height, starvz_height_resources);
+          H[[length(H)+1]] <- config_value(data$config$utilheatmap$height, starvz_height_resources);
       }
-      if (pjr(pajer$gpubandwidth$active)){
+      if (data$config$gpubandwidth$active){
           P[[length(P)+1]] <- plist$gpu;
-          H[[length(H)+1]] <- pjr_value(pajer$gpubandwidth$height, starvz_height_var);
+          H[[length(H)+1]] <- config_value(data$config$gpubandwidth$height, starvz_height_var);
       }
-      if (pjr(pajer$mpibandwidth$active)){
+      if (data$config$mpibandwidth$active){
           P[[length(P)+1]] <- plist$mpi;
-          H[[length(H)+1]] <- pjr_value(pajer$mpibandwidth$height, starvz_height_var);
+          H[[length(H)+1]] <- config_value(data$config$mpibandwidth$height, starvz_height_var);
       }
-      if (pjr(pajer$mpiconcurrent$active)){
+      if (data$config$mpiconcurrent$active){
           P[[length(P)+1]] <- plist$mpiconc;
-          H[[length(H)+1]] <- pjr_value(pajer$mpiconcurrent$height, starvz_height_var);
+          H[[length(H)+1]] <- config_value(data$config$mpiconcurrent$height, starvz_height_var);
       }
-      if (pjr(pajer$mpiconcurrentout$active)){
+      if (data$config$mpiconcurrentout$active){
           P[[length(P)+1]] <- plist$mpiconcout;
-          H[[length(H)+1]] <- pjr_value(pajer$mpiconcurrentout$height, starvz_height_var);
+          H[[length(H)+1]] <- config_value(data$config$mpiconcurrentout$height, starvz_height_var);
       }
-      if (pjr(pajer$mpistate$active)){
+      if (data$config$mpistate$active){
           P[[length(P)+1]] <- plist$mpistate;
-          H[[length(H)+1]] <- pjr_value(pajer$mpistate$height, starvz_height_nodes);
+          H[[length(H)+1]] <- config_value(data$config$mpistate$height, starvz_height_nodes);
       }
 
-      starvz_height_total <<- sum(unlist(H))
+      starvz_height_total <- sum(unlist(H))
 
-      return(list(P=P, H=H))
+      return(list(P=P, H=H, starvz_height_total=starvz_height_total))
 }
 
-starpu_mpi_grid_arrange <- function(plist)
-{
-
-    elem <- starvz_compute_plot_heights(plist)
-    P <- elem$P
-    H <- elem$H
-
-    # Empty the X axis of all + add horizontal direction for legends
-    emptyx <- theme (axis.text.x = element_blank(), axis.title.x = element_blank());
-
-    P <- lapply(P, function(p) { p <- p + emptyx; });
-
-    # Vanilla configuration
-    if (pjr_value(pajer$vanilla$horizontal, FALSE) == FALSE){
-        # Add time scale on last plot
-        notemptyx <- theme (axis.text.x = element_text(), axis.title.x = element_text());
-        P[[length(P)]] <- P[[length(P)]] + notemptyx;
-    }
-
-    if (pjr_value(pajer$vanilla$vertical, FALSE) == TRUE){
-        # Remove Y scale title and text
-        emptyy <- theme (axis.text.y = element_blank(),
-                         axis.title.y = element_blank(),
-                         axis.ticks.y = element_blank());
-        P <- lapply(P, function(p) { p <- p + emptyy; });
-    }
-
-    # Preparation for cowplot's plot_grid
-    loginfo("Call cowplot's plot_grid function");
-    g <- plot_grid(plotlist = P, align="v", ncol = 1, rel_heights = unlist(H));
-    return(g);
-}
-
-starvz_assemble <- function(..., remove_Y_info=TRUE, remove_legends=TRUE)
+starvz_assemble <- function(..., config=list(), remove_Y_info=TRUE, remove_legends=TRUE)
 {
     plists <- list()
     for(i in list(...)){
@@ -241,6 +211,8 @@ starvz_assemble <- function(..., remove_Y_info=TRUE, remove_legends=TRUE)
 
     first_plot <- TRUE
 
+    starvz_height_total <- 0
+
     for(plot_list in plists){
        # Check if its a group of plots
        # TODO: check is weak but will protect for many errors
@@ -250,7 +222,10 @@ starvz_assemble <- function(..., remove_Y_info=TRUE, remove_legends=TRUE)
        }
 
        # Computer Heights and sequence
-       elem <- starvz_compute_plot_heights(plot_list)
+       elem <- starvz_compute_plot_heights(plot_list, config)
+
+       # Get size if bigger
+       starvz_height_total <- max(starvz_height_total, elem$starvz_height_total)
 
        # Clean all X
        elem$P <- lapply(elem$P, function(p) { p <- p + emptyx; });
@@ -262,11 +237,6 @@ starvz_assemble <- function(..., remove_Y_info=TRUE, remove_legends=TRUE)
        # Remove Y of second group of plots
        if(!first_plot && remove_Y_info){
            elem$P <- lapply(elem$P, function(p) { p <- p + noy; });
-       }
-
-       # Retro compatible with older versions and option
-       if (pjr_value(pajer$vanilla$vertical, FALSE) == TRUE){
-          elem$P <- lapply(elem$P, function(p) { p <- p + noy; });
        }
 
        # Remove legend of second group of plots
@@ -286,9 +256,20 @@ starvz_assemble <- function(..., remove_Y_info=TRUE, remove_legends=TRUE)
     }
 
     final_plot <- wrap_plots(AllP, heights=AllH, ncol=number_plots, byrow=FALSE)
+    attr(final_plot, "starvz_height_total") <- starvz_height_total
     return(final_plot);
 }
 
+#' Create a StarVZ plot automaticaly computing height
+#'
+#' Use data to create a starvz plot and save in name
+#'
+#' @param data starvz_data with trace data
+#' @param name Path for saved image
+#' @return The ggplot plot
+#' @examples
+#' #starvz_guided_plot("data/", "file.png")
+#' @export
 starvz_guided_plot <- function(data, name)
 {
     #USe Y to compute state and starpu size
@@ -300,38 +281,43 @@ starvz_guided_plot <- function(data, name)
     # For variable plots, 100px
     # For atree plot 1.5px per node Position
     # For plots TODO, default 200px
-    if(!is.null(pajer$selected_nodes)){
-      nodes <- length(pajer$selected_nodes)
+    if(!is.null(data$config$selected_nodes)){
+      nodes <- length(data$config$selected_nodes)
     }else if(!is.null(data$Tasks)){
-      nodes <- data$Tasks %>% select(MPIRank) %>% distinct() %>% nrow()
+      nodes <- data$Tasks %>% select(.data$MPIRank) %>% distinct() %>% nrow()
     }else if(!is.null(data$Application)){
-      nodes <- data$Application %>% select(Node) %>% distinct() %>% nrow()
+      nodes <- data$Application %>% select(.data$Node) %>% distinct() %>% nrow()
     }else{
       nodes <- 1
     }
 
-    types <- data$Application %>% select(ResourceType) %>% distinct() %>% nrow()
+    types <- data$Application %>% select(.data$ResourceType) %>% distinct() %>% nrow()
 
-    if(!is.null(pajer$selected_nodes)){
-      data$Y %>% separate(Parent, into=c("Node"), remove=FALSE) %>%
-             filter(Node %in% pajer$selected_nodes) %>%
-             arrange(Position) %>%
-             mutate(New = cumsum(lag(Height, default = 0))) %>%
-             select(Parent, New) -> new_y
-        starvz_height_resources <<- (new_y$New %>% max()) * 10 / 100
+    if(!is.null(data$config$selected_nodes)){
+      data$Y %>% separate(.data$Parent, into=c("Node"), remove=FALSE) %>%
+             filter(.data$Node %in% data$config$selected_nodes) %>%
+             arrange(.data$Position) %>%
+             mutate(New = cumsum(lag(.data$Height, default = 0))) %>%
+             select(.data$Parent, .data$New) -> new_y
+        data$config$guided$starvz_height_resources <- (new_y$New %>% max()) * 10 / 100
     }else{
-        starvz_height_resources <<- (data$Y$Position %>% max()) * 10 / 100
+        data$config$guided$starvz_height_resources <- (data$Y$Position %>% max()) * 10 / 100
     }
 
-    starvz_height_agg <<- max(nodes * types * pjr_value(pajer$guided$agg_type_height, 50) / 100, 1)
-    starvz_height_nodes <<- max(nodes * 10 / 100, 1)
-    starvz_height_small <<- 0.5
-    starvz_height_atree <<- ((data$Atree$Position %>% max()) * 1.5) / 100
+    data$config$guided$starvz_height_agg <- max(nodes * types * data$config$guided$agg_type_height / 100, 1)
+    data$config$guided$starvz_height_nodes <- max(nodes * 10 / 100, 1)
+    data$config$guided$starvz_height_small <- 0.5
+    if(!is.null(data$Atree)){
+      data$config$guided$starvz_height_atree <- ((data$Atree$Position %>% max()) * 1.5) / 100
+    }else{
+      data$config$guided$starvz_height_atree <- 1
+    }
 
     p <- starvz_plot(data)
 
     total_dpi <- 120
-    if(starvz_height_total==0){
+    starvz_height_total <- attr(p, "starvz_height_total")
+    if(is.null(starvz_height_total) || starvz_height_total==0){
       logwarn("Total height is 0, set to 1000")
       starvz_height_total <- 1000
     }
@@ -348,22 +334,22 @@ starvz_guided_plot <- function(data, name)
 starvz_plot_list <- function(data = NULL)
 {
     if(is.null(data)) stop("data passed as parameter is null")
-    if(is.null(pajer)) stop("pajer configuration is null");
 
     # Activate logs
-    if(pjr(pajer$log)){
-        addHandler(writeToConsole)
+    if(!data$config$log){
+        removeHandler(writeToConsole)
     }
 
     if(is.null(data$Version)){
        logwarn("This is a old StarVZ trace, trying to be retrocompatible")
-       data$Application <- data$State %>% filter(Application)
-       data$Application <- data$Application %>% mutate(Size = as.integer(Size))
-       data$Starpu <- data$State %>% filter(Type=="Worker State", Application==FALSE) %>%
-                                     mutate(Size = as.integer(Size))
-       data$Comm_state <- data$State %>% filter(Type=="Communication Thread State") %>% select(-Position, -Height)
-       data$Memory_state <- data$State %>% filter(Type=="Memory Node State") %>% select(-Position)
-       data$Colors <- data$State %>% filter(Application) %>% select(Value, Color) %>% distinct()
+       data$Application <- data$State %>% filter(.data$Application)
+       data$Application <- data$Application %>% mutate(Size = as.integer(.data$Size))
+       data$Starpu <- data$State %>% filter(.data$Type=="Worker State", .data$Application==FALSE) %>%
+                                     mutate(Size = as.integer(.data$Size))
+       data$Comm_state <- data$State %>% filter(.data$Type=="Communication Thread State") %>%
+                                         select(-.data$Position, -.data$Height)
+       data$Memory_state <- data$State %>% filter(.data$Type=="Memory Node State") %>% select(-.data$Position)
+       data$Colors <- data$State %>% filter(.data$Application) %>% select(.data$Value, .data$Color) %>% distinct()
     }
 
     # Get data
@@ -373,12 +359,8 @@ starvz_plot_list <- function(data = NULL)
        stop("The Application data was not loaded, check if the feather files exists.");
     }
 
-    if (!is.null(pajer$time)){
-        stop("pajer: you are using a deprecated parameter.");
-    }
-
     # Define makespan
-    makespan <- data$Application %>% pull(End) %>% max
+    makespan <- data$Application %>% pull(.data$End) %>% max
 
     #  Filter out everything after the makespan
     # TODO: Maybe this will make sense to transfer to Phase1
@@ -391,64 +373,63 @@ starvz_plot_list <- function(data = NULL)
     #data$Variable <- data$Variable %>% filter(End < makespan)
 
     # Adjust temporal scale
-    tstart <- pjr_value(pajer$limits$start, data$Application %>% pull(Start) %>% min);
-    tend <- pjr_value(pajer$limits$end, data$Application %>% pull(End) %>% max) + 1 # Just to give space
+    tstart <- config_value(data$config$limits$start, data$Application %>% pull(.data$Start) %>% min);
+    tend <- config_value(data$config$limits$end, data$Application %>% pull(.data$End) %>% max) + 1 # Just to give space
     tScale <- list(
         coord_cartesian(xlim=c(tstart, tend))
     );
 
     dfv <- data$Variable;
-    if(!is.null(pajer$selected_nodes)){
-      dfv <- dfv %>% filter(Node %in% pajer$selected_nodes)
+    if(!is.null(data$config$selected_nodes)){
+      dfv <- dfv %>% filter(.data$Node %in% data$config$selected_nodes)
     }
 
     loginfo("Starting the Starvz plot function");
 
     # Fail Checking
-    if((pjr(pajer$pmtool$state$active) || pjr(pajer$pmtool$kiteration$active)) && is.null(data$Pmtool_states)){
+    if((data$config$pmtool$state$active || data$config$pmtool$kiteration$active) && is.null(data$Pmtool_states)){
       logwarn("Pmtool states config is active but the data is NULL")
-      pajer$pmtool$state$active <<- FALSE;
-      pajer$pmtool$kiteration$active <<- FALSE;
+      data$config$pmtool$state$active <<- FALSE;
+      data$config$pmtool$kiteration$active <<- FALSE;
     }
 
-    if(pjr(pajer$pmtool$bounds$active) && is.null(data$Pmtool)){
+    if(data$config$pmtool$bounds$active && is.null(data$Pmtool)){
       logwarn("Pmtool bounds config is active but the data is NULL")
-      pajer$pmtool$bounds$active <<- FALSE;
+      data$config$pmtool$bounds$active <<- FALSE;
     }
 
-    if((data$Memory_state %>% nrow) == 0 && pjr(pajer$memory$state$active) ){
+    if((data$Memory_state %>% nrow) == 0 && data$config$memory$state$active ){
       logwarn("There is not information about memory states")
-      pajer$memory$state$active <<- FALSE;
-      pajer$memory$combined <<- FALSE;
+      data$config$memory$state$active <<- FALSE;
+      data$config$memory$combined <<- FALSE;
     }
 
-    if(is.null(data$Link) && (pjr(pajer$memory$transfers$active) || pjr(pajer$memory$combined))) {
+    if(is.null(data$Link) && (data$config$memory$transfers$active || data$config$memory$combined)) {
       logwarn("This dataset dont have links, disabling some options")
-      pajer$memory$transfers$active <<- FALSE;
-      pajer$memory$combined <<- FALSE;
+      data$config$memory$transfers$active <<- FALSE;
+      data$config$memory$combined <<- FALSE;
     }
 
     dfevents = data$Memory_state
-
-    if((dfevents %>% nrow) == 0 && ( pjr(pajer$memory$new_data) && (data$Events %>% nrow) == 0) ){
+    if(!is.null(dfevents) && ((dfevents %>% nrow) == 0) && data$config$memory$new_data){
       logwarn("This dataset dont have memory node states")
-      pajer$memory$state$active <<- FALSE;
-      pajer$memory$combined <<- FALSE;
+      data$config$memory$state$active <<- FALSE;
+      data$config$memory$combined <<- FALSE;
     }
 
     if(is.null(data$Atree) && (
-      pjr(pajer$utiltreenode$active) ||
-      pjr(pajer$utiltreedepth$active) ||
-      pjr(pajer$atree$active) ||
-      pjr(pajer$activenodes$active) ||
-      pjr(pajer$computingnodes$active)
+      data$config$utiltreenode$active ||
+      data$config$utiltreedepth$active ||
+      data$config$atree$active ||
+      data$config$activenodes$active ||
+      data$config$computingnodes$active
     )){
       logwarn("This dataset dont have atree, disabling some options")
-      pajer$utiltreenode$active <<- FALSE;
-      pajer$utiltreedepth$active <<- FALSE;
-      pajer$atree$active <<- FALSE;
-      pajer$activenodes$active <<- FALSE;
-      pajer$computingnodes$active <<- FALSE;
+      data$config$utiltreenode$active <<- FALSE;
+      data$config$utiltreedepth$active <<- FALSE;
+      data$config$atree$active <<- FALSE;
+      data$config$activenodes$active <<- FALSE;
+      data$config$computingnodes$active <<- FALSE;
     }
 
     # Define the global aggregation step as 0.1% of the total window
@@ -486,39 +467,39 @@ starvz_plot_list <- function(data = NULL)
     tplot <- geom_blank();
 
     # Atree space/time view
-    if (!is.null(data$Atree) && pjr(pajer$atree$active)){
+    if (!is.null(data$Atree) && data$config$atree$active){
 
         # Reorganize tree Position
         data_reorder <- data$Application %>%
-          filter(grepl("lapack", Value)) %>%
-          select(ANode, SubmitOrder) %>% unique() %>%
-          group_by(ANode) %>%
-          mutate(SubmitOrder = as.integer(SubmitOrder)) %>%
-          arrange(SubmitOrder) %>%
+          filter(grepl("lapack", .data$Value)) %>%
+          select(.data$ANode, .data$SubmitOrder) %>% unique() %>%
+          group_by(.data$ANode) %>%
+          mutate(SubmitOrder = as.integer(.data$SubmitOrder)) %>%
+          arrange(.data$SubmitOrder) %>%
           slice(1) %>%
           ungroup() %>%
-          arrange(SubmitOrder) %>%
+          arrange(.data$SubmitOrder) %>%
           mutate(Position = 1:n(), Height=1) %>%
-          select(-SubmitOrder);
+          select(-.data$SubmitOrder);
 
         data$Atree <- data$Atree %>%
               # Replace Position and Height by new ordering
-              select(-Position, -Height) %>%
+              select(-.data$Position, -.data$Height) %>%
               left_join(data_reorder, by="ANode")
 
         loginfo("Creating the temporal atree plot");
-        aggStep <- pjr_value(pajer$atree$step, globalAggStep);
+        aggStep <- config_value(data$config$atree$step, globalAggStep);
         goatreet <- atree_temporal_chart(data, step=aggStep) + tScale;
-        if (!pjr(pajer$atree$legend)){
+        if (!data$config$atree$legend){
             goatreet <- goatreet + theme(legend.position="none");
         }else{
             goatreet <- goatreet + theme(legend.position = "top")
         }
         # Vertical zoom
-        z.start <- pjr_value(pajer$atree$zoom$start, 0)
-        z.end <- pjr_value(pajer$atree$zoom$end, 100)
-        max.y.coordinate <- (data$Atree %>% pull(Position) %>% max) +
-            (data$Atree %>% pull(Height) %>% max)
+        z.start <- data$config$atree$zoom$start
+        z.end <- data$config$atree$zoom$end
+        max.y.coordinate <- (data$Atree %>% pull(.data$Position) %>% max) +
+            (data$Atree %>% pull(.data$Height) %>% max)
         tzScale <- list(
             coord_cartesian(xlim=c(tstart, tend),
                             ylim=c(z.start/100 * max.y.coordinate,
@@ -527,11 +508,11 @@ starvz_plot_list <- function(data = NULL)
     }
 
     # Resource utilization by tree node
-    if (!is.null(data$Atree) && pjr(pajer$utiltreenode$active)){
+    if (!is.null(data$Atree) && data$config$utiltreenode$active){
         loginfo("Creating the resource utilization by node plot");
-        aggStep <- pjr_value(pajer$utiltreenode$step, globalAggStep);
+        aggStep <- config_value(data$config$utiltreenode$step, globalAggStep);
         resource_utilization_tree_node_plot(data=data, step=aggStep) + tScale -> goutiltreenode;
-        if (!pjr(pajer$utiltreenode$legend)){
+        if (!data$config$utiltreenode$legend){
             goutiltreenode <- goutiltreenode + theme(legend.position="none");
         }else{
             goutiltreenode <- goutiltreenode + theme(legend.position = "top")
@@ -539,11 +520,11 @@ starvz_plot_list <- function(data = NULL)
     }
 
     # Resource utilization by tree depth
-    if (!is.null(data$Atree) && pjr(pajer$utiltreedepth$active)){
+    if (!is.null(data$Atree) && data$config$utiltreedepth$active){
         loginfo("Creating the resource utilization by depth plot");
-        aggStep <- pjr_value(pajer$utiltreenode$step, globalAggStep);
+        aggStep <- config_value(data$config$utiltreenode$step, globalAggStep);
         resource_utilization_tree_depth_plot(data, step=aggStep) + tScale -> goutiltreedepth;
-        if (!pjr(pajer$utiltreedepth$legend)){
+        if (!data$config$utiltreedepth$legend){
             goutiltreedepth <- goutiltreedepth + theme(legend.position="none");
         }else{
             goutiltreedepth <- goutiltreedepth + theme(legend.position = "top")
@@ -551,90 +532,84 @@ starvz_plot_list <- function(data = NULL)
     }
 
     # SpaceTime
-    if (pjr(pajer$st$active)){
+    if (data$config$st$active){
         loginfo("Creating the Space/Time");
-        if (pjr(pajer$st$aggregation$active)){
-            if (pjr_value(pajer$st$aggregation$method, "lucas") == "lucas"){
-                aggStep <- pjr_value(pajer$st$aggregation$step, globalAggStep);
+        if (data$config$st$aggregation$active){
+            if (data$config$st$aggregation$method == "lucas"){
+                aggStep <- config_value(data$config$st$aggregation$step, globalAggStep);
                 dfw_agg <- st_time_aggregation(data$Application, step=aggStep);
                 data %>% st_time_aggregation_plot (dfw_agg) + coord_cartesian(xlim=c(tstart, tend), ylim=c(0, NA)) -> gow;
-            }else if(pjr_value(pajer$st$aggregation$method, "lucas") == "vinicius"){
+            }else if(data$config$st$aggregation$method == "vinicius"){
                 loginfo("Call vinicius aggregation");
                 data %>% st_time_aggregation_vinicius_plot() + coord_cartesian(xlim=c(tstart, tend), ylim=c(0, NA)) -> gow;
-            }else if(pjr_value(pajer$st$aggregation$method, "lucas") == "nodes"){
+            }else if(data$config$st$aggregation$method == "nodes"){
                 loginfo("Call Node aggregation");
                 node_aggregation(data) + coord_cartesian(xlim=c(tstart, tend), ylim=c(0, NA)) -> gow;
             }
         }else{
-            data %>% state_chart (globalEndTime = tend, ST.Outliers = pjr(pajer$st$outliers), StarPU.View = FALSE) +
+            data %>% state_chart (globalEndTime = tend, ST.Outliers = data$config$st$outliers, StarPU.View = FALSE) +
                 coord_cartesian(xlim=c(tstart, tend), ylim=c(0, NA)) -> gow;
         }
 
         # Without legend
-        if (!pjr(pajer$st$legend)){
+        if (!data$config$st$legend){
             gow <- gow + theme(legend.position="none");
         }
     }
 
-    if (pjr(pajer$summary_nodes$active)){
+    if (data$config$summary_nodes$active){
         loginfo("Creating node summary");
-        node_summary(data$Application) + tScale -> go_sn
-        if (!pjr(pajer$summary_nodes$legend)){
+        node_summary(data) + tScale -> go_sn
+        if (!data$config$summary_nodes$legend){
             go_sn <- go_sn + theme(legend.position="none");
         }
     }
 
-    if (pjr(pajer$pmtool$state$active)){
+    if (data$config$pmtool$state$active){
         data %>% state_pmtool_chart () + tScale -> gow_pm;
     }
 
-    memory_combined <- pjr(pajer$memory$combined) & pjr(pajer$memory$transfers$active);
+    memory_combined <- data$config$memory$combined & data$config$memory$transfers$active;
 
-    if (pjr(pajer$memory$state$active)){
-        if(pjr(pajer$memory$new_data)){
-            loginfo("Memory Chart using Events")
-            data %>% events_memory_chart(combined = memory_combined, tstart=tstart, tend=tend) + tScale -> gow_mm;
-        }else{
-            loginfo("Memory Chart using States")
-            data %>% memory_chart(combined = memory_combined, tstart=tstart, tend=tend) + tScale -> gow_mm;
-        }
+    if (data$config$memory$state$active){
+        data %>% events_memory_chart(combined = memory_combined, tstart=tstart, tend=tend) + tScale -> gow_mm;
     }
 
-    if (pjr(pajer$memory$transfers$active) & !memory_combined){
+    if (data$config$memory$transfers$active & !memory_combined){
         data %>% link_chart(tstart=tstart, tend=tend) + tScale -> gow_tf;
     }
 
 
 
     # StarPU SpaceTime
-    if (pjr(pajer$starpu$active)){
+    if (data$config$starpu$active){
         loginfo("Creating the StarPU Space/Time");
-        if (pjr(pajer$starpu$aggregation$active)){
+        if (data$config$starpu$aggregation$active){
           loginfo("Will call st_time_aggregation");
-          aggStep <- pjr_value(pajer$starpu$aggregation$step, globalAggStep);
+          aggStep <- config_value(data$config$starpu$aggregation$step, globalAggStep);
           dfw_agg <- st_time_aggregation(data$Starpu, StarPU.View=TRUE, step=aggStep);
           data %>% st_time_aggregation_plot (dfw_agg, StarPU.View=TRUE) + coord_cartesian(xlim=c(tstart, tend), ylim=c(0, NA)) -> gstarpu;
         }else{
           data %>% state_chart (globalEndTime = tend, StarPU.View = TRUE) + coord_cartesian(xlim=c(tstart, tend), ylim=c(0, NA)) -> gstarpu;
         }
-        if (!pjr(pajer$starpu$legend)){
+        if (!data$config$starpu$legend){
             gstarpu <- gstarpu + theme(legend.position="none");
         }
     }
 
     # KIteration
-    if (pjr(pajer$kiteration$active)){
+    if (data$config$kiteration$active){
         loginfo("Creating the KIteration");
-        ml <- pajer$kiteration$middlelines
+        ml <- data$config$kiteration$middlelines
         if(length(ml) == 0){
             ml <- NULL
         }
-        pn <- pjr_value(pajer$kiteration$pernode, FALSE)
-        goijk <- k_chart(data$Application,
+        pn <- data$config$kiteration$pernode
+        goijk <- k_chart(data,
                          middle_lines=ml,
                          per_node=pn, colors=data$Colors) + tScale;
 
-        if (!pjr(pajer$kiteration$legend)){
+        if (!data$config$kiteration$legend){
             goijk <- goijk +
                      theme(legend.position="none")
         }else{
@@ -647,150 +622,150 @@ starvz_plot_list <- function(data = NULL)
     }
 
     # KIteration PMTOOL
-    if (pjr(pajer$pmtool$kiteration$active)){
+    if (data$config$pmtool$kiteration$active){
         loginfo("Creating the KIteration for PMTool");
-        goijk_pm <- k_chart_pmtool(data$Pmtool_states, colors=data$Colors) + tScale;
+        goijk_pm <- k_chart_pmtool(data, colors=data$Colors) + tScale;
 
-        if (!pjr(pajer$pmtool$kiteration$legend)){
+        if (!data$config$pmtool$kiteration$legend){
             goijk_pm <- goijk_pm + theme(legend.position="none");
         }
     }
 
     # Lack ready (companion for Ready Variable)
-    if (pjr(pajer$lackready$active)){
+    if (data$config$lackready$active){
         loginfo("Creating the Lack Ready Plot");
         golrv <- plot_lackready(data) + tScale;
     }
 
     # Ready
-    if (pjr(pajer$ready$active)){
+    if (data$config$ready$active){
         loginfo("Creating the Ready plot");
-        aggStep <- pjr_value(pajer$ready$step, globalAggStep);
+        aggStep <- config_value(data$config$ready$step, globalAggStep);
         gorv <- dfv %>%
-            filter(grepl("sched", ResourceId), grepl("Ready", Type)) %>%
+            filter(grepl("sched", .data$ResourceId), grepl("Ready", .data$Type)) %>%
             var_integration_segment_chart(step = aggStep) + tScale;
-        if (!pjr(pajer$ready$legend)){
+        if (!data$config$ready$legend){
             gorv <- gorv + theme(legend.position="none");
         }else{
             gorv <- gorv +
                 theme(legend.position = "top")
         }
-        gorv <- userYLimit(gorv, pajer$ready$limit, c(tstart, tend));
+        gorv <- userYLimit(gorv, data$config$ready$limit, c(tstart, tend));
     }
 
     # Submitted
-    if (pjr(pajer$submitted$active)){
+    if (data$config$submitted$active){
         loginfo("Creating the Submitted plot");
-        aggStep <- pjr_value(pajer$submitted$step, globalAggStep);
+        aggStep <- config_value(data$config$submitted$step, globalAggStep);
         gosv <- dfv %>%
-            filter(grepl("sched", ResourceId), grepl("Submitted", Type)) %>%
+            filter(grepl("sched", .data$ResourceId), grepl("Submitted", .data$Type)) %>%
             var_integration_segment_chart(step = aggStep) + tScale;
-        if (!pjr(pajer$submitted$legend)){
+        if (!data$config$submitted$legend){
             gosv <- gosv + theme(legend.position="none");
         }else{
             gosv <- gosv +
                 theme(legend.position = "top")
         }
-        gosv <- userYLimit(gosv, pajer$submitted$limit, c(tstart, tend));
+        gosv <- userYLimit(gosv, data$config$submitted$limit, c(tstart, tend));
     }
 
     # GFlops
-    if (pjr(pajer$gflops$active)){
+    if (data$config$gflops$active){
         loginfo("Creating the GFlops plot");
-        aggStep <- pjr_value(pajer$gflops$step, globalAggStep);
-        facetted <- pjr_value(pajer$gflops$facet, TRUE);
+        aggStep <- config_value(data$config$gflops$step, globalAggStep);
+        facetted <- data$config$gflops$facet;
         gogfv <- dfv %>%
-            filter(Type == "GFlops") %>%
+            filter(.data$Type == "GFlops") %>%
             var_integration_segment_chart (., ylabel="GFlops", step = aggStep, facetting = facetted) + tScale;
 
         # adjust GFlops scale
-        if (pjr_value(pajer$gflops$limit, FALSE)){
-            limit <- pjr_value(pajer$gflops$limit, 0); # TODO define a better default value
+        if (data$config$gflops$limit){
+            limit <- data$config$gflops$limit
             gogfv <- gogfv + coord_cartesian(xlim=c(tstart, tend), ylim=c(0, limit));
         }
-        if (!pjr(pajer$gflops$legend)){
+        if (!data$config$gflops$legend){
             gogfv <- gogfv + theme(legend.position="none");
         }
         # TODO: user limit
     }
 
     # Used Memory
-    if (pjr(pajer$usedmemory$active)){
+    if (data$config$usedmemory$active){
         loginfo("Creating the Used Memory plot");
 
-        if ((dfv %>% filter(grepl("Used", Type)) %>% nrow) == 0){
+        if ((dfv %>% filter(grepl("Used", .data$Type)) %>% nrow) == 0){
             logwarn("There aren't any information about Used Memory, ignoring it.");
-            pajer$usedmemory$active <<- FALSE;
+            data$config$usedmemory$active <<- FALSE;
         }else{
-          aggStep <- pjr_value(pajer$usedmemory$step, globalAggStep);
+          aggStep <- config_value(data$config$usedmemory$step, globalAggStep);
 
           goguv <- dfv %>%
-              filter(grepl("Used", Type)) %>%
+              filter(grepl("Used", .data$Type)) %>%
               var_integration_segment_chart(step = aggStep) + tScale;
-          if (!pjr(pajer$usedmemory$legend)){
+          if (!data$config$usedmemory$legend){
               goguv <- goguv + theme(legend.position="none");
           }else{
               goguv <- goguv +
                   theme(legend.position = "top") #+
                   #guides(color = guide_legend(nrow = 1))
           }
-          goguv <- userYLimit(goguv, pajer$usedmemory$limit, c(tstart, tend));
+          goguv <- userYLimit(goguv, data$config$usedmemory$limit, c(tstart, tend));
         }
     }
 
 
     # Imbalance Metrics
-    if (pjr(pajer$imbalance$active)){
+    if (data$config$imbalance$active){
         loginfo("Creating the Imbalance Metrics plot");
 
-        Step <- as.double(pjr_value(pajer$imbalance$step, globalAggStep));
+        Step <- as.double(config_value(data$config$imbalance$step, globalAggStep));
 
-        imb_plot <- data$Application %>% filter(Start>=0) %>% var_imbalance(Step)
-        if (!pjr(pajer$imbalance$legend)){
+        imb_plot <- data %>% var_imbalance(Step)
+        if (!data$config$imbalance$legend){
             imb_plot <- imb_plot + theme(legend.position="none");
         }else{
             imb_plot <- imb_plot + theme(legend.position = "top")
         }
-        imb_plot <- imb_plot + coord_cartesian(xlim=c(tstart, tend), ylim=c(0, pjr_value(pajer$imbalance$limit, 1)))
+        imb_plot <- imb_plot + coord_cartesian(xlim=c(tstart, tend), ylim=c(0, data$config$imbalance$limit))
     }
 
     # Imbalance Metrics Power
-    if (pjr(pajer$power_imbalance$active)){
+    if (data$config$power_imbalance$active){
         loginfo("Creating the Imbalance Power Metrics plot");
 
-        Step <- as.double(pjr_value(pajer$power_imbalance$step, globalAggStep));
+        Step <- as.double(config_value(data$config$power_imbalance$step, globalAggStep));
 
-        imb_plot_power <- data$Application %>% filter(Start>=0) %>% var_imbalance_power(Step)
-        if (!pjr(pajer$power_imbalance$legend)){
+        imb_plot_power <- data %>% var_imbalance_power(Step)
+        if (!data$config$power_imbalance$legend){
             imb_plot_power <- imb_plot_power + theme(legend.position="none");
         }else{
             imb_plot_power <- imb_plot_power + theme(legend.position = "top")
         }
-        imb_plot_power <- imb_plot_power + coord_cartesian(xlim=c(tstart, tend), ylim=c(0, pjr_value(pajer$power_imbalance$limit, 1)))
+        imb_plot_power <- imb_plot_power + coord_cartesian(xlim=c(tstart, tend), ylim=c(0, data$config$power_imbalance$limit))
     }
 
     # Imbalance Metrics hete
-    if (pjr(pajer$hete_imbalance$active)){
+    if (data$config$hete_imbalance$active){
         loginfo("Creating the Imbalance Hetero Metrics plot");
 
-        Step <- as.double(pjr_value(pajer$hete_imbalance$step, globalAggStep));
+        Step <- as.double(config_value(data$config$hete_imbalance$step, globalAggStep));
 
-        imb_plot_hete <- data$Application %>% filter(Start>=0) %>% var_imbalance_double_hetero(Step)
-        if (!pjr(pajer$hete_imbalance$legend)){
+        imb_plot_hete <- data %>% var_imbalance_double_hetero(Step)
+        if (!data$config$hete_imbalance$legend){
             imb_plot_hete <- imb_plot_hete + theme(legend.position="none");
         }else{
             imb_plot_hete <- imb_plot_hete + theme(legend.position = "top")
         }
-        imb_plot_hete <- imb_plot_hete + coord_cartesian(xlim=c(tstart, tend), ylim=c(0, pjr_value(pajer$hete_imbalance$limit, 1)))
+        imb_plot_hete <- imb_plot_hete + coord_cartesian(xlim=c(tstart, tend), ylim=c(0, data$config$hete_imbalance$limit))
     }
 
-    if (pjr(pajer$utilheatmap$active)){
+    if (data$config$utilheatmap$active){
         loginfo("Creating the HeatMap Imbalance plot");
 
-        Step <- as.double(pjr_value(pajer$utilheatmap$step, globalAggStep));
+        Step <- as.double(config_value(data$config$utilheatmap$step, globalAggStep));
 
-        heatmap <- data$Application %>% filter(Start>=0) %>% utilization_heatmap(data$Y, Step)
-        if (!pjr(pajer$utilheatmap$legend)){
+        heatmap <- data$Application %>% filter(.data$Start>=0) %>% utilization_heatmap(data$Y, Step)
+        if (!data$config$utilheatmap$legend){
             heatmap <- heatmap + theme(legend.position="none");
         }else{
             heatmap <- heatmap + theme(legend.position = "top")
@@ -799,126 +774,126 @@ starvz_plot_list <- function(data = NULL)
     }
 
     # MPIBandwidth
-    if (pjr(pajer$mpibandwidth$active)){
+    if (data$config$mpibandwidth$active){
         loginfo("Creating the MPIBandwidth plot");
-        aggStep <- pjr_value(pajer$mpibandwidth$step, globalAggStep);
-        mpi_out <- dfv %>% filter(grepl("mpict", ResourceId), grepl("Out", Type));
+        aggStep <- config_value(data$config$mpibandwidth$step, globalAggStep);
+        mpi_out <- dfv %>% filter(grepl("mpict", .data$ResourceId), grepl("Out", .data$Type));
         if ((mpi_out %>% nrow) == 0){
             logwarn("There aren't any information on MPIBandwidth, ignoring it.");
-            pajer$mpibandwidth$active <<- FALSE;
+            data$config$mpibandwidth$active <<- FALSE;
         }else{
             gomov <- mpi_out %>%
                 var_integration_segment_chart(., ylabel="MPI\n(MB/s)", step=aggStep) + tScale;
-            if (!pjr(pajer$mpibandwidth$legend)){
+            if (!data$config$mpibandwidth$legend){
                 gomov <- gomov + theme(legend.position="none");
             }
-            gomov <- userYLimit(gomov, pajer$mpibandwidth$limit, c(tstart, tend));
+            gomov <- userYLimit(gomov, data$config$mpibandwidth$limit, c(tstart, tend));
         }
     }
 
     # MPI Concurrent
-    if (pjr(pajer$mpiconcurrent$active)){
+    if (data$config$mpiconcurrent$active){
         loginfo("Creating the MPI concurrent ops plot");
-        if ((data$Link %>% filter(grepl("mpicom", Key)) %>% nrow) == 0){
+        if ((data$Link %>% filter(grepl("mpicom", .data$Key)) %>% nrow) == 0){
             logwarn("There aren't any information on MPI, ignoring it.");
-            pajer$mpiconcurrent$active <<- FALSE;
+            data$config$mpiconcurrent$active <<- FALSE;
         }else{
-          aggStep <- pjr_value(pajer$mpiconcurrent$step, globalAggStep);
+          aggStep <- config_value(data$config$mpiconcurrent$step, globalAggStep);
           gompiconc <- data %>% concurrent_mpi() %>%
               var_integration_segment_chart(., ylabel="Concurrent\nMPI Tasks Send", step=aggStep) + tScale;
-          if (!pjr(pajer$mpiconcurrent$legend)){
+          if (!data$config$mpiconcurrent$legend){
               gompiconc <- gompiconc + theme(legend.position="none");
           }
-          gompiconc <- userYLimit(gompiconc, pajer$mpiconcurrent$limit, c(tstart, tend));
+          gompiconc <- userYLimit(gompiconc, data$config$mpiconcurrent$limit, c(tstart, tend));
         }
     }
 
     # MPI Concurrent Out
-    if (pjr(pajer$mpiconcurrentout$active)){
-        loginfo("Creating the MPI concurrent ops plot");
-        if ((data$Link %>% filter(grepl("mpicom", Key)) %>% nrow) == 0){
+    if (data$config$mpiconcurrentout$active){
+        loginfo("Creating the MPI concurrent ops out plot");
+        if ((data$Link %>% filter(grepl("mpicom", .data$Key)) %>% nrow) == 0){
             logwarn("There aren't any information on MPI, ignoring it.");
-            pajer$mpiconcurrentout$active <<- FALSE;
+            data$config$mpiconcurrentout$active <<- FALSE;
         }else{
-          aggStep <- pjr_value(pajer$mpiconcurrentout$step, globalAggStep);
+          aggStep <- config_value(data$config$mpiconcurrentout$step, globalAggStep);
           gompiconcout <- data %>% concurrent_mpi_out() %>%
               var_integration_segment_chart(., ylabel="Concurrent\nMPI Tasks Recv", step=aggStep) + tScale;
-          if (!pjr(pajer$mpiconcurrentout$legend)){
+          if (!data$config$mpiconcurrentout$legend){
               gompiconcout <- gompiconcout + theme(legend.position="none");
           }
-          gompiconcout <- userYLimit(gompiconcout, pajer$mpiconcurrentout$limit, c(tstart, tend));
+          gompiconcout <- userYLimit(gompiconcout, data$config$mpiconcurrentout$limit, c(tstart, tend));
         }
     }
 
     # MPI State
-    if (pjr(pajer$mpistate$active)){
+    if (data$config$mpistate$active){
         loginfo("Creating the MPI state");
         if ( is.null(data$Comm_state) || (data$Comm_state %>% nrow) == 0 ){
           logwarn("There aren't any information on MPI, ignoring it.");
-          pajer$mpistate$active <<- FALSE;
+          data$config$mpistate$active <<- FALSE;
         }else{
-          gompistate <- data$Comm_state %>% state_mpi_chart() + tScale;
-          if (!pjr(pajer$mpistate$legend)){
+          gompistate <- data %>% state_mpi_chart() + tScale;
+          if (!data$config$mpistate$legend){
               gompistate <- gompistate + theme(legend.position="none");
           }
         }
     }
 
     # GPUBandwidth
-    if (pjr(pajer$gpubandwidth$active)){
+    if (data$config$gpubandwidth$active){
         loginfo("Creating the GPU Bandwidth plot");
-        aggStep <- pjr_value(pajer$gpubandwidth$step, globalAggStep);
+        aggStep <- config_value(data$config$gpubandwidth$step, globalAggStep);
         if(aggStep < 0){
             gogov <- dfv %>%
                 # Get only GPU memory banwidth (out)
-                filter(grepl("MEMMANAGER", ResourceId), grepl("Out", Type)) %>%
+                filter(grepl("MEMMANAGER", .data$ResourceId), grepl("Out", .data$Type)) %>%
                 # Remove the MANAGER0, which is CPU-only
                 # TODO: After the logical OR there is a support for single-node StarPU traces
-                filter(!grepl("MANAGER0", Resource)) %>%
-                group_by(Type, Node, ResourceType, Start, End, Duration) %>%
-                summarize(Value = sum(Value), N=n()) %>%
-                rename(ResourceId = Node) %>%
-                var_chart(ylabel = "GPU\n(MB/s)") + tScale;
+                filter(!grepl("MANAGER0", .data$Resource)) %>%
+                group_by(.data$Type, .data$Node, .data$ResourceType, .data$Start, .data$End, .data$Duration) %>%
+                summarize(Value = sum(.data$Value), N=n()) %>%
+                rename(ResourceId = .data$Node) %>%
+                var_chart(ylabel = "GPU\n(MB/s)", data$config$base_size, data$config$expand) + tScale;
         }else{
             gogov <- dfv %>%
                 # Get only GPU memory banwidth (out)
-                filter(grepl("MEMMANAGER", ResourceId), grepl("Out", Type)) %>%
+                filter(grepl("MEMMANAGER", .data$ResourceId), grepl("Out", .data$Type)) %>%
                 # Remove the MANAGER0, which is CPU-only
                 # TODO: After the logical OR there is a support for single-node StarPU traces
-                filter(Resource != "MEMMANAGER0" | Node != "MEMMANAGER0") %>%
+                filter(.data$Resource != "MEMMANAGER0" | .data$Node != "MEMMANAGER0") %>%
                 var_integration_segment_chart(., ylabel="GPU\n(MB/s)", step=aggStep) + tScale;
         }
-        if (!pjr(pajer$gpubandwidth$legend)){
+        if (!data$config$gpubandwidth$legend){
             gogov <- gogov + theme(legend.position="none");
         }
         # Fixed upper bound
-        if (pjr(pajer$gpubandwidth$bound)) {
-            lbound <- pjr_value(pajer$gpubandwidth$bound, 0); # TODO: define a better default value
+        if (is.double(data$config$gpubandwidth$bound)) {
+            lbound <- data$config$gpubandwidth$bound
             gogov <- gogov + coord_cartesian(ylim=c(0, lbound),
                                              xlim=c(tstart, tend));
         }
-        if(pjr(pajer$gpubandwidth$total)){
+        if(data$config$gpubandwidth$total){
           ms <- dfv %>%
-              filter(grepl("MEMMANAGER", ResourceId), grepl("Out", Type)) %>%
-              filter(Resource != "MEMMANAGER0" | Node != "MEMMANAGER0") %>%
-              group_by(Type, Node, ResourceType, Start, End, Duration) %>%
-              summarize(Value = sum(Value), N=n()) %>%
-              rename(ResourceId = Node)
+              filter(grepl("MEMMANAGER", .data$ResourceId), grepl("Out", .data$Type)) %>%
+              filter(.data$Resource != "MEMMANAGER0" | .data$Node != "MEMMANAGER0") %>%
+              group_by(.data$Type, .data$Node, .data$ResourceType, .data$Start, .data$End, .data$Duration) %>%
+              summarize(Value = sum(.data$Value), N=n()) %>%
+              rename(ResourceId = .data$Node)
           y_size <- layer_scales(gogov)$y$range$range[2];
           gogov <- gogov + ms %>% var_chart_text(tstart=tstart, tend=tend, y_end = y_size);
         }
     }
 
     # Active Nodes
-    if (pjr(pajer$activenodes$active)){
+    if (data$config$activenodes$active){
       loginfo("Creating the Active Nodes plot");
 
-      if ( (data$Application %>% filter(!is.na(ANode)) %>% nrow) == 0 ){
+      if ( (data$Application %>% filter(!is.na(.data$ANode)) %>% nrow) == 0 ){
         logwarn("There aren't any information on ANode, ignoring it.");
-        pajer$activenodes$active <<- FALSE;
+        data$config$activenodes$active <<- FALSE;
       }else{
-        goactivenodes <- data$Application %>% active_nodes_chart() + tScale;
-        if (!pjr(pajer$activenodes$legend)){
+        goactivenodes <- data %>% active_nodes_chart() + tScale;
+        if (!data$config$activenodes$legend){
           goactivenodes <- goactivenodes + theme(legend.position="none");
         }else{
           goactivenodes <- goactivenodes + theme(legend.position = "top")
@@ -926,24 +901,24 @@ starvz_plot_list <- function(data = NULL)
       }
     }
     # Node memory usage
-    if (pjr(pajer$activenodes$nodememuse$active)) {
+    if (data$config$activenodes$nodememuse$active) {
       loginfo("Creating the Node Memory Usage plot");
 
-      if ( (data$Application %>% filter(grepl("front", Value) & GFlop != 0) %>% nrow) == 0 ){
+      if ( (data$Application %>% filter(grepl("front", .data$Value) & .data$GFlop != 0) %>% nrow) == 0 ){
         logwarn("There is no memory information on data, ignoring it.");
-        pajer$activenodes$nodememuse$active <<- FALSE;
+        data$config$activenodes$nodememuse$active <<- FALSE;
       }else{
         gonodememuse <- nodes_memory_usage_plot(data=data) + tScale;
       }
     }
 
     # Computing Nodes
-    if (pjr(pajer$computingnodes$active)){
+    if (data$config$computingnodes$active){
         loginfo("Creating the Computing Nodes plot");
-        aggStep <- pjr_value(pajer$computingnodes$step, globalAggStep);
-        if ( (data$Application %>% filter(!is.na(ANode)) %>% nrow) == 0 ) {
+        aggStep <- config_value(data$config$computingnodes$step, globalAggStep);
+        if ( (data$Application %>% filter(!is.na(.data$ANode)) %>% nrow) == 0 ) {
           logwarn("There aren't any information on ANode, ignoring it.");
-          pajer$computingnodes$active <<- FALSE;
+          data$config$computingnodes$active <<- FALSE;
         }else{
           gocomputingnodes <- computing_nodes_chart(data=data, step=aggStep) + tScale;
           loginfo("Exit of computing_nodes_chart");
@@ -951,7 +926,7 @@ starvz_plot_list <- function(data = NULL)
     }
 
     # Title
-    if (pjr(pajer$title$active)){
+    if (data$config$title$active){
         if (!is.null(directory)){
             tplot <- title_plot(directory);
         }
@@ -989,25 +964,39 @@ starvz_plot_list <- function(data = NULL)
         summary_nodes = go_sn,
         tplot = tplot
     )
+
+    if(data$config$vertical_lines$active){
+      ret[[length(ret)+1]] <- geom_vline(xintercept=data$config$vertical_lines$x_list,
+                       linetype='longdash',
+                       size=1,
+                       colour=data$config$vertical_lines$color_list)
+
+    }
+
     return (plot_list);
 }
 
+#' Make a StarVZ plot
+#'
+#' Create a StarVZ plot considering the data suplied
+#'
+#' @param data starvz_data class with $config
+#' @return ggplot object with all starvz plots
+#' @examples
+#' #starvz_plot(data)
+#' @export
 starvz_plot <- function(data = NULL)
 {
     if(is.null(data)) return(NULL);
-    if(is.null(pajer)) return(NULL);
 
     plist <- starvz_plot_list(data)
 
     loginfo("Assembling the plot");
 
     # assembling
-    g <- starvz_assemble(plist);
+    g <- starvz_assemble(plist, config=data$config);
 
     loginfo("Ending Starvz plot function");
 
     return(g);
 }
-
-# Keep the old name
-the_master_function <- starvz_plot

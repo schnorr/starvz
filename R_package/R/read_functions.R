@@ -1,213 +1,233 @@
-starvz_read_some_feather <- function (directory = ".", tables = c("application"))
-{
-  l1 <- list(Origin = directory);
+#' @include starvz_data.R
+
+starvz_read_some_feather <- function(directory = ".", tables = c("application")) {
+  l1 <- list(Origin = directory)
   l2 <- lapply(tables, function(table) {
-      table_file <- file.path(directory, paste0(table, ".feather"))
-      if (file.exists(table_file)){
-          read_parquet(table_file)
-      }else{
-          loginfo(paste("The file:", table_file, " does not exist on that directory. Ignore."));
-          NULL;
-      }
-  });
-  names(l2) <- tables %>% str_to_title();
-  c(l1, l2);
+    table_file <- file.path(directory, paste0(table, ".feather"))
+    if (file.exists(table_file)) {
+      read_parquet(table_file)
+    } else {
+      loginfo(paste("The file:", table_file, " does not exist on that directory. Ignore."))
+      NULL
+    }
+  })
+  names(l2) <- tables %>% str_to_title()
+  c(l1, l2)
 }
 
-starvz_read_feather <- function (directory = ".")
-{
-    filenames <- list.files(path = directory,
-                            pattern = "*.feather",
-                            full.names = FALSE,
-                            recursive = FALSE) %>%
-                  str_replace_all(".feather", "")
+starvz_read_feather <- function(directory = ".") {
+  filenames <- list.files(
+    path = directory,
+    pattern = "*.feather",
+    full.names = FALSE,
+    recursive = FALSE
+  ) %>%
+    str_replace_all(".feather", "")
 
-    starvz_read_some_feather(directory=directory, tables=filenames)
+  starvz_read_some_feather(directory = directory, tables = filenames)
 }
 
 # retrocompatibility
 the_fast_reader_function <- starvz_read_feather
 
-starvz_read_some_parquet <- function (directory = ".", tables = c("application")){
-  if(!codec_is_available("gzip")){
+starvz_read_some_parquet <- function(directory = ".", tables = c("application")) {
+  if (!codec_is_available("gzip")) {
     logwarn("Arrow Gzip is not available, try using arrow::install_arrow()")
   }
-  l1 <- list(Origin = directory);
+  l1 <- list(Origin = directory)
   l2 <- lapply(tables, function(table) {
-      table_file <- file.path(directory, paste0(table, ".parquet"))
-      if (file.exists(table_file)){
-          read_parquet(table_file)
-      }else{
-          loginfo(paste("The file:", table_file, " does not exist on that directory. Ignore."));
-          NULL;
-      }
-  });
-  names(l2) <- tables %>% str_to_title();
-  c(l1, l2);
+    table_file <- file.path(directory, paste0(table, ".parquet"))
+    if (file.exists(table_file)) {
+      read_parquet(table_file)
+    } else {
+      loginfo(paste("The file:", table_file, " does not exist on that directory. Ignore."))
+      NULL
+    }
+  })
+  names(l2) <- tables %>% str_to_title()
+  c(l1, l2)
 }
 
-starvz_read_parquet <- function (directory = ".")
-{
-    filenames <- list.files(path = directory,
-                            pattern = "*.parquet",
-                            full.names = FALSE,
-                            recursive = FALSE) %>%
-                  str_replace_all(".parquet", "")
+starvz_read_parquet <- function(directory = ".") {
+  filenames <- list.files(
+    path = directory,
+    pattern = "*.parquet",
+    full.names = FALSE,
+    recursive = FALSE
+  ) %>%
+    str_replace_all(".parquet", "")
 
-    starvz_read_some_parquet(directory=directory, tables=filenames)
+  starvz_read_some_parquet(directory = directory, tables = filenames)
 }
 
-# This will use Pajer to select what files to read
-starvz_selective_read <- function(directory = ".")
-{
+#' Read selective starvz trace files
+#'
+#' Read the directory of trace files (feather or parquet) and
+#' the configfuration file, and return a starvz_data class with only
+#' data that will be used in active plots in cofiguration file
+#'
+#' @param directory Directory path of trace files
+#' @param config_file Path for configuration yaml file
+#' @return The starvz_data with all tables
+#' @examples
+#' starvz_selective_read("folder_to_parquet_files/")
+#' starvz_selective_read(directory = "folder_to_parquet_files/", config_file = "path_to_config.yaml")
+#' starvz_selective_read() # Read current directory
+#' @export
+starvz_selective_read <- function(directory = ".", config_file = NULL) {
+  if (is.null(config_file)) {
+    config_file <- file.path(directory, "config.yaml")
+  }
+  data <- list()
+  data$config <- starvz_read_config(config_file)
+
   # Always try to load Version, Colors and Y
   tables_to_load <- c("version", "colors", "y")
 
-  if(pjr(pajer$st$active)){
+  if (data$config$st$active) {
     tables_to_load <- c(tables_to_load, "application")
   }
 
-  if (pjr(pajer$st$tasks$active)){
+  if (data$config$st$tasks$active) {
     tables_to_load <- c(tables_to_load, "gaps", "starpu", "application", "link")
   }
 
-  if (pjr(pajer$st$cpb) || pjr(pajer$st$cpb_mpi$active)){
+  if (data$config$st$cpb || data$config$st$cpb_mpi$active) {
     tables_to_load <- c(tables_to_load, "dag", "starpu", "application", "link")
   }
 
-  if (pjr(pajer$pmtool$bounds$active)){
+  if (data$config$pmtool$bounds$active) {
     tables_to_load <- c(tables_to_load, "application", "pmtool")
   }
 
-  if(pjr(pajer$atree$active)){
+  if (data$config$atree$active) {
     tables_to_load <- c(tables_to_load, "application", "atree")
   }
 
-  if(pjr(pajer$utiltreenode$active)){
+  if (data$config$utiltreenode$active) {
     tables_to_load <- c(tables_to_load, "application", "atree")
   }
 
-  if(pjr(pajer$utiltreedepth$active)){
+  if (data$config$utiltreedepth$active) {
     tables_to_load <- c(tables_to_load, "application", "atree")
   }
 
-  if(pjr(pajer$activenodes$active)){
+  if (data$config$activenodes$active) {
     tables_to_load <- c(tables_to_load, "application", "atree")
   }
 
-  if(pjr(pajer$computingnodes$active)){
+  if (data$config$computingnodes$active) {
     tables_to_load <- c(tables_to_load, "application", "atree")
   }
 
-  if(pjr(pajer$kiteration$active)){
+  if (data$config$kiteration$active) {
     tables_to_load <- c(tables_to_load, "application")
   }
 
-  if(pjr(pajer$summary_nodes$active)){
+  if (data$config$summary_nodes$active) {
     tables_to_load <- c(tables_to_load, "application")
   }
 
-  if(pjr(pajer$pmtool$state$active)){
+  if (data$config$pmtool$state$active) {
     tables_to_load <- c(tables_to_load, "application", "pmtool_states")
   }
 
-  if(pjr(pajer$pmtool$kiteration$active)){
+  if (data$config$pmtool$kiteration$active) {
     tables_to_load <- c(tables_to_load, "application", "pmtool_states")
   }
 
-  if(pjr(pajer$memory$state$active)){
-    tables_to_load <- c(tables_to_load, "application", "tasks", "task_handles", "data_handles", "memory_state", "link")
+  if (data$config$memory$state$active) {
+    tables_to_load <- c(tables_to_load, "application", "tasks", "task_handles", "data_handles", "memory_state", "events_memory", "link")
   }
 
-  if(pjr(pajer$memory$transfers$active)){
-    tables_to_load <- c(tables_to_load, "application", "tasks", "task_handles", "data_handles", "memory_state", "link")
+  if (data$config$memory$transfers$active) {
+    tables_to_load <- c(tables_to_load, "application", "tasks", "task_handles", "data_handles", "memory_state", "events_memory", "link")
   }
 
-  if(pjr(pajer$starpu$active)){
+  if (data$config$starpu$active) {
     tables_to_load <- c(tables_to_load, "starpu")
   }
 
-  if(pjr(pajer$ready$active)){
+  if (data$config$ready$active) {
     tables_to_load <- c(tables_to_load, "variable")
   }
 
-  if(pjr(pajer$usedmemory$active)){
+  if (data$config$usedmemory$active) {
     tables_to_load <- c(tables_to_load, "variable")
   }
 
-  if(pjr(pajer$submitted$active)){
+  if (data$config$submitted$active) {
     tables_to_load <- c(tables_to_load, "variable")
   }
 
-  if(pjr(pajer$lackready$active)){
+  if (data$config$lackready$active) {
     tables_to_load <- c(tables_to_load, "starpu", "variable")
   }
 
-  if(pjr(pajer$imbalance$active)){
+  if (data$config$imbalance$active) {
     tables_to_load <- c(tables_to_load, "application")
   }
 
-  if(pjr(pajer$power_imbalance$active)){
+  if (data$config$power_imbalance$active) {
     tables_to_load <- c(tables_to_load, "application")
   }
 
-  if(pjr(pajer$hete_imbalance$active)){
+  if (data$config$hete_imbalance$active) {
     tables_to_load <- c(tables_to_load, "application")
   }
 
-  if(pjr(pajer$utilheatmap$active)){
+  if (data$config$utilheatmap$active) {
     tables_to_load <- c(tables_to_load, "application")
   }
 
-  if(pjr(pajer$mpibandwidth$active)){
+  if (data$config$mpibandwidth$active) {
     tables_to_load <- c(tables_to_load, "variable")
   }
 
-  if(pjr(pajer$mpiconcurrent$active)){
+  if (data$config$mpiconcurrent$active) {
     tables_to_load <- c(tables_to_load, "link")
   }
 
-  if(pjr(pajer$mpiconcurrentout$active)){
+  if (data$config$mpiconcurrentout$active) {
     tables_to_load <- c(tables_to_load, "link")
   }
 
-  if(pjr(pajer$mpistate$active)){
+  if (data$config$mpistate$active) {
     tables_to_load <- c(tables_to_load, "comm_state")
   }
 
-  if(pjr(pajer$gflops$active)){
+  if (data$config$gflops$active) {
     tables_to_load <- c(tables_to_load, "variable")
   }
 
-  if(pjr(pajer$gpubandwidth$active)){
+  if (data$config$gpubandwidth$active) {
     tables_to_load <- c(tables_to_load, "variable")
   }
 
   tables_to_load <- tables_to_load %>% unique()
-  loginfo(paste("Read:", paste(tables_to_load, collapse=" ")))
-  starvz_read_some(directory = directory, tables = tables_to_load)
+  loginfo(paste("Read:", paste(tables_to_load, collapse = " ")))
+  starvz_read_some(directory = directory, tables = tables_to_load, config_file)
 }
 
-starvz_read_some <- function(directory = ".", tables = c("application"), config_file = NULL)
-{
-    check_arrow();
-    # Check if there is arrow gz files
-    filenames <- list.files(path = directory, pattern = "*.parquet", full.names = TRUE, recursive = FALSE);
-    if(length(filenames)>0){
-        loginfo("Detected parquet files")
-        data  <- starvz_read_some_parquet(directory, tables = tables)
-    }else{
-        data <- starvz_read_some_feather(directory, tables = tables)
-    }
+starvz_read_some <- function(directory = ".", tables = c("application"), config_file = NULL) {
+  check_arrow()
+  # Check if there is arrow gz files
+  filenames <- list.files(path = directory, pattern = "*.parquet", full.names = TRUE, recursive = FALSE)
+  if (length(filenames) > 0) {
+    loginfo("Detected parquet files")
+    data <- starvz_read_some_parquet(directory, tables = tables)
+  } else {
+    data <- starvz_read_some_feather(directory, tables = tables)
+  }
 
-    if(is.null(config_file)){
-      config_file <- file.path(directory, "config.yaml")
-    }
-    data$config <- starvz_read_config(config_file)
+  if (is.null(config_file)) {
+    config_file <- file.path(directory, "config.yaml")
+  }
+  data$config <- starvz_read_config(config_file)
 
-    final_data <- starvz_data(data)
+  final_data <- starvz_data(data)
 
-    return(final_data)
+  return(final_data)
 }
 
 #' Read starvz trace files
@@ -221,26 +241,26 @@ starvz_read_some <- function(directory = ".", tables = c("application"), config_
 #' @return The starvz_data with all tables
 #' @examples
 #' starvz_read("folder_to_parquet_files/")
-#' starvz_read(directory="folder_to_parquet_files/", config_file="path_to_config.yaml")
-#' starvz_read() #Read current directory
-starvz_read <- function(directory = ".", config_file = NULL)
-{
-    check_arrow();
-    # Check if there is arrow gz files
-    filenames <- list.files(path = directory, pattern = "*.parquet", full.names = TRUE, recursive = FALSE);
-    if(length(filenames)>0){
-        loginfo("Detected parquet files")
-        data <- starvz_read_parquet(directory)
-    }else{
-        data <- starvz_read_feather(directory)
-    }
+#' starvz_read(directory = "folder_to_parquet_files/", config_file = "path_to_config.yaml")
+#' starvz_read() # Read current directory
+#' @export
+starvz_read <- function(directory = ".", config_file = NULL) {
+  check_arrow()
+  # Check if there is arrow gz files
+  filenames <- list.files(path = directory, pattern = "*.parquet", full.names = TRUE, recursive = FALSE)
+  if (length(filenames) > 0) {
+    loginfo("Detected parquet files")
+    data <- starvz_read_parquet(directory)
+  } else {
+    data <- starvz_read_feather(directory)
+  }
 
-    if(is.null(config_file)){
-      config_file <- file.path(directory, "config.yaml")
-    }
-    data$config <- starvz_read_config(config_file)
+  if (is.null(config_file)) {
+    config_file <- file.path(directory, "config.yaml")
+  }
+  data$config <- starvz_read_config(config_file)
 
-    final_data <- starvz_data(data)
+  final_data <- starvz_data(data)
 
-    return(final_data)
+  return(final_data)
 }

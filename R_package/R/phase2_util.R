@@ -1,3 +1,4 @@
+#' @include starvz_data.R
 
 check_arrow <- function(){
   if(!arrow_available()){
@@ -13,74 +14,72 @@ extract_colors <- function(dfw = NULL, colors = NULL)
     dfw <- dfw %>% ungroup;
 
     dfw %>%
-        select(Value) %>%
+        select(.data$Value) %>%
         unique %>%
-        left_join(colors, by=c("Value")) %>%
-        .$Color %>%
-        setNames(dfw %>% select(Value) %>% unique %>% .$Value);
+        left_join(colors, by=c("Value")) %>% .$Color %>%
+        setNames(dfw %>% select(.data$Value) %>% unique %>% .$Value);
 }
 
 yconf <- function (dfw = NULL, option = "ALL")
 {
     if(is.null(dfw)) return(NULL);
 
-    # Currently being ignored
-    # step <- pjr_value(pajer$st$labels, 6);
-    dfw %>% mutate(Node = as.integer(as.character(Node))) -> dfw
-    dfw %>% mutate(ResourceId = factor(ResourceId)) %>%
-            mutate(ResourceId = factor(ResourceId, levels=mixedsort(levels(ResourceId)))) -> dfw
+    dfw %>% mutate(Node = as.integer(as.character(.data$Node))) -> dfw
+    dfw %>% mutate(ResourceId = factor(.data$ResourceId)) %>%
+            mutate(ResourceId = factor(.data$ResourceId,
+                        levels=mixedsort(levels(.data$ResourceId)))) -> dfw
     if(option == "1CPU_per_NODE"){ #First
         # One CPU per node
         dfw %>%
-            select(Node, ResourceId, ResourceType, Position, Height) %>%
+            select(.data$Node, .data$ResourceId, .data$ResourceType, .data$Position, .data$Height) %>%
             distinct() %>%
-            group_by(Node) %>%
-            arrange(Node, ResourceId, ResourceType) %>%
+            group_by(.data$Node) %>%
+            arrange(.data$Node, .data$ResourceId, .data$ResourceType) %>%
             slice(1) %>%
             ungroup;
     }else if(option == "1GPU_per_NODE"){ #Last
         # One GPU per node
         dfw %>%
-            select(Node, ResourceId, ResourceType, Position, Height) %>%
+            select(.data$Node, .data$ResourceId, .data$ResourceType, .data$Position, .data$Height) %>%
             distinct() %>%
-            group_by(Node) %>%
-            arrange(Node, ResourceId, ResourceType) %>%
+            group_by(.data$Node) %>%
+            arrange(.data$Node, .data$ResourceId, .data$ResourceType) %>%
             slice(n()) %>%
             ungroup;
     }else if(option == "NODES_only"){ #First
         dfw %>%
-            select(Node, ResourceId, ResourceType, Position, Height) %>%
+            select(.data$Node, .data$ResourceId, .data$ResourceType, .data$Position, .data$Height) %>%
             distinct() %>%
-            group_by(Node) %>%
-            arrange(ResourceId, ResourceType) %>%
+            group_by(.data$Node) %>%
+            arrange(.data$ResourceId, .data$ResourceType) %>%
             slice(1) %>%
-            mutate(ResourceId = Node) %>%
+            mutate(ResourceId = .data$Node) %>%
             ungroup;
     }else if(option == "NODES_1_in_10"){ #First
         dfw %>%
-            select(Node, ResourceId, ResourceType, Position, Height) %>%
+            select(.data$Node, .data$ResourceId, .data$ResourceType, .data$Position, .data$Height) %>%
             distinct() %>%
-            group_by(Node) %>%
-            arrange(ResourceId, ResourceType) %>%
+            group_by(.data$Node) %>%
+            arrange(.data$ResourceId, .data$ResourceType) %>%
             slice(1) %>%
-            mutate(ResourceId = Node) %>%
+            mutate(ResourceId = .data$Node) %>%
             ungroup %>%
-            mutate(Node = as.integer(as.character(Node))) %>%
-            arrange(Node) %>%
+            mutate(Node = as.integer(as.character(.data$Node))) %>%
+            arrange(.data$Node) %>%
             slice(seq(1, n(), 10))
     }else if(option == "ALL"){
         dfw %>%
-            select(Node, ResourceId, ResourceType, Position, Height) %>%
+            select(.data$Node, .data$ResourceId, .data$ResourceType, .data$Position, .data$Height) %>%
             distinct() %>%
-            group_by(Node, ResourceType) %>%
-            arrange(Node, ResourceId, ResourceType) %>%
+            group_by(.data$Node, .data$ResourceType) %>%
+            arrange(.data$Node, .data$ResourceId, .data$ResourceType) %>%
             ungroup;
     }else{ #First and Last
         dfw %>%
-            select(Node, ResourceId, ResourceType, Position, Height) %>%
+            select(.data$Node, .data$ResourceId, .data$ResourceType, .data$Position, .data$Height) %>%
             distinct() %>%
-            group_by(Node, ResourceType) %>%
-            arrange(Node, ResourceId, ResourceType) %>%
+            group_by(.data$Node, .data$ResourceType) %>%
+            arrange(.data$Node, .data$ResourceId, .data$ResourceType) %>%
             slice(c(1, n())) %>%
             ungroup;
     }
@@ -88,11 +87,11 @@ yconf <- function (dfw = NULL, option = "ALL")
 
 userYLimit <- function(obj, configuration, xlimits)
 {
-    if (pjr(configuration)){
+    if (!is.null(configuration)){
         # if there is an user vertical scale defined, use it
         tpScale <- list(
             coord_cartesian(xlim=xlimits,
-                            ylim=c(0, pjr(configuration)))
+                            ylim=c(0, configuration))
         );
         obj <- obj + tpScale;
     }

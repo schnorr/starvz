@@ -1,3 +1,5 @@
+#' @include starvz_data.R
+
 plot_lackready <- function (data = NULL)
 {
     if (is.null(data)) stop("data is NULL when given to geom_lackready");
@@ -5,50 +7,44 @@ plot_lackready <- function (data = NULL)
     if (is.null(data$Variable)) stop("variable is NULL when given to geom_lackready");
 
     data$Starpu %>%
-        select(Node, Resource) %>%
+        select(.data$Node, .data$Resource) %>%
         unique %>%
-        group_by(Node) %>%
+        group_by(.data$Node) %>%
         summarize(N=n()) %>%
         .$N %>%
         min -> minResources;
 
-    aggStep <- pjr_value(pajer$lackready$aggregation, 200);
+    aggStep <- data$config$lackready$aggregation
     #loginfo(paste("lack ready aggregation is", aggStep));
-    threshold <- pjr_value(pajer$lackready$threshold, minResources);
+    threshold <- config_value(data$config$lackready$threshold, minResources);
     #loginfo(paste("lack ready threshold is", threshold));
 
     data$Variable %>%
-        filter(Type == "Ready") %>%
-        group_by(Type, Node, ResourceId, ResourceType) %>%
+        filter(.data$Type == "Ready") %>%
+        group_by(.data$Type, .data$Node, .data$ResourceId, .data$ResourceType) %>%
         do(remyTimeIntegrationPrep(., myStep = aggStep)) %>%
-        mutate(Start = Slice, End = lead(Slice), Duration = End-Start) %>%
+        mutate(Start = .data$Slice, End = lead(.data$Slice), Duration = .data$End-.data$Start) %>%
         ungroup() %>%
-        filter(!is.na(End)) %>%
-        group_by(Type, Node, ResourceType, Start, End, Duration) %>%
-        summarize(Value = sum(Value), N=n()) %>%
+        filter(!is.na(.data$End)) %>%
+        group_by(.data$Type, .data$Node, .data$ResourceType, .data$Start, .data$End, .data$Duration) %>%
+        summarize(Value = sum(.data$Value), N=n()) %>%
         ungroup() %>%
-        rename(ResourceId = Node) %>%
-        filter(Value < threshold) %>%
-        group_by(Type, Start, End) %>%
+        rename(ResourceId = .data$Node) %>%
+        filter(.data$Value < threshold) %>%
+        group_by(.data$Type, .data$Start, .data$End) %>%
         summarize(Value=n()) %>%
         ungroup() %>%
-        ggplot() + geom_lackready();
+        ggplot() + default_theme(data$config$base_size, data$config$expand) + geom_lackready();
 }
 
-geom_lackready <- function (data = NULL)
+geom_lackready <- function ()
 {
-
-    if (!pjr(pajer$lackready$active)){
-        return(NULL);
-    }
-
     ret <- list();
 
-    ret[[length(ret)+1]] <- default_theme();
     ret[[length(ret)+1]] <- scale_fill_gradient(low="lightsalmon", high="red1");
-    ret[[length(ret)+1]] <- geom_rect(aes(fill=Value,
-                                          xmin=Start,
-                                          xmax=End,
+    ret[[length(ret)+1]] <- geom_rect(aes(fill=.data$Value,
+                                          xmin=.data$Start,
+                                          xmax=.data$End,
                                           ymin=0,
                                           ymax=1), alpha=1);
     ret[[length(ret)+1]] <- theme(

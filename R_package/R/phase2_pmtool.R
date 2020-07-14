@@ -1,3 +1,4 @@
+#' @include starvz_data.R
 
 state_pmtool_chart <- function (data = NULL)
 {
@@ -10,31 +11,20 @@ state_pmtool_chart <- function (data = NULL)
 
     # Filter
     dfwapp = dfw %>%
-        filter(sched == pajer$pmtool$state$sched);
+        filter(.data$sched == data$config$pmtool$state$sched);
 
     # Obtain time interval
     tstart <- dfwapp %>% .$Start %>% min;
     tend <- dfwapp %>% .$End %>% max;
 
     #Plot
-    gow <- ggplot() + default_theme();
+    gow <- ggplot() + default_theme(data$config$base_size, data$config$expand);
 
     # Add states and outliers if requested
     gow <- gow + geom_pmtool_states(data);
 
-
-    #if (pjr(pajer$st$abe$active)) gow = gow + geom_abe(data);
-
-    #if (pjr(pajer$pmtool$bounds$active)) gow = gow + geom_pmtool_bounds(data);
-
     # add makespan
-    if (pjr(pajer$st$makespan)) gow = gow + geom_makespan_pmtool(data);
-
-    # add idleness
-    #if (pjr(pajer$st$idleness)) gow = gow + geom_idleness(data);
-
-    # add Global CPB
-    #if (pjr(pajer$st$cpb) || pjr(pajer$st$cpb_mpi$active)) gow = gow + geom_cpb(data);
+    if (data$config$pmtool$makespan) gow = gow + geom_makespan_pmtool(data);
 
     loginfo("Exit of state_pmtool_chart");
     return(gow);
@@ -42,23 +32,23 @@ state_pmtool_chart <- function (data = NULL)
 
 
 
-k_chart_pmtool <- function (dfw = NULL, colors = NULL)
+k_chart_pmtool <- function (data = NULL, colors = NULL)
 {
-    if (is.null(dfw)) stop("dfw provided to k_chart is NULL");
+    if (is.null(data$Pmtool_states)) stop("dfw provided to pm k_chart is NULL");
 
-    dfw <- dfw %>%
-        filter(sched == pajer$pmtool$state$sched);
+    dfw <- data$Pmtool_states %>%
+        filter(.data$sched == data$config$pmtool$state$sched);
 
     # Prepare for colors
-    colors %>% select(Value, Color) %>% unique %>% .$Color -> appColors
-    appColors %>% setNames(colors %>% select(Value, Color) %>% unique %>% .$Value) -> appColors;
+    colors %>% select(.data$Value, .data$Color) %>% unique %>% .$Color -> appColors
+    appColors %>% setNames(colors %>% select(.data$Value, .data$Color) %>% unique %>% .$Value) -> appColors;
 
     # Prepare for borders
     dfborders <- dfw %>%
-        group_by(Iteration) %>%
-        summarize(Start = min(Start), End=max(End)) %>%
-        mutate(IterationB = lead(Iteration), StartB = lead(Start)) %>%
-        mutate(IterationE = lead(Iteration), EndB = lead(End)) %>%
+        group_by(.data$Iteration) %>%
+        summarize(Start = min(.data$Start), End=max(.data$End)) %>%
+        mutate(IterationB = lead(.data$Iteration), StartB = lead(.data$Start)) %>%
+        mutate(IterationE = lead(.data$Iteration), EndB = lead(.data$End)) %>%
         na.omit;
 
     # Height of each bar
@@ -70,20 +60,21 @@ k_chart_pmtool <- function (dfw = NULL, colors = NULL)
         theme_bw(base_size=12) +
         xlab("Time [ms]") +
         ylab("PMTool\nIteration") +
-        default_theme() +
+        default_theme(data$config$base_size, data$config$expand) +
         # Keep the alpha = 1 even if we use an alpha below
         guides(fill = guide_legend(override.aes = list(alpha=1))) +
         scale_y_reverse() +
         # The start border
-        geom_curve(data=dfborders, aes(x=Start, xend=StartB, y=Iteration+height, yend=IterationB+height), curvature=0.1, angle=20) +
+        geom_curve(data=dfborders, aes(x=.data$Start, xend=.data$StartB,
+                y=.data$Iteration+height, yend=.data$IterationB+height), curvature=0.1, angle=20) +
         # The end border
-        geom_curve(data=dfborders, aes(x=End, xend=EndB, y=Iteration, yend=IterationB), curvature=-0.1, angle=20) +
+        geom_curve(data=dfborders, aes(x=.data$End, xend=.data$EndB, y=.data$Iteration, yend=.data$IterationB), curvature=-0.1, angle=20) +
         # The state
-        geom_rect(aes(fill=Value,
-                      xmin=Start,
-                      xmax=End,
-                      ymin=Iteration,
-                      ymax=Iteration+height), alpha=.5) -> goijk;
+        geom_rect(aes(fill=.data$Value,
+                      xmin=.data$Start,
+                      xmax=.data$End,
+                      ymin=.data$Iteration,
+                      ymax=.data$Iteration+height), alpha=.5) -> goijk;
     return(goijk);
 }
 
@@ -94,7 +85,7 @@ geom_pmtool_states <- function (data = NULL)
     if (is.null(data)) stop("data is NULL when given to geom_pmtool_states");
 
 
-    dfw <- data$Pmtool_states %>% filter(sched == pajer$pmtool$state$sched);
+    dfw <- data$Pmtool_states %>% filter(.data$sched == data$config$pmtool$state$sched);
 
 
     loginfo("Starting geom_pmtool_states");
@@ -106,18 +97,18 @@ geom_pmtool_states <- function (data = NULL)
 
     # Y axis breaks and their labels
     gg <- data$Application;
-    yconfm <- yconf(gg, pjr_value(pajer$st$labels, "1"));
-    ret[[length(ret)+1]] <- scale_y_continuous(breaks = yconfm$Position+(yconfm$Height/3), labels=yconfm$ResourceId, expand=c(pjr_value(pajer$expand, 0.05),0));
+    yconfm <- yconf(gg, data$config$st$labels);
+    ret[[length(ret)+1]] <- scale_y_continuous(breaks = yconfm$Position+(yconfm$Height/3), labels=yconfm$ResourceId, expand=c(data$config$expand,0));
     # Y label
     ret[[length(ret)+1]] <- ylab("Pmtool Workers");
 
     # Add states
     ret[[length(ret)+1]] <-
-        geom_rect(data=dfw, aes(fill=Value,
-                                xmin=Start,
-                                xmax=End,
-                                ymin=Position,
-                                ymax=Position+Height-0.4), alpha=0.5, color=ifelse(pjr_value(pajer$st$rect_outline, NA), "black", NA));
+        geom_rect(data=dfw, aes(fill=.data$Value,
+                                xmin=.data$Start,
+                                xmax=.data$End,
+                                ymin=.data$Position,
+                                ymax=.data$Position+.data$Height-0.4), alpha=0.5, color=ifelse(data$config$st$rect_outline, "black", NA));
 
 
     loginfo("Finishing geom_pmtool_states");
@@ -131,12 +122,12 @@ geom_pmtool_bounds <- function(data = NULL)
     if (is.null(data)) stop("data is NULL when given to geom_pmtool_bounds");
 
     dftemp <- data$Application %>%
-        filter(grepl("CPU|CUDA", ResourceId)) %>%
-        select(Node, Resource, ResourceType, Duration, Value, Position, Height);
+        filter(grepl("CPU|CUDA", .data$ResourceId)) %>%
+        select(.data$Node, .data$Resource, .data$ResourceType, .data$Duration, .data$Value, .data$Position, .data$Height);
     # Y position
-    minPos = dftemp %>% pull(Position) %>% min;
-    minHeight = dftemp %>% pull(Height) %>% min;
-    maxPos = dftemp %>% pull(Position) %>% max + minHeight/1.25;
+    minPos = dftemp %>% pull(.data$Position) %>% min;
+    minHeight = dftemp %>% pull(.data$Height) %>% min;
+    maxPos = dftemp %>% pull(.data$Position) %>% max + minHeight/1.25;
 
     # Filter
     dfwapp = data$Application
@@ -148,15 +139,25 @@ geom_pmtool_bounds <- function(data = NULL)
       mutate(MinPosition = minPos,
             MaxPosition = maxPos) -> df.pmtool;
 
-    bsize = pjr_value(pajer$base_size, 22)/5;
+    bsize = data$config$base_size/5;
 
-    bound <- df.pmtool %>% filter(!is.na(Time)) %>% mutate(Label=pjr_value(pajer$pmtool$bounds$label, TRUE)) %>% mutate(Label=ifelse(Label, paste0(Alg, ": ", round(Time, 0)), round(Time, 0))) %>% unique %>% filter(Alg %in% pajer$pmtool$bounds$alg)
+    bound <- df.pmtool %>% filter(!is.na(.data$Time)) %>%
+         mutate(Label=data$config$pmtool$bounds$label) %>%
+         mutate(Label=ifelse(.data$Label, paste0(.data$Alg, ": ", round(.data$Time, 0)),
+           round(.data$Time, 0))) %>% unique %>% filter(.data$Alg %in% data$config$pmtool$bounds$alg)
 
-    ret <- list(geom_segment(data=bound %>% filter(Bound == FALSE), aes(x = Time+tstart, xend=Time+tstart, y = MinPosition, yend=MaxPosition), size=5, alpha=.7, color="lightgrey"),
-                geom_text (data=bound %>% filter(Bound == FALSE), aes(x = Time+tstart, y = MinPosition+(MaxPosition-MinPosition)/2, label=Label), angle=90, color="black", size=bsize, fontface="italic"))
+    ret <- list(geom_segment(data=bound %>% filter(.data$Bound == FALSE),
+                             aes(x = .data$Time+tstart,
+                                 xend=.data$Time+tstart,
+                                 y = .data$MinPosition,
+                                 yend=.data$MaxPosition), size=5, alpha=.7, color="lightgrey"),
+                geom_text (data=bound %>% filter(.data$Bound == FALSE),
+                            aes(x = .data$Time+tstart, y = .data$MinPosition+(.data$MaxPosition-.data$MinPosition)/2,
+                                label=.data$Label), angle=90, color="black", size=bsize, fontface="italic"))
 
-    ret[[length(ret)+1]] <- list(geom_segment(data=bound %>% filter(Bound == TRUE), aes(x = Time+tstart, xend=Time+tstart, y = MinPosition, yend=MaxPosition), size=5, alpha=.7, color="gainsboro"),
-                geom_text (data=bound %>% filter(Bound == TRUE), aes(x = Time+tstart, y = MinPosition+(MaxPosition-MinPosition)/2, label=Label), angle=90, color="black", size=bsize))
+    ret[[length(ret)+1]] <- list(geom_segment(data=bound %>% filter(.data$Bound == TRUE),
+                                     aes(x = .data$Time+tstart, xend=.data$Time+tstart, y = .data$MinPosition, yend=.data$MaxPosition), size=5, alpha=.7, color="gainsboro"),
+                geom_text (data=bound %>% filter(.data$Bound == TRUE), aes(x = .data$Time+tstart, y = .data$MinPosition+(.data$MaxPosition-.data$MinPosition)/2, label=.data$Label), angle=90, color="black", size=bsize))
 
     return(ret);
 
@@ -167,11 +168,11 @@ geom_makespan_pmtool <- function(data = NULL)
     if(is.null(data)) stop("data provided for geom_makespan_pmtool is NULL");
     dfw <- data$Pmtool_states;
 
-    bsize = pjr_value(pajer$base_size, 22);
+    bsize = data$config$base_size;
 
-    tend = dfw %>% filter(sched == pajer$pmtool$state$sched) %>% pull(End) %>% max;
+    tend = dfw %>% filter(.data$sched == data$config$pmtool$state$sched) %>% pull(.data$End) %>% max;
     loginfo(paste("makespan pm tool is", tend));
-    height = dfw %>% select(Position) %>% na.omit %>% pull(Position) %>% max;
+    height = dfw %>% select(.data$Position) %>% na.omit %>% pull(.data$Position) %>% max;
     loginfo(paste("max height for makespan is", height));
     ret <- geom_text(data=data.frame(), x=tend, y=height*.5, aes(label=round(tend,0)), angle=90, size=bsize/4);
     return(ret);

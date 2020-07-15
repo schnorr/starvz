@@ -70,22 +70,22 @@ article to Wiley's Concurrent and Computation: Practice and
 Experience. A memory analysis extension was developed and discussed in
 the third publication at CCGRID 2019.
 
-- Analyzing Dynamic Task-Based Applications on Hybrid Platforms: An
-  Agile Scripting Approach, Vinicius Garcia Pinto, Luka Stanisic,
+- *Analyzing Dynamic Task-Based Applications on Hybrid Platforms: An
+  Agile Scripting Approach*, Vinicius Garcia Pinto, Luka Stanisic,
   Arnaud Legrand, Lucas Mello Schnorr, Samuel Thibault, Vincent
   Danjean, in /2016 Third Workshop on Visual Performance Analysis
-  (VPA@SC)/, Salt Lake City, UT, 2016, pp. 17-24. 
+  (VPA@SC)/, Salt Lake City, UT, 2016, pp. 17-24.
   - [[https://doi.org/10.1109/VPA.2016.008][DOI]] and [[http://perf-ev-runtime.gforge.inria.fr/vpa2016/][Reproducible Paper]]
 
-- A Visual Performance Analysis Framework for Task-based Parallel
-  Applications running on Hybrid Clusters, Vinicius Garcia Pinto,
+- *A Visual Performance Analysis Framework for Task-based Parallel
+  Applications running on Hybrid Clusters*, Vinicius Garcia Pinto,
   Lucas Mello Schnorr, Luka Stanisic, Arnaud Legrand, Samuel Thibault,
   Vincent Danjean, in /Concurrency and Computation: Practice and
-  Experience/, Wiley, 2018, 30 (18), pp.1-31.  
+  Experience/, Wiley, 2018, 30 (18), pp.1-31.
   - [[https://dx.doi.org/10.1002/cpe.4472][DOI]], [[https://hal.inria.fr/hal-01616632/][Draft]], and [[https://gitlab.in2p3.fr/schnorr/ccpe2017][Companion website]]
 
-- Visual Performance Analysis of Memory Behavior in a Task-Based
-  Runtime on Hybrid Platforms, Lucas Leandro Nesi, Samuel Thibault,
+- *Visual Performance Analysis of Memory Behavior in a Task-Based
+  Runtime on Hybrid Platforms*, Lucas Leandro Nesi, Samuel Thibault,
   Luka Stanisic and Lucas Mello Schnorr, in /2019 19th IEEE/ACM
   International Symposium on Cluster, Cloud and Grid Computing
   (CCGRID)/, Larnaca, Cyprus, 2019, pp. 142-151.

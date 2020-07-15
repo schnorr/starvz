@@ -123,9 +123,6 @@ atree_temporal_chart <- function(data = NULL, step = 100, globalEndTime = NULL) 
 
   loginfo("Entry of atree_temporal_chart")
 
-  dfw <- data$Application
-  dfa <- data$Atree
-
   df_node_plot <- resource_utilization_tree_node(data = data, step = step)
 
   # Calculate NodeUsage, this represent the "most active" node at the time slice
@@ -133,7 +130,7 @@ atree_temporal_chart <- function(data = NULL, step = 100, globalEndTime = NULL) 
     filter(.data$Value != 0) %>%
     select(.data$ANode, .data$Slice, .data$Value1, .data$Usage) %>%
     ungroup() %>%
-    mutate(NodeUsage = .data$Value1) %>%
+    rename(NodeUsage = .data$Value1) %>%
     left_join(data$Atree, by = "ANode") %>%
     # resize for node computation Start
     inner_join(data$Application %>%
@@ -153,15 +150,15 @@ atree_temporal_chart <- function(data = NULL, step = 100, globalEndTime = NULL) 
     mutate(End = ifelse(.data$Slice + step >= .data$End, .data$End, .data$Slice + step)) -> df_node_plot_filtered
 
   # filter initialization tasks
-  dfw_init <- dfw %>%
+  dfw_init <- data$Application %>%
     filter(grepl("init_", .data$Value)) %>%
     unique() %>%
     select(-.data$Position, -.data$Height) %>%
     left_join(data$Atree, by = "ANode")
 
   # Prepare for colors
-  atreeplot <- dfw %>%
-    # Considering only application data and Worker State
+  atreeplot <- data$Application %>%
+    # Considering only Intermediary nodes
     filter(.data$Intermediary) %>%
     filter(grepl("lapack_", .data$Value) | grepl("subtree", .data$Value)) %>%
     unique() %>%
@@ -415,13 +412,13 @@ remyTimeIntegrationPrepNoDivision <- function(dfv = NULL, myStep = 100) {
 resource_utilization_tree_node <- function(data = NULL, step = 100) {
   loginfo("Entry of resource_utilization_tree_node")
   # Prepare and filter data
-  data$Application %>%
+  df_filter <- data$Application %>%
     filter(
       grepl("lapack", .data$Value) | grepl("subtree", .data$Value)
     ) %>%
     select(.data$ANode, .data$Start, .data$End, .data$JobId) %>%
     unique() %>%
-    arrange(.data$Start) -> df_filter
+    arrange(.data$Start)
 
   # Get number of workers for resource utilization
   NWorkers <- data$Application %>%

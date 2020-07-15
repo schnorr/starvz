@@ -23,6 +23,13 @@
 #+EXPORT_SELECT_TAGS: export
 #+TAGS: noexport(n) deprecated(d)
 
+#+html: <a href="https://www.tidyverse.org/lifecycle/#maturing">
+#+html:   <img src="https://img.shields.io/badge/lifecycle-maturing-blue.svg" />
+#+html: </a>
+#+html: <a href="http://opensource.org/licenses/GPL-3.0">
+#+html:   <img src="https://img.shields.io/badge/license-GPL--3.0-blue" />
+#+html: </a>
+
 StarVZ consists in a performance analysis workflow that combines the
 power of the R language (and the =tidyverse= realm) and many auxiliary
 tools to provide a consistent, flexible, extensible, fast, and
@@ -35,31 +42,53 @@ heterogeneous (multi-GPU, multi-core) multi-node HPC platforms.
 
 The source code of this framework is released under the GPLv3 license.
 
-** Content
+** Instalation
+#+begin_src R :results output :session *R* :exports both
+# To install only the R package
+install.packages("devtools")
+devtools::install_github("schnorr/starvz", subdir="R_package")
+#+end_src
+
+** Quick Usage
+#+begin_src R :results output :session *R* :exports both
+#TODO
+#+end_src
+
+** Extended Content
 - [[./INSTALL.org][Installation Instructions]]
 - [[./PHASE1.org][Phase 1 Workflow Instructions]]
+- Phase 2 Workflow Instructions
+
 ** Origin and Publications
 
 A preliminary version of this framework has been released in the
 companion website (check the reproducible paper link below) of the VPA
 2016 workshop (held during the SC16 conference).  A second release of
-the framework is available in the companion website of a manuscript
-submitted to Wiley's Concurrent and Computation: Practice and
-Experience.
+the framework is available in the companion website of an accepted
+article to Wiley's Concurrent and Computation: Practice and
+Experience. A memory analysis extension was developed and discussed in
+the third publication at CCGRID 2019.
 
-- Vinicius Garcia Pinto, Luka Stanisic, Arnaud Legrand, Lucas Mello
-  Schnorr, Samuel Thibault, Vincent Danjean, "Analyzing Dynamic
-  Task-Based Applications on Hybrid Platforms: An Agile Scripting
-  Approach", In Third Workshop on Visual Performance Analysis, VPA@SC
-  2016, Salt Lake, UT, USA, November 18, 2016,
-  pp. 17-24, 2016 ([[http://perf-ev-runtime.gforge.inria.fr/vpa2016/][Reproducible Paper]] and [[https://doi.org/10.1109/VPA.2016.008][DOI]])
+- Analyzing Dynamic Task-Based Applications on Hybrid Platforms: An
+  Agile Scripting Approach, Vinicius Garcia Pinto, Luka Stanisic,
+  Arnaud Legrand, Lucas Mello Schnorr, Samuel Thibault, Vincent
+  Danjean, in /2016 Third Workshop on Visual Performance Analysis
+  (VPA@SC)/, Salt Lake City, UT, 2016, pp. 17-24. ([[https://doi.org/10.1109/VPA.2016.008][DOI]] and [[http://perf-ev-runtime.gforge.inria.fr/vpa2016/][Reproducible
+  Paper]])
 
 - A Visual Performance Analysis Framework for Task-based Parallel
-  Applications running on Hybrid Clusters. Vinicius Garcia Pinto,
+  Applications running on Hybrid Clusters, Vinicius Garcia Pinto,
   Lucas Mello Schnorr, Luka Stanisic, Arnaud Legrand, Samuel Thibault,
-  Vincent Danjean. Concurrency and Computation: Practice and
-  Experience, Wiley, 2018, 30 (18), pp.1-31. ([[https://dx.doi.org/10.1002/cpe.4472][DOI]], [[https://hal.inria.fr/hal-01616632/][Draft]], and
+  Vincent Danjean, in /Concurrency and Computation: Practice and
+  Experience/, Wiley, 2018, 30 (18), pp.1-31. ([[https://dx.doi.org/10.1002/cpe.4472][DOI]], [[https://hal.inria.fr/hal-01616632/][Draft]], and
   [[https://gitlab.in2p3.fr/schnorr/ccpe2017][Companion website]])
+
+- Visual Performance Analysis of Memory Behavior in a Task-Based
+  Runtime on Hybrid Platforms, Lucas Leandro Nesi, Samuel Thibault,
+  Luka Stanisic and Lucas Mello Schnorr, in /2019 19th IEEE/ACM
+  International Symposium on Cluster, Cloud and Grid Computing
+  (CCGRID)/, Larnaca, Cyprus, 2019, pp. 142-151. ([[10.1109/CCGRID.2019.00025][DOI]] and [[https://gitlab.com/lnesi/starpu_mem_analysis][Companion
+  website]])
 
 ** Docker container
 
@@ -80,7 +109,10 @@ After entering the container, run R and load the =starvz= package with:
 library(starvz)
 #+end_src
 
-** Contact
+** Team and Contact
 
-- [[http://www.inf.ufrgs.br/~schnorr][Lucas Mello Schnorr (http://www.inf.ufrgs.br/~schnorr)]]
+- [[http://www.inf.ufrgs.br/~schnorr][Lucas Mello Schnorr (schnorr@inf.ufrgs.br)]] 
+- Vinicius Garcia (vgpinto@inf.ufrgs.br)
+- Lucas Nesi (lucas.nesi@inf.ufrgs.br)
+- Marcelo Miletto (mcmiletto@inf.ufrgs.br)
 

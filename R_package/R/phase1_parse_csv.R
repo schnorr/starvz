@@ -209,10 +209,10 @@ read_worker_csv <- function(where = ".",
     }
 
     if (ib != 1) {
-      loginfo("Attempt to detect outliers for QRMumps using Duration ~ GFlops**(2/3)")
+      loginfo("Attempt to detect anomalies for QRMumps using Duration ~ GFlops**(2/3)")
       task_model <- task_model_ib_other
     } else {
-      loginfo("Attempt to detect outliers for QRMumps using Duration ~ GFlops")
+      loginfo("Attempt to detect anomalies for QRMumps using Duration ~ GFlops")
       task_model <- task_model_ib_1
     }
     # Step 1: apply the model to each task, considering the ResourceType
@@ -227,32 +227,40 @@ read_worker_csv <- function(where = ".",
         tibble(Row = names(outlierTest(m, n.max = Inf)$rstudent))
       })) -> df.pre.outliers
 
-    # Step 2: identify outliers rows
-    df.pre.outliers %>%
-      select(-.data$Residual) %>%
-      unnest(.data$outliers) %>%
-      mutate(Row = as.integer(.data$Row), Outlier = TRUE) %>%
-      ungroup() -> df.pos.outliers
+    # Step 1.1: Check if any anomaly was detected
+    if(df.pre.outliers %>% nrow() > 0) {
 
-    # Step 3: unnest all data and tag create the Outiler field according to the Row value
-    df.pre.outliers %>%
-      unnest(.data$data, .data$Residual) %>%
-      # this must be identical to the grouping used in the step 1
-      group_by(.data$Value, .data$ResourceType) %>%
-      mutate(Row = 1:n()) %>%
-      ungroup() %>%
-      # the left join must be by exactly the same as the grouping + Row
-      left_join(df.pos.outliers, by = c("Value", "Row", "ResourceType")) %>%
-      mutate(Outlier = ifelse(is.na(.data$Outlier), FALSE, .data$Outlier)) %>%
-      # remove outliers that are below the regression line
-      mutate(Outlier = ifelse(.data$Outlier & .data$Residual < 0, FALSE, .data$Outlier)) %>%
-      select(-.data$Row) %>%
-      ungroup() -> df.outliers
+      # Step 2: identify outliers rows
+      df.pre.outliers %>%
+        select(-.data$Residual) %>%
+        unnest(.data$outliers) %>%
+        mutate(Row = as.integer(.data$Row), Outlier = TRUE) %>%
+        ungroup() -> df.pos.outliers
 
-    # Step 4: regroup the Outlier data to the original Application
-    Application <- Application %>%
-      left_join(df.outliers %>%
-        select(.data$JobId, .data$Outlier), by = c("JobId"))
+      # Step 3: unnest all data and tag create the Outiler field according to the Row value
+      df.pre.outliers %>%
+        unnest(.data$data, .data$Residual) %>%
+        # this must be identical to the grouping used in the step 1
+        group_by(.data$Value, .data$ResourceType) %>%
+        mutate(Row = 1:n()) %>%
+        ungroup() %>%
+        # the left join must be by exactly the same as the grouping + Row
+        left_join(df.pos.outliers, by = c("Value", "Row", "ResourceType")) %>%
+        mutate(Outlier = ifelse(is.na(.data$Outlier), FALSE, .data$Outlier)) %>%
+        # remove outliers that are below the regression line
+        mutate(Outlier = ifelse(.data$Outlier & .data$Residual < 0, FALSE, .data$Outlier)) %>%
+        select(-.data$Row) %>%
+        ungroup() -> df.outliers
+
+      # Step 4: regroup the Outlier data to the original Application
+      Application <- Application %>%
+        left_join(df.outliers %>%
+                  select(.data$JobId, .data$Outlier), by = c("JobId"))
+    } else {
+      loginfo("No anomalies were detected.")
+      Application <- Application %>%
+        mutate(Outlier = FALSE)
+    }
   } else {
     loginfo("No outlier detection; use standard model")
     Application <- Application %>%

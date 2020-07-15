@@ -86,8 +86,7 @@ the third publication at CCGRID 2019.
 
 - *Visual Performance Analysis of Memory Behavior in a Task-Based
   Runtime on Hybrid Platforms*, Lucas Leandro Nesi, Samuel Thibault,
-  Luka Stanisic and Lucas Mello Schnorr, in /2019 19th IEEE/ACM
-  International Symposium on Cluster, Cloud and Grid Computing
+  Luka Stanisic and Lucas Mello Schnorr, in /2019 19th IEEE/ACM International Symposium on Cluster, Cloud and Grid Computing
   (CCGRID)/, Larnaca, Cyprus, 2019, pp. 142-151.
   - [[10.1109/CCGRID.2019.00025][DOI]] and [[https://gitlab.com/lnesi/starpu_mem_analysis][Companion website]]
 

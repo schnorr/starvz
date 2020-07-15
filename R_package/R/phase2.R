@@ -346,6 +346,15 @@ starvz_guided_plot <- function(data, name) {
   return(list(plot = p, height = final_px_height))
 }
 
+#' Generate the StarVZ Plots
+#'
+#' Use data to create the list of StarVZ plots
+#'
+#' @param data starvz_data with trace data
+#' @return A list of ggplot plots
+#' @examples
+#' # starvz_plot_list(data)
+#' @export
 starvz_plot_list <- function(data = NULL) {
   if (is.null(data)) stop("data passed as parameter is null")
 

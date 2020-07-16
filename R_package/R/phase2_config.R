@@ -69,6 +69,7 @@ starvz_default_config <- function() {
   config$st$abe$bar_color <- "grey"
   config$st$abe$text <- TRUE
   config$st$abe$label <- TRUE
+  config$st$alpha <- 0.5
 
   config$summary_nodes$active <- FALSE
   config$summary_nodes$legend <- FALSE

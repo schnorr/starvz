@@ -18,7 +18,7 @@ state_chart <- function(data = NULL, globalEndTime = NULL, ST.Outliers = TRUE, S
   # Select Nodes
   if (!is.null(data$config$selected_nodes)) {
     data$Y %>%
-      separate(.data$Parent, into = c("Node"), remove = FALSE) %>%
+      separate(.data$Parent, into = c("Node"), remove = FALSE, extra="drop") %>%
       filter(.data$Node %in% data$config$selected_nodes) %>%
       arrange(.data$Position) %>%
       mutate(New = cumsum(lag(.data$Height, default = 0))) %>%

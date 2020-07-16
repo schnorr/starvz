@@ -18,5 +18,5 @@ The ggplot plot
 Use data to create a starvz plot and save in name
 }
 \examples{
-#starvz_guided_plot("data/", "file.png")
+# starvz_guided_plot("data/", "file.png")
 }

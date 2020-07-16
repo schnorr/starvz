@@ -320,7 +320,7 @@ starvz_guided_plot <- function(data, name) {
   }
 
   data$config$guided$starvz_height_agg <- max(nodes * types * data$config$guided$agg_type_height / 100, 1)
-  data$config$guided$starvz_height_nodes <- max(nodes * 10 / 100, 1)
+  data$config$guided$starvz_height_nodes <- max(nodes * data$config$guided$node_height / 100, 1)
   data$config$guided$starvz_height_small <- 0.5
   if (!is.null(data$Atree)) {
     data$config$guided$starvz_height_atree <- ((data$Atree$Position %>% max()) * 1.5) / 100

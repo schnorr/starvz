@@ -138,6 +138,7 @@ starvz_default_config <- function() {
 
   config$guided$active <- FALSE
   config$guided$agg_type_height <- 50
+  config$guided$node_height <- 10
 
   config$vertical_lines$active <- FALSE
   config$vertical_lines$x_list <- NULL

@@ -73,7 +73,7 @@ state_chart <- function(data = NULL, globalEndTime = NULL, ST.Outliers = TRUE, S
         tasks = tasklist,
         levels = levels
       )
-      if (!is.null(data$config$selected_nodes)) {
+      if (nrow(tasksel)>0 & !is.null(data$config$selected_nodes)) {
         tasksel <- tasksel %>%
           left_join(new_y, by = c("ResourceId" = "Parent")) %>%
           mutate(Position = if_else(is.na(.data$New), -3, .data$New)) %>%

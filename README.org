@@ -51,9 +51,25 @@ devtools::install_github("schnorr/starvz", subdir="R_package")
 #+end_src
 
 ** Quick Usage
-#+begin_src R :results output :session *R* :exports both
-#TODO
+*** Full Workflow
+With =starpu_fxt_tool= and =pajeng= in =$PATH=
+
+#+begin_src bash :results output :session *R* :exports both
+export EXP_FOLDER=/folder_to_fxt_files/
+src/phase1-workflow.sh $EXP_FOLDER
+R/phase2-workflow.R $EXP_FOLDER full_config.yaml
 #+end_src
+
+This generates =$EXP_FOLDER/starvz.png=
+
+*** Phase 2 (/Visualizations/) in R:
+#+begin_src R :results output :session *R* :exports both
+data <- starvz_read("/folder_to_fxt_files/", "starvz_home/full_config.yaml")
+plot <- starvz_plot(data)
+plot
+#+end_src
+
+=plot= will be a =ggplot= object that can be saved with =ggsave=
 
 ** Extended Content
 - [[./INSTALL.org][Installation Instructions]]

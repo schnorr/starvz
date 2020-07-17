@@ -26,7 +26,7 @@
 #+html: <a href="https://www.tidyverse.org/lifecycle/#maturing">
 #+html:   <img src="https://img.shields.io/badge/lifecycle-maturing-blue.svg" />
 #+html: </a>
-#+html: <a href="http://opensource.org/licenses/GPL-3.0">
+#+html: <a href="https://opensource.org/licenses/GPL-3.0">
 #+html:   <img src="https://img.shields.io/badge/license-GPL--3.0-blue" />
 #+html: </a>
 #+html: <br><br>
@@ -88,7 +88,7 @@ the third publication at CCGRID 2019.
   Runtime on Hybrid Platforms*, Lucas Leandro Nesi, Samuel Thibault,
   Luka Stanisic and Lucas Mello Schnorr, in /2019 19th IEEE/ACM International Symposium on Cluster, Cloud and Grid Computing
   (CCGRID)/, Larnaca, Cyprus, 2019, pp. 142-151.
-  - [[10.1109/CCGRID.2019.00025][DOI]] and [[https://gitlab.com/lnesi/starpu_mem_analysis][Companion website]]
+  - [[https://dx.doi.org/10.1109/CCGRID.2019.00025][DOI]] and [[https://gitlab.com/lnesi/starpu_mem_analysis][Companion website]]
 
 ** Docker container
 

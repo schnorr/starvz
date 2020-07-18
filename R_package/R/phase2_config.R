@@ -146,6 +146,15 @@ starvz_default_config <- function() {
   return(config)
 }
 
+#' Read config files
+#'
+#' Read starvz config yaml files
+#'
+#' @param file path to file
+#' @return A list containing starvz configuration
+#' @examples
+#' # starvz_read_config("path_to_config")
+#' @export
 starvz_read_config <- function(file = NULL) {
   defaut_config <- starvz_default_config()
   if (is.null(file)) {

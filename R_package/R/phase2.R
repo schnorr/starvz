@@ -13,33 +13,33 @@ starvz_compute_plot_heights <- function(plist, config) {
   # Letsset default height values
   # This is also experiment computed on starvz_guided_plot
   # For plots that show resources
-  if (!exists("starvz_height_resources")) {
-    starvz_height_resources <- 4
+  if (is.null(data$config$guided$starvz_height_resources)) {
+    data$config$guided$starvz_height_resources <- 4
   }
   # For plots that show nodes 10px per node
-  if (!exists("starvz_height_nodes")) {
-    starvz_height_nodes <- 2
+  if (is.null(data$config$guided$starvz_height_nodes)) {
+    data$config$guided$starvz_height_nodes <- 2
   }
   # For plots that show nodes 10px per node
-  if (!exists("starvz_height_agg")) {
-    starvz_height_agg <- 2
+  if (is.null(data$config$guided$starvz_height_agg)) {
+    data$config$guided$starvz_height_agg <- 2
   }
-  # For variable plots, 100px
-  if (!exists("starvz_height_var")) {
-    starvz_height_var <- 2
+  # For variable plots
+  if (is.null(data$config$guided$starvz_height_var)) {
+    data$config$guided$starvz_height_var <- 2
   }
   # For the tree, default 1.5px per tree node Position
-  if (!exists("starvz_height_atree")) {
-    starvz_height_atree <- 4
+  if (is.null(data$config$guided$starvz_height_atree)) {
+    data$config$guided$starvz_height_atree <- 4
   }
-  # For plots TODO, default 200px
-  if (!exists("starvz_height_todo")) {
-    starvz_height_todo <- 4
+  # For plots TODO
+  if (is.null(data$config$guided$starvz_height_todo)) {
+    data$config$guided$starvz_height_todo <- 4
   }
 
-  # For plots TODO, default small
-  if (!exists("starvz_height_small")) {
-    starvz_height_small <- 0.05
+  # For plots Small
+  if (is.null(data$config$guided$starvz_height_small)) {
+    data$config$guided$starvz_height_small <- 0.05
   }
 
   # Prepare title
@@ -50,119 +50,119 @@ starvz_compute_plot_heights <- function(plist, config) {
 
   if (data$config$atree$active) {
     P[[length(P) + 1]] <- plist$atree
-    H[[length(H) + 1]] <- config_value(data$config$atree$height, starvz_height_atree)
+    H[[length(H) + 1]] <- config_value(data$config$atree$height, data$config$guided$starvz_height_atree)
   }
   if (data$config$utiltreenode$active) {
     P[[length(P) + 1]] <- plist$utiltreenode
-    H[[length(H) + 1]] <- config_value(data$config$utiltreenode$height, starvz_height_var)
+    H[[length(H) + 1]] <- config_value(data$config$utiltreenode$height, data$config$guided$starvz_height_var)
   }
   if (data$config$utiltreedepth$active) {
     P[[length(P) + 1]] <- plist$utiltreedepth
-    H[[length(H) + 1]] <- config_value(data$config$utiltreedepth$height, starvz_height_var)
+    H[[length(H) + 1]] <- config_value(data$config$utiltreedepth$height, data$config$guided$starvz_height_var)
   }
   if (data$config$activenodes$active) {
     P[[length(P) + 1]] <- plist$activenodes
-    H[[length(H) + 1]] <- config_value(data$config$activenodes$height, starvz_height_var)
+    H[[length(H) + 1]] <- config_value(data$config$activenodes$height, data$config$guided$starvz_height_var)
   }
   if (data$config$activenodes$nodememuse$active) {
     P[[length(P) + 1]] <- plist$nodememuse
-    H[[length(H) + 1]] <- config_value(data$config$activenodes$nodememuse$height, starvz_height_var)
+    H[[length(H) + 1]] <- config_value(data$config$activenodes$nodememuse$height, data$config$guided$starvz_height_var)
   }
   if (data$config$computingnodes$active) {
     P[[length(P) + 1]] <- plist$computingnodes
-    H[[length(H) + 1]] <- config_value(data$config$computingnodes$height, starvz_height_var)
+    H[[length(H) + 1]] <- config_value(data$config$computingnodes$height, data$config$guided$starvz_height_var)
   }
   if (data$config$kiteration$active) {
     P[[length(P) + 1]] <- plist$ijk
-    H[[length(H) + 1]] <- config_value(data$config$kiteration$height, starvz_height_todo)
+    H[[length(H) + 1]] <- config_value(data$config$kiteration$height, data$config$guided$starvz_height_todo)
   }
   if (data$config$summary_nodes$active) {
     P[[length(P) + 1]] <- plist$summary_nodes
-    H[[length(H) + 1]] <- config_value(data$config$summary_nodes$height, starvz_height_nodes)
+    H[[length(H) + 1]] <- config_value(data$config$summary_nodes$height, data$config$guided$starvz_height_nodes)
   }
   if (data$config$st$active) {
     P[[length(P) + 1]] <- plist$st
     if (data$config$st$aggregation$active && data$config$st$aggregation$method == "nodes") {
-      H[[length(H) + 1]] <- config_value(data$config$st$height, starvz_height_agg)
+      H[[length(H) + 1]] <- config_value(data$config$st$height, data$config$guided$starvz_height_agg)
     } else {
-      H[[length(H) + 1]] <- config_value(data$config$st$height, starvz_height_resources)
+      H[[length(H) + 1]] <- config_value(data$config$st$height, data$config$guided$starvz_height_resources)
     }
   }
   if (data$config$pmtool$kiteration$active) {
     P[[length(P) + 1]] <- plist$ijk_pm
-    H[[length(H) + 1]] <- config_value(data$config$pmtool$kiteration$height, starvz_height_todo)
+    H[[length(H) + 1]] <- config_value(data$config$pmtool$kiteration$height, data$config$guided$starvz_height_todo)
   }
   if (data$config$pmtool$state$active) {
     P[[length(P) + 1]] <- plist$st_pm
-    H[[length(H) + 1]] <- config_value(data$config$pmtool$state$height, starvz_height_resources)
+    H[[length(H) + 1]] <- config_value(data$config$pmtool$state$height, data$config$guided$starvz_height_resources)
   }
   if (data$config$memory$state$active) {
     P[[length(P) + 1]] <- plist$st_mm
-    H[[length(H) + 1]] <- config_value(data$config$memory$state$height, starvz_height_nodes)
+    H[[length(H) + 1]] <- config_value(data$config$memory$state$height, data$config$guided$starvz_height_nodes)
   }
   if (data$config$memory$transfers$active && !data$config$memory$combined) {
     P[[length(P) + 1]] <- plist$transf
-    H[[length(H) + 1]] <- config_value(data$config$memory$transfers$height, starvz_height_nodes)
+    H[[length(H) + 1]] <- config_value(data$config$memory$transfers$height, data$config$guided$starvz_height_nodes)
   }
   if (data$config$submitted$active) {
     P[[length(P) + 1]] <- plist$submitted
-    H[[length(H) + 1]] <- config_value(data$config$submitted$height, starvz_height_var)
+    H[[length(H) + 1]] <- config_value(data$config$submitted$height, data$config$guided$starvz_height_var)
   }
   if (data$config$starpu$active) {
     P[[length(P) + 1]] <- plist$starpu
-    H[[length(H) + 1]] <- config_value(data$config$starpu$height, starvz_height_resources)
+    H[[length(H) + 1]] <- config_value(data$config$starpu$height, data$config$guided$starvz_height_resources)
   }
   if (data$config$ready$active) {
     P[[length(P) + 1]] <- plist$ready
-    H[[length(H) + 1]] <- config_value(data$config$ready$height, starvz_height_var)
+    H[[length(H) + 1]] <- config_value(data$config$ready$height, data$config$guided$starvz_height_var)
   }
   if (data$config$lackready$active) {
     P[[length(P) + 1]] <- plist$lackready
-    H[[length(H) + 1]] <- config_value(data$config$lackready$height, starvz_height_small)
+    H[[length(H) + 1]] <- config_value(data$config$lackready$height, data$config$guided$starvz_height_small)
   }
   if (data$config$gflops$active) {
     P[[length(P) + 1]] <- plist$gflops
-    H[[length(H) + 1]] <- config_value(data$config$gflops$height, starvz_height_var)
+    H[[length(H) + 1]] <- config_value(data$config$gflops$height, data$config$guided$starvz_height_var)
   }
   if (data$config$usedmemory$active) {
     P[[length(P) + 1]] <- plist$memory
-    H[[length(H) + 1]] <- config_value(data$config$usedmemory$height, starvz_height_var)
+    H[[length(H) + 1]] <- config_value(data$config$usedmemory$height, data$config$guided$starvz_height_var)
   }
   if (data$config$imbalance$active) {
     P[[length(P) + 1]] <- plist$imb_plot
-    H[[length(H) + 1]] <- config_value(data$config$imbalance$height, starvz_height_var)
+    H[[length(H) + 1]] <- config_value(data$config$imbalance$height, data$config$guided$starvz_height_var)
   }
   if (data$config$power_imbalance$active) {
     P[[length(P) + 1]] <- plist$imb_plot_power
-    H[[length(H) + 1]] <- config_value(data$config$power_imbalance$height, starvz_height_var)
+    H[[length(H) + 1]] <- config_value(data$config$power_imbalance$height, data$config$guided$starvz_height_var)
   }
   if (data$config$hete_imbalance$active) {
     P[[length(P) + 1]] <- plist$imb_plot_hete
-    H[[length(H) + 1]] <- config_value(data$config$hete_imbalance$height, starvz_height_var)
+    H[[length(H) + 1]] <- config_value(data$config$hete_imbalance$height, data$config$guided$starvz_height_var)
   }
   if (data$config$utilheatmap$active) {
     P[[length(P) + 1]] <- plist$heatmap
-    H[[length(H) + 1]] <- config_value(data$config$utilheatmap$height, starvz_height_resources)
+    H[[length(H) + 1]] <- config_value(data$config$utilheatmap$height, data$config$guided$starvz_height_resources)
   }
   if (data$config$gpubandwidth$active) {
     P[[length(P) + 1]] <- plist$gpu
-    H[[length(H) + 1]] <- config_value(data$config$gpubandwidth$height, starvz_height_var)
+    H[[length(H) + 1]] <- config_value(data$config$gpubandwidth$height, data$config$guided$starvz_height_var)
   }
   if (data$config$mpibandwidth$active) {
     P[[length(P) + 1]] <- plist$mpi
-    H[[length(H) + 1]] <- config_value(data$config$mpibandwidth$height, starvz_height_var)
+    H[[length(H) + 1]] <- config_value(data$config$mpibandwidth$height, data$config$guided$starvz_height_var)
   }
   if (data$config$mpiconcurrent$active) {
     P[[length(P) + 1]] <- plist$mpiconc
-    H[[length(H) + 1]] <- config_value(data$config$mpiconcurrent$height, starvz_height_var)
+    H[[length(H) + 1]] <- config_value(data$config$mpiconcurrent$height, data$config$guided$starvz_height_var)
   }
   if (data$config$mpiconcurrentout$active) {
     P[[length(P) + 1]] <- plist$mpiconcout
-    H[[length(H) + 1]] <- config_value(data$config$mpiconcurrentout$height, starvz_height_var)
+    H[[length(H) + 1]] <- config_value(data$config$mpiconcurrentout$height, data$config$guided$starvz_height_var)
   }
   if (data$config$mpistate$active) {
     P[[length(P) + 1]] <- plist$mpistate
-    H[[length(H) + 1]] <- config_value(data$config$mpistate$height, starvz_height_nodes)
+    H[[length(H) + 1]] <- config_value(data$config$mpistate$height, data$config$guided$starvz_height_nodes)
   }
 
   starvz_height_total <- sum(unlist(H))
@@ -170,7 +170,19 @@ starvz_compute_plot_heights <- function(plist, config) {
   return(list(P = P, H = H, starvz_height_total = starvz_height_total))
 }
 
-starvz_assemble <- function(..., config = list(), remove_Y_info = TRUE, remove_legends = TRUE) {
+#' Assemble multiple StarVZ panel lists
+#'
+#' Take a panel list, or a list of list of panels and assemble it
+#'
+#' @param ... Panel list or list of panel lists
+#' @param config StarVZ configurations for determaning panels heights
+#' @param remove_Y_info remove Y labels for second and subsequent list of panels
+#' @param remove_legends remove legends for second and subsequent list of panels
+#' @return The ggplot plot
+#' @examples
+#' # starvz_assemble(TODO)
+#' @export
+starvz_assemble <- function(..., config = NULL, remove_Y_info = TRUE, remove_legends = TRUE) {
   plists <- list()
   for (i in list(...)) {
 
@@ -184,6 +196,11 @@ starvz_assemble <- function(..., config = list(), remove_Y_info = TRUE, remove_l
       logerror("starvz_assemble needs a list of plots or a list of list of plots")
       return(NULL)
     }
+  }
+
+  if(is.null(config)){
+    logerror("config is null")
+    stop()
   }
 
   number_plots <- length(plists)
@@ -320,7 +337,7 @@ starvz_guided_plot <- function(data, name) {
   }
 
   data$config$guided$starvz_height_agg <- max(nodes * types * data$config$guided$agg_type_height / 100, 1)
-  data$config$guided$starvz_height_nodes <- max(nodes * 10 / 100, 1)
+  data$config$guided$starvz_height_nodes <- max(nodes * data$config$guided$node_height / 100, 1)
   data$config$guided$starvz_height_small <- 0.5
   if (!is.null(data$Atree)) {
     data$config$guided$starvz_height_atree <- ((data$Atree$Position %>% max()) * 1.5) / 100
@@ -663,7 +680,7 @@ starvz_plot_list <- function(data = NULL) {
     aggStep <- config_value(data$config$ready$step, globalAggStep)
     gorv <- dfv %>%
       filter(grepl("sched", .data$ResourceId), grepl("Ready", .data$Type)) %>%
-      var_integration_segment_chart(step = aggStep) + tScale
+      var_integration_segment_chart(step = aggStep, base_size=data$config$base_size, expand=data$config$expand) + tScale
     if (!data$config$ready$legend) {
       gorv <- gorv + theme(legend.position = "none")
     } else {
@@ -679,7 +696,7 @@ starvz_plot_list <- function(data = NULL) {
     aggStep <- config_value(data$config$submitted$step, globalAggStep)
     gosv <- dfv %>%
       filter(grepl("sched", .data$ResourceId), grepl("Submitted", .data$Type)) %>%
-      var_integration_segment_chart(step = aggStep) + tScale
+      var_integration_segment_chart(step = aggStep, base_size=data$config$base_size, expand=data$config$expand) + tScale
     if (!data$config$submitted$legend) {
       gosv <- gosv + theme(legend.position = "none")
     } else {
@@ -696,7 +713,7 @@ starvz_plot_list <- function(data = NULL) {
     facetted <- data$config$gflops$facet
     gogfv <- dfv %>%
       filter(.data$Type == "GFlops") %>%
-      var_integration_segment_chart(., ylabel = "GFlops", step = aggStep, facetting = facetted) + tScale
+      var_integration_segment_chart(., ylabel = "GFlops", step = aggStep, facetting = facetted, base_size=data$config$base_size, expand=data$config$expand) + tScale
 
     # adjust GFlops scale
     if (data$config$gflops$limit) {
@@ -721,7 +738,7 @@ starvz_plot_list <- function(data = NULL) {
 
       goguv <- dfv %>%
         filter(grepl("Used", .data$Type)) %>%
-        var_integration_segment_chart(step = aggStep) + tScale
+        var_integration_segment_chart(step = aggStep, base_size=data$config$base_size, expand=data$config$expand) + tScale
       if (!data$config$usedmemory$legend) {
         goguv <- goguv + theme(legend.position = "none")
       } else {
@@ -784,8 +801,7 @@ starvz_plot_list <- function(data = NULL) {
 
     Step <- as.double(config_value(data$config$utilheatmap$step, globalAggStep))
 
-    heatmap <- data$Application %>%
-      filter(.data$Start >= 0) %>%
+    heatmap <- data %>%
       utilization_heatmap(data$Y, Step)
     if (!data$config$utilheatmap$legend) {
       heatmap <- heatmap + theme(legend.position = "none")
@@ -805,7 +821,7 @@ starvz_plot_list <- function(data = NULL) {
       data$config$mpibandwidth$active <<- FALSE
     } else {
       gomov <- mpi_out %>%
-        var_integration_segment_chart(., ylabel = "MPI\n(MB/s)", step = aggStep) + tScale
+        var_integration_segment_chart(., ylabel = "MPI\n(MB/s)", step = aggStep, base_size=data$config$base_size, expand=data$config$expand) + tScale
       if (!data$config$mpibandwidth$legend) {
         gomov <- gomov + theme(legend.position = "none")
       }
@@ -823,7 +839,7 @@ starvz_plot_list <- function(data = NULL) {
       aggStep <- config_value(data$config$mpiconcurrent$step, globalAggStep)
       gompiconc <- data %>%
         concurrent_mpi() %>%
-        var_integration_segment_chart(., ylabel = "Concurrent\nMPI Tasks Send", step = aggStep) + tScale
+        var_integration_segment_chart(., ylabel = "Concurrent\nMPI Tasks Send", step = aggStep, base_size=data$config$base_size, expand=data$config$expand) + tScale
       if (!data$config$mpiconcurrent$legend) {
         gompiconc <- gompiconc + theme(legend.position = "none")
       }
@@ -841,7 +857,7 @@ starvz_plot_list <- function(data = NULL) {
       aggStep <- config_value(data$config$mpiconcurrentout$step, globalAggStep)
       gompiconcout <- data %>%
         concurrent_mpi_out() %>%
-        var_integration_segment_chart(., ylabel = "Concurrent\nMPI Tasks Recv", step = aggStep) + tScale
+        var_integration_segment_chart(., ylabel = "Concurrent\nMPI Tasks Recv", step = aggStep, base_size=data$config$base_size, expand=data$config$expand) + tScale
       if (!data$config$mpiconcurrentout$legend) {
         gompiconcout <- gompiconcout + theme(legend.position = "none")
       }
@@ -885,7 +901,7 @@ starvz_plot_list <- function(data = NULL) {
         # Remove the MANAGER0, which is CPU-only
         # TODO: After the logical OR there is a support for single-node StarPU traces
         filter(.data$Resource != "MEMMANAGER0" | .data$Node != "MEMMANAGER0") %>%
-        var_integration_segment_chart(., ylabel = "GPU\n(MB/s)", step = aggStep) + tScale
+        var_integration_segment_chart(., ylabel = "GPU\n(MB/s)", step = aggStep, base_size=data$config$base_size, expand=data$config$expand) + tScale
     }
     if (!data$config$gpubandwidth$legend) {
       gogov <- gogov + theme(legend.position = "none")

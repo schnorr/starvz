@@ -69,6 +69,7 @@ starvz_default_config <- function() {
   config$st$abe$bar_color <- "grey"
   config$st$abe$text <- TRUE
   config$st$abe$label <- TRUE
+  config$st$alpha <- 0.5
 
   config$summary_nodes$active <- FALSE
   config$summary_nodes$legend <- FALSE
@@ -137,6 +138,7 @@ starvz_default_config <- function() {
 
   config$guided$active <- FALSE
   config$guided$agg_type_height <- 50
+  config$guided$node_height <- 10
 
   config$vertical_lines$active <- FALSE
   config$vertical_lines$x_list <- NULL
@@ -144,13 +146,22 @@ starvz_default_config <- function() {
   return(config)
 }
 
+#' Read config files
+#'
+#' Read starvz config yaml files
+#'
+#' @param file path to file
+#' @return A list containing starvz configuration
+#' @examples
+#' # starvz_read_config("path_to_config")
+#' @export
 starvz_read_config <- function(file = NULL) {
   defaut_config <- starvz_default_config()
   if (is.null(file)) {
     loginfo("Using default config")
     return(defaut_config)
   } else if (!file.exists(file)) {
-    logwarn("Config file dont exist, using defaut")
+    logwarn(paste0("Config file dont exist, using default, wd:", getwd(), " file:", file))
     return(defaut_config)
   } else {
     config <- yaml::read_yaml(file)

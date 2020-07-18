@@ -26,7 +26,7 @@
 #+html: <a href="https://www.tidyverse.org/lifecycle/#maturing">
 #+html:   <img src="https://img.shields.io/badge/lifecycle-maturing-blue.svg" />
 #+html: </a>
-#+html: <a href="http://opensource.org/licenses/GPL-3.0">
+#+html: <a href="https://opensource.org/licenses/GPL-3.0">
 #+html:   <img src="https://img.shields.io/badge/license-GPL--3.0-blue" />
 #+html: </a>
 #+html: <br><br>
@@ -51,9 +51,25 @@ devtools::install_github("schnorr/starvz", subdir="R_package")
 #+end_src
 
 ** Quick Usage
-#+begin_src R :results output :session *R* :exports both
-#TODO
+*** Full Workflow
+With =starpu_fxt_tool= and =pajeng= in =$PATH=
+
+#+begin_src bash :results output :session *R* :exports both
+export EXP_FOLDER=/folder_to_fxt_files/
+src/phase1-workflow.sh $EXP_FOLDER
+R/phase2-workflow.R $EXP_FOLDER full_config.yaml
 #+end_src
+
+This generates =$EXP_FOLDER/starvz.png=
+
+*** Phase 2 (/Visualizations/) in R:
+#+begin_src R :results output :session *R* :exports both
+data <- starvz_read("/folder_to_fxt_files/", "starvz_home/full_config.yaml")
+plot <- starvz_plot(data)
+plot
+#+end_src
+
+=plot= will be a =ggplot= object that can be saved with =ggsave=
 
 ** Extended Content
 - [[./INSTALL.org][Installation Instructions]]
@@ -88,7 +104,7 @@ the third publication at CCGRID 2019.
   Runtime on Hybrid Platforms*, Lucas Leandro Nesi, Samuel Thibault,
   Luka Stanisic and Lucas Mello Schnorr, in /2019 19th IEEE/ACM International Symposium on Cluster, Cloud and Grid Computing
   (CCGRID)/, Larnaca, Cyprus, 2019, pp. 142-151.
-  - [[10.1109/CCGRID.2019.00025][DOI]] and [[https://gitlab.com/lnesi/starpu_mem_analysis][Companion website]]
+  - [[https://dx.doi.org/10.1109/CCGRID.2019.00025][DOI]] and [[https://gitlab.com/lnesi/starpu_mem_analysis][Companion website]]
 
 ** Docker container
 

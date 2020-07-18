@@ -69,60 +69,6 @@ var_chart_text <- function(dfv = NULL, tstart = NULL, tend = NULL, y_end = NULL)
   return(ret)
 }
 
-
-var_cumulative_chart <- function(dfv = NULL) {
-  if (is.null(dfv)) {
-    return(NULL)
-  }
-
-  variable <- dfv %>%
-    select(.data$Type) %>%
-    .$Type %>%
-    unique()
-
-  dfv %>%
-    ggplot(aes(x = .data$Start, y = .data$Value, fill = .data$Node)) +
-    geom_area() +
-    xlab("Time [ms]") +
-    ylab(variable) +
-    theme_bw(base_size = 12) +
-    theme(
-      plot.margin = unit(c(0, 0, 0, 0), "cm"),
-      legend.margin = unit(.2, "line"),
-      panel.grid = element_blank(),
-      legend.position = "top",
-      legend.title = element_blank()
-    )
-}
-var_simple_chart <- function(dfv = NULL, ylabel = NA) {
-  if (is.null(dfv)) {
-    return(NULL)
-  }
-
-  variable <- dfv %>%
-    select(.data$Type) %>%
-    .$Type %>%
-    unique()
-  if (is.na(ylabel)) ylabel <- variable
-
-  dfv %>%
-    ggplot(aes(x = .data$Start, y = .data$Value, color = .data$ResourceId)) +
-    geom_line() +
-    geom_point(size = .1) +
-    xlab("Time [ms]") +
-    # coord_cartesian(xlim=c(0, max(dfv$End))) +
-    ylim(0, NA) +
-    ylab(ylabel) +
-    theme_bw(base_size = 12) +
-    scale_fill_brewer(palette = "Set1") +
-    theme(
-      plot.margin = unit(c(0, 0, 0, 0), "cm"),
-      legend.margin = unit(.2, "line"),
-      panel.grid = element_blank(),
-      legend.position = "top",
-      legend.title = element_blank()
-    )
-}
 var_integration_chart <- function(dfv = NULL, ylabel = NA, step = 250, facetting = FALSE, base_size = 22, expand = 0.05) {
   if (is.null(dfv)) {
     return(NULL)
@@ -157,7 +103,7 @@ var_integration_chart <- function(dfv = NULL, ylabel = NA, step = 250, facetting
   }
   return(result)
 }
-var_integration_segment_chart <- function(dfv = NULL, ylabel = NA, step = 250, facetting = FALSE) {
+var_integration_segment_chart <- function(dfv = NULL, ylabel = NA, step = 250, facetting = FALSE, base_size = 22, expand = 0.05) {
   if (is.null(dfv)) {
     return(NULL)
   }
@@ -180,7 +126,7 @@ var_integration_segment_chart <- function(dfv = NULL, ylabel = NA, step = 250, f
     summarize(Value = sum(.data$Value), N = n()) %>%
     # rename(ResourceId = Node) %>%
     ungroup() %>%
-    var_chart(., ylabel = ylabel) -> result
+    var_chart(., ylabel = ylabel, base_size = base_size, expand = expand) -> result
   if (facetting) {
     result <- result +
       facet_wrap(~ .data$ResourceType, ncol = 1, scales = "free_y") + # , strip.position="right") + # cowplot can't align this

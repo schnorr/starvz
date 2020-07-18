@@ -19,6 +19,12 @@ qr_states <- function() {
 scalfmm_states <- function() {
   scalfmm_colors() %>% .$Kernel
 }
+
+#' Colors for lu
+#'
+#' This will be deprecated
+#'
+#' @export
 lu_colors <- function() {
   tibble(
     Kernel = c("getrf", "trsm", "gemm", "plgsy", "plrnt"),

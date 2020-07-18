@@ -699,7 +699,7 @@ starvz_plot_list <- function(data = NULL) {
     aggStep <- config_value(data$config$ready$step, globalAggStep)
     gorv <- dfv %>%
       filter(grepl("sched", .data$ResourceId), grepl("Ready", .data$Type)) %>%
-      var_integration_segment_chart(step = aggStep) + tScale
+      var_integration_segment_chart(step = aggStep, base_size=data$config$base_size, expand=data$config$expand) + tScale
     if (!data$config$ready$legend) {
       gorv <- gorv + theme(legend.position = "none")
     } else {
@@ -715,7 +715,7 @@ starvz_plot_list <- function(data = NULL) {
     aggStep <- config_value(data$config$submitted$step, globalAggStep)
     gosv <- dfv %>%
       filter(grepl("sched", .data$ResourceId), grepl("Submitted", .data$Type)) %>%
-      var_integration_segment_chart(step = aggStep) + tScale
+      var_integration_segment_chart(step = aggStep, base_size=data$config$base_size, expand=data$config$expand) + tScale
     if (!data$config$submitted$legend) {
       gosv <- gosv + theme(legend.position = "none")
     } else {
@@ -732,7 +732,7 @@ starvz_plot_list <- function(data = NULL) {
     facetted <- data$config$gflops$facet
     gogfv <- dfv %>%
       filter(.data$Type == "GFlops") %>%
-      var_integration_segment_chart(., ylabel = "GFlops", step = aggStep, facetting = facetted) + tScale
+      var_integration_segment_chart(., ylabel = "GFlops", step = aggStep, facetting = facetted, base_size=data$config$base_size, expand=data$config$expand) + tScale
 
     # adjust GFlops scale
     if (data$config$gflops$limit) {
@@ -757,7 +757,7 @@ starvz_plot_list <- function(data = NULL) {
 
       goguv <- dfv %>%
         filter(grepl("Used", .data$Type)) %>%
-        var_integration_segment_chart(step = aggStep) + tScale
+        var_integration_segment_chart(step = aggStep, base_size=data$config$base_size, expand=data$config$expand) + tScale
       if (!data$config$usedmemory$legend) {
         goguv <- goguv + theme(legend.position = "none")
       } else {
@@ -840,7 +840,7 @@ starvz_plot_list <- function(data = NULL) {
       data$config$mpibandwidth$active <<- FALSE
     } else {
       gomov <- mpi_out %>%
-        var_integration_segment_chart(., ylabel = "MPI\n(MB/s)", step = aggStep) + tScale
+        var_integration_segment_chart(., ylabel = "MPI\n(MB/s)", step = aggStep, base_size=data$config$base_size, expand=data$config$expand) + tScale
       if (!data$config$mpibandwidth$legend) {
         gomov <- gomov + theme(legend.position = "none")
       }
@@ -858,7 +858,7 @@ starvz_plot_list <- function(data = NULL) {
       aggStep <- config_value(data$config$mpiconcurrent$step, globalAggStep)
       gompiconc <- data %>%
         concurrent_mpi() %>%
-        var_integration_segment_chart(., ylabel = "Concurrent\nMPI Tasks Send", step = aggStep) + tScale
+        var_integration_segment_chart(., ylabel = "Concurrent\nMPI Tasks Send", step = aggStep, base_size=data$config$base_size, expand=data$config$expand) + tScale
       if (!data$config$mpiconcurrent$legend) {
         gompiconc <- gompiconc + theme(legend.position = "none")
       }
@@ -876,7 +876,7 @@ starvz_plot_list <- function(data = NULL) {
       aggStep <- config_value(data$config$mpiconcurrentout$step, globalAggStep)
       gompiconcout <- data %>%
         concurrent_mpi_out() %>%
-        var_integration_segment_chart(., ylabel = "Concurrent\nMPI Tasks Recv", step = aggStep) + tScale
+        var_integration_segment_chart(., ylabel = "Concurrent\nMPI Tasks Recv", step = aggStep, base_size=data$config$base_size, expand=data$config$expand) + tScale
       if (!data$config$mpiconcurrentout$legend) {
         gompiconcout <- gompiconcout + theme(legend.position = "none")
       }
@@ -920,7 +920,7 @@ starvz_plot_list <- function(data = NULL) {
         # Remove the MANAGER0, which is CPU-only
         # TODO: After the logical OR there is a support for single-node StarPU traces
         filter(.data$Resource != "MEMMANAGER0" | .data$Node != "MEMMANAGER0") %>%
-        var_integration_segment_chart(., ylabel = "GPU\n(MB/s)", step = aggStep) + tScale
+        var_integration_segment_chart(., ylabel = "GPU\n(MB/s)", step = aggStep, base_size=data$config$base_size, expand=data$config$expand) + tScale
     }
     if (!data$config$gpubandwidth$legend) {
       gogov <- gogov + theme(legend.position = "none")

@@ -170,7 +170,19 @@ starvz_compute_plot_heights <- function(plist, config) {
   return(list(P = P, H = H, starvz_height_total = starvz_height_total))
 }
 
-starvz_assemble <- function(..., config = list(), remove_Y_info = TRUE, remove_legends = TRUE) {
+#' Assemble multiple StarVZ panel lists
+#'
+#' Take a panel list, or a list of list of panels and assemble it
+#'
+#' @param ... Panel list or list of panel lists
+#' @param config StarVZ configurations for determaning panels heights
+#' @param remove_Y_info remove Y labels for second and subsequent list of panels
+#' @param remove_legends remove legends for second and subsequent list of panels
+#' @return The ggplot plot
+#' @examples
+#' # starvz_assemble(TODO)
+#' @export
+starvz_assemble <- function(..., config = NULL, remove_Y_info = TRUE, remove_legends = TRUE) {
   plists <- list()
   for (i in list(...)) {
 
@@ -184,6 +196,11 @@ starvz_assemble <- function(..., config = list(), remove_Y_info = TRUE, remove_l
       logerror("starvz_assemble needs a list of plots or a list of list of plots")
       return(NULL)
     }
+  }
+
+  if(is.null(config)){
+    logerror("config is null")
+    stop()
   }
 
   number_plots <- length(plists)

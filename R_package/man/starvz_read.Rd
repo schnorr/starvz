@@ -4,12 +4,14 @@
 \alias{starvz_read}
 \title{Read starvz trace files}
 \usage{
-starvz_read(directory = ".", config_file = NULL)
+starvz_read(directory = ".", config_file = NULL, selective = TRUE)
 }
 \arguments{
 \item{directory}{Directory path of trace files}
 
 \item{config_file}{Path for configuration yaml file}
+
+\item{selective}{if True, only read data needed for creating panels actived in config}
 }
 \value{
 The starvz_data with all tables

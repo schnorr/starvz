@@ -2,6 +2,7 @@
 
 export(lu_colors)
 export(qrmumps_colors)
+export(starvz_assemble)
 export(starvz_guided_plot)
 export(starvz_phase1_read_write)
 export(starvz_plot)

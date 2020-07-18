@@ -501,25 +501,6 @@ starvz_plot_list <- function(data = NULL) {
   # Atree space/time view
   if (!is.null(data$Atree) && data$config$atree$active) {
 
-    # Reorganize tree Position
-    data_reorder <- data$Application %>%
-      filter(grepl("lapack", .data$Value)) %>%
-      select(.data$ANode, .data$SubmitOrder) %>%
-      unique() %>%
-      group_by(.data$ANode) %>%
-      mutate(SubmitOrder = as.integer(.data$SubmitOrder)) %>%
-      arrange(.data$SubmitOrder) %>%
-      slice(1) %>%
-      ungroup() %>%
-      arrange(.data$SubmitOrder) %>%
-      mutate(Position = 1:n(), Height = 1) %>%
-      select(-.data$SubmitOrder)
-
-    data$Atree <- data$Atree %>%
-      # Replace Position and Height by new ordering
-      select(-.data$Position, -.data$Height) %>%
-      left_join(data_reorder, by = "ANode")
-
     loginfo("Creating the temporal atree plot")
     aggStep <- config_value(data$config$atree$step, globalAggStep)
     goatreet <- atree_temporal_chart(data, step = aggStep) + tScale

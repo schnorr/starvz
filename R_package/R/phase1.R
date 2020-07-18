@@ -113,6 +113,9 @@ starvz_phase1_read_write <- function(directory = ".", app_states_fun = NULL, sta
     dfap <- NULL
   }
 
+  # Reorder the elimination tree
+  dfa <- reorder_elimination_tree(dfa, Worker$Application)
+
   # Read DAG
   dfdag <- read_dag(where = directory, Worker$Application %>% mutate(Application = TRUE), dfl)
 
@@ -188,6 +191,53 @@ atree_to_df <- function(node) {
   )
   for (child in node$children) ndf <- ndf %>% bind_rows(atree_to_df(child))
   return(ndf)
+}
+
+reorder_elimination_tree <- function(Atree, Application) {
+
+  # Reorganize tree Position
+  data_reorder <- Application %>%
+    filter(grepl("qrt", .data$Value)) %>%
+    select(.data$ANode, .data$SubmitOrder) %>%
+    unique() %>%
+    group_by(.data$ANode) %>%
+    mutate(SubmitOrder = as.integer(.data$SubmitOrder)) %>%
+    arrange(.data$SubmitOrder) %>%
+    slice(1) %>%
+    ungroup() %>%
+    arrange(.data$SubmitOrder) %>%
+    mutate(Position = 1:n(), Height = 1) %>%
+    select(-.data$SubmitOrder)
+
+  Atree <- Atree %>%
+    # Replace Position and Height by new ordering
+    select(-.data$Position, -.data$Height) %>%
+    left_join(data_reorder, by = "ANode")
+
+  # Need to define Position for pruned nodes
+  data_pruned_position <- Application %>%
+    filter(grepl("qrt", .data$Value) | grepl("do_subtree", .data$Value)) %>%
+    mutate(NodeType = case_when(.data$Value == "do_subtree" ~ "Pruned", TRUE ~ "Normal")) %>%
+    select(-.data$Position, -.data$Height) %>% 
+    left_join(Atree, by = "ANode") %>% 
+    select(.data$ANode, .data$Parent, .data$NodeType, .data$Position, .data$Height) %>% 
+    unique() %>%
+    left_join(Atree %>%
+      select(.data$ANode, .data$Position, .data$Height),
+      by=c("Parent" = "ANode"), suffix = c("", ".Parent")
+    ) %>%
+    # pruned child node have the same position as its father
+    mutate(Position = case_when(.data$NodeType == "Pruned" ~ .data$Position.Parent, TRUE ~ .data$Position),
+             Height = case_when(.data$NodeType == "Pruned" ~ .data$Height.Parent, TRUE ~ .data$Height)
+    ) %>%
+    select(-.data$Parent, -.data$Position.Parent, -.data$Height.Parent)
+  
+  Atree <- Atree %>%
+    # Replace Position and Height by new ordering
+    select(-.data$Position, -.data$Height) %>%
+    left_join(data_pruned_position, by = "ANode")
+
+  return(Atree)
 }
 
 hl_y_paje_tree <- function(where = ".") {

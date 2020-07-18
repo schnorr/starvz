@@ -34,7 +34,7 @@ if (length(args)==3) {
 
 cat("StarVZ - Phase 2 - Start\n", file = stdout())
 
-data <- starvz_selective_read(directory, config_file);
+data <- starvz_read(directory, config_file);
 
 if(data$config$guided$active){
   r <- starvz_guided_plot(data, name)

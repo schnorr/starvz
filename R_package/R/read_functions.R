@@ -60,155 +60,6 @@ starvz_read_parquet <- function(directory = ".") {
   starvz_read_some_parquet(directory = directory, tables = filenames)
 }
 
-#' Read selective starvz trace files
-#'
-#' Read the directory of trace files (feather or parquet) and
-#' the configfuration file, and return a starvz_data class with only
-#' data that will be used in active plots in cofiguration file
-#'
-#' @param directory Directory path of trace files
-#' @param config_file Path for configuration yaml file
-#' @return The starvz_data with all tables
-#' @examples
-#' starvz_selective_read("folder_to_parquet_files/")
-#' starvz_selective_read(directory = "folder_to_parquet_files/", config_file = "path_to_config.yaml")
-#' starvz_selective_read() # Read current directory
-#' @export
-starvz_selective_read <- function(directory = ".", config_file = NULL) {
-  if (is.null(config_file)) {
-    config_file <- file.path(directory, "config.yaml")
-  }
-  data <- list()
-  data$config <- starvz_read_config(config_file)
-
-  # Always try to load Version, Colors and Y
-  tables_to_load <- c("version", "colors", "y")
-
-  if (data$config$st$active) {
-    tables_to_load <- c(tables_to_load, "application")
-  }
-
-  if (data$config$st$tasks$active) {
-    tables_to_load <- c(tables_to_load, "gaps", "starpu", "application", "link")
-  }
-
-  if (data$config$st$cpb || data$config$st$cpb_mpi$active) {
-    tables_to_load <- c(tables_to_load, "dag", "starpu", "application", "link")
-  }
-
-  if (data$config$pmtool$bounds$active) {
-    tables_to_load <- c(tables_to_load, "application", "pmtool")
-  }
-
-  if (data$config$atree$active) {
-    tables_to_load <- c(tables_to_load, "application", "atree")
-  }
-
-  if (data$config$utiltreenode$active) {
-    tables_to_load <- c(tables_to_load, "application", "atree")
-  }
-
-  if (data$config$utiltreedepth$active) {
-    tables_to_load <- c(tables_to_load, "application", "atree")
-  }
-
-  if (data$config$activenodes$active) {
-    tables_to_load <- c(tables_to_load, "application", "atree")
-  }
-
-  if (data$config$computingnodes$active) {
-    tables_to_load <- c(tables_to_load, "application", "atree")
-  }
-
-  if (data$config$kiteration$active) {
-    tables_to_load <- c(tables_to_load, "application")
-  }
-
-  if (data$config$summary_nodes$active) {
-    tables_to_load <- c(tables_to_load, "application")
-  }
-
-  if (data$config$pmtool$state$active) {
-    tables_to_load <- c(tables_to_load, "application", "pmtool_states")
-  }
-
-  if (data$config$pmtool$kiteration$active) {
-    tables_to_load <- c(tables_to_load, "application", "pmtool_states")
-  }
-
-  if (data$config$memory$state$active) {
-    tables_to_load <- c(tables_to_load, "application", "tasks", "task_handles", "data_handles", "memory_state", "events_memory", "link")
-  }
-
-  if (data$config$memory$transfers$active) {
-    tables_to_load <- c(tables_to_load, "application", "tasks", "task_handles", "data_handles", "memory_state", "events_memory", "link")
-  }
-
-  if (data$config$starpu$active) {
-    tables_to_load <- c(tables_to_load, "starpu")
-  }
-
-  if (data$config$ready$active) {
-    tables_to_load <- c(tables_to_load, "variable")
-  }
-
-  if (data$config$usedmemory$active) {
-    tables_to_load <- c(tables_to_load, "variable")
-  }
-
-  if (data$config$submitted$active) {
-    tables_to_load <- c(tables_to_load, "variable")
-  }
-
-  if (data$config$lackready$active) {
-    tables_to_load <- c(tables_to_load, "starpu", "variable")
-  }
-
-  if (data$config$imbalance$active) {
-    tables_to_load <- c(tables_to_load, "application")
-  }
-
-  if (data$config$power_imbalance$active) {
-    tables_to_load <- c(tables_to_load, "application")
-  }
-
-  if (data$config$hete_imbalance$active) {
-    tables_to_load <- c(tables_to_load, "application")
-  }
-
-  if (data$config$utilheatmap$active) {
-    tables_to_load <- c(tables_to_load, "application")
-  }
-
-  if (data$config$mpibandwidth$active) {
-    tables_to_load <- c(tables_to_load, "variable")
-  }
-
-  if (data$config$mpiconcurrent$active) {
-    tables_to_load <- c(tables_to_load, "link")
-  }
-
-  if (data$config$mpiconcurrentout$active) {
-    tables_to_load <- c(tables_to_load, "link")
-  }
-
-  if (data$config$mpistate$active) {
-    tables_to_load <- c(tables_to_load, "comm_state")
-  }
-
-  if (data$config$gflops$active) {
-    tables_to_load <- c(tables_to_load, "variable")
-  }
-
-  if (data$config$gpubandwidth$active) {
-    tables_to_load <- c(tables_to_load, "variable")
-  }
-
-  tables_to_load <- tables_to_load %>% unique()
-  loginfo(paste("Read:", paste(tables_to_load, collapse = " ")))
-  starvz_read_some(directory = directory, tables = tables_to_load, config_file)
-}
-
 starvz_read_some <- function(directory = ".", tables = c("application"), config_file = NULL) {
   check_arrow()
   # Check if there is arrow gz files
@@ -238,27 +89,162 @@ starvz_read_some <- function(directory = ".", tables = c("application"), config_
 #'
 #' @param directory Directory path of trace files
 #' @param config_file Path for configuration yaml file
+#' @param selective if True, only read data needed for creating panels actived in config
 #' @return The starvz_data with all tables
 #' @examples
 #' starvz_read("folder_to_parquet_files/")
 #' starvz_read(directory = "folder_to_parquet_files/", config_file = "path_to_config.yaml")
 #' starvz_read() # Read current directory
 #' @export
-starvz_read <- function(directory = ".", config_file = NULL) {
+starvz_read <- function(directory = ".", config_file = NULL, selective=TRUE) {
   check_arrow()
-  # Check if there is arrow gz files
-  filenames <- list.files(path = directory, pattern = "*.parquet", full.names = TRUE, recursive = FALSE)
-  if (length(filenames) > 0) {
-    loginfo("Detected parquet files")
-    data <- starvz_read_parquet(directory)
-  } else {
-    data <- starvz_read_feather(directory)
-  }
 
   if (is.null(config_file)) {
     config_file <- file.path(directory, "config.yaml")
   }
-  data$config <- starvz_read_config(config_file)
+
+  config <- starvz_read_config(config_file)
+
+  if(selective){
+    # Always try to load Version, Colors and Y
+    tables_to_load <- c("version", "colors", "y")
+
+    if (config$st$active) {
+      tables_to_load <- c(tables_to_load, "application")
+    }
+
+    if (config$st$tasks$active) {
+      tables_to_load <- c(tables_to_load, "gaps", "starpu", "application", "link")
+    }
+
+    if (config$st$cpb || config$st$cpb_mpi$active) {
+      tables_to_load <- c(tables_to_load, "dag", "starpu", "application", "link")
+    }
+
+    if (config$pmtool$bounds$active) {
+      tables_to_load <- c(tables_to_load, "application", "pmtool")
+    }
+
+    if (config$atree$active) {
+      tables_to_load <- c(tables_to_load, "application", "atree")
+    }
+
+    if (config$utiltreenode$active) {
+      tables_to_load <- c(tables_to_load, "application", "atree")
+    }
+
+    if (config$utiltreedepth$active) {
+      tables_to_load <- c(tables_to_load, "application", "atree")
+    }
+
+    if (config$activenodes$active) {
+      tables_to_load <- c(tables_to_load, "application", "atree")
+    }
+
+    if (config$computingnodes$active) {
+      tables_to_load <- c(tables_to_load, "application", "atree")
+    }
+
+    if (config$kiteration$active) {
+      tables_to_load <- c(tables_to_load, "application")
+    }
+
+    if (config$summary_nodes$active) {
+      tables_to_load <- c(tables_to_load, "application")
+    }
+
+    if (config$pmtool$state$active) {
+      tables_to_load <- c(tables_to_load, "application", "pmtool_states")
+    }
+
+    if (config$pmtool$kiteration$active) {
+      tables_to_load <- c(tables_to_load, "application", "pmtool_states")
+    }
+
+    if (config$memory$state$active) {
+      tables_to_load <- c(tables_to_load, "application", "tasks", "task_handles", "data_handles", "memory_state", "events_memory", "link")
+    }
+
+    if (config$memory$transfers$active) {
+      tables_to_load <- c(tables_to_load, "application", "tasks", "task_handles", "data_handles", "memory_state", "events_memory", "link")
+    }
+
+    if (config$starpu$active) {
+      tables_to_load <- c(tables_to_load, "starpu")
+    }
+
+    if (config$ready$active) {
+      tables_to_load <- c(tables_to_load, "variable")
+    }
+
+    if (config$usedmemory$active) {
+      tables_to_load <- c(tables_to_load, "variable")
+    }
+
+    if (config$submitted$active) {
+      tables_to_load <- c(tables_to_load, "variable")
+    }
+
+    if (config$lackready$active) {
+      tables_to_load <- c(tables_to_load, "starpu", "variable")
+    }
+
+    if (config$imbalance$active) {
+      tables_to_load <- c(tables_to_load, "application")
+    }
+
+    if (config$power_imbalance$active) {
+      tables_to_load <- c(tables_to_load, "application")
+    }
+
+    if (config$hete_imbalance$active) {
+      tables_to_load <- c(tables_to_load, "application")
+    }
+
+    if (config$utilheatmap$active) {
+      tables_to_load <- c(tables_to_load, "application")
+    }
+
+    if (config$mpibandwidth$active) {
+      tables_to_load <- c(tables_to_load, "variable")
+    }
+
+    if (config$mpiconcurrent$active) {
+      tables_to_load <- c(tables_to_load, "link")
+    }
+
+    if (config$mpiconcurrentout$active) {
+      tables_to_load <- c(tables_to_load, "link")
+    }
+
+    if (config$mpistate$active) {
+      tables_to_load <- c(tables_to_load, "comm_state")
+    }
+
+    if (config$gflops$active) {
+      tables_to_load <- c(tables_to_load, "variable")
+    }
+
+    if (config$gpubandwidth$active) {
+      tables_to_load <- c(tables_to_load, "variable")
+    }
+
+    tables_to_load <- tables_to_load %>% unique()
+    loginfo(paste("Read:", paste(tables_to_load, collapse = " ")))
+    data <- starvz_read_some(directory = directory, tables = tables_to_load, config_file)
+
+  }else{
+    # Check if there is arrow gz files
+    filenames <- list.files(path = directory, pattern = "*.parquet", full.names = TRUE, recursive = FALSE)
+    if (length(filenames) > 0) {
+      loginfo("Detected parquet files")
+      data <- starvz_read_parquet(directory)
+    } else {
+      data <- starvz_read_feather(directory)
+    }
+  }
+
+  data$config <- config
 
   final_data <- starvz_data(data)
 

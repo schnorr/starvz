@@ -123,7 +123,7 @@ utilization_per_step <- function(data_app, step) {
   min_time <- min(data_app$Start)
   max_time <- max(data_app$End)
 
-  data_app %>%
+  data_app %>% filter(.data$Start>=0) %>%
     select(.data$JobId, .data$Duration, .data$Node, .data$ResourceId, .data$ResourceType, .data$Start, .data$End) %>%
     mutate(
       SStep = as.integer(floor(.data$Start / step)),
@@ -238,7 +238,7 @@ var_imbalance_plot <- function(data, name, step, base_size, expand) {
 utilization_per_step_double_hetero <- function(step, df) {
   max_time <- max(df$End)
 
-  df %>%
+  df %>% filter(.data$Start>0) %>%
     select(
       .data$JobId, .data$Value, .data$Duration, .data$Node,
       .data$ResourceId, .data$ResourceType, .data$Start, .data$End

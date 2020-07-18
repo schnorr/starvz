@@ -803,8 +803,7 @@ starvz_plot_list <- function(data = NULL) {
 
     Step <- as.double(config_value(data$config$utilheatmap$step, globalAggStep))
 
-    heatmap <- data$Application %>%
-      filter(.data$Start >= 0) %>%
+    heatmap <- data %>%
       utilization_heatmap(data$Y, Step)
     if (!data$config$utilheatmap$legend) {
       heatmap <- heatmap + theme(legend.position = "none")

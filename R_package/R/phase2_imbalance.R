@@ -132,7 +132,7 @@ utilization_per_step <- function(data_app, step) {
       UtilLast = .data$End %% step
     ) %>%
     mutate(FullUtil = mapply(function(x, y) seq(x, y, by = 1), .data$SStep, .data$EStep)) %>%
-    unnest(cols = c(FullUtil)) %>%
+    unnest(cols = c(.data$FullUtil)) %>%
     mutate(Util = case_when(
       (.data$FullUtil == .data$SStep) ~ .data$UtilFirst,
       (.data$FullUtil == .data$EStep) ~ .data$UtilLast,
@@ -250,7 +250,7 @@ utilization_per_step_double_hetero <- function(step, df) {
       UtilLast = .data$End %% step
     ) %>%
     mutate(FullUtil = mapply(function(x, y) seq(x, y, by = 1), .data$SStep, .data$EStep)) %>%
-    unnest(cols = c(FullUtil)) %>%
+    unnest(cols = c(.data$FullUtil)) %>%
     mutate(Util = case_when(
       (.data$FullUtil == .data$SStep) ~ .data$UtilFirst,
       (.data$FullUtil == .data$EStep) ~ .data$UtilLast,

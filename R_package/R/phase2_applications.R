@@ -103,80 +103,16 @@ cholesky_pastix_colors <- function() {
   )
 }
 
-qrmumps_states_level_order <- function() {
-  c(
-    "Do_subtree",
-    "INIT",
-    "GEQRT",
-    "GEMQRT",
-    "TPQRT",
-    "TPMQRT",
-    "ASM",
-    "CLEAN",
-    "Idle"
-  )
-}
-qrmumps_states <- function() {
-  c(
-    "ASM",
-    "GEMQRT",
-    "Do_subtree",
-    "CLEAN",
-    "GEQRT",
-    "INIT",
-    "TPMQRT",
-    "TPQRT",
-    "Idle"
-  )
-}
-
-qrmumps_color_mapping <- function() {
-  # This vector changes the color ordering
-  states <- qrmumps_states()
-  kcol <- data.frame(
-    RGB = as.character(brewer.pal(9, "Set1")),
-    # These are only the color names I put manually here to try to understand the color mapping
-    #                       ColorName=c("red", "blue", "green", "purple", "orange", "yellow", "brown", "pink", "gray"),
-    StateName = factor(states, levels = qrmumps_states_level_order()),
-    xmin = 1:length(states),
-    xmax = 1:length(states) + 1,
-    ymin = 0,
-    ymax = 1
-  )
-  kcol
-}
-
-#' Colors for qrmumps
-#'
-#' This will be deprecated
-#'
-#' @export
 qrmumps_colors <- function() {
-  qrmumps_color_mapping() %>%
-    # Rename
-    rename(Kernel = .data$StateName, Color = .data$RGB) %>%
-    # Remove Idle
-    filter(.data$Kernel != "Idle") %>%
-    # Change to character
-    mutate(Kernel = as.character(.data$Kernel), Color = as.character(.data$Color)) %>%
-    # Select only those necessary
-    select(.data$Kernel, .data$Color) %>%
-    # Change names according to latest modifications
-    mutate(Kernel = case_when(
-      .data$Kernel == "ASM" ~ "assemble_block",
-      .data$Kernel == "GEMQRT" ~ "lapack_gemqrt",
-      .data$Kernel == "GEQRT" ~ "lapack_geqrt",
-      .data$Kernel == "TPMQRT" ~ "lapack_tpmqrt",
-      .data$Kernel == "TPQRT" ~ "lapack_tpqrt",
-      .data$Kernel == "Do_subtree" ~ "do_subtree",
-      .data$Kernel == "CLEAN" ~ "clean_front",
-      .data$Kernel == "INIT" ~ "init_front",
-      TRUE ~ .data$Kernel
-    )) %>%
-    # Add new kernels
-    bind_rows(tibble(
-      Kernel = c("init_block", "clean_block", "block_copy"),
-      Color = c("#FFFF33", "#984EA3", "#ad0a18")
-    )) %>%
-    mutate(Use = TRUE)
+  tibble(
+    Kernel = c("geqrt", "gemqrt", "tpqrt", "tpmqrt", "block_extadd",                           # qrm new
+               "lapack_geqrt", "lapack_gemqrt", "lapack_tpqrt", "lapack_tpmqrt", "block_copy", # qrm older
+               "do_subtree", "init_block", "clean_block", "init_front", "clean_front"),
+    Color = c("#FF7F00", "#377EB8", "#F781BF", "#A65628", "#E41A1C", 
+              "#FF7F00", "#377EB8", "#F781BF", "#A65628", "#E41A1C",
+              "#4DAF4A", "#FFFF33", "#984EA3", "#FFFF33", "#984EA3"),
+    Use = c(TRUE, TRUE, TRUE, TRUE, TRUE,
+            TRUE, TRUE, TRUE, TRUE, TRUE, 
+            TRUE, TRUE, TRUE, TRUE, TRUE)
+  )
 }

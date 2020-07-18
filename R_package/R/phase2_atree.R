@@ -160,7 +160,7 @@ atree_temporal_chart <- function(data = NULL, step = 100, globalEndTime = NULL) 
   atreeplot <- data$Application %>%
     # Considering only Intermediary nodes
     filter(.data$Intermediary) %>%
-    filter(grepl("lapack_", .data$Value) | grepl("subtree", .data$Value)) %>%
+    filter(grepl("qrt", .data$Value) | grepl("subtree", .data$Value)) %>%
     unique() %>%
     # Remove all tasks that do not have ANode
     filter(!is.na(.data$Height.ANode)) %>%
@@ -243,7 +243,7 @@ active_nodes_chart <- function(data = NULL) {
 
     # get the nodes that where pruned
     seq_tree <- dfv %>%
-      filter(.data$Task == "do_subtree") %>%
+      filter(grepl("subtree", .data$Task)) %>%
       .$ANode
 
     dfv <- dfv %>%
@@ -414,7 +414,7 @@ resource_utilization_tree_node <- function(data = NULL, step = 100) {
   # Prepare and filter data
   df_filter <- data$Application %>%
     filter(
-      grepl("lapack", .data$Value) | grepl("subtree", .data$Value)
+      grepl("qrt", .data$Value) | grepl("subtree", .data$Value)
     ) %>%
     select(.data$ANode, .data$Start, .data$End, .data$JobId) %>%
     unique() %>%
@@ -564,7 +564,7 @@ resource_utilization_tree_depth_plot <- function(data = NULL, step = 100) {
   loginfo("Entry of resource_utilization_tree_depth_plot")
   # Prepare and filter data
   df_filter <- data$Application %>%
-    filter(grepl("lapack", .data$Value) | grepl("do_sub", .data$Value)) %>%
+    filter(grepl("qrt", .data$Value) | grepl("do_sub", .data$Value)) %>%
     select(.data$ANode, .data$Start, .data$End, .data$JobId) %>%
     arrange(.data$Start)
 

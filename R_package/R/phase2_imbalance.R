@@ -132,7 +132,7 @@ utilization_per_step <- function(data_app, step) {
       UtilLast = .data$End %% step
     ) %>%
     mutate(FullUtil = mapply(function(x, y) seq(x, y, by = 1), .data$SStep, .data$EStep)) %>%
-    unnest() %>%
+    unnest(cols = c(FullUtil)) %>%
     mutate(Util = case_when(
       (.data$FullUtil == .data$SStep) ~ .data$UtilFirst,
       (.data$FullUtil == .data$EStep) ~ .data$UtilLast,
@@ -160,7 +160,7 @@ var_imbalance <- function(data, step) {
     pivot_longer(-.data$Step, names_to = "metric", values_to = "value") %>%
     mutate(Time = .data$Step * step + step / 2) -> to_plot
 
-  to_plot %>% var_imbalance_plot("Imb Metric", step, data_app <- data$Application)
+  to_plot %>% var_imbalance_plot("Imb Metric", step, data$config$base_size, data$config$expand)
 }
 
 var_imbalance_power <- function(data, step) {
@@ -250,7 +250,7 @@ utilization_per_step_double_hetero <- function(step, df) {
       UtilLast = .data$End %% step
     ) %>%
     mutate(FullUtil = mapply(function(x, y) seq(x, y, by = 1), .data$SStep, .data$EStep)) %>%
-    unnest() %>%
+    unnest(cols = c(FullUtil)) %>%
     mutate(Util = case_when(
       (.data$FullUtil == .data$SStep) ~ .data$UtilFirst,
       (.data$FullUtil == .data$EStep) ~ .data$UtilLast,

@@ -1,20 +1,25 @@
 #' @include starvz_data.R
 
-geom_atree <- function(data = NULL, Offset = 1.02, Flip = TRUE) {
-  if (is.null(data)) stop("input data for geom_atree is NULL")
+#' Create the elimination tree structure plot along time
+#'
+#' Use Atree and Application data to create the elimination tree strucutre plot in a ggplot object and return it
+#'
+#' @param Application starvz_data Application trace data
+#' @param Atree starvz_data Atree elimination tree trace data
+#' @return A ggplot object
+#' @examples
+#' geom_atree_plot(data$Application, data$Atree)
+#' @export
+geom_atree_plot <- function(Application = NULL, Atree = NULL) {
+  if (is.null(Atree)) stop("input data for geom_atree_plot is NULL")
 
-  makespan <- data$Application %>%
+  makespan <- Application %>%
     .$End %>%
     max()
 
-  ffactor <- ifelse(Flip, +1, -1)
-  dfactor <- makespan * 0.04
-  doffset <- makespan * Offset
-
-  dtree <- data$Atree %>%
+  dtree <- Atree %>%
     # Get Start time of the first task belonging to each ANode
-    left_join(data$Application %>%
-      filter(.data$Value != "block_copy") %>%
+    left_join(Application %>%
       select(.data$ANode, .data$Start, .data$End) %>%
       group_by(.data$ANode) %>%
       summarize(
@@ -23,23 +28,15 @@ geom_atree <- function(data = NULL, Offset = 1.02, Flip = TRUE) {
       ),
     by = "ANode"
     ) %>%
-    # Get graphical properties of each parent for each row
+    # Get graphical properties of Parent for each ANode
     left_join(
       x = .,
       y = .,
-      by = c("Parent" = "ANode"), suffix = c(".Node", ".Parent")
-    ) %>%
-    rename(
-      Height = .data$Height.Node,
-      Position = .data$Position.Node,
-      Depth = .data$Depth.Node,
-      Intermediary = .data$Intermediary.Node,
-      Start = .data$Start.Node,
-      End = .data$End.Node
+      by = c("Parent" = "ANode"), suffix = c("", ".Parent")
     ) %>%
     select(-.data$Parent.Parent) %>%
-    # Keep only intermediary nodes
-    filter(.data$Intermediary == TRUE) %>%
+    # Keep only non pruned nodes for tree structure
+    filter(.data$NodeType != "Pruned") %>%
     # Calculate coordinates for lines connecting child with parent
     mutate(
       Edge.X = .data$Start,
@@ -56,7 +53,7 @@ geom_atree <- function(data = NULL, Offset = 1.02, Flip = TRUE) {
 
   # data frame for the tree plot structure
   dstruct <- dtree %>%
-    # Remove that without parent
+    # Remove nodes without parent
     filter(!is.na(.data$Parent)) %>%
     # The root has no tasks associated with, remove it.
     mutate(Parent = as.integer(.data$Parent)) %>%
@@ -67,63 +64,56 @@ geom_atree <- function(data = NULL, Offset = 1.02, Flip = TRUE) {
     select(.data$ANode, .data$Start, .data$End, .data$Position, .data$Height, .data$Parent) %>%
     filter(!is.na(.data$Parent), !is.na(.data$Start))
 
-  ret <-
-    list(
-      # Lines connecting child with parent (Start)
-      geom_segment(
-        data = dstruct,
-        arrow = arrow(length = unit(0.03, "npc")),
-        aes(
-          x = .data$Edge.X,
-          y = .data$Edge.Y,
-          xend = .data$Edge.Xend,
-          yend = .data$Edge.Yend
-        ),
-        color = "blue"
-      ),
-      geom_point(
-        data = dstruct,
-        aes(
-          x = .data$Edge.X,
-          y = .data$Edge.Y
-        ), color = "blue"
-      ),
-      # Lines connecting child with parent (End)
-      geom_segment(
-        data = dstruct,
-        arrow = arrow(length = unit(0.03, "npc")),
-        aes(
-          x = .data$Edge.End.X,
-          y = .data$Edge.End.Y,
-          xend = .data$Edge.End.Xend,
-          yend = .data$Edge.End.Yend
-        ),
-        color = "red"
-      ),
-      geom_point(
-        data = dstruct,
-        aes(
-          x = .data$Edge.End.X,
-          y = .data$Edge.End.Y
-        ), color = "red"
-      ),
-      # Fix time coordinates
-      coord_cartesian(xlim = c(0, makespan)),
-      # Horizontal lines
-      geom_segment(data = dline, aes(
+  atreeplot <- ggplot() +
+    # Lines connecting child with parent (Start)
+    geom_segment(
+      data = dstruct,
+      aes(
+        x = .data$Edge.X,
+        y = .data$Edge.Y,
+        xend = .data$Edge.Xend,
+        yend = .data$Edge.Yend
+      ), arrow = arrow(length = unit(0.03, "npc")), color = "#1B9E77"
+    ) +
+    geom_point(
+      data = dstruct,
+      aes(
+        x = .data$Edge.X,
+        y = .data$Edge.Y
+      ), color = "#1B9E77"
+    ) +
+    # Lines connecting child with parent (End)
+    geom_segment(
+      data = dstruct,
+      arrow = arrow(length = unit(0.03, "npc")),
+      aes(
+        x = .data$Edge.End.X,
+        y = .data$Edge.End.Y,
+        xend = .data$Edge.End.Xend,
+        yend = .data$Edge.End.Yend
+      ), color = "#D95F02"
+    ) +
+    geom_point(
+      data = dstruct,
+      aes(
+        x = .data$Edge.End.X,
+        y = .data$Edge.End.Y
+      ), color = "#D95F02"
+    ) +
+    # Fix time coordinates
+    coord_cartesian(xlim = c(0, makespan)) +
+    # Horizontal lines
+    geom_segment(data = dline, 
+      aes(
         y = .data$Position + .data$Height / 2,
-        yend = .data$Position + .data$Height / 2, x = .data$Start, xend = .data$End
-      ), color = "lightblue")
+        yend = .data$Position + .data$Height / 2, 
+        x = .data$Start, 
+        xend = .data$End
+      ), color = "lightblue"
     )
-  return(ret)
+
+  return(atreeplot)
 }
-
-atree_temporal_chart <- function(data = NULL, step = 100, globalEndTime = NULL) {
-  if (is.null(data)) stop("a NULL data has been provided to atree_temporal_chart")
-
-  loginfo("Entry of atree_temporal_chart")
-
-  df_node_plot <- resource_utilization_tree_node(data = data, step = step)
 
   # Calculate NodeUsage, this represent the "most active" node at the time slice
   df_node_plot %>%

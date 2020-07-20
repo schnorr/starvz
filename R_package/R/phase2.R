@@ -68,10 +68,6 @@ starvz_compute_plot_heights <- function(plist, config) {
     P[[length(P) + 1]] <- plist$nodememuse
     H[[length(H) + 1]] <- config_value(data$config$activenodes$nodememuse$height, data$config$guided$starvz_height_var)
   }
-  if (data$config$computingnodes$active) {
-    P[[length(P) + 1]] <- plist$computingnodes
-    H[[length(H) + 1]] <- config_value(data$config$computingnodes$height, data$config$guided$starvz_height_var)
-  }
   if (data$config$kiteration$active) {
     P[[length(P) + 1]] <- plist$ijk
     H[[length(H) + 1]] <- config_value(data$config$kiteration$height, data$config$guided$starvz_height_todo)
@@ -470,15 +466,13 @@ starvz_plot_list <- function(data = NULL) {
     data$config$utiltreenode$active ||
       data$config$utiltreedepth$active ||
       data$config$atree$active ||
-      data$config$activenodes$active ||
-      data$config$computingnodes$active
+      data$config$activenodes$active
   )) {
     logwarn("This dataset dont have atree, disabling some options")
     data$config$utiltreenode$active <<- FALSE
     data$config$utiltreedepth$active <<- FALSE
     data$config$atree$active <<- FALSE
     data$config$activenodes$active <<- FALSE
-    data$config$computingnodes$active <<- FALSE
   }
 
   # Define the global aggregation step as 0.1% of the total window
@@ -512,7 +506,6 @@ starvz_plot_list <- function(data = NULL) {
   heatmap <- geom_blank()
   goactivenodes <- geom_blank()
   gonodememuse <- geom_blank()
-  gocomputingnodes <- geom_blank()
   tplot <- geom_blank()
 
   # Atree space/time view
@@ -954,19 +947,6 @@ starvz_plot_list <- function(data = NULL) {
     }
   }
 
-  # Computing Nodes
-  if (data$config$computingnodes$active) {
-    loginfo("Creating the Computing Nodes plot")
-    aggStep <- config_value(data$config$computingnodes$step, globalAggStep)
-    if ((data$Application %>% filter(!is.na(.data$ANode)) %>% nrow()) == 0) {
-      logwarn("There aren't any information on ANode, ignoring it.")
-      data$config$computingnodes$active <<- FALSE
-    } else {
-      gocomputingnodes <- computing_nodes_chart(data = data, step = aggStep) + tScale
-      loginfo("Exit of computing_nodes_chart")
-    }
-  }
-
   # Title
   if (data$config$title$active) {
     if (!is.null(directory)) {
@@ -1002,7 +982,6 @@ starvz_plot_list <- function(data = NULL) {
     gflops = gogfv,
     activenodes = goactivenodes,
     nodememuse = gonodememuse,
-    computingnodes = gocomputingnodes,
     summary_nodes = go_sn,
     tplot = tplot
   )

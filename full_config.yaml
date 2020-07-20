@@ -219,10 +219,6 @@ default:
         active: FALSE # Enable
         step: 100 # Time step used for aggregation
 
-  computingnodes: # Plot the computationally active nodes over time
-    active: FALSE # Enable
-    height: 2 # Vertical size for the plot
-    step: 10 # Time step used for aggregation
 
   gflops:
     active: FALSE

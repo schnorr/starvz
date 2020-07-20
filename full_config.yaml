@@ -214,11 +214,6 @@ default:
     nodememuse: # Plot the memory usage for qr_mumps
       active: FALSE # Enable
       height: 2 # Vertical size for the plot
-      mempeak: FALSE # Show/Hide memory usage peak
-      aggregation: # If enable, aggregates the visualization tasks inside a time step.
-        active: FALSE # Enable
-        step: 100 # Time step used for aggregation
-
 
   gflops:
     active: FALSE

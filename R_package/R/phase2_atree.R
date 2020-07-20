@@ -595,15 +595,6 @@ nodes_memory_usage_plot <- function(data = NULL) {
       geom_line() +
       default_theme(data$config$base_size, data$config$expand)
 
-    if (data$config$activenodes$nodememuse$mempeak) {
-      mem_peak <- max(df_mem$UsedMemMB)
-      node_mem_use <- node_mem_use +
-        geom_text(aes(x = 0, y = mem_peak),
-          hjust = -.5, vjust = 1.1, color = "red",
-          label = paste0("Memory peak = ", round(mem_peak, digits = 2), "MB")
-        ) +
-        geom_hline(yintercept = mem_peak, color = "red", linetype = "dashed")
-    }
   }
   node_mem_use <- node_mem_use +
     theme(legend.position = "none") +

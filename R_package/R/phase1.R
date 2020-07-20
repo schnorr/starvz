@@ -195,7 +195,7 @@ atree_to_df <- function(node) {
 
 reorder_elimination_tree <- function(Atree, Application) {
 
-  # Reorganize tree Position
+  # Reorganize tree Position, consider only not pruned nodes and submission order
   data_reorder <- Application %>%
     filter(grepl("qrt", .data$Value)) %>%
     select(.data$ANode, .data$SubmitOrder) %>%
@@ -214,10 +214,10 @@ reorder_elimination_tree <- function(Atree, Application) {
     select(-.data$Position, -.data$Height) %>%
     left_join(data_reorder, by = "ANode")
 
-  # Need to define Position for pruned nodes
+  # Define Position for pruned nodes as the same of its Parent
   data_pruned_position <- Application %>%
     filter(grepl("qrt", .data$Value) | grepl("do_subtree", .data$Value)) %>%
-    mutate(NodeType = case_when(.data$Value == "do_subtree" ~ "Pruned", TRUE ~ "Normal")) %>%
+    mutate(NodeType = case_when(.data$Value == "do_subtree" ~ "Pruned", TRUE ~ "Not Pruned")) %>%
     select(-.data$Position, -.data$Height) %>% 
     left_join(Atree, by = "ANode") %>% 
     select(.data$ANode, .data$Parent, .data$NodeType, .data$Position, .data$Height) %>% 
@@ -233,10 +233,10 @@ reorder_elimination_tree <- function(Atree, Application) {
     select(-.data$Parent, -.data$Position.Parent, -.data$Height.Parent)
   
   Atree <- Atree %>%
-    # Replace Position and Height by new ordering
+    # Replace Position and Height for pruned nodes
     select(-.data$Position, -.data$Height) %>%
     left_join(data_pruned_position, by = "ANode")
-
+    
   return(Atree)
 }
 

@@ -384,6 +384,21 @@ resource_utilization_tree_depth_plot <- function(data = NULL, step = 100) {
   resource_utilization_tree_depth(df_depth_plot, base_size = data$config$base_size, expand = data$config$expand)
 }
 
+# Define a geom rect receiving the data and defining the fill color as the resource usage 
+atree_geom_rect_gradient <- function(data, yminOffset, ymaxOffset) {
+  list(
+    geom_rect(
+      data = data,
+      aes(
+        fill = .data$NodeUsage,
+        xmin = .data$Start,
+        xmax = .data$End,
+        ymin = .data$Position + yminOffset,
+        ymax = .data$Position + ymaxOffset
+      )
+    )
+  )
+}
 nodes_memory_usage_plot <- function(data = NULL) {
   loginfo("Entry of nodes_memory_usage_plot")
   if (is.null(data)) stop("a NULL data has been provided to nodes_memory_usage_plot")
@@ -425,10 +440,22 @@ nodes_memory_usage_plot <- function(data = NULL) {
       arrange(.data$Time) %>%
       mutate(UsedMemMB = lag(.data$UsedMemMB))
 
-    node_mem_use <- df_mem %>%
-      ggplot(aes(x = .data$Time, y = .data$UsedMemMB, color = .data$Node)) +
-      geom_line() +
-      default_theme(data$config$base_size, data$config$expand)
+# Define a geom rect receiving the data, color, and height of the geom_rect
+atree_geom_rect <- function(data, color, yminOffset, ymaxOffset, alpha) {
+  list(
+    geom_rect(
+      data = data,
+      aes(
+        xmin = .data$Start,
+        xmax = .data$End,
+        ymin = .data$Position + yminOffset,
+        ymax = .data$Position + ymaxOffset
+      ),
+      fill = color,
+      alpha = alpha
+    )
+  )
+}
 
   }
   node_mem_use <- node_mem_use +

@@ -2,7 +2,8 @@
 
 #' Create the elimination tree structure plot along time
 #'
-#' Use Atree and Application data to create the elimination tree strucutre plot in a ggplot object and return it
+#' Use Atree and Application data to create the elimination tree
+#' strucutre plot in a ggplot object and return it
 #'
 #' @param Application starvz_data Application trace data
 #' @param Atree starvz_data Atree elimination tree trace data

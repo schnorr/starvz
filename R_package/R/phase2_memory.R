@@ -468,22 +468,6 @@ pre_handle_gantt <- function(data, name_func = NULL) {
     select(.data$Handle, .data$Info, .data$Container) %>%
     mutate(Info = as.integer(.data$Info)) -> links_handles
 
-  mpi_links <- data$Link %>%
-    filter(.data$Type == "MPI communication") %>%
-    select(-.data$Container, -.data$Size) %>%
-    mutate(Origin = str_replace(.data$Origin, "mpict", "MEMMANAGER0")) %>%
-    mutate(Dest = str_replace(.data$Dest, "mpict", "MEMMANAGER0")) %>%
-    inner_join(position, by = c("Origin" = "Container")) %>%
-    rename(origin_y = .data$y1) %>%
-    inner_join(position, by = c("Dest" = "Container")) %>%
-    rename(dest_y = .data$y1) %>%
-    mutate(Tag = as.numeric(as.character(.data$Tag))) %>%
-    inner_join(data$Data_handle, by = c("Tag" = "MPITag")) %>%
-    name_func() %>%
-    select(.data$Type, .data$Start, .data$End, .data$Value, .data$origin_y, .data$dest_y) %>%
-    rename(Transfer = .data$Type) %>%
-    unique()
-
   links <- data$Link %>%
     filter(.data$Type == "Intra-node data Fetch" |
       .data$Type == "Intra-node data PreFetch") %>%
@@ -502,8 +486,28 @@ pre_handle_gantt <- function(data, name_func = NULL) {
     select(.data$Type, .data$Start, .data$End, .data$Value, .data$origin_y, .data$dest_y) %>%
     rename(Transfer = .data$Type)
 
-  all_links <- bind_rows(mpi_links, final_links)
-
+  if ("MPI communication" %in% unique(data$Link$Type)) {
+    mpi_links <- data$Link %>%
+      filter(.data$Type == "MPI communication") %>%
+      select(-.data$Container, -.data$Size) %>%
+      mutate(Origin = str_replace(.data$Origin, "mpict", "MEMMANAGER0")) %>%
+      mutate(Dest = str_replace(.data$Dest, "mpict", "MEMMANAGER0")) %>%
+      inner_join(position, by = c("Origin" = "Container")) %>%
+      rename(origin_y = .data$y1) %>%
+      inner_join(position, by = c("Dest" = "Container")) %>%
+      rename(dest_y = .data$y1) %>%
+      mutate(Tag = as.numeric(as.character(.data$Tag))) %>%
+      inner_join(data$Data_handle, by = c("Tag" = "MPITag")) %>%
+      name_func() %>%
+      select(.data$Type, .data$Start, .data$End, .data$Value, .data$origin_y, .data$dest_y) %>%
+      rename(Transfer = .data$Type) %>%
+      unique()
+   
+    all_links <- bind_rows(mpi_links, final_links)
+  } else {
+    all_links <- final_links
+  }
+    
   return(list(
     all_st_m_data = all_st_m_data,
     events_points = events_points,

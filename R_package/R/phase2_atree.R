@@ -343,6 +343,63 @@ resource_utilization_tree_depth_plot <- function(Application = NULL, Atree = NUL
     ylim(0, 100)
 }
 
+#' Create the node memory usage plot
+#'
+#' Use starvz_data to create a line plot of the memory usage in MB of
+#' active nodes along the application execution time
+#'
+#' @param Application starvz_data Application trace data
+#' @param step size in milliseconds for the time aggregation step 
+#' @return A ggplot object
+#' @examples
+#' active_nodes_plot(data$Application, step=100)
+#' @export
+nodes_memory_usage_plot <- function(Application = NULL, step = 100) {
+  loginfo("Entry of nodes_memory_usage_plot")
+  if (is.null(Application)) stop("a NULL data has been provided to nodes_memory_usage_plot")
+  node_mem_utilization_plot <- geom_blank()
+
+  # Prepare data
+  data_mem_utilization <- Application %>%
+    filter(grepl("front", .data$Value) | grepl("do_subtree", .data$Value)) %>%
+    rename(Task = .data$Value) %>%
+    mutate(UsedMemMB = ifelse(grepl("clean", .data$Task), -.data$GFlop * 1024, .data$GFlop * 1024)) %>%
+    arrange(.data$Start) %>%
+    mutate(Value = cumsum(.data$UsedMemMB)) %>%
+    mutate(Type = NA)
+
+  if (data$config$activenodes$aggregation$active) {
+    node_mem_utilization_plot <- var_integration_chart(data_mem_utilization, ylabel = NA, step = step, facetting = FALSE, base_size = data$config$base_size, expand = data$config$expand)
+  } else {
+    # TODO: try to reuse some code form above
+    # mem use without time aggregation
+    df_mem <- Application %>%
+      filter(grepl("front", .data$Value) | grepl("do_sub", .data$Value)) %>%
+      select(.data$Start, .data$Value, .data$GFlop, .data$ANode, .data$Node) %>%
+      arrange(.data$Start) %>%
+      mutate(GFlop = ifelse(.data$Value == "clean_front", -.data$GFlop, .data$GFlop)) %>%
+      mutate(MemMB = .data$GFlop * 1024) %>%
+      mutate(UsedMemMB = cumsum(.data$MemMB)) %>%
+      mutate(Time = .data$Start * 0.9999) %>%
+      gather(.data$Start, .data$Time, key = "Start", value = "Time") %>%
+      select(-.data$Start) %>%
+      arrange(.data$Time) %>%
+      mutate(UsedMemMB = lag(.data$UsedMemMB))
+
+    node_mem_utilization_plot <- df_mem %>%
+      ggplot(aes(x = .data$Time, y = .data$UsedMemMB, color = .data$Node)) +
+      geom_line() +
+      default_theme(data$config$base_size, data$config$expand)
+  }
+
+  node_mem_utilization_plot <- node_mem_utilization_plot +
+    theme(legend.position = "none") +
+    ylab("Used\nMB") +
+    scale_color_brewer(palette = "Dark2")
+
+  loginfo("Exit of nodes_memory_usage_plot")
+  return(node_mem_utilization_plot)
+}
 # Calculate the computational resource utilization by tree node
 resource_utilization_tree_node <- function(Application = NULL, Atree = NULL, step = 100, group_pruned=FALSE) {
   loginfo("Entry of resource_utilization_tree_node")
@@ -502,46 +559,6 @@ atree_geom_rect_gradient <- function(data, yminOffset, ymaxOffset) {
     )
   )
 }
-nodes_memory_usage_plot <- function(data = NULL) {
-  loginfo("Entry of nodes_memory_usage_plot")
-  if (is.null(data)) stop("a NULL data has been provided to nodes_memory_usage_plot")
-  node_mem_use <- geom_blank()
-
-  if (data$config$activenodes$nodememuse$aggregation$active) {
-    # mem use with time aggregation
-    dfv <- data$Application %>%
-      filter(grepl("front", .data$Value) | grepl("do_sub", .data$Value)) %>%
-      rename(Task = .data$Value) %>%
-      # GFlop here holds the memory allocated/freed by a task
-      mutate(MemMB = ifelse(grepl("clean", .data$Task), -.data$GFlop * 1024, .data$GFlop * 1024)) %>%
-      arrange(.data$Start) %>%
-      mutate(Value = cumsum(.data$MemMB)) %>%
-      group_by(.data$Node) %>%
-      select(
-        -.data$Duration,
-        -.data$Size, -.data$Depth, -.data$Params, -.data$JobId, -.data$Footprint, -.data$Tag,
-        -.data$GFlop, -.data$X, -.data$Y, -.data$Iteration, -.data$Subiteration,
-        -.data$Resource, -.data$Outlier, -.data$Height,
-        -.data$Position
-      ) %>%
-      mutate(Type = NA)
-
-    step <- data$config$activenodes$nodememuse$aggregation$step
-    node_mem_use <- var_integration_chart(dfv, ylabel = NA, step = step, facetting = FALSE, base_size = data$config$base_size, expand = data$config$expand)
-  } else {
-    # mem use without time aggregation
-    df_mem <- data$Application %>%
-      filter(grepl("front", .data$Value) | grepl("do_sub", .data$Value)) %>%
-      select(.data$Start, .data$Value, .data$GFlop, .data$ANode, .data$Node) %>%
-      arrange(.data$Start) %>%
-      mutate(GFlop = ifelse(.data$Value == "clean_front", -.data$GFlop, .data$GFlop)) %>%
-      mutate(MemMB = .data$GFlop * 1024) %>%
-      mutate(UsedMemMB = cumsum(.data$MemMB)) %>%
-      mutate(Time = .data$Start * 0.9999) %>%
-      gather(.data$Start, .data$Time, key = "Start", value = "Time") %>%
-      select(-.data$Start) %>%
-      arrange(.data$Time) %>%
-      mutate(UsedMemMB = lag(.data$UsedMemMB))
 
 # Define a geom rect receiving the data, color, and height of the geom_rect
 atree_geom_rect <- function(data, color, yminOffset, ymaxOffset, alpha) {

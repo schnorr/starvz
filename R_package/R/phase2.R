@@ -935,6 +935,7 @@ starvz_plot_list <- function(data = NULL) {
       }
     }
   }
+
   # Node memory usage
   if (data$config$activenodes$nodememuse$active) {
     loginfo("Creating the Node Memory Usage plot")
@@ -943,7 +944,8 @@ starvz_plot_list <- function(data = NULL) {
       logwarn("There is no memory information on data, ignoring it.")
       data$config$activenodes$nodememuse$active <<- FALSE
     } else {
-      gonodememuse <- nodes_memory_usage_plot(data = data) + tScale
+      aggStep <- config_value(data$config$activenodes$aggregation$step, globalAggStep)
+      gonodememuse <- nodes_memory_usage_plot(data$Application, aggStep) + tScale
     }
   }
 

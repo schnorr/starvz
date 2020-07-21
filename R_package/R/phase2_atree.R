@@ -115,258 +115,103 @@ geom_atree_plot <- function(Application = NULL, Atree = NULL) {
   return(atreeplot)
 }
 
-  # Calculate NodeUsage, this represent the "most active" node at the time slice
-  df_node_plot %>%
+#' Create the elimination tree plot with some options in the config file
+#'
+#' Use starvz_data to create a representation of the elimination tree structure
+#' considering the initialization, communication and computational tasks. These
+#' representations can be controlled in the configuration file. 
+#'
+#' @param Application starvz_data Application trace data
+#' @param Atree starvz_data Atree elimination tree trace data
+#' @param step size in milliseconds for the time aggregation step 
+#' @return A ggplot object
+#' @examples
+#' atree_temporal_plot(data$Application, data$Atree, step=100)
+#' @export
+atree_temporal_plot <- function(Application = NULL, Atree = NULL, step = 100) {
+  if (is.null(Application) | is.null(Atree)) stop("a NULL data has been provided to atree_temporal_plot")
+
+  loginfo("Entry of atree_temporal_plot")
+
+  data_utilization_node <- resource_utilization_tree_node(Application, Atree, step = step, group_pruned = TRUE)
+
+  # Manipulate data for the tree resource utilization plots
+  data_tree_utilization_plot <- data_utilization_node %>%
     filter(.data$Value != 0) %>%
-    select(.data$ANode, .data$Slice, .data$Value1, .data$Usage) %>%
+    select(.data$ANode, .data$Slice, .data$Value1) %>%
     ungroup() %>%
     rename(NodeUsage = .data$Value1) %>%
-    left_join(data$Atree, by = "ANode") %>%
-    # resize for node computation Start
-    inner_join(data$Application %>%
-      filter(grepl("init_", .data$Value)) %>%
-      select(.data$ANode, .data$End) %>% group_by(.data$ANode) %>%
+    left_join(Atree, by = "ANode") %>%
+    # Resize for node computation Start
+    inner_join(Application %>%
+      filter(grepl("init_", .data$Value) | grepl("do_subtree", .data$Value)) %>%
+      select(.data$ANode, .data$End) %>% 
+      group_by(.data$ANode) %>%
       filter(.data$End == max(.data$End)),
     by = "ANode"
     ) %>%
     mutate(Start = ifelse(.data$End >= .data$Slice, .data$End, .data$Slice)) %>%
     # resize for node computation End
     select(-.data$End) %>%
-    inner_join(data$Application %>%
-      select(.data$ANode, .data$End) %>% group_by(.data$ANode) %>%
+    inner_join(Application %>%
+      select(.data$ANode, .data$End) %>% 
+      group_by(.data$ANode) %>%
       filter(.data$End == max(.data$End)),
     by = "ANode"
     ) %>%
-    mutate(End = ifelse(.data$Slice + step >= .data$End, .data$End, .data$Slice + step)) -> df_node_plot_filtered
+    mutate(End = ifelse(.data$Slice + step >= .data$End, .data$End, .data$Slice + step))
 
-  # filter initialization tasks
-  dfw_init <- data$Application %>%
-    filter(grepl("init_", .data$Value)) %>%
-    unique() %>%
-    select(-.data$Position, -.data$Height) %>%
-    left_join(data$Atree, by = "ANode")
-
-  # Prepare for colors
-  atreeplot <- data$Application %>%
-    # Considering only Intermediary nodes
-    filter(.data$Intermediary) %>%
-    filter(grepl("qrt", .data$Value) | grepl("subtree", .data$Value)) %>%
-    unique() %>%
-    # Remove all tasks that do not have ANode
-    filter(!is.na(.data$Height.ANode)) %>%
-    ggplot() +
+  # 0. Add the atree structure representation first
+  atreeplot <- geom_atree_plot(Application, Atree) +
     default_theme(data$config$base_size, data$config$expand) +
     ylab("Elimination\nTree [nodes]") +
-    scale_y_continuous(breaks = NULL, labels = NULL) +
-    # Add the atree structure representation
-    geom_atree(data, Offset = 1.05, Flip = TRUE)
+    scale_y_continuous(breaks = NULL, labels = NULL)
 
-  if (data$config$atree$utilization) {
+  # Add the computation, initialization, and communication over the tree structure plot
+  # 1. Add computations  
+  if (data$config$atree$computation$active) {
     atreeplot <- atreeplot +
-      geom_rect(
-        data = df_node_plot_filtered,
-        aes(
-          fill = .data$NodeUsage,
-          xmin = .data$Start,
-          xmax = .data$End,
-          ymin = .data$Position,
-          ymax = .data$Position + .data$Height
-        )
-      ) +
-      scale_fill_gradient2(name = "Computational Load", limits = c(0, 100), midpoint = 50, low = "blue", mid = "yellow", high = "red") +
-      geom_rect(
-        data = dfw_init,
-        aes(
-          xmin = .data$Start,
-          xmax = .data$End,
-          ymin = .data$Position,
-          ymax = .data$Position + .data$Height
-        ),
-        fill = "#4DAF4A"
-      )
+      atree_geom_rect_gradient(data_tree_utilization_plot %>% filter(.data$NodeType != "Pruned"), yminOffset=0, ymaxOffset=1)
+
+    # Add the pruned node computation representations
+    if(data$config$atree$computation$pruned$active) {
+      atreeplot <- atreeplot +
+        atree_geom_rect_gradient(data_tree_utilization_plot %>% filter(.data$NodeType == "Pruned"), yminOffset=0.25, ymaxOffset=0.75)
+    }
+
+    # Add the color to represent computation
+    atreeplot <- atreeplot +
+      scale_fill_gradient2(name = "Computational Load", limits = c(0, 100), midpoint = 50, low = "blue", mid = "yellow", high = "red")
   }
 
-  # plot "communication" block_copy tasks in the tree nodes
-  if (data$config$atree$communication$active) {
-    # filter communication tasks
-    dfw_comm <- dfw %>%
-      filter(grepl("block_", .data$Value)) %>%
+  # 2. Add initialization tasks representation
+  if (data$config$atree$initialization$active) {
+    # filter initialization tasks
+    dfw_init <- Application %>%
+      filter(grepl("init_", .data$Value)) %>%
       unique() %>%
       select(-.data$Position, -.data$Height) %>%
-      left_join(data$Atree, by = "ANode")
+      left_join(Atree, by = "ANode")
 
     atreeplot <- atreeplot +
-      geom_rect(
-        data = dfw_comm,
-        aes(
-          xmin = .data$Start,
-          xmax = .data$End,
-          ymin = .data$Position + 0.25 * .data$Height,
-          ymax = .data$Position + 0.75 * .data$Height
-        ),
-        fill = "#000000", alpha = .3
-      )
+      atree_geom_rect(dfw_init, "#4DAF4A", yminOffset=0, ymaxOffset=1, alpha=0.7)
   }
 
-  loginfo("Exit of atree_temporal_chart")
+  # 3. Add "communication" (block_copy | block_extadd) tasks in the tree nodes
+  if (data$config$atree$communication$active) {
+    # filter communication tasks
+    dfw_comm <- Application %>%
+      filter(grepl("block_", .data$Value) | grepl("block_extadd", .data$Value)) %>%
+      unique() %>%
+      select(-.data$Position, -.data$Height) %>%
+      left_join(Atree, by = "ANode")
+
+    atreeplot <- atreeplot +
+      atree_geom_rect(dfw_comm, "#000000", yminOffset=0.25, ymaxOffset=0.75, alpha=0.7)
+  }
+
+  loginfo("Exit of atree_temporal_plot")
   return(atreeplot)
-}
-
-active_nodes_chart <- function(data = NULL) {
-  if (is.null(data)) stop("a NULL data has been provided to active_nodes_chart")
-  loginfo("Entry of active_nodes_chart")
-  activenodesplot <- geom_blank()
-
-  if (data$config$activenodes$aggregation$active) {
-    # use time aggregation
-    dfv <- data$Application %>%
-      rename(Task = .data$Value) %>%
-      filter(grepl("front", .data$Task) | grepl("subtree", .data$Task)) %>%
-      mutate(node_count = case_when(
-        .data$Task == "do_subtree" ~ 1,
-        .data$Task == "init_front" ~ 1,
-        .data$Task == "clean_front" ~ -1,
-        TRUE ~ 0
-      )) %>%
-      mutate(nodeType = case_when(grepl("subtree", .data$Task) ~ "Pruned")) %>%
-      mutate(Type = NA)
-
-    # get the nodes that where pruned
-    seq_tree <- dfv %>%
-      filter(grepl("subtree", .data$Task)) %>%
-      .$ANode
-
-    dfv <- dfv %>%
-      select(-.data$nodeType) %>%
-      left_join(dfv %>% select(.data$ANode, .data$nodeType), by = "ANode") %>%
-      mutate(nodeType = ifelse(.data$ANode %in% seq_tree, "Pruned", "Not Pruned")) %>%
-      arrange(.data$Start) %>%
-      group_by(.data$nodeType) %>%
-      mutate(Value = 0) %>%
-      mutate(Value = cumsum(.data$node_count)) %>%
-      mutate(ResourceType = .data$nodeType, Node = .data$nodeType)
-
-    step <- data$config$activenodes$aggregation$step
-    activenodesplot <- var_integration_chart(dfv, ylabel = NA, step = step, facetting = FALSE, base_size = data$config$base_size, expand = data$config$expand)
-  } else {
-    # do not use time aggregation
-    df_active <- data$Application %>%
-      filter(grepl("front", .data$Value) | grepl("subtree", .data$Value)) %>%
-      select(.data$ResourceId, .data$Start, .data$End, .data$Value, .data$ANode) %>%
-      mutate(
-        node_count = case_when(
-          .data$Value == "do_subtree" ~ "1",
-          .data$Value == "init_front" ~ "1",
-          .data$Value == "clean_front" ~ "-1",
-          TRUE ~ "<NA>"
-        ),
-        node_count = as.integer(.data$node_count)
-      )
-
-    # get all nodes that roots of sequential subtrees
-    df_active %>%
-      filter(.data$Value == "do_subtree") %>%
-      mutate(nodeType = TRUE) %>%
-      select(.data$ANode, .data$nodeType) -> seq_tree
-
-    df_active %>%
-      filter_at(vars(.data$ANode), any_vars(.data %in% seq_tree$ANode)) %>%
-      mutate(nodeType = "Pruned") -> seq_nodes
-
-    df_active %>%
-      filter_at(vars(.data$ANode), any_vars(!.data %in% seq_tree$ANode)) %>%
-      mutate(nodeType = "Not Pruned") -> front_nodes
-
-    # let's merge them
-    df_all <- front_nodes %>% bind_rows(seq_nodes)
-    df_all %>%
-      arrange(.data$Start) %>%
-      group_by(.data$nodeType) %>%
-      mutate(active = 0) %>%
-      mutate(active = cumsum(.data$node_count)) -> df_all
-
-    activenodesplot <- df_all %>%
-      ggplot(aes(x = .data$Start, y = .data$active, color = .data$nodeType)) +
-      default_theme(data$config$base_size, data$config$expand) +
-      geom_line()
-  }
-
-  activenodesplot <- activenodesplot +
-    theme(legend.position = "top") +
-    ylab("Active\nNodes") +
-    scale_colour_brewer(palette = "Dark2")
-
-  loginfo("Exit of active_nodes_chart")
-  return(activenodesplot)
-}
-
-  }
-
-
-# remyTimeIntegrationPrep without dividing the Value column by the time slice
-remyTimeIntegrationPrepNoDivision <- function(dfv = NULL, myStep = 100) {
-  if (is.null(dfv)) {
-    return(NULL)
-  }
-  if (nrow(dfv) == 0) {
-    return(NULL)
-  }
-  mySlices <- getSlices(dfv, step = myStep)
-  tibble(Slice = mySlices, Value = c(remyTimeIntegration(dfv, slices = mySlices), 0))
-}
-
-resource_utilization_tree_node <- function(data = NULL, step = 100) {
-  loginfo("Entry of resource_utilization_tree_node")
-  # Prepare and filter data
-  df_filter <- data$Application %>%
-    filter(
-      grepl("qrt", .data$Value) | grepl("subtree", .data$Value)
-    ) %>%
-    select(.data$ANode, .data$Start, .data$End, .data$JobId) %>%
-    unique() %>%
-    arrange(.data$Start)
-
-  # Get number of workers for resource utilization
-  NWorkers <- data$Application %>%
-    filter(grepl("CPU", .data$ResourceType) | grepl("CUDA", .data$ResourceType)) %>%
-    select(.data$ResourceId) %>%
-    unique() %>%
-    nrow()
-
-  # Compute the node parallelism
-  df_node_parallelism <- df_filter %>%
-    select(.data$ANode, .data$Start, .data$JobId) %>%
-    mutate(Event = "Start") %>%
-    rename(Time = .data$Start) %>%
-    bind_rows(df_filter %>%
-      select(.data$ANode, .data$End, .data$JobId) %>%
-      mutate(Event = "End") %>%
-      rename(Time = .data$End)) %>%
-    arrange(.data$Time) %>%
-    group_by(.data$ANode) %>%
-    mutate(Value = ifelse(.data$Event == "Start", 1, -1)) %>%
-    mutate(nodeParallelism = cumsum(.data$Value)) %>%
-    ungroup()
-
-  # Integrate resource utilization by ANode
-  df_node_plot <- df_node_parallelism %>%
-    select(.data$ANode, .data$Time, .data$nodeParallelism) %>%
-    arrange(.data$Time) %>%
-    mutate(End = lead(.data$Time)) %>%
-    mutate(Duration = .data$End - .data$Time) %>%
-    rename(Start = .data$Time, Value = .data$nodeParallelism) %>%
-    na.omit() %>%
-    group_by(.data$ANode) %>%
-    do(remyTimeIntegrationPrepNoDivision(., myStep = step)) %>%
-    # This give us the total worker usage grouped by ANode in a time slice
-    mutate(Value1 = .data$Value / (step * NWorkers) * 100) %>%
-    ungroup() %>%
-    group_by(.data$Slice) %>%
-    arrange(.data$Slice) %>%
-    mutate(Usage = sum(.data$Value1))
-
-  loginfo("Exit of resource_utilization_tree_node")
-  return(df_node_plot)
 }
 
 resource_utilization_tree_node_plot <- function(data = NULL, step = 100) {

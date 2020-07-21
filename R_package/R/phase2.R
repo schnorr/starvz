@@ -513,7 +513,7 @@ starvz_plot_list <- function(data = NULL) {
 
     loginfo("Creating the temporal atree plot")
     aggStep <- config_value(data$config$atree$step, globalAggStep)
-    goatreet <- atree_temporal_chart(data, step = aggStep) + tScale
+    goatreet <- atree_temporal_plot(data$Application, data$Atree, step = aggStep) + tScale
     if (!data$config$atree$legend) {
       goatreet <- goatreet + theme(legend.position = "none")
     } else {

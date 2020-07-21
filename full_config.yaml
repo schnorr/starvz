@@ -24,7 +24,13 @@ default:
   atree: # plot space/time tree structure computation
     active: FALSE # Disable
     step: 10 # Time step used for aggregation
-    height: # Vertical Size in the final visualization
+    height: 2 # Vertical Size in the final visualization
+    computation: # Show computation tasks in the tree nodes
+      active: FALSE # Enable
+      pruned: # Show computation tasks of the pruned nodes
+        active: FALSE # Enable
+    initialization: # Show initialization tasks in the tree nodes
+      active: FALSE # Enable
     communication: # Show communication tasks in the tree nodes
       active: FALSE # Enable
 

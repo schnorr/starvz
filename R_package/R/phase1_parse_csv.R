@@ -217,7 +217,7 @@ read_worker_csv <- function(where = ".",
     }
     # Step 1: apply the model to each task, considering the ResourceType
     Application %>%
-      filter(grepl("qrt", .data$Value) | grepl("do_subtree", .data$Value)) %>%
+      filter(grepl("qrt", .data$Value)) %>%
       unique() %>%
       group_by(.data$ResourceType, .data$Value) %>%
       nest() %>%

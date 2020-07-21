@@ -400,6 +400,69 @@ nodes_memory_usage_plot <- function(Application = NULL, step = 100) {
   loginfo("Exit of nodes_memory_usage_plot")
   return(node_mem_utilization_plot)
 }
+
+#' Create the active nodes in memory plot
+#'
+#' Use starvz_data to create a line plot of the number of active nodes per type
+#' along the application execution time
+#'
+#' @param Application starvz_data Application trace data
+#' @param Atree starvz_data Atree elimination tree trace data
+#' @return A ggplot object
+#' @examples
+#' active_nodes_plot(data$Application, data$Atree, step=100)
+#' @export
+active_nodes_plot <- function(Application = NULL, Atree = NULL, step = 100) {
+  if (is.null(Application) | is.null(Atree)) stop("a NULL data has been provided to active_nodes_plot")
+  loginfo("Entry of active_nodes_plot")
+  activenodesplot <- geom_blank()
+
+  # Prepare data
+  data_active_nodes <- data$Application %>%
+    filter(grepl("front", .data$Value) | grepl("subtree", .data$Value)) %>%
+    select(.data$ResourceId, .data$Start, .data$End, .data$Value, .data$ANode) %>%
+    mutate(
+      node_count = case_when(
+        .data$Value == "do_subtree" ~ 1,
+        .data$Value == "init_front" ~ 1,
+        .data$Value == "clean_front" ~ -1,
+        TRUE ~ 0
+      )
+    ) %>%
+    # get the node types from Atree
+    left_join(
+      data$Atree %>% select(.data$ANode, .data$NodeType), 
+      by="ANode"
+    ) %>%
+    arrange(.data$Start) %>%
+    group_by(.data$NodeType) %>%
+    rename(Task = .data$Value) %>%
+    mutate(Value = cumsum(.data$node_count)) %>%
+    filter(!is.na(.data$NodeType))
+
+  # use time aggregation or not
+  if (data$config$activenodes$aggregation$active) {
+    data_active_nodes <- data_active_nodes %>%
+      # need for the var integration
+      mutate(Type = NA) %>% 
+      mutate(ResourceType = .data$NodeType, Node = .data$NodeType)
+
+    activenodesplot <- var_integration_chart(data_active_nodes, ylabel = NA, step = step, facetting = FALSE, base_size = data$config$base_size, expand = data$config$expand)
+  } else {
+    activenodesplot <- data_active_nodes %>%
+      ggplot(aes(x = .data$Start, y = .data$Value, color = .data$NodeType)) +
+      default_theme(data$config$base_size, data$config$expand) +
+      geom_line() 
+  }
+
+  activenodesplot <- activenodesplot +
+    ylab("Active\nNodes") +
+    scale_colour_brewer(palette = "Dark2")
+
+  loginfo("Exit of active_nodes_plot")
+  return(activenodesplot)
+}
+
 # Calculate the computational resource utilization by tree node
 resource_utilization_tree_node <- function(Application = NULL, Atree = NULL, step = 100, group_pruned=FALSE) {
   loginfo("Entry of resource_utilization_tree_node")
@@ -577,14 +640,16 @@ atree_geom_rect <- function(data, color, yminOffset, ymaxOffset, alpha) {
   )
 }
 
+# remyTimeIntegrationPrep without dividing the Value column by the time slice
+remyTimeIntegrationPrepNoDivision <- function(dfv = NULL, myStep = 100) {
+  if (is.null(dfv)) {
+    return(NULL)
   }
-  node_mem_use <- node_mem_use +
-    theme(legend.position = "none") +
-    ylab("Used\nMB") +
-    scale_color_brewer(palette = "Dark2")
-
-  loginfo("Exit of nodes_memory_usage_plot")
-  return(node_mem_use)
+  if (nrow(dfv) == 0) {
+    return(NULL)
+  }
+  mySlices <- getSlices(dfv, step = myStep)
+  tibble(Slice = mySlices, Value = c(remyTimeIntegration(dfv, slices = mySlices), 0))
 }
 
 # Set of functions to define the color of the nodes in the resource utilization plot

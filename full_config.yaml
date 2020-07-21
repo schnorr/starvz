@@ -214,10 +214,11 @@ default:
 
   activenodes: # Plot the active node count over time
     active: FALSE # Enable
-    aggregation: # If enable, aggregates the visualization tasks inside a time step.
-      active: FALSE # Enable
-      step: 100 # Time step used for aggregation
     height: 2 # Vertical size for the plot
+    legend: TRUE # Enable/Disable legend
+    aggregation: # If enable, aggregates the visualization tasks inside a time step.
+      active: TRUE # Enable
+      step: 10 # Time step used for aggregation
     nodememuse: # Plot the memory usage for qr_mumps
       active: FALSE # Enable
       height: 2 # Vertical size for the plot

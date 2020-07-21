@@ -927,7 +927,8 @@ starvz_plot_list <- function(data = NULL) {
       logwarn("There aren't any information on ANode, ignoring it.")
       data$config$activenodes$active <<- FALSE
     } else {
-      goactivenodes <- data %>% active_nodes_chart() + tScale
+      aggStep <- config_value(data$config$activenodes$aggregation$step, globalAggStep)
+      goactivenodes <- active_nodes_plot(data$Application, data$Atree, aggStep) + tScale
       if (!data$config$activenodes$legend) {
         goactivenodes <- goactivenodes + theme(legend.position = "none")
       } else {

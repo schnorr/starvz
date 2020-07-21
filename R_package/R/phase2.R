@@ -540,7 +540,7 @@ starvz_plot_list <- function(data = NULL) {
   if (!is.null(data$Atree) && data$config$utiltreenode$active) {
     loginfo("Creating the resource utilization by node plot")
     aggStep <- config_value(data$config$utiltreenode$step, globalAggStep)
-    resource_utilization_tree_node_plot(data = data, step = aggStep) + tScale -> goutiltreenode
+    goutiltreenode <- resource_utilization_tree_node_plot(data$Application, data$Atree, step = aggStep) + tScale
     if (!data$config$utiltreenode$legend) {
       goutiltreenode <- goutiltreenode + theme(legend.position = "none")
     } else {

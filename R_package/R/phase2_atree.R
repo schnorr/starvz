@@ -214,8 +214,21 @@ atree_temporal_plot <- function(Application = NULL, Atree = NULL, step = 100) {
   return(atreeplot)
 }
 
-resource_utilization_tree_node_plot <- function(data = NULL, step = 100) {
-  df1 <- resource_utilization_tree_node(data = data, step = step)
+#' Create the resource utilization by tree node plot
+#'
+#' Use starvz_data Application and Atree to create a plot that shows the
+#' total resource utilization, painted by tree node using geom_ribbon. The
+#' colors are reused between nodes, not tied to as specific tree node.
+#'
+#' @param Application starvz_data Application trace data
+#' @param Atree starvz_data Atree elimination tree trace data
+#' @param step size in milliseconds for the time aggregation step 
+#' @return A ggplot object
+#' @examples
+#' resource_utilization_tree_node_plot(data$Application, data$Atree, step=100)
+#' @export
+resource_utilization_tree_node_plot <- function(Application = NULL, Atree = NULL, step = 100) {
+  df1 <- resource_utilization_tree_node(Application, Atree, step = step, group_pruned=FALSE)
 
   event_data <- df1 %>%
     filter(.data$Value != 0) %>%
@@ -274,6 +287,10 @@ resource_utilization_tree_node_plot <- function(data = NULL, step = 100) {
     max(.$Color)
   if (ncolors <= 10) {
     palette <- brewer.pal(9, "Greens")[3:9]
+  } else if(ncolors <= 20) {
+    palette <- c(
+      brewer.pal(9, "Reds")[3:9], brewer.pal(9, "Greens")[3:9]
+    )
   } else {
     palette <- c(
       brewer.pal(9, "Oranges")[3:9], brewer.pal(9, "Blues")[3:9],
@@ -312,6 +329,77 @@ resource_utilization_tree_depth <- function(data = NULL, base_size = 22, expand 
 }
 
 resource_utilization_tree_depth_plot <- function(data = NULL, step = 100) {
+# Calculate the computational resource utilization by tree node
+resource_utilization_tree_node <- function(Application = NULL, Atree = NULL, step = 100, group_pruned=FALSE) {
+  loginfo("Entry of resource_utilization_tree_node")
+  # Prepare and filter data
+  df_filter <- Application %>%
+    filter(
+      grepl("qrt", .data$Value) | grepl("subtree", .data$Value)
+    ) %>%
+    select(.data$ANode, .data$Start, .data$End, .data$JobId) %>%
+    unique() %>%
+    arrange(.data$Start)
+
+  # Get number of workers for resource utilization
+  NWorkers <- Application %>%
+    filter(grepl("CPU", .data$ResourceType) | grepl("CUDA", .data$ResourceType)) %>%
+    select(.data$ResourceId) %>%
+    unique() %>%
+    nrow()
+
+  # Group pruned nodes with same Parent to aggregate their computations
+  if(isTRUE(group_pruned)) {
+    # When we change ANode, we also need to update it in Atree, but this will modify other plots as well
+    groupPruned <- Atree %>%
+      mutate(NewANode = case_when(.data$NodeType == "Pruned" ~ paste0(.data$Parent, "Pruned"), TRUE ~ .data$ANode)) %>%
+      select(.data$ANode, .data$NodeType, .data$NewANode)
+
+    df_filter <- df_filter %>%
+      left_join(groupPruned %>% 
+        select(.data$ANode, .data$NodeType, .data$NewANode),
+        by="ANode"
+      ) %>%
+      mutate(originalAnode = .data$ANode, ANode = .data$NewANode)
+  }
+
+  # Compute the node parallelism
+  data_node_parallelism <- df_filter %>%
+    gather(.data$Start, .data$End, key="Event", value="Time") %>%
+    arrange(.data$Time) %>%
+    group_by(.data$ANode) %>%
+    mutate(Value = ifelse(.data$Event == "Start", 1, -1)) %>%
+    mutate(nodeParallelism = cumsum(.data$Value)) %>%
+    ungroup()
+
+  # Do the time aggregation of resource utilization by ANode
+  data_node_plot <- data_node_parallelism %>%
+    select(.data$ANode, .data$Time, .data$nodeParallelism) %>%
+    arrange(.data$Time) %>%
+    mutate(End = lead(.data$Time)) %>%
+    mutate(Duration = .data$End - .data$Time) %>%
+    rename(Start = .data$Time, Value = .data$nodeParallelism) %>%
+    na.omit() %>%
+    group_by(.data$ANode) %>%
+    do(remyTimeIntegrationPrepNoDivision(., myStep = step)) %>%
+    # This give us the total worker usage grouped by ANode in a time slice
+    mutate(Value1 = .data$Value / (step * NWorkers) * 100) %>%
+    ungroup()
+
+  # Restore original values of ANode for the Pruned nodes
+  if(isTRUE(group_pruned)) {
+    data_node_plot <- data_node_plot %>%
+      left_join(df_filter %>% select(.data$ANode, .data$originalAnode),
+        by="ANode"
+      ) %>%
+      mutate(ANode = .data$originalAnode) %>%
+      select(-.data$originalAnode)
+  }
+
+  loginfo("Exit of resource_utilization_tree_node")
+  return(data_node_plot)
+}
+
   loginfo("Entry of resource_utilization_tree_depth_plot")
   # Prepare and filter data
   df_filter <- data$Application %>%
@@ -467,6 +555,7 @@ atree_geom_rect <- function(data, color, yminOffset, ymaxOffset, alpha) {
   return(node_mem_use)
 }
 
+# Set of functions to define the color of the nodes in the resource utilization plot
 get_min_color <- function(node) {
   min_color <- 0
   while (1) {

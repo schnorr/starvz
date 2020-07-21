@@ -552,7 +552,7 @@ starvz_plot_list <- function(data = NULL) {
   if (!is.null(data$Atree) && data$config$utiltreedepth$active) {
     loginfo("Creating the resource utilization by depth plot")
     aggStep <- config_value(data$config$utiltreenode$step, globalAggStep)
-    resource_utilization_tree_depth_plot(data, step = aggStep) + tScale -> goutiltreedepth
+    goutiltreedepth <- resource_utilization_tree_depth_plot(data$Application, data$Atree, step = aggStep) + tScale 
     if (!data$config$utiltreedepth$legend) {
       goutiltreedepth <- goutiltreedepth + theme(legend.position = "none")
     } else {

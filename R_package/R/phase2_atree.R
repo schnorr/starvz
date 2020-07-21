@@ -311,16 +311,31 @@ resource_utilization_tree_node_plot <- function(Application = NULL, Atree = NULL
     ylim(0, 100)
 }
 
-resource_utilization_tree_depth <- function(data = NULL, base_size = 22, expand = 0.05) {
-  maxDepth <- data %>%
+#' Create the resource utilization by tree depth plot
+#'
+#' Use starvz_data Application and Atree to create a plot that shows the
+#' total resource utilization, painted by tree depth level using geom_ribbon
+#'
+#' @param Application starvz_data Application trace data
+#' @param Atree starvz_data Atree elimination tree trace data
+#' @param step size in milliseconds for the time aggregation step 
+#' @return A ggplot object
+#' @examples
+#' resource_utilization_tree_depth_plot(data$Application, data$Atree, step=100)
+#' @export
+resource_utilization_tree_depth_plot <- function(Application = NULL, Atree = NULL, step = 100) {
+  #Prepare data
+  depth_plot_data <- resource_utilization_tree_depth(Application, Atree, step)
+
+  maxDepth <- depth_plot_data %>%
     .$Depth %>%
     max()
   depthPalette <- rev(colorRampPalette(brewer.pal(9, "YlOrRd"))(maxDepth))
 
-  data %>%
+  depth_plot_data %>%
     ggplot() +
     geom_ribbon(aes(ymin = .data$Ymin, ymax = .data$Ymax, x = .data$Slice, fill = as.factor(.data$Depth))) +
-    default_theme(base_size, expand) +
+    default_theme(data$config$base_size, data$config$expand) +
     theme(legend.position = "top") +
     scale_fill_manual(values = depthPalette) +
     ylab("Usage %\nDepth") +
@@ -328,7 +343,6 @@ resource_utilization_tree_depth <- function(data = NULL, base_size = 22, expand 
     ylim(0, 100)
 }
 
-resource_utilization_tree_depth_plot <- function(data = NULL, step = 100) {
 # Calculate the computational resource utilization by tree node
 resource_utilization_tree_node <- function(Application = NULL, Atree = NULL, step = 100, group_pruned=FALSE) {
   loginfo("Entry of resource_utilization_tree_node")
@@ -400,15 +414,17 @@ resource_utilization_tree_node <- function(Application = NULL, Atree = NULL, ste
   return(data_node_plot)
 }
 
+# Calculate the computational resource utilization by tree depth
+resource_utilization_tree_depth <- function(Application = NULL, Atree = NULL, step = 100) {
   loginfo("Entry of resource_utilization_tree_depth_plot")
   # Prepare and filter data
-  df_filter <- data$Application %>%
-    filter(grepl("qrt", .data$Value) | grepl("do_sub", .data$Value)) %>%
+  df_filter <- Application %>%
+    filter(grepl("qrt", .data$Value) | grepl("do_subtree", .data$Value)) %>%
     select(.data$ANode, .data$Start, .data$End, .data$JobId) %>%
     arrange(.data$Start)
 
   # Get number of workers for resource utilization
-  NWorkers <- data$Application %>%
+  NWorkers <- Application %>%
     filter(grepl("CPU", .data$ResourceType) | grepl("CUDA", .data$ResourceType)) %>%
     select(.data$ResourceId) %>%
     unique() %>%
@@ -446,7 +462,7 @@ resource_utilization_tree_node <- function(Application = NULL, Atree = NULL, ste
     arrange(.data$Slice) %>%
     mutate(Usage = sum(.data$Value1)) %>%
     # usage by depth
-    left_join(data$Atree %>% select(.data$ANode, .data$Depth), by = "ANode") %>%
+    left_join(Atree %>% select(.data$ANode, .data$Depth), by = "ANode") %>%
     group_by(.data$Slice, .data$Depth) %>%
     mutate(Value1 = sum(.data$Value1)) %>%
     ungroup() %>%
@@ -454,7 +470,7 @@ resource_utilization_tree_node <- function(Application = NULL, Atree = NULL, ste
     unique()
 
   # expand all time slices with the possible colors (for geom_ribbon)
-  df_depth_plot <- df_node_plot %>%
+  data_depth_plot <- df_node_plot %>%
     expand(.data$Slice, Depth = 1:(df_node_plot$Depth %>% max())) %>%
     left_join(df_node_plot, by = c("Slice", "Depth")) %>%
     group_by(.data$Depth) %>%
@@ -468,8 +484,7 @@ resource_utilization_tree_node <- function(Application = NULL, Atree = NULL, ste
     ungroup() %>%
     filter(.data$Slc == 0 | .data$Slice == max(.data$Slice))
 
-  loginfo("Exit of resource_utilization_tree_depth_plot")
-  resource_utilization_tree_depth(df_depth_plot, base_size = data$config$base_size, expand = data$config$expand)
+    return(data_depth_plot)
 }
 
 # Define a geom rect receiving the data and defining the fill color as the resource usage 

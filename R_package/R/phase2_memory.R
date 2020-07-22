@@ -425,7 +425,7 @@ pre_handle_gantt <- function(data, name_func = NULL) {
   if (TR %>% nrow() > 0) {
     TR %>%
       mutate(P = substring(.data$Tid, 5)) %>%
-      mutate(G = substr(.data$Container, 1, nchar(.data$Container) - 1)) %>%
+      mutate(G = substr(.data$Container, 1, nchar(as.character(.data$Container)) - 1)) %>%
       mutate(Container = paste0(.data$G, .data$P)) %>%
       select(-.data$P, -.data$G) %>%
       select(-.data$Tid) %>%
@@ -535,8 +535,8 @@ handles_gantt <- function(data, JobId = NA, lines = NA, lHandle = NA) {
     data$Task_handles %>%
       filter(.data$JobId == myjobid) %>%
       inner_join(data$Data_handle, by = c("Handles" = "Handle")) %>%
-      ungroup() %>%
-      .$name_func() %>%
+      ungroup() -> xx
+    data$handle_gantt_data$name_func(xx) %>%
       .$Value -> selected_handles
 
     final_st_data <- data$handle_gantt_data$all_st_m_data %>% filter(.data$Value %in% selected_handles)

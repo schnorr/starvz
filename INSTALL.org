@@ -266,7 +266,7 @@ cmake -DARROW_CSV=ON \
       -DARROW_WITH_LZ4=ON \
       -DARROW_WITH_SNAPPY=ON \
       -DARROW_WITH_ZLIB=ON \
-      -DARROW_WITH_ZSTD=ON
+      -DARROW_WITH_ZSTD=ON \
       ..
 make
 make install

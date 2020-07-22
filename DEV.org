@@ -1,3 +1,18 @@
+* Coding conventions
+** Function naming
+   - Functions that return a ggplot object must be named with the
+     =panel_= prefix.
+   - After that prefix, the function name must match the config option
+     name in the =.yaml= file.
+
+** Function implementation
+   - The =panel_= functions must return the complete ggplot object. No
+     further editions need to be done outside it.
+   - All =panel_= functions receive the full =data= as the first parameter.
+   - All the possible configurations (legends, plot layers, metrics, ...)
+     of the =panel_= functions have to be passed as parameters.
+   - Use the =data$config= values as default values for the parameters.
+
 * Util Functions
 
 ** Check package

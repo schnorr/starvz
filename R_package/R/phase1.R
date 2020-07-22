@@ -111,10 +111,9 @@ starvz_phase1_read_write <- function(directory = ".", app_states_fun = NULL, sta
       rename(Height.ANode = .data$Height, Position.ANode = .data$Position)
     Worker$Application <- Worker$Application %>% left_join(dfap, by = "ANode")
     dfap <- NULL
+    # Reorder the elimination tree
+    dfa <- reorder_elimination_tree(dfa, Worker$Application)
   }
-
-  # Reorder the elimination tree
-  dfa <- reorder_elimination_tree(dfa, Worker$Application)
 
   # Read DAG
   dfdag <- read_dag(where = directory, Worker$Application %>% mutate(Application = TRUE), dfl)
@@ -218,9 +217,9 @@ reorder_elimination_tree <- function(Atree, Application) {
   data_pruned_position <- Application %>%
     filter(grepl("qrt", .data$Value) | grepl("do_subtree", .data$Value)) %>%
     mutate(NodeType = case_when(.data$Value == "do_subtree" ~ "Pruned", TRUE ~ "Not Pruned")) %>%
-    select(-.data$Position, -.data$Height) %>% 
-    left_join(Atree, by = "ANode") %>% 
-    select(.data$ANode, .data$Parent, .data$NodeType, .data$Position, .data$Height) %>% 
+    select(-.data$Position, -.data$Height) %>%
+    left_join(Atree, by = "ANode") %>%
+    select(.data$ANode, .data$Parent, .data$NodeType, .data$Position, .data$Height) %>%
     unique() %>%
     left_join(Atree %>%
       select(.data$ANode, .data$Position, .data$Height),
@@ -231,12 +230,12 @@ reorder_elimination_tree <- function(Atree, Application) {
              Height = case_when(.data$NodeType == "Pruned" ~ .data$Height.Parent, TRUE ~ .data$Height)
     ) %>%
     select(-.data$Parent, -.data$Position.Parent, -.data$Height.Parent)
-  
+
   Atree <- Atree %>%
     # Replace Position and Height for pruned nodes
     select(-.data$Position, -.data$Height) %>%
     left_join(data_pruned_position, by = "ANode")
-    
+
   return(Atree)
 }
 

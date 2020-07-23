@@ -1,6 +1,6 @@
 #' @include starvz_data.R
 
-node_summary <- function(data) {
+panel_node_summary <- function(data, legend=data$config$summary_nodes$legend) {
   hl_per_node_ABE(data$Application) -> Abes
   data$Application %>%
     group_by(.data$Node) %>%
@@ -38,5 +38,8 @@ node_summary <- function(data) {
       expand = c(data$config$expand, 0)
     ) +
     geom_col(width = 0.8, orientation = "y") -> splot
+    if(legend){
+      splot <- splot + theme(legend.position = "none")
+    }
   return(splot)
 }

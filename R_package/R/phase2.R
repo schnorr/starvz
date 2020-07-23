@@ -552,7 +552,7 @@ starvz_plot_list <- function(data = NULL) {
   if (!is.null(data$Atree) && data$config$utiltreedepth$active) {
     loginfo("Creating the resource utilization by depth plot")
     aggStep <- config_value(data$config$utiltreenode$step, globalAggStep)
-    goutiltreedepth <- resource_utilization_tree_depth_plot(data$Application, data$Atree, step = aggStep) + tScale 
+    goutiltreedepth <- resource_utilization_tree_depth_plot(data$Application, data$Atree, step = aggStep) + tScale
     if (!data$config$utiltreedepth$legend) {
       goutiltreedepth <- goutiltreedepth + theme(legend.position = "none")
     } else {
@@ -588,10 +588,7 @@ starvz_plot_list <- function(data = NULL) {
 
   if (data$config$summary_nodes$active) {
     loginfo("Creating node summary")
-    node_summary(data) + tScale -> go_sn
-    if (!data$config$summary_nodes$legend) {
-      go_sn <- go_sn + theme(legend.position = "none")
-    }
+    panel_node_summary(data) + tScale -> go_sn
   }
 
   if (data$config$pmtool$state$active) {
@@ -607,8 +604,6 @@ starvz_plot_list <- function(data = NULL) {
   if (data$config$memory$transfers$active & !memory_combined) {
     data %>% link_chart(tstart = tstart, tend = tend) + tScale -> gow_tf
   }
-
-
 
   # StarPU SpaceTime
   if (data$config$starpu$active) {

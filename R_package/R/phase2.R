@@ -659,7 +659,7 @@ starvz_plot_list <- function(data = NULL) {
   # Lack ready (companion for Ready Variable)
   if (data$config$lackready$active) {
     loginfo("Creating the Lack Ready Plot")
-    golrv <- plot_lackready(data) + tScale
+    golrv <- panel_lackready(data) + tScale
   }
 
   # Ready

@@ -1,6 +1,6 @@
 #' @include starvz_data.R
 
-plot_lackready <- function(data = NULL) {
+panel_lackready <- function(data = NULL) {
   if (is.null(data)) stop("data is NULL when given to geom_lackready")
   if (is.null(data$Starpu)) stop("state is NULL when given to geom_lackready")
   if (is.null(data$Variable)) stop("variable is NULL when given to geom_lackready")

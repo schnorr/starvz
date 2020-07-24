@@ -1,5 +1,20 @@
 #' @include starvz_data.R
 
+panel_ready <- function(data, legend=data$config$ready$legend){
+  agg_step <- config_value(data$config$ready$step, data$config$global_agg_step)
+  panel <- data$Variable %>%
+    filter(grepl("sched", .data$ResourceId), grepl("Ready", .data$Type)) %>%
+    var_integration_segment_chart(step = agg_step,
+       base_size=data$config$base_size,
+      expand=data$config$expand,
+      legend=legend) +
+    coord_cartesian(
+        xlim = c(data$config$limits$start, data$config$limits$end),
+        ylim = c(0, data$config$ready$limit)
+    )
+  return(panel)
+}
+
 var_chart <- function(dfv = NULL, ylabel = NA, base_size = 22, expand = 0.05) {
   if (is.null(dfv)) {
     return(NULL)
@@ -103,7 +118,7 @@ var_integration_chart <- function(dfv = NULL, ylabel = NA, step = 250, facetting
   }
   return(result)
 }
-var_integration_segment_chart <- function(dfv = NULL, ylabel = NA, step = 250, facetting = FALSE, base_size = 22, expand = 0.05) {
+var_integration_segment_chart <- function(dfv = NULL, ylabel = NA, step = 250, facetting = FALSE, base_size = 22, expand = 0.05, legend=TRUE) {
   if (is.null(dfv)) {
     return(NULL)
   }
@@ -135,6 +150,11 @@ var_integration_segment_chart <- function(dfv = NULL, ylabel = NA, step = 250, f
         strip.placement = "inside",
         panel.spacing = unit(1, "mm")
       )
+  }
+  if(legend){
+    result <- result + theme(legend.position = "top")
+  }else{
+    result <- result + theme(legend.position = "none")
   }
   return(result)
 }

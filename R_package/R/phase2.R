@@ -418,15 +418,26 @@ starvz_plot_list <- function(data = NULL) {
   # data$Variable <- data$Variable %>% filter(End < makespan)
 
   # Adjust temporal scale
-  tstart <- config_value(data$config$limits$start, data$Application %>% pull(.data$Start) %>% min())
-  tend <- config_value(data$config$limits$end, data$Application %>% pull(.data$End) %>% max()) + 1 # Just to give space
+  if(is.null(data$config$limits$start)){
+    data$config$limits$start <- data$Application %>% pull(.data$Start) %>% min()
+  }
+  if(is.null(data$config$limits$end)){
+    data$config$limits$end <- data$Application %>% pull(.data$End) %>% max() + 1 # Just to give space
+  }
+
+  # Define the global aggregation step as 0.1% of the total window
+  data$config$global_agg_step <- (data$config$limits$end - data$config$limits$start) * .001
+
+  # To be deprecated
+  tstart <- data$config$limits$start
+  tend <- data$config$limits$end
+  globalAggStep <- data$config$global_agg_step
   tScale <- list(
     coord_cartesian(xlim = c(tstart, tend))
   )
 
-  dfv <- data$Variable
   if (!is.null(data$config$selected_nodes)) {
-    dfv <- dfv %>% filter(.data$Node %in% data$config$selected_nodes)
+    data$Variable <- data$Variable %>% filter(.data$Node %in% data$config$selected_nodes)
   }
 
   loginfo("Starting the Starvz plot function")
@@ -474,9 +485,6 @@ starvz_plot_list <- function(data = NULL) {
     data$config$atree$active <<- FALSE
     data$config$activenodes$active <<- FALSE
   }
-
-  # Define the global aggregation step as 0.1% of the total window
-  globalAggStep <- (tend - tstart) * .001
 
   # Set all possible plots to NULL
   goatreet <- geom_blank()
@@ -665,24 +673,14 @@ starvz_plot_list <- function(data = NULL) {
   # Ready
   if (data$config$ready$active) {
     loginfo("Creating the Ready plot")
-    aggStep <- config_value(data$config$ready$step, globalAggStep)
-    gorv <- dfv %>%
-      filter(grepl("sched", .data$ResourceId), grepl("Ready", .data$Type)) %>%
-      var_integration_segment_chart(step = aggStep, base_size=data$config$base_size, expand=data$config$expand) + tScale
-    if (!data$config$ready$legend) {
-      gorv <- gorv + theme(legend.position = "none")
-    } else {
-      gorv <- gorv +
-        theme(legend.position = "top")
-    }
-    gorv <- userYLimit(gorv, data$config$ready$limit, c(tstart, tend))
+    gorv <- panel_ready(data)
   }
 
   # Submitted
   if (data$config$submitted$active) {
     loginfo("Creating the Submitted plot")
     aggStep <- config_value(data$config$submitted$step, globalAggStep)
-    gosv <- dfv %>%
+    gosv <- data$Variable %>%
       filter(grepl("sched", .data$ResourceId), grepl("Submitted", .data$Type)) %>%
       var_integration_segment_chart(step = aggStep, base_size=data$config$base_size, expand=data$config$expand) + tScale
     if (!data$config$submitted$legend) {
@@ -699,7 +697,7 @@ starvz_plot_list <- function(data = NULL) {
     loginfo("Creating the GFlops plot")
     aggStep <- config_value(data$config$gflops$step, globalAggStep)
     facetted <- data$config$gflops$facet
-    gogfv <- dfv %>%
+    gogfv <- data$Variable %>%
       filter(.data$Type == "GFlops") %>%
       var_integration_segment_chart(., ylabel = "GFlops", step = aggStep, facetting = facetted, base_size=data$config$base_size, expand=data$config$expand) + tScale
 
@@ -718,13 +716,13 @@ starvz_plot_list <- function(data = NULL) {
   if (data$config$usedmemory$active) {
     loginfo("Creating the Used Memory plot")
 
-    if ((dfv %>% filter(grepl("Used", .data$Type)) %>% nrow()) == 0) {
+    if ((data$Variable %>% filter(grepl("Used", .data$Type)) %>% nrow()) == 0) {
       logwarn("There aren't any information about Used Memory, ignoring it.")
       data$config$usedmemory$active <<- FALSE
     } else {
       aggStep <- config_value(data$config$usedmemory$step, globalAggStep)
 
-      goguv <- dfv %>%
+      goguv <- data$Variable %>%
         filter(grepl("Used", .data$Type)) %>%
         var_integration_segment_chart(step = aggStep, base_size=data$config$base_size, expand=data$config$expand) + tScale
       if (!data$config$usedmemory$legend) {
@@ -803,7 +801,7 @@ starvz_plot_list <- function(data = NULL) {
   if (data$config$mpibandwidth$active) {
     loginfo("Creating the MPIBandwidth plot")
     aggStep <- config_value(data$config$mpibandwidth$step, globalAggStep)
-    mpi_out <- dfv %>% filter(grepl("mpict", .data$ResourceId), grepl("Out", .data$Type))
+    mpi_out <- data$Variable %>% filter(grepl("mpict", .data$ResourceId), grepl("Out", .data$Type))
     if ((mpi_out %>% nrow()) == 0) {
       logwarn("There aren't any information on MPIBandwidth, ignoring it.")
       data$config$mpibandwidth$active <<- FALSE
@@ -872,7 +870,7 @@ starvz_plot_list <- function(data = NULL) {
     loginfo("Creating the GPU Bandwidth plot")
     aggStep <- config_value(data$config$gpubandwidth$step, globalAggStep)
     if (aggStep < 0) {
-      gogov <- dfv %>%
+      gogov <- data$Variable %>%
         # Get only GPU memory banwidth (out)
         filter(grepl("MEMMANAGER", .data$ResourceId), grepl("Out", .data$Type)) %>%
         # Remove the MANAGER0, which is CPU-only
@@ -883,7 +881,7 @@ starvz_plot_list <- function(data = NULL) {
         rename(ResourceId = .data$Node) %>%
         var_chart(ylabel = "GPU\n(MB/s)", data$config$base_size, data$config$expand) + tScale
     } else {
-      gogov <- dfv %>%
+      gogov <- data$Variable %>%
         # Get only GPU memory banwidth (out)
         filter(grepl("MEMMANAGER", .data$ResourceId), grepl("Out", .data$Type)) %>%
         # Remove the MANAGER0, which is CPU-only
@@ -903,7 +901,7 @@ starvz_plot_list <- function(data = NULL) {
       )
     }
     if (data$config$gpubandwidth$total) {
-      ms <- dfv %>%
+      ms <- data$Variable %>%
         filter(grepl("MEMMANAGER", .data$ResourceId), grepl("Out", .data$Type)) %>%
         filter(.data$Resource != "MEMMANAGER0" | .data$Node != "MEMMANAGER0") %>%
         group_by(.data$Type, .data$Node, .data$ResourceType, .data$Start, .data$End, .data$Duration) %>%

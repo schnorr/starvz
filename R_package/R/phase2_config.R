@@ -101,6 +101,7 @@ starvz_default_config <- function() {
   config$starpu$aggregation$active <- FALSE
 
   config$ready$active <- FALSE
+  config$ready$limit <- NA
 
   config$lackready$active <- FALSE
 

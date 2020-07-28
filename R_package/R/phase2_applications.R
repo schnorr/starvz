@@ -109,6 +109,11 @@ cholesky_pastix_colors <- function() {
   )
 }
 
+#' Colors for qr mumps
+#'
+#' This will be deprecated
+#'
+#' @export
 qrmumps_colors <- function() {
   tibble(
     Kernel = c("geqrt", "gemqrt", "tpqrt", "tpmqrt", "block_extadd",                           # qrm new

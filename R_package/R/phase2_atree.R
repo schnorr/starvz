@@ -212,6 +212,12 @@ atree_temporal_plot <- function(Application = NULL, Atree = NULL, step = 100) {
   }
 
   loginfo("Exit of atree_temporal_plot")
+  # Add representation for anomalies in the tree
+  if(anomalies) {
+    atreeplot <- atreeplot +
+      atree_geom_anomalies(data, alpha=.5)
+  }
+
   return(atreeplot)
 }
 
@@ -607,6 +613,32 @@ resource_utilization_tree_depth <- function(Application = NULL, Atree = NULL, st
 
     return(data_depth_plot)
 }
+
+# Add anomalies representation in the tree structure 
+atree_geom_anomalies <- function(data, alpha=.5) {
+  anomalies_points <- data$Application %>%
+    filter(.data$Outlier) %>%
+    select(.data$ANode, .data$Start, .data$End, .data$Value, .data$Height) %>%
+    mutate(Time = (.data$Start + .data$End) / 2) %>%
+    left_join(data$Atree %>%
+      select(.data$ANode, .data$Position),
+      by="ANode"
+    ) 
+
+  list(
+    geom_point(
+      data = anomalies_points,
+      aes(
+        x=.data$Start,
+        y=.data$Position + .data$Height/2,
+        color=.data$Value,
+        alpha=alpha
+      )
+    ),
+    scale_colour_manual(values =  c("geqrt"="#FF7F00", "gemqrt"="#377EB8", "tpqrt" = "#F781BF", "tpmqrt" = "#A65628"))
+  )
+}
+
 
 # Define a geom rect receiving the data and defining the fill color as the resource usage 
 atree_geom_rect_gradient <- function(data, yminOffset, ymaxOffset) {

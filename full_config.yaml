@@ -33,6 +33,8 @@ default:
       active: FALSE # Enable
     communication: # Show communication tasks in the tree nodes
       active: FALSE # Enable
+    anomalies: # Show where in the tree the anomalies happened
+      active: FALSE # Enable
 
   utiltreenode: # Plot of resource utilization by tree depth
     active: FALSE # Disable

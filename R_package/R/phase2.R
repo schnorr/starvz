@@ -581,16 +581,9 @@ starvz_plot_list <- function(data = NULL) {
         labels=data$config$st$labels, alpha=data$config$st$alpha, idleness=data$config$st$idleness, 
         taskdeps=data$config$st$tasks$active, tasklist=data$config$st$tasks$list, levels=data$config$st$tasks$levels,
         makespan=data$config$st$makespan, abe=data$config$st$abe$active, pmtoolbounds=data$config$pmtool$bounds$active,
-        cpb=data$config$st$cpb, cpb_mpi=data$config$st$cpb_mpi$active, StarPU.View = FALSE) +
+        cpb=data$config$st$cpb, cpb_mpi=data$config$st$cpb_mpi$active, legend=data$config$st$legend, StarPU.View = FALSE) +
         coord_cartesian(xlim = c(tstart, tend), ylim = c(0, NA))
     }
-
-    # Without legend
-    if (!data$config$st$legend) {
-      gow <- gow + theme(legend.position = "none")
-    }
-
-
   }
 
   if (data$config$summary_nodes$active) {
@@ -626,11 +619,8 @@ starvz_plot_list <- function(data = NULL) {
         labels=data$config$st$labels, alpha=data$config$st$alpha, idleness=data$config$st$idleness, 
         taskdeps=data$config$st$tasks$active, tasklist=data$config$st$tasks$list, levels=data$config$st$tasks$levels,
         makespan=data$config$st$makespan, abe=data$config$st$abe$active, pmtoolbounds=data$config$pmtool$bounds$active,
-        cpb=data$config$st$cpb, cpb_mpi=data$config$st$cpb_mpi$active, StarPU.View = TRUE) +
+        cpb=data$config$st$cpb, cpb_mpi=data$config$st$cpb_mpi$active, legend=data$config$starpu$legend, StarPU.View = TRUE) +
         coord_cartesian(xlim = c(tstart, tend), ylim = c(0, NA))
-    }
-    if (!data$config$starpu$legend) {
-      gstarpu <- gstarpu + theme(legend.position = "none")
     }
   }
 

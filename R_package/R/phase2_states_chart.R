@@ -23,6 +23,7 @@
 #' @param cpb enable/disable critical path bound makespan metric
 #' @param cpb_mpi enable/disable critical path bound makespan considering MPI
 #' @param StarPU.View TODO I think we should create a separated function for it
+#' @param legend enable/disable legends
 #' @return A ggplot object
 #' @examples
 #' panel_st_raw(data=starvz_data)
@@ -30,7 +31,7 @@
 panel_st_raw <- function(data = NULL, ST.Outliers = TRUE, base_size=22, expand_x=0.05,
   expand_y=0.05, selected_nodes = NULL, labels="ALL", alpha=0.25, idleness=TRUE, 
   taskdeps=FALSE, tasklist = NULL,  levels=10, makespan=TRUE, abe=FALSE, pmtoolbounds=FALSE,
-  cpb = FALSE, cpb_mpi = FALSE, StarPU.View = FALSE) {
+  cpb = FALSE, cpb_mpi = FALSE, legend=TRUE, StarPU.View = FALSE) {
   if (is.null(data)) stop("data provided to state_chart is NULL")
 
   # Obtain time interval
@@ -118,6 +119,10 @@ panel_st_raw <- function(data = NULL, ST.Outliers = TRUE, base_size=22, expand_x
 
     # add makespan
     if (makespan) gow <- gow + geom_makespan(App, bsize = base_size)
+  }
+
+  if(!legend) {
+    gow <- gow + theme(legend.position = "none")
   }
 
   return(gow)

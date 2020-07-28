@@ -25,10 +25,13 @@ starvz_default_config <- function() {
   config$atree$active <- FALSE
   config$atree$zoom$start <- 0
   config$atree$zoom$end <- 100
-  config$atree$utilization <- TRUE
-  config$atree$communication$active <- FALSE
   config$atree$legend <- FALSE
-
+  config$atree$computation$active <- FALSE
+  config$atree$computation$pruned$active <- FALSE
+  config$atree$initialization$active <- FALSE
+  config$atree$communication$active <- FALSE
+  config$atree$anomalies$active <- FALSE
+  
   config$activenodes$active <- FALSE
   config$activenodes$nodememuse$active <- FALSE
   config$activenodes$nodememuse$aggregation$active <- FALSE

@@ -5,22 +5,21 @@
 #' Use Atree and Application data to create the elimination tree
 #' strucutre plot in a ggplot object and return it
 #'
-#' @param Application starvz_data Application trace data
-#' @param Atree starvz_data Atree elimination tree trace data
+#' @param data starvz_data with trace data
 #' @return A ggplot object
 #' @examples
-#' geom_atree_plot(data$Application, data$Atree)
+#' panel_atree_structure(data)
 #' @export
-geom_atree_plot <- function(Application = NULL, Atree = NULL) {
-  if (is.null(Atree)) stop("input data for geom_atree_plot is NULL")
+panel_atree_structure <- function(data = NULL) {
+  if (is.null(data)) stop("input data for geom_atree_plot is NULL")
 
-  makespan <- Application %>%
+  makespan <- data$Application %>%
     .$End %>%
     max()
 
-  dtree <- Atree %>%
+  dtree <- data$Atree %>%
     # Get Start time of the first task belonging to each ANode
-    left_join(Application %>%
+    left_join(data$Application %>%
       select(.data$ANode, .data$Start, .data$End) %>%
       group_by(.data$ANode) %>%
       summarize(
@@ -102,7 +101,7 @@ geom_atree_plot <- function(Application = NULL, Atree = NULL) {
       ), color = "#D95F02"
     ) +
     # Fix time coordinates
-    coord_cartesian(xlim = c(0, makespan)) +
+    # coord_cartesian(xlim = c(0, makespan)) +
     # Horizontal lines
     geom_segment(data = dline, 
       aes(
@@ -122,102 +121,153 @@ geom_atree_plot <- function(Application = NULL, Atree = NULL) {
 #' considering the initialization, communication and computational tasks. These
 #' representations can be controlled in the configuration file. 
 #'
-#' @param Application starvz_data Application trace data
-#' @param Atree starvz_data Atree elimination tree trace data
+#' @param data starvz_data with trace data
 #' @param step size in milliseconds for the time aggregation step 
+#' @param legend enable/disable panel legend 
+#' @param zoom enable/disable vertical zoom in the tree structure
+#' @param computation enable/disable computations representations in the tree
+#' @param pruned enable/disable pruned computations representations in the tree
+#' @param initialization enable/disable initialization tasks representation
+#' @param communication enable/disable communication tasks representation
+#' @param anomalies enable/disable anomalies tasks representation
 #' @return A ggplot object
 #' @examples
-#' atree_temporal_plot(data$Application, data$Atree, step=100)
+#' panel_atree(data, step=10)
+#' panel_atree(data, step=20, communication=FALSE, initialization=FALSE)
 #' @export
-atree_temporal_plot <- function(Application = NULL, Atree = NULL, step = 100) {
-  if (is.null(Application) | is.null(Atree)) stop("a NULL data has been provided to atree_temporal_plot")
+panel_atree <- function(data = NULL, step = 100, legend = TRUE, zoom = FALSE,
+                        computation = TRUE, pruned = TRUE, initialization = TRUE, 
+                        communication = TRUE, anomalies = TRUE) {
+  if (is.null(data)) stop("a NULL data has been provided to panel_atree")
+  loginfo("Entry of panel_atree")
 
-  loginfo("Entry of atree_temporal_plot")
-
-  data_utilization_node <- resource_utilization_tree_node(Application, Atree, step = step, group_pruned = TRUE)
-
-  # Manipulate data for the tree resource utilization plots
-  data_tree_utilization_plot <- data_utilization_node %>%
+  data_utilization_node <- resource_utilization_tree_node(data$Application, data$Atree, step = step, group_pruned = TRUE) %>%
     filter(.data$Value != 0) %>%
     select(.data$ANode, .data$Slice, .data$Value1) %>%
     ungroup() %>%
     rename(NodeUsage = .data$Value1) %>%
-    left_join(Atree, by = "ANode") %>%
-    # Resize for node computation Start
-    inner_join(Application %>%
-      filter(grepl("init_", .data$Value) | grepl("do_subtree", .data$Value)) %>%
-      select(.data$ANode, .data$End) %>% 
+    left_join(data$Atree, by = "ANode")
+
+  # Manipulate data for the tree resource utilization plots 
+  # Resize for pruned nodes Start and End of the aggregated pruned nodes
+  data_tree_utilization_pruned <- data_utilization_node %>%
+    inner_join(data$Application %>%
+      filter(grepl("do_subtree", .data$Value)) %>%
+      select(.data$ANode, .data$End, .data$Start) %>%
       group_by(.data$ANode) %>%
-      filter(.data$End == max(.data$End)),
+      mutate(Start = min(.data$Start), End = max(.data$End)) %>% 
+      unique(),
     by = "ANode"
     ) %>%
-    mutate(Start = ifelse(.data$End >= .data$Slice, .data$End, .data$Slice)) %>%
-    # resize for node computation End
-    select(-.data$End) %>%
-    inner_join(Application %>%
-      select(.data$ANode, .data$End) %>% 
-      group_by(.data$ANode) %>%
-      filter(.data$End == max(.data$End)),
-    by = "ANode"
-    ) %>%
+    group_by(.data$Parent, .data$Position) %>%
+    mutate(Start = min(.data$Start), End = max(.data$End)) %>%
+    mutate(Start = ifelse(.data$Start >= .data$Slice, .data$Start, .data$Slice)) %>%
     mutate(End = ifelse(.data$Slice + step >= .data$End, .data$End, .data$Slice + step))
 
-  # 0. Add the atree structure representation first
-  atreeplot <- geom_atree_plot(Application, Atree) +
+  # Resize for not pruned nodes, first and last computational tasks
+  data_tree_utilization_not_pruned <- data_utilization_node %>%
+    inner_join(data$Application %>%
+      filter(grepl("qrt", .data$Value)) %>%
+      select(.data$ANode, .data$End, .data$Start) %>%
+      group_by(.data$ANode) %>%
+      mutate(Start = min(.data$Start), End = max(.data$End)) %>%
+      select(.data$ANode, .data$Start, .data$End) %>% 
+      unique(),
+    by = "ANode"
+    ) %>%
+    mutate(Start = ifelse(.data$Start >= .data$Slice, .data$Start, .data$Slice)) %>%
+    mutate(End = ifelse(.data$Slice + step >= .data$End, .data$End, .data$Slice + step))
+    
+  # 1. Add the atree structure representation first
+  atreeplot <- panel_atree_structure(data) +
     default_theme(data$config$base_size, data$config$expand) +
     ylab("Elimination\nTree [nodes]") +
     scale_y_continuous(breaks = NULL, labels = NULL)
 
   # Add the computation, initialization, and communication over the tree structure plot
-  # 1. Add computations  
-  if (data$config$atree$computation$active) {
+  # 2. Add computations
+  # 2.1 Add the not pruned computation representation
+  if (computation) {
     atreeplot <- atreeplot +
-      atree_geom_rect_gradient(data_tree_utilization_plot %>% filter(.data$NodeType != "Pruned"), yminOffset=0, ymaxOffset=1)
-
-    # Add the pruned node computation representations
-    if(data$config$atree$computation$pruned$active) {
-      atreeplot <- atreeplot +
-        atree_geom_rect_gradient(data_tree_utilization_plot %>% filter(.data$NodeType == "Pruned"), yminOffset=0.25, ymaxOffset=0.75)
-    }
-
-    # Add the color to represent computation
-    atreeplot <- atreeplot +
-      scale_fill_gradient2(name = "Computational Load", limits = c(0, 100), midpoint = 50, low = "blue", mid = "yellow", high = "red")
+      atree_geom_rect_gradient(data_tree_utilization_not_pruned, yminOffset=0, ymaxOffset=1)
   }
+  # 2.2 Add the pruned computation representation
+  if(pruned) {
+    atreeplot <- atreeplot +
+      atree_geom_rect_gradient(data_tree_utilization_pruned, yminOffset=0.25, ymaxOffset=0.75)
+  }
+  # 2.3 Add the color to represent resource utilization
+  atreeplot <- atreeplot +
+    scale_fill_gradient2(name = "Computational Load %", limits = c(0, 100), midpoint = 50, low = "blue", mid = "yellow", high = "red")
 
-  # 2. Add initialization tasks representation
-  if (data$config$atree$initialization$active) {
+  # 3. Add initialization tasks representation
+  if (initialization) {
     # filter initialization tasks
-    dfw_init <- Application %>%
+    dfw_init <- data$Application %>%
       filter(grepl("init_", .data$Value)) %>%
       unique() %>%
       select(-.data$Position, -.data$Height) %>%
-      left_join(Atree, by = "ANode")
+      left_join(data$Atree, by = "ANode")
 
     atreeplot <- atreeplot +
       atree_geom_rect(dfw_init, "#4DAF4A", yminOffset=0, ymaxOffset=1, alpha=0.7)
   }
 
-  # 3. Add "communication" (block_copy | block_extadd) tasks in the tree nodes
-  if (data$config$atree$communication$active) {
+  # 4. Add "communication" (block_copy | block_extadd) tasks in the tree nodes
+  if (communication) {
     # filter communication tasks
-    dfw_comm <- Application %>%
-      filter(grepl("block_", .data$Value) | grepl("block_extadd", .data$Value)) %>%
+    dfw_comm <- data$Application %>%
+      filter(grepl("block_copy", .data$Value) | grepl("block_extadd", .data$Value)) %>%
       unique() %>%
       select(-.data$Position, -.data$Height) %>%
-      left_join(Atree, by = "ANode")
+      left_join(data$Atree, by = "ANode") %>%
+      filter(!is.na(.data$Position))
 
     atreeplot <- atreeplot +
       atree_geom_rect(dfw_comm, "#000000", yminOffset=0.25, ymaxOffset=0.75, alpha=0.7)
   }
 
-  loginfo("Exit of atree_temporal_plot")
+  # Vertical zoom
+  if(zoom) {
+    z.start <- data$config$atree$zoom$start
+    z.end <- data$config$atree$zoom$end
+    max.y.coordinate <- (data$Atree %>% pull(.data$Position) %>% max()) +
+      (data$Atree %>% pull(.data$Height) %>% max())
+    tzScale <- list(
+      coord_cartesian(
+        xlim = c(tstart, tend),
+        ylim = c(
+          z.start / 100 * max.y.coordinate,
+          z.end / 100 * max.y.coordinate
+        )
+      )
+    )
+    atreeplot <- atreeplot + tzScale
+  }
+
   # Add representation for anomalies in the tree
   if(anomalies) {
     atreeplot <- atreeplot +
       atree_geom_anomalies(data, alpha=.5)
   }
 
+  # Add legend to the plot
+  if (legend) {
+    atreeplot <- atreeplot + 
+      guides(shape=FALSE, alpha=FALSE, color=FALSE) +
+      theme(
+        legend.position = "top",
+        legend.justification = "left",
+        legend.box.just = "left",
+        legend.direction="horizontal",
+        legend.text = element_text(size = 12, colour = "black"),
+        legend.title = element_text(size = 14, "Computational Load %")
+      )
+  } else {
+    atreeplot <- atreeplot + theme(legend.position = "none")
+  }
+
+  loginfo("Exit of panel_atree")
   return(atreeplot)
 }
 
@@ -314,7 +364,6 @@ resource_utilization_tree_node_plot <- function(Application = NULL, Atree = NULL
     default_theme(data$config$base_size, data$config$expand) +
     theme(legend.position = "none") +
     ylab("Usage %\nANode") +
-    coord_cartesian(ylim = c(0, 100)) +
     ylim(0, 100)
 }
 
@@ -346,7 +395,6 @@ resource_utilization_tree_depth_plot <- function(Application = NULL, Atree = NUL
     theme(legend.position = "top") +
     scale_fill_manual(values = depthPalette) +
     ylab("Usage %\nDepth") +
-    coord_cartesian(ylim = c(0, 100)) +
     ylim(0, 100)
 }
 
@@ -452,7 +500,8 @@ active_nodes_plot <- function(Application = NULL, Atree = NULL, step = 100) {
     data_active_nodes <- data_active_nodes %>%
       # need for the var integration
       mutate(Type = NA) %>% 
-      mutate(ResourceType = .data$NodeType, Node = .data$NodeType)
+      mutate(ResourceType = .data$NodeType, Node = .data$NodeType) %>%
+      ungroup()
 
     activenodesplot <- var_integration_chart(data_active_nodes, ylabel = NA, step = step, facetting = FALSE, base_size = data$config$base_size, expand = data$config$expand)
   } else {

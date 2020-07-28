@@ -518,30 +518,20 @@ starvz_plot_list <- function(data = NULL) {
 
   # Atree space/time view
   if (!is.null(data$Atree) && data$config$atree$active) {
-
     loginfo("Creating the temporal atree plot")
+    # get default values for parameters
     aggStep <- config_value(data$config$atree$step, globalAggStep)
-    goatreet <- atree_temporal_plot(data$Application, data$Atree, step = aggStep) + tScale
-    if (!data$config$atree$legend) {
-      goatreet <- goatreet + theme(legend.position = "none")
-    } else {
-      goatreet <- goatreet + theme(legend.position = "top")
-    }
-    # Vertical zoom
-    z.start <- data$config$atree$zoom$start
-    z.end <- data$config$atree$zoom$end
-    max.y.coordinate <- (data$Atree %>% pull(.data$Position) %>% max()) +
-      (data$Atree %>% pull(.data$Height) %>% max())
-    tzScale <- list(
-      coord_cartesian(
-        xlim = c(tstart, tend),
-        ylim = c(
-          z.start / 100 * max.y.coordinate,
-          z.end / 100 * max.y.coordinate
-        )
-      )
-    )
-    goatreet <- goatreet + tzScale
+    
+    legend <- data$config$atree$legend
+    computation <- data$config$atree$computation$active
+    pruned <- data$config$atree$computation$pruned$active
+    communication <- data$config$atree$communication$active
+    initialization <- data$config$atree$initialization$active
+    anomalies <- data$config$atree$anomalies$active
+    
+    goatreet <- panel_atree(data, step = aggStep, legend = legend, zoom=FALSE, 
+      computation=computation, pruned=pruned, communication=communication, 
+      initialization=initialization, anomalies=anomalies) + tScale
   }
 
   # Resource utilization by tree node

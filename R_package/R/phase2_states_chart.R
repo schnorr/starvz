@@ -1,25 +1,52 @@
 #' @include starvz_data.R
 
-state_chart <- function(data = NULL, globalEndTime = NULL, ST.Outliers = TRUE, StarPU.View = FALSE) {
+#' Create a space time visualization as a Gantt chart    
+#'
+#' Use the Application trace data to plot the task computations by ResourceId
+#' over the execution time. 
+#'
+#' @param data starvz_data with trace data
+#' @param ST.Outliers enable/disable the anomalous task highlighting
+#' @param base_size base_size base font size
+#' @param expand_x expand size for scale_x_continuous padding
+#' @param expand_y expand size for scale_y_continuous padding
+#' @param selected_nodes select only some nodes in some plots
+#' @param labels control resources labels: [ALL, 1CPU_per_NODE, 1GPU_per_NODE]
+#' @param alpha alpha value for non anomalous tasks
+#' @param idleness enable/disable idleness percentages in the plot
+#' @param taskdeps enable/disable task deps path highlighting
+#' @param tasklist list of JobIds to highlight the dependencies
+#' @param levels number of dependencies to be shown
+#' @param makespan enable/disable application makespan at the end of the plot
+#' @param abe enable/disable ABE metric
+#' @param pmtoolbounds enable/disable pmtool theoretical bounds 
+#' @param cpb enable/disable critical path bound makespan metric
+#' @param cpb_mpi enable/disable critical path bound makespan considering MPI
+#' @param StarPU.View TODO I think we should create a separated function for it
+#' @return A ggplot object
+#' @examples
+#' panel_st_raw(data=starvz_data)
+#' @export
+panel_st_raw <- function(data = NULL, ST.Outliers = TRUE, base_size=22, expand_x=0.05,
+  expand_y=0.05, selected_nodes = NULL, labels="ALL", alpha=0.25, idleness=TRUE, 
+  taskdeps=FALSE, tasklist = NULL,  levels=10, makespan=TRUE, abe=FALSE, pmtoolbounds=FALSE,
+  cpb = FALSE, cpb_mpi = FALSE, StarPU.View = FALSE) {
   if (is.null(data)) stop("data provided to state_chart is NULL")
 
-  # Filter
-  dfwapp <- data$Application
-
   # Obtain time interval
-  tstart <- dfwapp$Start %>% min()
-  tend <- dfwapp$End %>% max()
+  tstart <- data$Application$Start %>% min()
+  tend <- data$Application$End %>% max()
 
   # Plot
   gow <- ggplot() +
-    default_theme(data$config$base_size, data$config$expand)
+    default_theme(base_size, expand_x)
 
   App <- data$Application
   # Select Nodes
-  if (!is.null(data$config$selected_nodes)) {
+  if (!is.null(selected_nodes)) {
     data$Y %>%
       separate(.data$Parent, into = c("Node"), remove = FALSE, extra="drop") %>%
-      filter(.data$Node %in% data$config$selected_nodes) %>%
+      filter(.data$Node %in% selected_nodes) %>%
       arrange(.data$Position) %>%
       mutate(New = cumsum(lag(.data$Height, default = 0))) %>%
       select(.data$Parent, .data$New) -> new_y
@@ -43,37 +70,34 @@ state_chart <- function(data = NULL, globalEndTime = NULL, ST.Outliers = TRUE, S
   if (StarPU.View) {
     gow <- gow + geom_states(data$Starpu,
       ST.Outliers, StarPU.View, data$Colors,
-      labels = data$config$st$labels,
-      expand = data$config$st$expand,
+      labels = labels,
+      expand = expand_y,
       rect_outline = data$config$st$rect_outline,
-      alpha_value = data$config$st$alpha
+      alpha_value = alpha
     )
   } else {
     gow <- gow + geom_states(App,
       ST.Outliers, StarPU.View, data$Colors,
-      labels = data$config$st$labels,
-      expand = data$config$st$expand,
+      labels = labels,
+      expand = expand_y,
       rect_outline = data$config$st$rect_outline,
-      alpha_value = data$config$st$alpha
+      alpha_value = alpha
     )
   }
 
   if (!StarPU.View) {
 
     # add idleness
-    if (data$config$st$idleness) gow <- gow + geom_idleness(data)
+    if (idleness) gow <- gow + geom_idleness(data)
 
     # check if task dependencies should be added
-    if (data$config$st$tasks$active) {
-      tasklist <- data$config$st$tasks$list
-      levels <- data$config$st$tasks$levels
-
+    if (taskdeps) {
       tasksel <- gaps_backward_deps(
         data = data,
         tasks = tasklist,
         levels = levels
       )
-      if (nrow(tasksel)>0 & !is.null(data$config$selected_nodes)) {
+      if (nrow(tasksel)>0 & !is.null(selected_nodes)) {
         tasksel <- tasksel %>%
           left_join(new_y, by = c("ResourceId" = "Parent")) %>%
           mutate(Position = if_else(is.na(.data$New), -3, .data$New)) %>%
@@ -84,16 +108,16 @@ state_chart <- function(data = NULL, globalEndTime = NULL, ST.Outliers = TRUE, S
     }
 
     # add Global CPB
-    if (data$config$st$cpb || data$config$st$cpb_mpi$active) gow <- gow + geom_cpb(data)
+    if (cpb || cpb_mpi) gow <- gow + geom_cpb(data)
 
     # The per-node ABE
-    if (data$config$st$abe$active) gow <- gow + geom_abe(data)
+    if (abe) gow <- gow + geom_abe(data)
 
     # add pmtool bound
-    if (data$config$pmtool$bounds$active) gow <- gow + geom_pmtool_bounds(data)
+    if (pmtoolbounds) gow <- gow + geom_pmtool_bounds(data)
 
     # add makespan
-    if (data$config$st$makespan) gow <- gow + geom_makespan(App, bsize = data$config$base_size)
+    if (makespan) gow <- gow + geom_makespan(App, bsize = base_size)
   }
 
   return(gow)

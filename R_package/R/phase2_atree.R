@@ -684,7 +684,8 @@ atree_geom_anomalies <- function(data, alpha=.5) {
         alpha=alpha
       )
     ),
-    scale_colour_manual(values =  c("geqrt"="#FF7F00", "gemqrt"="#377EB8", "tpqrt" = "#F781BF", "tpmqrt" = "#A65628"))
+    scale_colour_manual(values =  c("geqrt"="#FF7F00", "gemqrt"="#377EB8", "tpqrt" = "#F781BF", "tpmqrt" = "#A65628",
+                                    "lapack_geqrt"="#FF7F00", "lapack_gemqrt"="#377EB8", "lapack_tpqrt" = "#F781BF", "lapack_tpmqrt" = "#A65628"))
   )
 }
 

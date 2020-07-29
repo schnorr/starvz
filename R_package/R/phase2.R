@@ -529,7 +529,7 @@ starvz_plot_list <- function(data = NULL) {
     initialization <- data$config$atree$initialization$active
     anomalies <- data$config$atree$anomalies$active
     
-    goatreet <- panel_atree(data, step = aggStep, legend = legend, zoom=FALSE, 
+    goatreet <- panel_atree(data=data, step=aggStep, legend=legend, zoom=FALSE, 
       computation=computation, pruned=pruned, communication=communication, 
       initialization=initialization, anomalies=anomalies) + tScale
   }
@@ -538,24 +538,15 @@ starvz_plot_list <- function(data = NULL) {
   if (!is.null(data$Atree) && data$config$utiltreenode$active) {
     loginfo("Creating the resource utilization by node plot")
     aggStep <- config_value(data$config$utiltreenode$step, globalAggStep)
-    goutiltreenode <- resource_utilization_tree_node_plot(data$Application, data$Atree, step = aggStep) + tScale
-    if (!data$config$utiltreenode$legend) {
-      goutiltreenode <- goutiltreenode + theme(legend.position = "none")
-    } else {
-      goutiltreenode <- goutiltreenode + theme(legend.position = "top")
-    }
+    goutiltreenode <- panel_utiltreenode(data=data, step=aggStep) + tScale
   }
 
   # Resource utilization by tree depth
   if (!is.null(data$Atree) && data$config$utiltreedepth$active) {
     loginfo("Creating the resource utilization by depth plot")
     aggStep <- config_value(data$config$utiltreenode$step, globalAggStep)
-    goutiltreedepth <- resource_utilization_tree_depth_plot(data$Application, data$Atree, step = aggStep) + tScale
-    if (!data$config$utiltreedepth$legend) {
-      goutiltreedepth <- goutiltreedepth + theme(legend.position = "none")
-    } else {
-      goutiltreedepth <- goutiltreedepth + theme(legend.position = "top")
-    }
+    goutiltreedepth <- panel_utiltreedepth(data=data, step=aggStep, 
+      legend=data$config$utiltreedepth$legend) + tScale
   }
 
   # SpaceTime
@@ -916,12 +907,8 @@ starvz_plot_list <- function(data = NULL) {
       data$config$activenodes$active <<- FALSE
     } else {
       aggStep <- config_value(data$config$activenodes$aggregation$step, globalAggStep)
-      goactivenodes <- active_nodes_plot(data$Application, data$Atree, aggStep) + tScale
-      if (!data$config$activenodes$legend) {
-        goactivenodes <- goactivenodes + theme(legend.position = "none")
-      } else {
-        goactivenodes <- goactivenodes + theme(legend.position = "top")
-      }
+      goactivenodes <- panel_activenodes(data=data, step=aggStep, aggregation=data$config$activenodes$aggregation$active, 
+        legend=data$config$activenodes$legend) + tScale
     }
   }
 
@@ -934,7 +921,8 @@ starvz_plot_list <- function(data = NULL) {
       data$config$activenodes$nodememuse$active <<- FALSE
     } else {
       aggStep <- config_value(data$config$activenodes$aggregation$step, globalAggStep)
-      gonodememuse <- nodes_memory_usage_plot(data$Application, aggStep) + tScale
+      gonodememuse <- panel_nodememuse(data=data, step=aggStep, aggregation=data$config$activenodes$aggregation$active,  
+        legend=data$config$activenodes$nodememuse$legend) + tScale
     }
   }
 

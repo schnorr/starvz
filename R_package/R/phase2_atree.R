@@ -137,7 +137,8 @@ panel_atree_structure <- function(data = NULL) {
 #' @export
 panel_atree <- function(data = NULL, step = 100, legend = TRUE, zoom = FALSE,
                         computation = TRUE, pruned = TRUE, initialization = TRUE, 
-                        communication = TRUE, anomalies = TRUE) {
+                        communication = TRUE, anomalies = TRUE) 
+{
   if (is.null(data)) stop("a NULL data has been provided to panel_atree")
   loginfo("Entry of panel_atree")
 
@@ -248,7 +249,7 @@ panel_atree <- function(data = NULL, step = 100, legend = TRUE, zoom = FALSE,
   # Add representation for anomalies in the tree
   if(anomalies) {
     atreeplot <- atreeplot +
-      atree_geom_anomalies(data, alpha=.5)
+      atree_geom_anomalies(data)
   }
 
   # Add legend to the plot
@@ -277,15 +278,14 @@ panel_atree <- function(data = NULL, step = 100, legend = TRUE, zoom = FALSE,
 #' total resource utilization, painted by tree node using geom_ribbon. The
 #' colors are reused between nodes, not tied to as specific tree node.
 #'
-#' @param Application starvz_data Application trace data
-#' @param Atree starvz_data Atree elimination tree trace data
+#' @param data starvz_data with trace data
 #' @param step size in milliseconds for the time aggregation step 
 #' @return A ggplot object
 #' @examples
-#' resource_utilization_tree_node_plot(data$Application, data$Atree, step=100)
+#' panel_utiltreenode(data=starvz_data, step=100)
 #' @export
-resource_utilization_tree_node_plot <- function(Application = NULL, Atree = NULL, step = 100) {
-  df1 <- resource_utilization_tree_node(Application, Atree, step = step, group_pruned=FALSE)
+panel_utiltreenode <- function(data = NULL, step = 100) {
+  df1 <- resource_utilization_tree_node(data$Application, data$Atree, step = step, group_pruned=FALSE)
 
   event_data <- df1 %>%
     filter(.data$Value != 0) %>%
@@ -372,23 +372,21 @@ resource_utilization_tree_node_plot <- function(Application = NULL, Atree = NULL
 #' Use starvz_data Application and Atree to create a plot that shows the
 #' total resource utilization, painted by tree depth level using geom_ribbon
 #'
-#' @param Application starvz_data Application trace data
-#' @param Atree starvz_data Atree elimination tree trace data
+#' @param data starvz_data with trace data
 #' @param step size in milliseconds for the time aggregation step 
+#' @param legend enable/disable plot legends
 #' @return A ggplot object
 #' @examples
-#' resource_utilization_tree_depth_plot(data$Application, data$Atree, step=100)
+#' panel_utiltreedepth(data, step=100, legend=TRUE)
 #' @export
-resource_utilization_tree_depth_plot <- function(Application = NULL, Atree = NULL, step = 100) {
-  #Prepare data
-  depth_plot_data <- resource_utilization_tree_depth(Application, Atree, step)
+  depth_plot_data <- resource_utilization_tree_depth(data$Application, data$Atree, step)
 
   maxDepth <- depth_plot_data %>%
     .$Depth %>%
     max()
   depthPalette <- rev(colorRampPalette(brewer.pal(9, "YlOrRd"))(maxDepth))
 
-  depth_plot_data %>%
+  panel <- depth_plot_data %>%
     ggplot() +
     geom_ribbon(aes(ymin = .data$Ymin, ymax = .data$Ymax, x = .data$Slice, fill = as.factor(.data$Depth))) +
     default_theme(data$config$base_size, data$config$expand) +
@@ -396,6 +394,13 @@ resource_utilization_tree_depth_plot <- function(Application = NULL, Atree = NUL
     scale_fill_manual(values = depthPalette) +
     ylab("Usage %\nDepth") +
     ylim(0, 100)
+
+  # configure legend
+  if(!legend) {
+    panel <- panel + theme(legend.position="none")
+  }
+
+  return(panel)
 }
 
 #' Create the node memory usage plot
@@ -403,19 +408,20 @@ resource_utilization_tree_depth_plot <- function(Application = NULL, Atree = NUL
 #' Use starvz_data to create a line plot of the memory usage in MB of
 #' active nodes along the application execution time
 #'
-#' @param Application starvz_data Application trace data
+#' @param data starvz_data with trace data
 #' @param step size in milliseconds for the time aggregation step 
-#' @return A ggplot object
+#' @param aggregation enable/disable time aggregation for the plot 
+#' @param legend enable/disable plot legends
 #' @examples
-#' active_nodes_plot(data$Application, step=100)
+#' panel_nodememuse(data$Application, step=100)
 #' @export
-nodes_memory_usage_plot <- function(Application = NULL, step = 100) {
-  loginfo("Entry of nodes_memory_usage_plot")
-  if (is.null(Application)) stop("a NULL data has been provided to nodes_memory_usage_plot")
-  node_mem_utilization_plot <- geom_blank()
+panel_nodememuse <- function(data = NULL, step = 100, aggregation=FALSE, legend=TRUE) {
+  loginfo("Entry of panel_nodememuse")
+  if (is.null(data)) stop("a NULL data has been provided to panel_nodememuse")
+  panel <- geom_blank()
 
   # Prepare data
-  data_mem_utilization <- Application %>%
+  data_mem_utilization <- data$Application %>%
     filter(grepl("front", .data$Value) | grepl("do_subtree", .data$Value)) %>%
     rename(Task = .data$Value) %>%
     mutate(UsedMemMB = ifelse(grepl("clean", .data$Task), -.data$GFlop * 1024, .data$GFlop * 1024)) %>%
@@ -423,12 +429,12 @@ nodes_memory_usage_plot <- function(Application = NULL, step = 100) {
     mutate(Value = cumsum(.data$UsedMemMB)) %>%
     mutate(Type = NA)
 
-  if (data$config$activenodes$aggregation$active) {
-    node_mem_utilization_plot <- var_integration_chart(data_mem_utilization, ylabel = NA, step = step, facetting = FALSE, base_size = data$config$base_size, expand = data$config$expand)
+  if (aggregation) {
+    panel <- var_integration_chart(data_mem_utilization, ylabel = NA, step = step, facetting = FALSE, base_size = data$config$base_size, expand = data$config$expand)
   } else {
     # TODO: try to reuse some code form above
     # mem use without time aggregation
-    df_mem <- Application %>%
+    df_mem <- data$Application %>%
       filter(grepl("front", .data$Value) | grepl("do_sub", .data$Value)) %>%
       select(.data$Start, .data$Value, .data$GFlop, .data$ANode, .data$Node) %>%
       arrange(.data$Start) %>%
@@ -441,19 +447,23 @@ nodes_memory_usage_plot <- function(Application = NULL, step = 100) {
       arrange(.data$Time) %>%
       mutate(UsedMemMB = lag(.data$UsedMemMB))
 
-    node_mem_utilization_plot <- df_mem %>%
+    panel <- df_mem %>%
       ggplot(aes(x = .data$Time, y = .data$UsedMemMB, color = .data$Node)) +
       geom_line() +
       default_theme(data$config$base_size, data$config$expand)
   }
 
-  node_mem_utilization_plot <- node_mem_utilization_plot +
-    theme(legend.position = "none") +
+  panel <- panel +
     ylab("Used\nMB") +
     scale_color_brewer(palette = "Dark2")
 
-  loginfo("Exit of nodes_memory_usage_plot")
-  return(node_mem_utilization_plot)
+  # configure legend
+  if(!legend) {
+    panel <- panel + theme(legend.position="none")
+  }
+
+  loginfo("Exit of panel_nodememuse")
+  return(panel)
 }
 
 #' Create the active nodes in memory plot
@@ -461,16 +471,18 @@ nodes_memory_usage_plot <- function(Application = NULL, step = 100) {
 #' Use starvz_data to create a line plot of the number of active nodes per type
 #' along the application execution time
 #'
-#' @param Application starvz_data Application trace data
-#' @param Atree starvz_data Atree elimination tree trace data
+#' @param data starvz_data with trace data
+#' @param step size in milliseconds for the time aggregation step 
+#' @param aggregation enable/disable time aggregation for the plot 
+#' @param legend enable/disable plot legends
 #' @return A ggplot object
 #' @examples
-#' active_nodes_plot(data$Application, data$Atree, step=100)
+#' panel_activenodes(data=starvz_data, step=100)
 #' @export
-active_nodes_plot <- function(Application = NULL, Atree = NULL, step = 100) {
-  if (is.null(Application) | is.null(Atree)) stop("a NULL data has been provided to active_nodes_plot")
-  loginfo("Entry of active_nodes_plot")
-  activenodesplot <- geom_blank()
+panel_activenodes <- function(data = NULL, step = 100, aggregation=FALSE, legend=TRUE) {
+  if (is.null(data)) stop("a NULL data has been provided to panel_activenodes")
+  loginfo("Entry of panel_activenodes")
+  panel <- geom_blank()
 
   # Prepare data
   data_active_nodes <- data$Application %>%
@@ -496,27 +508,32 @@ active_nodes_plot <- function(Application = NULL, Atree = NULL, step = 100) {
     filter(!is.na(.data$NodeType))
 
   # use time aggregation or not
-  if (data$config$activenodes$aggregation$active) {
+  if (aggregation) {
     data_active_nodes <- data_active_nodes %>%
       # need for the var integration
       mutate(Type = NA) %>% 
       mutate(ResourceType = .data$NodeType, Node = .data$NodeType) %>%
       ungroup()
 
-    activenodesplot <- var_integration_chart(data_active_nodes, ylabel = NA, step = step, facetting = FALSE, base_size = data$config$base_size, expand = data$config$expand)
+    panel <- var_integration_chart(data_active_nodes, ylabel = NA, step = step, facetting = FALSE, base_size = data$config$base_size, expand = data$config$expand)
   } else {
-    activenodesplot <- data_active_nodes %>%
+    panel <- data_active_nodes %>%
       ggplot(aes(x = .data$Start, y = .data$Value, color = .data$NodeType)) +
       default_theme(data$config$base_size, data$config$expand) +
       geom_line() 
   }
 
-  activenodesplot <- activenodesplot +
+  panel <- panel +
     ylab("Active\nNodes") +
     scale_colour_brewer(palette = "Dark2")
 
-  loginfo("Exit of active_nodes_plot")
-  return(activenodesplot)
+  # configure legend
+  if (!legend) {
+    panel <- panel + theme(legend.position = "none")
+  }
+
+  loginfo("Exit of panel_activenodes")
+  return(panel)
 }
 
 # Calculate the computational resource utilization by tree node
@@ -664,15 +681,18 @@ resource_utilization_tree_depth <- function(Application = NULL, Atree = NULL, st
 }
 
 # Add anomalies representation in the tree structure 
-atree_geom_anomalies <- function(data, alpha=.5) {
+atree_geom_anomalies <- function(data) {
   anomalies_points <- data$Application %>%
-    filter(.data$Outlier) %>%
-    select(.data$ANode, .data$Start, .data$End, .data$Value, .data$Height) %>%
-    mutate(Time = (.data$Start + .data$End) / 2) %>%
-    left_join(data$Atree %>%
-      select(.data$ANode, .data$Position),
+    select(-.data$Position) %>%
+    left_join(data$Atree %>% 
+      select(
+        .data$ANode, 
+        .data$Position
+      ),
       by="ANode"
-    ) 
+    ) %>%
+    filter(.data$Outlier) %>%
+    mutate(Height = 1)
 
   list(
     geom_point(
@@ -680,8 +700,8 @@ atree_geom_anomalies <- function(data, alpha=.5) {
       aes(
         x=.data$Start,
         y=.data$Position + .data$Height/2,
-        color=.data$Value,
-        alpha=alpha
+        colour=.data$Value,
+        alpha=.7
       )
     ),
     scale_colour_manual(values =  c("geqrt"="#FF7F00", "gemqrt"="#377EB8", "tpqrt" = "#F781BF", "tpmqrt" = "#A65628",

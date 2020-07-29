@@ -34,6 +34,7 @@ starvz_default_config <- function() {
   
   config$activenodes$active <- FALSE
   config$activenodes$nodememuse$active <- FALSE
+  config$activenodes$nodememuse$legend <- TRUE
   config$activenodes$nodememuse$aggregation$active <- FALSE
   config$activenodes$nodememuse$aggregation$step <- 100
   config$activenodes$aggregation$active <- FALSE

@@ -225,6 +225,7 @@ default:
     nodememuse: # Plot the memory usage for qr_mumps
       active: FALSE # Enable
       height: 2 # Vertical size for the plot
+      legend: TRUE # Enable/Disable legend
 
   gflops:
     active: FALSE

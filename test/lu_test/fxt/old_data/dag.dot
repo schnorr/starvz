@@ -1,5 +1,0 @@
-digraph G {
-	color=white
-	rankdir=LR;
-subgraph cluster_0 {
-	color=black;

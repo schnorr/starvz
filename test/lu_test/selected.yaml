@@ -111,8 +111,6 @@ default:
     active: TRUE
     #height: 2
     legend: TRUE
-    limit:
-    step:
 
   lackready:
     active: TRUE

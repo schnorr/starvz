@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang='fr'>
+	<head>
+		<meta charset='utf-8'>
+		<link rel='stylesheet' href='http://code.jquery.com/ui/1.11.2/themes/smoothness/jquery-ui.css'>
+		<script src='http://code.jquery.com/jquery-1.10.2.js'></script>
+		<script src='http://code.jquery.com/ui/1.11.2/jquery-ui.js'></script>
+		<style>
+			table {
+				margin: 0;
+				padding: 0;
+			}
+			td {
+				margin: 0;
+				padding: 0;
+				vertical-align: top;
+				text-align: center;
+			}
+			td.box {
+				border: solid 1px;
+			}
+			td.worker_box {
+				border: solid 1px;
+				width: 75px;
+			}
+			td.worker_box_sched {
+				border: solid 1px;
+				width: 75px;
+				background-color: lightgreen;
+			}
+			td.task {
+				border: solid 1px;
+				width: 23px;
+				height: 23px;
+				background-color: #87CEEB;
+			}
+			td.run_task {
+				border: solid 1px;
+				width: 69px;
+				max-width: 69px;
+				overflow: hidden;
+				font-size: 50%;
+				height: 23px;
+				background-color: #87CEEB;
+			}
+			td.task_prio {
+				border: solid 1px;
+				width: 23px;
+				height: 23px;
+				background-color: red;
+			}
+			td.last_task_empty {
+				border: dashed 1px;
+				width: 23px;
+				height: 23px;
+				background-color: white;
+			}
+			td.last_task_full {
+				border: dashed 1px;
+				width: 23px;
+				height: 23px;
+				background-color: #87CEEB;
+			}
+			td.last_task_full_prio {
+				border: dashed 1px;
+				width: 23px;
+				height: 23px;
+				background-color: red;
+			}
+			td.fake_task {
+				width: 25px;
+				height: 25px;
+			}
+		</style>
+		<script>
+			function getInput(){
+				var input = document.getElementById('input').value;
+				if (input <= 0 || input > $('#slider').slider('option', 'max')){
+					alert('Invalid state value');
+				}
+				document.getElementById('et' + document.getElementById('etape').value).style.display = 'none';
+				document.getElementById('et' + input).style.display = 'block';
+				$('#etape').val(input);
+				$('#slider').slider('value', input);
+			}
+		</script>
+		<script>
+			var myVar = null;
+			function changeState(number){
+				var state = document.getElementById('etape').value;
+				var state2 = parseInt(state) + parseInt(number);
+				var min = $('#slider').slider('option', 'min');
+				var max = $('#slider').slider('option', 'max');
+					document.getElementById('et' + document.getElementById('etape').value).style.display = 'none';
+				if (state2 >= min && state2 <= max){
+					document.getElementById('et' + state2).style.display = 'block';
+					$('#etape').val(state2);
+					$('#slider').slider('value', state2);
+				}
+				else if (state2 < min){
+					document.getElementById('et' + min).style.display = 'block';
+					$('#etape').val(min);
+					$('#slider').slider('value', min);
+				}
+				else if (state2 > max){
+					document.getElementById('et' + max).style.display = 'block';
+					$('#etape').val(max);
+					$('#slider').slider('value', max);
+				}
+			}
+		</script>
+	</head>
+	<body>

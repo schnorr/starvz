@@ -1,0 +1,412 @@
+%EventDef	PajeDefineContainerType	1
+%	Alias	string
+%	Type	string
+%	Name	string
+%EndEventDef
+%EventDef	PajeDefineEventType	2
+%	Alias	string
+%	Type	string
+%	Name	string
+%EndEventDef
+%EventDef	PajeDefineStateType	3
+%	Alias	string
+%	Type	string
+%	Name	string
+%EndEventDef
+%EventDef	PajeDefineVariableType	4
+%	Alias	string
+%	Type	string
+%	Name	string
+%EndEventDef
+%EventDef	PajeDefineLinkType	5
+%	Alias	string
+%	Type	string
+%	StartContainerType	string
+%	EndContainerType	string
+%	Name	string
+%EndEventDef
+%EventDef	PajeDefineEntityValue	6
+%	Alias	string
+%	Type	string
+%	Name	string
+%	Color	color
+%EndEventDef
+%EventDef	PajeCreateContainer	7
+%	Time	date
+%	Alias	string
+%	Type	string
+%	Container	string
+%	Name	string
+%EndEventDef
+%EventDef	PajeDestroyContainer	8
+%	Time	date
+%	Name	string
+%	Type	string
+%EndEventDef
+%EventDef	PajeNewEvent	9
+%	Time	date
+%	Type	string
+%	Container	string
+%	Value	string
+%EndEventDef
+%EventDef PajeSetState 10
+%	Time	date
+%	Container	string
+%	Type	string
+%	Value	string
+%EndEventDef
+%EventDef	PajePushState	11
+%	Time	date
+%	Container	string
+%	Type	string
+%	Value	string
+%EndEventDef
+%EventDef	PajePopState	12
+%	Time	date
+%	Container	string
+%	Type	string
+%EndEventDef
+%EventDef	PajeSetVariable	13
+%	Time	date
+%	Container	string
+%	Type	string
+%	Value	double
+%EndEventDef
+%EventDef	PajeAddVariable	14
+%	Time	date
+%	Type	string
+%	Container	string
+%	Value	double
+%EndEventDef
+%EventDef	PajeSubVariable	15
+%	Time	date
+%	Type	string
+%	Container	string
+%	Value	double
+%EndEventDef
+%EventDef	PajeStartLink	18
+%	Time	date
+%	Type	string
+%	Container	string
+%	Value	string
+%	StartContainer	string
+%	Key	string
+%EndEventDef
+%EventDef	PajeEndLink	19
+%	Time	date
+%	Type	string
+%	Container	string
+%	Value	string
+%	EndContainer	string
+%	Key	string
+%EndEventDef
+%EventDef PajeSetState 20
+%	Time	date
+%	Container	string
+%	Type	string
+%	Value	string
+%	Size	string
+%	Params	string
+%	Footprint	string
+%	Tag	string
+%	JobId	string
+%	SubmitOrder	string
+%	GFlop	string
+%	X	string
+%	Y	string
+%	Iteration	string
+%	Subiteration	string
+%EndEventDef
+%EventDef PajeSetState 21
+%	Time	date
+%	Container	string
+%	Type	string
+%	Value	string
+%	Size	string
+%	Params	string
+%	Footprint	string
+%	Tag	string
+%	JobId	string
+%	SubmitOrder	string
+%EndEventDef
+%EventDef	PajeNewEvent	22
+%	Time	date
+%	Type	string
+%	Container	string
+%	Value	string
+%	Handle	string
+%	Info	string
+%	Size	string
+%	Tid	string
+%EndEventDef
+%EventDef	PajeStartLink	23
+%	Time	date
+%	Type	string
+%	Container	string
+%	Value	string
+%	StartContainer	string
+%	Key	string
+%	MPITAG	string
+%EndEventDef
+%EventDef	PajeEndLink	24
+%	Time	date
+%	Type	string
+%	Container	string
+%	Value	string
+%	EndContainer	string
+%	Key	string
+%	MPITAG	string
+%EndEventDef
+                                        
+1       MPIP      0       "MPI Program"                      	
+1       P      MPIP       "Program"                      	
+1       Mn      P       "Memory Node"                         
+1       T      Mn       "Thread"                               
+1       UT      P       "User Thread"                               
+1       Mm      Mn       "Memory Manager"                         
+1       W      T       "Worker"                               
+1       MPICt   P       "MPI Communication Thread"              
+1       Sc       P       "Scheduler State"                        
+2       prog_event   P       "program event type"				
+2       pu   P       "Task Push"                             
+2       po   P       "Task Pop"                              
+2       register     P       "data registration"				
+2       unregister     P       "data unregistration"				
+2       user_event   P       "user event type"				
+2       thread_event   T       "thread event type"				
+2       user_user_event   UT       "user event type"				
+2       user_thread_event   UT       "thread event type"				
+2       MPIev   MPICt    "MPI event type"			
+3       S       T       "Thread State"                        
+3       CtS     MPICt    "Communication Thread State"          
+3       Ctx1      W     "InCtx1"         		
+3       Ctx2      W     "InCtx2"         		
+3       Ctx3      W     "InCtx3"         		
+3       Ctx4      W     "InCtx4"         		
+3       Ctx5      W     "InCtx5"         		
+3       Ctx6      W     "InCtx6"         		
+3       Ctx7      W     "InCtx7"         		
+3       Ctx8      W     "InCtx8"         		
+3       Ctx9      W     "InCtx9"         		
+2       SI       Mm "data state invalid"                            
+2       SS       Mm "data state shared"                            
+2       SO       Mm "data state owner"                            
+2       WU       Mm "data wont use"                            
+2       Al       Mm    "Allocating Start"    
+2       rc       Mm    "Request Created"    
+2       AlE      Mm    "Allocating End"    
+2       Alr      Mm    "Allocating Async Start"    
+2       AlrE     Mm    "Allocating Async End"    
+2       Fe       Mm    "Free Start"    
+2       FeE      Mm    "Free End"    
+2       Wb       Mm    "WritingBack Start"    
+2       WbE      Mm    "WritingBack End"    
+2       DCo      Mm    "DriverCopy Start"    
+2       DCoE     Mm    "DriverCopy End"    
+2       DCoA     Mm    "DriverCopyAsync Start"    
+2       DCoAE    Mm    "DriverCopyAsync End"    
+3       MS       Mm       "Memory Node State"                        
+4       nsubmitted    Sc       "Number of Submitted Uncompleted Tasks"                        
+4       nready    Sc       "Number of Ready Tasks"                        
+4       gft    Sc       "Total GFlops"                        
+4       use     Mm       "Used (MB)"                        
+4       bwi_mm     Mm       "Bandwidth In (MB/s)"                        
+4       bwo_mm     Mm       "Bandwidth Out (MB/s)"                        
+4       bwi_mpi     MPICt       "Bandwidth In (MB/s)"                        
+4       bwo_mpi     MPICt       "Bandwidth Out (MB/s)"                        
+4       gf      W       "GFlops"                        
+6       I       S       Idle         ".9 .1 .0"		
+6       In       S      Initializing       "0.0 .7 1.0"            
+6       D       S      Deinitializing       "0.0 .1 .7"            
+6       Fi       S      FetchingInput       "1.0 .1 1.0"            
+6       Po       S      PushingOutput       "0.1 1.0 1.0"            
+6       C       S       Callback       ".0 .3 .8"            
+6       B       S       Overhead         ".5 .18 .0"		
+6       E       S       Executing         ".0 .6 .5"		
+6       Sc       S      Scheduling         ".7 .36 .0"		
+6       Sl       S      Sleeping         ".9 .1 .0"		
+6       P       S       Progressing         ".1 .3 .1"		
+6       U       S       Unpartitioning      ".0 .0 1.0"		
+6       H       S       Hypervisor      ".5 .18 .0"		
+6       Bu      S       "Building task"   ".5 .18 .0"		
+6       Su      S       "Submitting task" ".3 .09 .0"		
+6       Th      S       "Throttling task submission" ".8 .6 .6"		
+6       MD      S       "Decoding task for MPI" ".5 .18 .2"		
+6       MPr     S       "Preparing task for MPI" ".4 .14 .2"		
+6       MPo     S       "Post-processing task for MPI" ".3 .09 .2"		
+3       WS       W       "Worker State"                        
+6       I       WS       Idle         ".9 .1 .0"		
+6       In       WS      Initializing       "0.0 .7 1.0"            
+6       D       WS      Deinitializing       "0.0 .1 .7"            
+6       Fi       WS      FetchingInput       "1.0 .1 1.0"            
+6       Po       WS      PushingOutput       "0.1 1.0 1.0"            
+6       C       WS       Callback       ".0 .3 .8"            
+6       B       WS       Overhead         ".5 .18 .0"		
+6       E       WS       Executing         ".0 .6 .5"		
+6       Sc       WS      Scheduling         ".7 .36 .0"		
+6       Sl       WS      Sleeping         ".9 .1 .0"		
+6       P       WS       Progressing         ".1 .3 .1"		
+6       U       WS       Unpartitioning      ".0 .0 1.0"		
+6       H       WS       Hypervisor      ".5 .18 .0"		
+6       Bu      WS       "Building task"   ".5 .18 .0"		
+6       Su      WS       "Submitting task" ".3 .09 .0"		
+6       Th      WS       "Throttling task submission" ".8 .6 .6"		
+3       US       UT       "User Thread State"                        
+6       Bu      US      "Building task"   ".5 .18 .0"		
+6       Su      US      "Submitting task" ".3 .09 .0"		
+6       C       US      "Callback" ".0 .3 .8"		
+6       Th      US      "Throttling task submission" ".8 .6 .6"		
+6       MD      US      "Decoding task for MPI" ".5 .18 .2"		
+6       MPr     US      "Preparing task for MPI" ".4 .14 .2"		
+6       MPo     US      "Post-processing task for MPI" ".3 .09 .2"		
+6       W       US      "Waiting task" ".9 .1 .0"		
+6       WA      US      "Waiting all tasks" ".9 .1 .0"		
+6       No      US      Nothing ".0 .0 .0"		
+6       P       CtS       Processing         "0 0 0"		
+6       Pl       CtS      Polling	   "1.0 .5 0"		
+6       Dr       CtS      DriverRun	   ".1 .1 1.0"	
+6       Sl       CtS      Sleeping         ".9 .1 .0"		
+6       UT       CtS      UserTesting        ".2 .1 .6"	
+6       UW       CtS      UserWaiting        ".4 .1 .3"	
+6       SdS       CtS      SendSubmitted     "1.0 .1 1.0"	
+6       RvS       CtS      ReceiveSubmitted  "0.1 1.0 1.0"	
+6       SdC       CtS      SendCompleted     "1.0 .5 1.0"	
+6       RvC       CtS      ReceiveCompleted  "0.5 1.0 1.0"	
+6       TD       CtS      "Testing Detached"  ".0 .0 .6"	
+6       MT       CtS      "MPI Test"  ".0 .0 .8"	
+6       Bu      CtS      "Building task"   ".5 .18 .0"		
+6       Su      CtS      "Submitting task" ".3 .09 .0"		
+6       Th      CtS      "Throttling task submission" ".8 .6 .6"		
+6       C       CtS      "Callback" ".0 .3 .8"		
+6       I       Ctx1      Idle         ".9 .1 .0"		
+6       In       Ctx1      Initializing       "0.0 .7 1.0"            
+6       D       Ctx1      Deinitializing       "0.0 .1 .7"            
+6       Fi       Ctx1      FetchingInput       "1.0 .1 1.0"            
+6       Po       Ctx1      PushingOutput       "0.1 1.0 1.0"            
+6       C       Ctx1       Callback       ".0 .3 .8"            
+6       B       Ctx1       Overhead         ".5 .18 .0"		
+6       E       Ctx1       Executing         ".0 .6 .5"		
+6       Sc       Ctx1      Scheduling         ".7 .36 .0"		
+6       Sl       Ctx1      Sleeping         ".9 .1 .0"		
+6       P       Ctx1       Progressing         ".1 .3 .1"		
+6       U       Ctx1       Unpartitioning         ".0 .0 1.0"	
+6       H       Ctx1       Hypervisor         ".5 .18 .0"		
+6       I       Ctx2      Idle         ".9 .1 .0"		
+6       In       Ctx2      Initializing       "0.0 .7 1.0"            
+6       D       Ctx2      Deinitializing       "0.0 .1 .7"            
+6       Fi       Ctx2      FetchingInput       "1.0 .1 1.0"            
+6       Po       Ctx2      PushingOutput       "0.1 1.0 1.0"            
+6       C       Ctx2       Callback       ".0 .3 .8"            
+6       B       Ctx2       Overhead         ".5 .18 .0"		
+6       E       Ctx2       Executing         ".0 .6 .5"		
+6       Sc       Ctx2      Scheduling         ".7 .36 .0"		
+6       Sl       Ctx2      Sleeping         ".9 .1 .0"		
+6       P       Ctx2       Progressing         ".1 .3 .1"		
+6       U       Ctx2       Unpartitioning         ".0 .0 1.0"	
+6       H       Ctx2       Hypervisor         ".5 .18 .0"		
+6       I       Ctx3      Idle         ".9 .1 .0"		
+6       In       Ctx3      Initializing       "0.0 .7 1.0"            
+6       D       Ctx3      Deinitializing       "0.0 .1 .7"            
+6       Fi       Ctx3      FetchingInput       "1.0 .1 1.0"            
+6       Po       Ctx3      PushingOutput       "0.1 1.0 1.0"            
+6       C       Ctx3       Callback       ".0 .3 .8"            
+6       B       Ctx3       Overhead         ".5 .18 .0"		
+6       E       Ctx3       Executing         ".0 .6 .5"		
+6       Sc       Ctx3      Scheduling         ".7 .36 .0"		
+6       Sl       Ctx3      Sleeping         ".9 .1 .0"		
+6       P       Ctx3       Progressing         ".1 .3 .1"		
+6       U       Ctx3       Unpartitioning         ".0 .0 1.0"	
+6       H       Ctx3       Hypervisor         ".5 .18 .0"		
+6       I       Ctx4      Idle         ".9 .1 .0"		
+6       In       Ctx4      Initializing       "0.0 .7 1.0"            
+6       D       Ctx4      Deinitializing       "0.0 .1 .7"            
+6       Fi       Ctx4      FetchingInput       "1.0 .1 1.0"            
+6       Po       Ctx4      PushingOutput       "0.1 1.0 1.0"            
+6       C       Ctx4       Callback       ".0 .3 .8"            
+6       B       Ctx4       Overhead         ".5 .18 .0"		
+6       E       Ctx4       Executing         ".0 .6 .5"		
+6       Sc       Ctx4      Scheduling         ".7 .36 .0"		
+6       Sl       Ctx4      Sleeping         ".9 .1 .0"		
+6       P       Ctx4       Progressing         ".1 .3 .1"		
+6       U       Ctx4       Unpartitioning         ".0 .0 1.0"	
+6       H       Ctx4       Hypervisor         ".5 .18 .0"		
+6       I       Ctx5      Idle         ".9 .1 .0"		
+6       In       Ctx5      Initializing       "0.0 .7 1.0"            
+6       D       Ctx5      Deinitializing       "0.0 .1 .7"            
+6       Fi       Ctx5      FetchingInput       "1.0 .1 1.0"            
+6       Po       Ctx5      PushingOutput       "0.1 1.0 1.0"            
+6       C       Ctx5       Callback       ".0 .3 .8"            
+6       B       Ctx5       Overhead         ".5 .18 .0"		
+6       E       Ctx5       Executing         ".0 .6 .5"		
+6       Sc       Ctx5      Scheduling         ".7 .36 .0"		
+6       Sl       Ctx5      Sleeping         ".9 .1 .0"		
+6       P       Ctx5       Progressing         ".1 .3 .1"		
+6       U       Ctx5       Unpartitioning         ".0 .0 1.0"	
+6       H       Ctx5       Hypervisor         ".5 .18 .0"		
+6       I       Ctx6      Idle         ".9 .1 .0"		
+6       In       Ctx6      Initializing       "0.0 .7 1.0"            
+6       D       Ctx6      Deinitializing       "0.0 .1 .7"            
+6       Fi       Ctx6      FetchingInput       "1.0 .1 1.0"            
+6       Po       Ctx6      PushingOutput       "0.1 1.0 1.0"            
+6       C       Ctx6       Callback       ".0 .3 .8"            
+6       B       Ctx6       Overhead         ".5 .18 .0"		
+6       E       Ctx6       Executing         ".0 .6 .5"		
+6       Sc       Ctx6      Scheduling         ".7 .36 .0"		
+6       Sl       Ctx6      Sleeping         ".9 .1 .0"		
+6       P       Ctx6       Progressing         ".1 .3 .1"		
+6       U       Ctx6       Unpartitioning         ".0 .0 1.0"	
+6       H       Ctx6       Hypervisor         ".5 .18 .0"		
+6       I       Ctx7      Idle         ".9 .1 .0"		
+6       In       Ctx7      Initializing       "0.0 .7 1.0"            
+6       D       Ctx7      Deinitializing       "0.0 .1 .7"            
+6       Fi       Ctx7      FetchingInput       "1.0 .1 1.0"            
+6       Po       Ctx7      PushingOutput       "0.1 1.0 1.0"            
+6       C       Ctx7       Callback       ".0 .3 .8"            
+6       B       Ctx7       Overhead         ".5 .18 .0"		
+6       E       Ctx7       Executing         ".0 .6 .5"		
+6       Sc       Ctx7      Scheduling         ".7 .36 .0"		
+6       Sl       Ctx7      Sleeping         ".9 .1 .0"		
+6       P       Ctx7       Progressing         ".1 .3 .1"		
+6       U       Ctx7       Unpartitioning         ".0 .0 1.0"	
+6       H       Ctx7       Hypervisor         ".5 .18 .0"		
+6       I       Ctx8      Idle         ".9 .1 .0"		
+6       In       Ctx8      Initializing       "0.0 .7 1.0"            
+6       D       Ctx8      Deinitializing       "0.0 .1 .7"            
+6       Fi       Ctx8      FetchingInput       "1.0 .1 1.0"            
+6       Po       Ctx8      PushingOutput       "0.1 1.0 1.0"            
+6       C       Ctx8       Callback       ".0 .3 .8"            
+6       B       Ctx8       Overhead         ".5 .18 .0"		
+6       E       Ctx8       Executing         ".0 .6 .5"		
+6       Sc       Ctx8      Scheduling         ".7 .36 .0"		
+6       Sl       Ctx8      Sleeping         ".9 .1 .0"		
+6       P       Ctx8       Progressing         ".1 .3 .1"		
+6       U       Ctx8       Unpartitioning         ".0 .0 1.0"	
+6       H       Ctx8       Hypervisor         ".5 .18 .0"		
+6       I       Ctx9      Idle         ".9 .1 .0"		
+6       In       Ctx9      Initializing       "0.0 .7 1.0"            
+6       D       Ctx9      Deinitializing       "0.0 .1 .7"            
+6       Fi       Ctx9      FetchingInput       "1.0 .1 1.0"            
+6       Po       Ctx9      PushingOutput       "0.1 1.0 1.0"            
+6       C       Ctx9       Callback       ".0 .3 .8"            
+6       B       Ctx9       Overhead         ".5 .18 .0"		
+6       E       Ctx9       Executing         ".0 .6 .5"		
+6       Sc       Ctx9      Scheduling         ".7 .36 .0"		
+6       Sl       Ctx9      Sleeping         ".9 .1 .0"		
+6       P       Ctx9       Progressing         ".1 .3 .1"		
+6       U       Ctx9       Unpartitioning         ".0 .0 1.0"	
+6       H       Ctx9       Hypervisor         ".5 .18 .0"		
+6       A       MS      Allocating         ".4 .1 .0"		
+6       Ar       MS      AllocatingReuse       ".1 .1 .8"		
+6       F       MS      Freeing         ".6 .3 .0"		
+6       W       MS      WritingBack         ".0 .0 .5"		
+6       Wa       MS     WritingBackAsync    ".0 .0 .4"		
+6       R       MS      Reclaiming         ".0 .1 .6"		
+6       Co       MS     DriverCopy         ".3 .5 .1"		
+6       CoA      MS     DriverCopyAsync         ".1 .3 .1"		
+6       No       MS     Nothing         ".0 .0 .0"		
+5       MPIL     MPIP	MPICt	MPICt   "MPI communication"
+5       F       P	Mm	Mm      "Intra-node data Fetch"
+5       PF      P	Mm	Mm      "Intra-node data PreFetch"
+5       IF      P	Mm	Mm      "Intra-node data IdleFetch"
+5       WSL     P	W	W       "Work steal"
+7	0.0 MPIroot      MPIP      0       root

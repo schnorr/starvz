@@ -379,6 +379,8 @@ panel_utiltreenode <- function(data = NULL, step = 100) {
 #' @examples
 #' panel_utiltreedepth(data, step=100, legend=TRUE)
 #' @export
+panel_utiltreedepth <- function(Application = NULL, Atree = NULL, step = 100) {
+  #Prepare data
   depth_plot_data <- resource_utilization_tree_depth(data$Application, data$Atree, step)
 
   maxDepth <- depth_plot_data %>%

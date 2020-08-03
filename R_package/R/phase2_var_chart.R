@@ -1,16 +1,58 @@
 #' @include starvz_data.R
 
-panel_ready <- function(data, legend=data$config$ready$legend){
-  agg_step <- config_value(data$config$ready$step, data$config$global_agg_step)
+panel_ready <- function(data, legend=data$config$ready$legend,
+                              base_size=data$config$base_size,
+                              expand_x=data$config$expand,
+                              x_start=data$config$limits$start,
+                              x_end=data$config$limits$end,
+                              y_start=0,
+                              y_end=data$config$ready$limit,
+                              step=data$config$ready$step){
+
+  ## Check for non-valid arguments
+  if(is.null(legend) || !is.logical(legend)){
+    legend <- TRUE
+  }
+
+  if(is.null(base_size) || !is.numeric(base_size)){
+    base_size <- 22
+  }
+
+  if(is.null(expand_x) || !is.numeric(expand_x)){
+    expand_x <- 0.05
+  }
+
+  if(is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start)) ){
+    x_start <- NA
+  }
+
+  if(is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end)) ){
+    x_end <- NA
+  }
+
+  if(is.null(y_start) || (!is.na(y_start) && !is.numeric(y_start)) ){
+    y_start <- NA
+  }
+
+  if(is.null(y_end) || (!is.na(y_end) && !is.numeric(y_end)) ){
+    y_end <- NA
+  }
+
+  agg_step <- config_value(step, data$config$global_agg_step)
+
+  if(is.null(agg_step) || !is.numeric(agg_step)){
+    agg_step <- 100
+  }
+
   panel <- data$Variable %>%
     filter(grepl("sched", .data$ResourceId), grepl("Ready", .data$Type)) %>%
     var_integration_segment_chart(step = agg_step,
-       base_size=data$config$base_size,
-      expand=data$config$expand,
+      base_size=base_size,
+      expand=expand_x,
       legend=legend) +
     coord_cartesian(
-        xlim = c(data$config$limits$start, data$config$limits$end),
-        ylim = c(0, data$config$ready$limit)
+        xlim = c(x_start, x_end),
+        ylim = c(0, y_end)
     )
   return(panel)
 }

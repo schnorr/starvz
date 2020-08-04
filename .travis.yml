@@ -2,6 +2,10 @@ language: r
 
 r_packages:
   - covr
+  - devtools
+
+r_github_packages:
+  - schnorr/starvz/R_package
 
 after_success:
   - Rscript -e 'library(covr); codecov("R_package")'

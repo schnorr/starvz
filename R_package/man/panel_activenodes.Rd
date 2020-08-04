@@ -23,5 +23,5 @@ Use starvz_data to create a line plot of the number of active nodes per type
 along the application execution time
 }
 \examples{
-panel_activenodes(data=starvz_data, step=100)
+#panel_activenodes(data=starvz_data, step=100)
 }

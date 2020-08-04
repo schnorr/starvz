@@ -8,7 +8,7 @@
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
-#' panel_atree_structure(data)
+#' #panel_atree_structure(data)
 #' @export
 panel_atree_structure <- function(data = NULL) {
   if (is.null(data)) stop("input data for geom_atree_plot is NULL")
@@ -134,8 +134,8 @@ panel_atree_structure <- function(data = NULL) {
 #' @param anomalies enable/disable anomalies tasks representation
 #' @return A ggplot object
 #' @examples
-#' panel_atree(data, step=10)
-#' panel_atree(data, step=20, communication=FALSE, initialization=FALSE)
+#' #panel_atree(data, step=10)
+#' #panel_atree(data, step=20, communication=FALSE, initialization=FALSE)
 #' @export
 panel_atree <- function(data = NULL, step = 100, legend = TRUE, zoom = FALSE,
                         computation = TRUE, pruned = TRUE, initialization = TRUE,
@@ -286,7 +286,7 @@ panel_atree <- function(data = NULL, step = 100, legend = TRUE, zoom = FALSE,
 #' @param step size in milliseconds for the time aggregation step
 #' @return A ggplot object
 #' @examples
-#' panel_utiltreenode(data=starvz_data, step=100)
+#' #panel_utiltreenode(data=starvz_data, step=100)
 #' @export
 panel_utiltreenode <- function(data = NULL, step = 100) {
   df1 <- resource_utilization_tree_node(data$Application, data$Atree, step = step, group_pruned=FALSE)
@@ -381,7 +381,7 @@ panel_utiltreenode <- function(data = NULL, step = 100) {
 #' @param legend enable/disable plot legends
 #' @return A ggplot object
 #' @examples
-#' panel_utiltreedepth(data, step=100, legend=TRUE)
+#' #panel_utiltreedepth(data, step=100, legend=TRUE)
 #' @export
 panel_utiltreedepth <- function(data, step = 100, legend=TRUE) {
   #Prepare data
@@ -419,7 +419,7 @@ panel_utiltreedepth <- function(data, step = 100, legend=TRUE) {
 #' @param aggregation enable/disable time aggregation for the plot
 #' @param legend enable/disable plot legends
 #' @examples
-#' panel_nodememuse(data$Application, step=100)
+#' #panel_nodememuse(data$Application, step=100)
 #' @export
 panel_nodememuse <- function(data = NULL, step = 100, aggregation=FALSE, legend=TRUE) {
   loginfo("Entry of panel_nodememuse")
@@ -483,7 +483,7 @@ panel_nodememuse <- function(data = NULL, step = 100, aggregation=FALSE, legend=
 #' @param legend enable/disable plot legends
 #' @return A ggplot object
 #' @examples
-#' panel_activenodes(data=starvz_data, step=100)
+#' #panel_activenodes(data=starvz_data, step=100)
 #' @export
 panel_activenodes <- function(data = NULL, step = 100, aggregation=FALSE, legend=TRUE) {
   if (is.null(data)) stop("a NULL data has been provided to panel_activenodes")

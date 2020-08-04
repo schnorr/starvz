@@ -197,7 +197,7 @@ var_imbalance_power <- function(data, step) {
     pivot_longer(-.data$Step, names_to = "metric", values_to = "value") %>%
     mutate(Time = .data$Step * step + step / 2) -> to_plot
 
-  to_plot %>% var_imbalance_plot("Imb Metric Power", step, data$config$base_size, data$config$expand)
+  to_plot %>% var_imbalance_plot("Imb Metric\nPower", step, data$config$base_size, data$config$expand)
 }
 
 var_imbalance_double_hetero <- function(data, step) {
@@ -213,7 +213,7 @@ var_imbalance_double_hetero <- function(data, step) {
     pivot_longer(-.data$Step, names_to = "metric", values_to = "value") %>%
     mutate(Time = .data$Step * step + step / 2) -> to_plot
 
-  to_plot %>% var_imbalance_plot("Imb Metric Hete", step, data$config$base_size, data$config$expand)
+  to_plot %>% var_imbalance_plot("Imb Metric\nHete", step, data$config$base_size, data$config$expand)
 }
 
 var_imbalance_plot <- function(data, name, step, base_size, expand) {

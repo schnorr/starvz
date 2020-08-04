@@ -55,10 +55,14 @@ panel_ready <- function(data, legend=data$config$ready$legend,
     y_end <- NA
   }
 
-  agg_step <- config_value(step, data$config$global_agg_step)
-
-  if(is.null(agg_step) || !is.numeric(agg_step)){
-    agg_step <- 100
+  if(is.null(step) || !is.numeric(step)){
+    if(is.null(data$config$global_agg_step)){
+      agg_step <- 100
+    }else{
+      agg_step <- data$config$global_agg_step
+    }
+  }else{
+      agg_step <- step
   }
 
   panel <- data$Variable %>%
@@ -132,10 +136,14 @@ panel_submitted <- function(data, legend=data$config$submmited$legend,
     y_end <- NA
   }
 
-  agg_step <- config_value(step, data$config$global_agg_step)
-
-  if(is.null(agg_step) || !is.numeric(agg_step)){
-    agg_step <- 100
+  if(is.null(step) || !is.numeric(step)){
+    if(is.null(data$config$global_agg_step)){
+      agg_step <- 100
+    }else{
+      agg_step <- data$config$global_agg_step
+    }
+  }else{
+      agg_step <- step
   }
 
   panel <- data$Variable %>%
@@ -209,10 +217,14 @@ panel_usedmemory <- function(data, legend=data$config$usedmemory$legend,
     y_end <- NA
   }
 
-  agg_step <- config_value(step, data$config$global_agg_step)
-
-  if(is.null(agg_step) || !is.numeric(agg_step)){
-    agg_step <- 100
+  if(is.null(step) || !is.numeric(step)){
+    if(is.null(data$config$global_agg_step)){
+      agg_step <- 100
+    }else{
+      agg_step <- data$config$global_agg_step
+    }
+  }else{
+      agg_step <- step
   }
 
   panel <- data$Variable %>%

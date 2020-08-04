@@ -50,6 +50,6 @@ considering the initialization, communication and computational tasks. These
 representations can be controlled in the configuration file.
 }
 \examples{
-panel_atree(data, step=10)
-panel_atree(data, step=20, communication=FALSE, initialization=FALSE)
+#panel_atree(data, step=10)
+#panel_atree(data, step=20, communication=FALSE, initialization=FALSE)
 }

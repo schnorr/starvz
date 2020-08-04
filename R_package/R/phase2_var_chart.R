@@ -1,5 +1,23 @@
 #' @include starvz_data.R
 
+#' Create a line chart panel with ready tasks submission
+#'
+#' Use the Variable traces to create a line chart panel with ready tasks
+#' submission per node, aggregated by a configurable time step
+#'
+#' @param data starvz_data with trace data
+#' @param legend enable/disable legends
+#' @param base_size base_size base font size
+#' @param expand_x expand size for scale_x_continuous padding
+#' @param x_start X-axis start value
+#' @param x_end X-axis end value
+#' @param y_start Y-axis start value
+#' @param y_end Y-axis end value
+#' @param step time step for aggregation
+#' @return A ggplot object
+#' @examples
+#' panel_ready(data=starvz_data)
+#' @export
 panel_ready <- function(data, legend=data$config$ready$legend,
                               base_size=data$config$base_size,
                               expand_x=data$config$expand,

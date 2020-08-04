@@ -5,6 +5,7 @@ r_packages:
   - devtools
 
 r_binary_packages:
+  - later
   - tidyverse
 
 apt_packages:

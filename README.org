@@ -32,6 +32,9 @@
 #+html: <a href="https://opensource.org/licenses/GPL-3.0">
 #+html:   <img src="https://img.shields.io/badge/license-GPL--3.0-blue" />
 #+html: </a>
+#+html: <a href="https://codecov.io/gh/schnorr/starvz">
+#+html:  <img src="https://codecov.io/gh/schnorr/starvz/branch/master/graph/badge.svg" />
+#+html: </a>
 #+html: <br><br>
 
 StarVZ consists in a performance analysis workflow that combines the

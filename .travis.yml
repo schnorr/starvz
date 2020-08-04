@@ -4,6 +4,12 @@ r_packages:
   - covr
   - devtools
 
+r_binary_packages:
+  - tidyverse
+
+apt_packages:
+  - libboost-graph-dev
+
 before_install:
   - cd R_package
 

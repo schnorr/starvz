@@ -23,6 +23,9 @@
 #+EXPORT_SELECT_TAGS: export
 #+TAGS: noexport(n) deprecated(d)
 
+#+html: <a href="https://travis-ci.org/schnorr/starvz">
+#+html:   <img src="https://travis-ci.org/schnorr/starvz.svg?branch=master" />
+#+html: </a>
 #+html: <a href="https://www.tidyverse.org/lifecycle/#maturing">
 #+html:   <img src="https://img.shields.io/badge/lifecycle-maturing-blue.svg" />
 #+html: </a>

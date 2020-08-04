@@ -521,16 +521,16 @@ starvz_plot_list <- function(data = NULL) {
     loginfo("Creating the temporal atree plot")
     # get default values for parameters
     aggStep <- config_value(data$config$atree$step, globalAggStep)
-    
+
     legend <- data$config$atree$legend
     computation <- data$config$atree$computation$active
     pruned <- data$config$atree$computation$pruned$active
     communication <- data$config$atree$communication$active
     initialization <- data$config$atree$initialization$active
     anomalies <- data$config$atree$anomalies$active
-    
-    goatreet <- panel_atree(data=data, step=aggStep, legend=legend, zoom=FALSE, 
-      computation=computation, pruned=pruned, communication=communication, 
+
+    goatreet <- panel_atree(data=data, step=aggStep, legend=legend, zoom=FALSE,
+      computation=computation, pruned=pruned, communication=communication,
       initialization=initialization, anomalies=anomalies) + tScale
   }
 
@@ -545,7 +545,7 @@ starvz_plot_list <- function(data = NULL) {
   if (!is.null(data$Atree) && data$config$utiltreedepth$active) {
     loginfo("Creating the resource utilization by depth plot")
     aggStep <- config_value(data$config$utiltreenode$step, globalAggStep)
-    goutiltreedepth <- panel_utiltreedepth(data=data, step=aggStep, 
+    goutiltreedepth <- panel_utiltreedepth(data=data, step=aggStep,
       legend=data$config$utiltreedepth$legend) + tScale
   }
 
@@ -567,9 +567,9 @@ starvz_plot_list <- function(data = NULL) {
         node_aggregation(data) + coord_cartesian(xlim = c(tstart, tend), ylim = c(0, NA)) -> gow
       }
     } else {
-      gow <- panel_st_raw(data=data, ST.Outliers=data$config$st$outliers, base_size=data$config$base_size, 
-        expand_x=data$config$expand, expand_y=data$config$st$expand, selected_nodes=data$config$selected_nodes, 
-        labels=data$config$st$labels, alpha=data$config$st$alpha, idleness=data$config$st$idleness, 
+      gow <- panel_st_raw(data=data, ST.Outliers=data$config$st$outliers, base_size=data$config$base_size,
+        expand_x=data$config$expand, expand_y=data$config$st$expand, selected_nodes=data$config$selected_nodes,
+        labels=data$config$st$labels, alpha=data$config$st$alpha, idleness=data$config$st$idleness,
         taskdeps=data$config$st$tasks$active, tasklist=data$config$st$tasks$list, levels=data$config$st$tasks$levels,
         makespan=data$config$st$makespan, abe=data$config$st$abe$active, pmtoolbounds=data$config$pmtool$bounds$active,
         cpb=data$config$st$cpb, cpb_mpi=data$config$st$cpb_mpi$active, legend=data$config$st$legend, StarPU.View = FALSE) +
@@ -605,9 +605,9 @@ starvz_plot_list <- function(data = NULL) {
       dfw_agg <- st_time_aggregation(data$Starpu, StarPU.View = TRUE, step = aggStep)
       data %>% st_time_aggregation_plot(dfw_agg, StarPU.View = TRUE) + coord_cartesian(xlim = c(tstart, tend), ylim = c(0, NA)) -> gstarpu
     } else {
-      gstarpu <- panel_st_raw(data=data, ST.Outliers=data$config$st$outliers, base_size=data$config$base_size, 
-        expand_x=data$config$expand, expand_y=data$config$st$expand, selected_nodes=data$config$selected_nodes, 
-        labels=data$config$st$labels, alpha=data$config$st$alpha, idleness=data$config$st$idleness, 
+      gstarpu <- panel_st_raw(data=data, ST.Outliers=data$config$st$outliers, base_size=data$config$base_size,
+        expand_x=data$config$expand, expand_y=data$config$st$expand, selected_nodes=data$config$selected_nodes,
+        labels=data$config$st$labels, alpha=data$config$st$alpha, idleness=data$config$st$idleness,
         taskdeps=data$config$st$tasks$active, tasklist=data$config$st$tasks$list, levels=data$config$st$tasks$levels,
         makespan=data$config$st$makespan, abe=data$config$st$abe$active, pmtoolbounds=data$config$pmtool$bounds$active,
         cpb=data$config$st$cpb, cpb_mpi=data$config$st$cpb_mpi$active, legend=data$config$starpu$legend, StarPU.View = TRUE) +
@@ -665,17 +665,7 @@ starvz_plot_list <- function(data = NULL) {
   # Submitted
   if (data$config$submitted$active) {
     loginfo("Creating the Submitted plot")
-    aggStep <- config_value(data$config$submitted$step, globalAggStep)
-    gosv <- data$Variable %>%
-      filter(grepl("sched", .data$ResourceId), grepl("Submitted", .data$Type)) %>%
-      var_integration_segment_chart(step = aggStep, base_size=data$config$base_size, expand=data$config$expand) + tScale
-    if (!data$config$submitted$legend) {
-      gosv <- gosv + theme(legend.position = "none")
-    } else {
-      gosv <- gosv +
-        theme(legend.position = "top")
-    }
-    gosv <- userYLimit(gosv, data$config$submitted$limit, c(tstart, tend))
+    gosv <- panel_submitted(data)
   }
 
   # GFlops
@@ -907,7 +897,7 @@ starvz_plot_list <- function(data = NULL) {
       data$config$activenodes$active <<- FALSE
     } else {
       aggStep <- config_value(data$config$activenodes$aggregation$step, globalAggStep)
-      goactivenodes <- panel_activenodes(data=data, step=aggStep, aggregation=data$config$activenodes$aggregation$active, 
+      goactivenodes <- panel_activenodes(data=data, step=aggStep, aggregation=data$config$activenodes$aggregation$active,
         legend=data$config$activenodes$legend) + tScale
     }
   }
@@ -921,7 +911,7 @@ starvz_plot_list <- function(data = NULL) {
       data$config$activenodes$nodememuse$active <<- FALSE
     } else {
       aggStep <- config_value(data$config$activenodes$aggregation$step, globalAggStep)
-      gonodememuse <- panel_nodememuse(data=data, step=aggStep, aggregation=data$config$activenodes$aggregation$active,  
+      gonodememuse <- panel_nodememuse(data=data, step=aggStep, aggregation=data$config$activenodes$aggregation$active,
         legend=data$config$activenodes$nodememuse$legend) + tScale
     }
   }

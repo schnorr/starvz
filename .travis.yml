@@ -1,16 +1,15 @@
 language: r
 
 r_packages:
-  - covr
-
-r_binary_packages:
-  - later
-  - tidyverse
   - devtools
+  - tidyverse
+  - covr
 
 apt_packages:
   - libboost-graph-dev
   - libgit2-dev
+
+cache: packages
 
 before_install:
   - cd R_package

@@ -73,3 +73,10 @@ summary.starvz_data <- function(x) {
 print.starvz_data <- function(x) {
   cat("TODO")
 }
+
+#' Small StarVZ data of LU Factorization
+#'
+#' A small StarVZ data object obtained from Chameleon+StarPU LU Factorization
+#'
+#' @source Chameleon+StarPU
+"starvz_sample_lu"

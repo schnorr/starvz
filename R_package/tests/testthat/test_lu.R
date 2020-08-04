@@ -2,9 +2,8 @@ context("Test with LU")
 library(starvz)
 
 test_that("starvz_plot works", {
-  dt <- starvz_read("../../../test/lu_test/fxt/", "../../../test/lu_test/config.yaml")
-  expect_equal(class(dt), "starvz_data")
+  expect_equal(class(starvz_sample_lu), "starvz_data")
 
- pl <- starvz_plot(dt)
+ pl <- starvz_plot(starvz_sample_lu)
  expect_equal(class(pl),c("patchwork", "gg", "ggplot"))
 })

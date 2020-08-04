@@ -1,5 +1,3 @@
-#' @include starvz_data.R
-
 #' Create a line chart panel with ready tasks submission
 #'
 #' Use the Variable traces to create a line chart panel with ready tasks
@@ -15,8 +13,9 @@
 #' @param y_end Y-axis end value
 #' @param step time step for aggregation
 #' @return A ggplot object
+#' @include starvz_data.R
 #' @examples
-#' panel_ready(data=starvz_data)
+#' panel_ready(data=starvz_sample_lu)
 #' @export
 panel_ready <- function(data, legend=data$config$ready$legend,
                               base_size=data$config$base_size,
@@ -91,8 +90,9 @@ panel_ready <- function(data, legend=data$config$ready$legend,
 #' @param y_end Y-axis end value
 #' @param step time step for aggregation
 #' @return A ggplot object
+#' @include starvz_data.R
 #' @examples
-#' panel_submitted(data=starvz_data)
+#' panel_submitted(data=starvz_sample_lu)
 #' @export
 panel_submitted <- function(data, legend=data$config$submmited$legend,
                               base_size=data$config$base_size,
@@ -167,8 +167,9 @@ panel_submitted <- function(data, legend=data$config$submmited$legend,
 #' @param y_end Y-axis end value
 #' @param step time step for aggregation
 #' @return A ggplot object
+#' @include starvz_data.R
 #' @examples
-#' panel_submitted(data=starvz_data)
+#' panel_submitted(data=starvz_sample_lu)
 #' @export
 panel_usedmemory <- function(data, legend=data$config$usedmemory$legend,
                               base_size=data$config$base_size,

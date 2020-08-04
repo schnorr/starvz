@@ -1,9 +1,9 @@
-#' @include starvz_data.R
 
-#' Create a space time visualization as a Gantt chart    
+
+#' Create a space time visualization as a Gantt chart
 #'
 #' Use the Application trace data to plot the task computations by ResourceId
-#' over the execution time. 
+#' over the execution time.
 #'
 #' @param data starvz_data with trace data
 #' @param ST.Outliers enable/disable the anomalous task highlighting
@@ -19,19 +19,28 @@
 #' @param levels number of dependencies to be shown
 #' @param makespan enable/disable application makespan at the end of the plot
 #' @param abe enable/disable ABE metric
-#' @param pmtoolbounds enable/disable pmtool theoretical bounds 
+#' @param pmtoolbounds enable/disable pmtool theoretical bounds
 #' @param cpb enable/disable critical path bound makespan metric
 #' @param cpb_mpi enable/disable critical path bound makespan considering MPI
 #' @param StarPU.View TODO I think we should create a separated function for it
 #' @param legend enable/disable legends
 #' @return A ggplot object
+#' @include starvz_data.R
 #' @examples
-#' panel_st_raw(data=starvz_data)
+#' panel_st_raw(data=starvz_sample_lu)
 #' @export
-panel_st_raw <- function(data = NULL, ST.Outliers = TRUE, base_size=22, expand_x=0.05,
-  expand_y=0.05, selected_nodes = NULL, labels="ALL", alpha=0.25, idleness=TRUE, 
-  taskdeps=FALSE, tasklist = NULL,  levels=10, makespan=TRUE, abe=FALSE, pmtoolbounds=FALSE,
-  cpb = FALSE, cpb_mpi = FALSE, legend=TRUE, StarPU.View = FALSE) {
+panel_st_raw <- function(data = NULL, ST.Outliers=data$config$st$outliers, base_size=data$config$base_size,
+  expand_x=data$config$expand, expand_y=data$config$st$expand, selected_nodes=data$config$selected_nodes,
+  labels=data$config$st$labels, alpha=data$config$st$alpha, idleness=data$config$st$idleness,
+  taskdeps=data$config$st$tasks$active, tasklist=data$config$st$tasks$list, levels=data$config$st$tasks$levels,
+  makespan=data$config$st$makespan, abe=data$config$st$abe$active, pmtoolbounds=data$config$pmtool$bounds$active,
+  cpb=data$config$st$cpb, cpb_mpi=data$config$st$cpb_mpi$active, legend=data$config$starpu$legend, StarPU.View = FALSE) {
+
+#ST.Outliers = TRUE, base_size=22, expand_x=0.05,
+#  expand_y=0.05, selected_nodes = NULL, labels="ALL", alpha=0.25, idleness=TRUE,
+#  taskdeps=FALSE, tasklist = NULL,  levels=10, makespan=TRUE, abe=FALSE, pmtoolbounds=FALSE,
+#  cpb = FALSE, cpb_mpi = FALSE, legend=TRUE
+
   if (is.null(data)) stop("data provided to state_chart is NULL")
 
   # Obtain time interval

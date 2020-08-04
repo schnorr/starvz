@@ -12,6 +12,8 @@ panel_atree(
   computation = TRUE,
   pruned = TRUE,
   initialization = TRUE,
+  x_start = data$config$limits$start,
+  x_end = data$config$limits$end,
   communication = TRUE,
   anomalies = TRUE
 )
@@ -30,6 +32,10 @@ panel_atree(
 \item{pruned}{enable/disable pruned computations representations in the tree}
 
 \item{initialization}{enable/disable initialization tasks representation}
+
+\item{x_start}{X-axis start value}
+
+\item{x_end}{X-axis end value}
 
 \item{communication}{enable/disable communication tasks representation}
 

@@ -4,12 +4,12 @@
 \alias{panel_utiltreedepth}
 \title{Create the resource utilization by tree depth plot}
 \usage{
-panel_utiltreedepth(Application = NULL, Atree = NULL, step = 100)
+panel_utiltreedepth(data, step = 100, legend = TRUE)
 }
 \arguments{
-\item{step}{size in milliseconds for the time aggregation step}
-
 \item{data}{starvz_data with trace data}
+
+\item{step}{size in milliseconds for the time aggregation step}
 
 \item{legend}{enable/disable plot legends}
 }

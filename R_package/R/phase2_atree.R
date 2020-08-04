@@ -1,4 +1,3 @@
-#' @include starvz_data.R
 
 #' Create the elimination tree structure plot along time
 #'
@@ -7,6 +6,7 @@
 #'
 #' @param data starvz_data with trace data
 #' @return A ggplot object
+#' @include starvz_data.R
 #' @examples
 #' panel_atree_structure(data)
 #' @export
@@ -103,11 +103,11 @@ panel_atree_structure <- function(data = NULL) {
     # Fix time coordinates
     # coord_cartesian(xlim = c(0, makespan)) +
     # Horizontal lines
-    geom_segment(data = dline, 
+    geom_segment(data = dline,
       aes(
         y = .data$Position + .data$Height / 2,
-        yend = .data$Position + .data$Height / 2, 
-        x = .data$Start, 
+        yend = .data$Position + .data$Height / 2,
+        x = .data$Start,
         xend = .data$End
       ), color = "lightblue"
     )
@@ -119,15 +119,17 @@ panel_atree_structure <- function(data = NULL) {
 #'
 #' Use starvz_data to create a representation of the elimination tree structure
 #' considering the initialization, communication and computational tasks. These
-#' representations can be controlled in the configuration file. 
+#' representations can be controlled in the configuration file.
 #'
 #' @param data starvz_data with trace data
-#' @param step size in milliseconds for the time aggregation step 
-#' @param legend enable/disable panel legend 
+#' @param step size in milliseconds for the time aggregation step
+#' @param legend enable/disable panel legend
 #' @param zoom enable/disable vertical zoom in the tree structure
 #' @param computation enable/disable computations representations in the tree
 #' @param pruned enable/disable pruned computations representations in the tree
 #' @param initialization enable/disable initialization tasks representation
+#' @param x_start X-axis start value
+#' @param x_end X-axis end value
 #' @param communication enable/disable communication tasks representation
 #' @param anomalies enable/disable anomalies tasks representation
 #' @return A ggplot object
@@ -136,8 +138,10 @@ panel_atree_structure <- function(data = NULL) {
 #' panel_atree(data, step=20, communication=FALSE, initialization=FALSE)
 #' @export
 panel_atree <- function(data = NULL, step = 100, legend = TRUE, zoom = FALSE,
-                        computation = TRUE, pruned = TRUE, initialization = TRUE, 
-                        communication = TRUE, anomalies = TRUE) 
+                        computation = TRUE, pruned = TRUE, initialization = TRUE,
+                        x_start=data$config$limits$start,
+                        x_end=data$config$limits$end,
+                        communication = TRUE, anomalies = TRUE)
 {
   if (is.null(data)) stop("a NULL data has been provided to panel_atree")
   loginfo("Entry of panel_atree")
@@ -149,14 +153,14 @@ panel_atree <- function(data = NULL, step = 100, legend = TRUE, zoom = FALSE,
     rename(NodeUsage = .data$Value1) %>%
     left_join(data$Atree, by = "ANode")
 
-  # Manipulate data for the tree resource utilization plots 
+  # Manipulate data for the tree resource utilization plots
   # Resize for pruned nodes Start and End of the aggregated pruned nodes
   data_tree_utilization_pruned <- data_utilization_node %>%
     inner_join(data$Application %>%
       filter(grepl("do_subtree", .data$Value)) %>%
       select(.data$ANode, .data$End, .data$Start) %>%
       group_by(.data$ANode) %>%
-      mutate(Start = min(.data$Start), End = max(.data$End)) %>% 
+      mutate(Start = min(.data$Start), End = max(.data$End)) %>%
       unique(),
     by = "ANode"
     ) %>%
@@ -172,13 +176,13 @@ panel_atree <- function(data = NULL, step = 100, legend = TRUE, zoom = FALSE,
       select(.data$ANode, .data$End, .data$Start) %>%
       group_by(.data$ANode) %>%
       mutate(Start = min(.data$Start), End = max(.data$End)) %>%
-      select(.data$ANode, .data$Start, .data$End) %>% 
+      select(.data$ANode, .data$Start, .data$End) %>%
       unique(),
     by = "ANode"
     ) %>%
     mutate(Start = ifelse(.data$Start >= .data$Slice, .data$Start, .data$Slice)) %>%
     mutate(End = ifelse(.data$Slice + step >= .data$End, .data$End, .data$Slice + step))
-    
+
   # 1. Add the atree structure representation first
   atreeplot <- panel_atree_structure(data) +
     default_theme(data$config$base_size, data$config$expand) +
@@ -236,7 +240,7 @@ panel_atree <- function(data = NULL, step = 100, legend = TRUE, zoom = FALSE,
       (data$Atree %>% pull(.data$Height) %>% max())
     tzScale <- list(
       coord_cartesian(
-        xlim = c(tstart, tend),
+        xlim = c(x_start, x_end),
         ylim = c(
           z.start / 100 * max.y.coordinate,
           z.end / 100 * max.y.coordinate
@@ -254,7 +258,7 @@ panel_atree <- function(data = NULL, step = 100, legend = TRUE, zoom = FALSE,
 
   # Add legend to the plot
   if (legend) {
-    atreeplot <- atreeplot + 
+    atreeplot <- atreeplot +
       guides(shape=FALSE, alpha=FALSE, color=FALSE) +
       theme(
         legend.position = "top",
@@ -279,7 +283,7 @@ panel_atree <- function(data = NULL, step = 100, legend = TRUE, zoom = FALSE,
 #' colors are reused between nodes, not tied to as specific tree node.
 #'
 #' @param data starvz_data with trace data
-#' @param step size in milliseconds for the time aggregation step 
+#' @param step size in milliseconds for the time aggregation step
 #' @return A ggplot object
 #' @examples
 #' panel_utiltreenode(data=starvz_data, step=100)
@@ -373,13 +377,13 @@ panel_utiltreenode <- function(data = NULL, step = 100) {
 #' total resource utilization, painted by tree depth level using geom_ribbon
 #'
 #' @param data starvz_data with trace data
-#' @param step size in milliseconds for the time aggregation step 
+#' @param step size in milliseconds for the time aggregation step
 #' @param legend enable/disable plot legends
 #' @return A ggplot object
 #' @examples
 #' panel_utiltreedepth(data, step=100, legend=TRUE)
 #' @export
-panel_utiltreedepth <- function(Application = NULL, Atree = NULL, step = 100) {
+panel_utiltreedepth <- function(data, step = 100, legend=TRUE) {
   #Prepare data
   depth_plot_data <- resource_utilization_tree_depth(data$Application, data$Atree, step)
 
@@ -411,8 +415,8 @@ panel_utiltreedepth <- function(Application = NULL, Atree = NULL, step = 100) {
 #' active nodes along the application execution time
 #'
 #' @param data starvz_data with trace data
-#' @param step size in milliseconds for the time aggregation step 
-#' @param aggregation enable/disable time aggregation for the plot 
+#' @param step size in milliseconds for the time aggregation step
+#' @param aggregation enable/disable time aggregation for the plot
 #' @param legend enable/disable plot legends
 #' @examples
 #' panel_nodememuse(data$Application, step=100)
@@ -474,8 +478,8 @@ panel_nodememuse <- function(data = NULL, step = 100, aggregation=FALSE, legend=
 #' along the application execution time
 #'
 #' @param data starvz_data with trace data
-#' @param step size in milliseconds for the time aggregation step 
-#' @param aggregation enable/disable time aggregation for the plot 
+#' @param step size in milliseconds for the time aggregation step
+#' @param aggregation enable/disable time aggregation for the plot
 #' @param legend enable/disable plot legends
 #' @return A ggplot object
 #' @examples
@@ -500,7 +504,7 @@ panel_activenodes <- function(data = NULL, step = 100, aggregation=FALSE, legend
     ) %>%
     # get the node types from Atree
     left_join(
-      data$Atree %>% select(.data$ANode, .data$NodeType), 
+      data$Atree %>% select(.data$ANode, .data$NodeType),
       by="ANode"
     ) %>%
     arrange(.data$Start) %>%
@@ -513,7 +517,7 @@ panel_activenodes <- function(data = NULL, step = 100, aggregation=FALSE, legend
   if (aggregation) {
     data_active_nodes <- data_active_nodes %>%
       # need for the var integration
-      mutate(Type = NA) %>% 
+      mutate(Type = NA) %>%
       mutate(ResourceType = .data$NodeType, Node = .data$NodeType) %>%
       ungroup()
 
@@ -522,7 +526,7 @@ panel_activenodes <- function(data = NULL, step = 100, aggregation=FALSE, legend
     panel <- data_active_nodes %>%
       ggplot(aes(x = .data$Start, y = .data$Value, color = .data$NodeType)) +
       default_theme(data$config$base_size, data$config$expand) +
-      geom_line() 
+      geom_line()
   }
 
   panel <- panel +
@@ -565,7 +569,7 @@ resource_utilization_tree_node <- function(Application = NULL, Atree = NULL, ste
       select(.data$ANode, .data$NodeType, .data$NewANode)
 
     df_filter <- df_filter %>%
-      left_join(groupPruned %>% 
+      left_join(groupPruned %>%
         select(.data$ANode, .data$NodeType, .data$NewANode),
         by="ANode"
       ) %>%
@@ -682,13 +686,13 @@ resource_utilization_tree_depth <- function(Application = NULL, Atree = NULL, st
     return(data_depth_plot)
 }
 
-# Add anomalies representation in the tree structure 
+# Add anomalies representation in the tree structure
 atree_geom_anomalies <- function(data) {
   anomalies_points <- data$Application %>%
     select(-.data$Position) %>%
-    left_join(data$Atree %>% 
+    left_join(data$Atree %>%
       select(
-        .data$ANode, 
+        .data$ANode,
         .data$Position
       ),
       by="ANode"
@@ -712,7 +716,7 @@ atree_geom_anomalies <- function(data) {
 }
 
 
-# Define a geom rect receiving the data and defining the fill color as the resource usage 
+# Define a geom rect receiving the data and defining the fill color as the resource usage
 atree_geom_rect_gradient <- function(data, yminOffset, ymaxOffset) {
   list(
     geom_rect(

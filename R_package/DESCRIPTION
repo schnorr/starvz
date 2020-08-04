@@ -71,6 +71,7 @@ Collate:
     'phase2_time_integration.R'
     'phase2_util.R'
     'phase2_var_chart.R'
+    'phase2_var_panels.R'
     'read_functions.R'
     'write_functions.R'
 Suggests:

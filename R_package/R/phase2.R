@@ -691,25 +691,7 @@ starvz_plot_list <- function(data = NULL) {
   # Used Memory
   if (data$config$usedmemory$active) {
     loginfo("Creating the Used Memory plot")
-
-    if ((data$Variable %>% filter(grepl("Used", .data$Type)) %>% nrow()) == 0) {
-      logwarn("There aren't any information about Used Memory, ignoring it.")
-      data$config$usedmemory$active <<- FALSE
-    } else {
-      aggStep <- config_value(data$config$usedmemory$step, globalAggStep)
-
-      goguv <- data$Variable %>%
-        filter(grepl("Used", .data$Type)) %>%
-        var_integration_segment_chart(step = aggStep, base_size=data$config$base_size, expand=data$config$expand) + tScale
-      if (!data$config$usedmemory$legend) {
-        goguv <- goguv + theme(legend.position = "none")
-      } else {
-        goguv <- goguv +
-          theme(legend.position = "top") #+
-        # guides(color = guide_legend(nrow = 1))
-      }
-      goguv <- userYLimit(goguv, data$config$usedmemory$limit, c(tstart, tend))
-    }
+    goguv <- panel_usedmemory(data)
   }
 
 

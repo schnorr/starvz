@@ -15,4 +15,4 @@ before_install:
   - cd R_package
 
 after_success:
-  - Rscript -e 'library(covr); codecov("R_package")'
+  - Rscript -e 'library(covr); codecov()'

@@ -5,10 +5,10 @@ isolate_read_write <- function(input.parquet, fun, name, directory, ZERO) {
   data[[name]] <- fun(where = directory, ZERO = ZERO)
   if (input.parquet == "1") {
     loginfo("Saving as parquet")
-    starvz_write_parquet(data)
+    starvz_write_parquet(data, directory=directory)
   } else {
     loginfo("Saving as feather")
-    starvz_write_feather(data)
+    starvz_write_feather(data, directory=directory)
   }
   return(NULL)
 }
@@ -17,10 +17,10 @@ isolate_read_write_m <- function(input.parquet, fun, directory, ZERO) {
   data <- fun(where = directory, ZERO = ZERO)
   if (input.parquet == "1") {
     loginfo("Saving as parquet")
-    starvz_write_parquet(data)
+    starvz_write_parquet(data, directory=directory)
   } else {
     loginfo("Saving as feather")
-    starvz_write_feather(data)
+    starvz_write_feather(data, directory=directory)
   }
   return(NULL)
 }
@@ -144,10 +144,10 @@ starvz_phase1_read_write <- function(directory = ".", app_states_fun = NULL, sta
 
   if (input.parquet == "1") {
     loginfo("Saving as parquet")
-    starvz_write_parquet(data)
+    starvz_write_parquet(data, directory=directory)
   } else {
     loginfo("Saving as feather")
-    starvz_write_feather(data)
+    starvz_write_feather(data, directory=directory)
   }
 }
 

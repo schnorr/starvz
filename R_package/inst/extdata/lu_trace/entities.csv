@@ -1,0 +1,594 @@
+Parent, Name, Type, Nature
+0, 0, 0, Container
+0, root, MPI Program, Container
+root, MPI communication, MPI communication, Link
+root, 1_program, Program, Container
+1_program, Intra-node data Fetch, Intra-node data Fetch, Link
+1_program, Intra-node data IdleFetch, Intra-node data IdleFetch, Link
+1_program, Intra-node data PreFetch, Intra-node data PreFetch, Link
+1_program, Work steal, Work steal, Link
+1_program, Task Pop, Task Pop, Event
+1_program, program event type, program event type, Event
+1_program, Task Push, Task Push, Event
+1_program, data registration, data registration, Event
+1_program, data unregistration, data unregistration, Event
+1_program, user event type, user event type, Event
+1_program, 1_UserThread27894, User Thread, Container
+1_UserThread27894, User Thread State, User Thread State, State
+1_UserThread27894, thread event type, thread event type, Event
+1_UserThread27894, user event type, user event type, Event
+1_program, 1_scheduler, Scheduler State, Container
+1_scheduler, Total GFlops, Total GFlops, Variable
+1_scheduler, Number of Ready Tasks, Number of Ready Tasks, Variable
+1_scheduler, Number of Submitted Uncompleted Tasks, Number of Submitted Uncompleted Tasks, Variable
+1_program, 1_MEMNODE1, Memory Node, Container
+1_MEMNODE1, 1_T28, Thread, Container
+1_T28, Thread State, Thread State, State
+1_T28, thread event type, thread event type, Event
+1_T28, 1_CUDA0_0, Worker, Container
+1_CUDA0_0, InCtx1, InCtx1, State
+1_CUDA0_0, InCtx2, InCtx2, State
+1_CUDA0_0, InCtx3, InCtx3, State
+1_CUDA0_0, InCtx4, InCtx4, State
+1_CUDA0_0, InCtx5, InCtx5, State
+1_CUDA0_0, InCtx6, InCtx6, State
+1_CUDA0_0, InCtx7, InCtx7, State
+1_CUDA0_0, InCtx8, InCtx8, State
+1_CUDA0_0, InCtx9, InCtx9, State
+1_CUDA0_0, Worker State, Worker State, State
+1_CUDA0_0, GFlops, GFlops, Variable
+1_MEMNODE1, 1_MEMMANAGER1, Memory Manager, Container
+1_MEMMANAGER1, Allocating Start, Allocating Start, Event
+1_MEMMANAGER1, Allocating End, Allocating End, Event
+1_MEMMANAGER1, Allocating Async Start, Allocating Async Start, Event
+1_MEMMANAGER1, Allocating Async End, Allocating Async End, Event
+1_MEMMANAGER1, DriverCopy Start, DriverCopy Start, Event
+1_MEMMANAGER1, DriverCopyAsync Start, DriverCopyAsync Start, Event
+1_MEMMANAGER1, DriverCopyAsync End, DriverCopyAsync End, Event
+1_MEMMANAGER1, DriverCopy End, DriverCopy End, Event
+1_MEMMANAGER1, Free Start, Free Start, Event
+1_MEMMANAGER1, Free End, Free End, Event
+1_MEMMANAGER1, Memory Node State, Memory Node State, State
+1_MEMMANAGER1, data state invalid, data state invalid, Event
+1_MEMMANAGER1, data state owner, data state owner, Event
+1_MEMMANAGER1, data state shared, data state shared, Event
+1_MEMMANAGER1, data wont use, data wont use, Event
+1_MEMMANAGER1, WritingBack Start, WritingBack Start, Event
+1_MEMMANAGER1, WritingBack End, WritingBack End, Event
+1_MEMMANAGER1, Bandwidth In (MB/s), Bandwidth In (MB/s), Variable
+1_MEMMANAGER1, Bandwidth Out (MB/s), Bandwidth Out (MB/s), Variable
+1_MEMMANAGER1, Request Created, Request Created, Event
+1_MEMMANAGER1, Used (MB), Used (MB), Variable
+1_program, 1_MEMNODE0, Memory Node, Container
+1_MEMNODE0, 1_T26, Thread, Container
+1_T26, Thread State, Thread State, State
+1_T26, thread event type, thread event type, Event
+1_T26, 1_CPU13, Worker, Container
+1_CPU13, InCtx1, InCtx1, State
+1_CPU13, InCtx2, InCtx2, State
+1_CPU13, InCtx3, InCtx3, State
+1_CPU13, InCtx4, InCtx4, State
+1_CPU13, InCtx5, InCtx5, State
+1_CPU13, InCtx6, InCtx6, State
+1_CPU13, InCtx7, InCtx7, State
+1_CPU13, InCtx8, InCtx8, State
+1_CPU13, InCtx9, InCtx9, State
+1_CPU13, Worker State, Worker State, State
+1_CPU13, GFlops, GFlops, Variable
+1_MEMNODE0, 1_T24, Thread, Container
+1_T24, Thread State, Thread State, State
+1_T24, thread event type, thread event type, Event
+1_T24, 1_CPU12, Worker, Container
+1_CPU12, InCtx1, InCtx1, State
+1_CPU12, InCtx2, InCtx2, State
+1_CPU12, InCtx3, InCtx3, State
+1_CPU12, InCtx4, InCtx4, State
+1_CPU12, InCtx5, InCtx5, State
+1_CPU12, InCtx6, InCtx6, State
+1_CPU12, InCtx7, InCtx7, State
+1_CPU12, InCtx8, InCtx8, State
+1_CPU12, InCtx9, InCtx9, State
+1_CPU12, Worker State, Worker State, State
+1_CPU12, GFlops, GFlops, Variable
+1_MEMNODE0, 1_T22, Thread, Container
+1_T22, Thread State, Thread State, State
+1_T22, thread event type, thread event type, Event
+1_T22, 1_CPU11, Worker, Container
+1_CPU11, InCtx1, InCtx1, State
+1_CPU11, InCtx2, InCtx2, State
+1_CPU11, InCtx3, InCtx3, State
+1_CPU11, InCtx4, InCtx4, State
+1_CPU11, InCtx5, InCtx5, State
+1_CPU11, InCtx6, InCtx6, State
+1_CPU11, InCtx7, InCtx7, State
+1_CPU11, InCtx8, InCtx8, State
+1_CPU11, InCtx9, InCtx9, State
+1_CPU11, Worker State, Worker State, State
+1_CPU11, GFlops, GFlops, Variable
+1_MEMNODE0, 1_T20, Thread, Container
+1_T20, Thread State, Thread State, State
+1_T20, thread event type, thread event type, Event
+1_T20, 1_CPU10, Worker, Container
+1_CPU10, InCtx1, InCtx1, State
+1_CPU10, InCtx2, InCtx2, State
+1_CPU10, InCtx3, InCtx3, State
+1_CPU10, InCtx4, InCtx4, State
+1_CPU10, InCtx5, InCtx5, State
+1_CPU10, InCtx6, InCtx6, State
+1_CPU10, InCtx7, InCtx7, State
+1_CPU10, InCtx8, InCtx8, State
+1_CPU10, InCtx9, InCtx9, State
+1_CPU10, Worker State, Worker State, State
+1_CPU10, GFlops, GFlops, Variable
+1_MEMNODE0, 1_T18, Thread, Container
+1_T18, Thread State, Thread State, State
+1_T18, thread event type, thread event type, Event
+1_T18, 1_CPU9, Worker, Container
+1_CPU9, InCtx1, InCtx1, State
+1_CPU9, InCtx2, InCtx2, State
+1_CPU9, InCtx3, InCtx3, State
+1_CPU9, InCtx4, InCtx4, State
+1_CPU9, InCtx5, InCtx5, State
+1_CPU9, InCtx6, InCtx6, State
+1_CPU9, InCtx7, InCtx7, State
+1_CPU9, InCtx8, InCtx8, State
+1_CPU9, InCtx9, InCtx9, State
+1_CPU9, Worker State, Worker State, State
+1_CPU9, GFlops, GFlops, Variable
+1_MEMNODE0, 1_T16, Thread, Container
+1_T16, Thread State, Thread State, State
+1_T16, thread event type, thread event type, Event
+1_T16, 1_CPU8, Worker, Container
+1_CPU8, InCtx1, InCtx1, State
+1_CPU8, InCtx2, InCtx2, State
+1_CPU8, InCtx3, InCtx3, State
+1_CPU8, InCtx4, InCtx4, State
+1_CPU8, InCtx5, InCtx5, State
+1_CPU8, InCtx6, InCtx6, State
+1_CPU8, InCtx7, InCtx7, State
+1_CPU8, InCtx8, InCtx8, State
+1_CPU8, InCtx9, InCtx9, State
+1_CPU8, Worker State, Worker State, State
+1_CPU8, GFlops, GFlops, Variable
+1_MEMNODE0, 1_T14, Thread, Container
+1_T14, Thread State, Thread State, State
+1_T14, thread event type, thread event type, Event
+1_T14, 1_CPU7, Worker, Container
+1_CPU7, InCtx1, InCtx1, State
+1_CPU7, InCtx2, InCtx2, State
+1_CPU7, InCtx3, InCtx3, State
+1_CPU7, InCtx4, InCtx4, State
+1_CPU7, InCtx5, InCtx5, State
+1_CPU7, InCtx6, InCtx6, State
+1_CPU7, InCtx7, InCtx7, State
+1_CPU7, InCtx8, InCtx8, State
+1_CPU7, InCtx9, InCtx9, State
+1_CPU7, Worker State, Worker State, State
+1_CPU7, GFlops, GFlops, Variable
+1_MEMNODE0, 1_T12, Thread, Container
+1_T12, Thread State, Thread State, State
+1_T12, thread event type, thread event type, Event
+1_T12, 1_CPU6, Worker, Container
+1_CPU6, InCtx1, InCtx1, State
+1_CPU6, InCtx2, InCtx2, State
+1_CPU6, InCtx3, InCtx3, State
+1_CPU6, InCtx4, InCtx4, State
+1_CPU6, InCtx5, InCtx5, State
+1_CPU6, InCtx6, InCtx6, State
+1_CPU6, InCtx7, InCtx7, State
+1_CPU6, InCtx8, InCtx8, State
+1_CPU6, InCtx9, InCtx9, State
+1_CPU6, Worker State, Worker State, State
+1_CPU6, GFlops, GFlops, Variable
+1_MEMNODE0, 1_T10, Thread, Container
+1_T10, Thread State, Thread State, State
+1_T10, thread event type, thread event type, Event
+1_T10, 1_CPU5, Worker, Container
+1_CPU5, InCtx1, InCtx1, State
+1_CPU5, InCtx2, InCtx2, State
+1_CPU5, InCtx3, InCtx3, State
+1_CPU5, InCtx4, InCtx4, State
+1_CPU5, InCtx5, InCtx5, State
+1_CPU5, InCtx6, InCtx6, State
+1_CPU5, InCtx7, InCtx7, State
+1_CPU5, InCtx8, InCtx8, State
+1_CPU5, InCtx9, InCtx9, State
+1_CPU5, Worker State, Worker State, State
+1_CPU5, GFlops, GFlops, Variable
+1_MEMNODE0, 1_T8, Thread, Container
+1_T8, Thread State, Thread State, State
+1_T8, thread event type, thread event type, Event
+1_T8, 1_CPU4, Worker, Container
+1_CPU4, InCtx1, InCtx1, State
+1_CPU4, InCtx2, InCtx2, State
+1_CPU4, InCtx3, InCtx3, State
+1_CPU4, InCtx4, InCtx4, State
+1_CPU4, InCtx5, InCtx5, State
+1_CPU4, InCtx6, InCtx6, State
+1_CPU4, InCtx7, InCtx7, State
+1_CPU4, InCtx8, InCtx8, State
+1_CPU4, InCtx9, InCtx9, State
+1_CPU4, Worker State, Worker State, State
+1_CPU4, GFlops, GFlops, Variable
+1_MEMNODE0, 1_T6, Thread, Container
+1_T6, Thread State, Thread State, State
+1_T6, thread event type, thread event type, Event
+1_T6, 1_CPU3, Worker, Container
+1_CPU3, InCtx1, InCtx1, State
+1_CPU3, InCtx2, InCtx2, State
+1_CPU3, InCtx3, InCtx3, State
+1_CPU3, InCtx4, InCtx4, State
+1_CPU3, InCtx5, InCtx5, State
+1_CPU3, InCtx6, InCtx6, State
+1_CPU3, InCtx7, InCtx7, State
+1_CPU3, InCtx8, InCtx8, State
+1_CPU3, InCtx9, InCtx9, State
+1_CPU3, Worker State, Worker State, State
+1_CPU3, GFlops, GFlops, Variable
+1_MEMNODE0, 1_T4, Thread, Container
+1_T4, Thread State, Thread State, State
+1_T4, thread event type, thread event type, Event
+1_T4, 1_CPU2, Worker, Container
+1_CPU2, InCtx1, InCtx1, State
+1_CPU2, InCtx2, InCtx2, State
+1_CPU2, InCtx3, InCtx3, State
+1_CPU2, InCtx4, InCtx4, State
+1_CPU2, InCtx5, InCtx5, State
+1_CPU2, InCtx6, InCtx6, State
+1_CPU2, InCtx7, InCtx7, State
+1_CPU2, InCtx8, InCtx8, State
+1_CPU2, InCtx9, InCtx9, State
+1_CPU2, Worker State, Worker State, State
+1_CPU2, GFlops, GFlops, Variable
+1_MEMNODE0, 1_T2, Thread, Container
+1_T2, Thread State, Thread State, State
+1_T2, thread event type, thread event type, Event
+1_T2, 1_CPU1, Worker, Container
+1_CPU1, InCtx1, InCtx1, State
+1_CPU1, InCtx2, InCtx2, State
+1_CPU1, InCtx3, InCtx3, State
+1_CPU1, InCtx4, InCtx4, State
+1_CPU1, InCtx5, InCtx5, State
+1_CPU1, InCtx6, InCtx6, State
+1_CPU1, InCtx7, InCtx7, State
+1_CPU1, InCtx8, InCtx8, State
+1_CPU1, InCtx9, InCtx9, State
+1_CPU1, Worker State, Worker State, State
+1_CPU1, GFlops, GFlops, Variable
+1_MEMNODE0, 1_T0, Thread, Container
+1_T0, Thread State, Thread State, State
+1_T0, thread event type, thread event type, Event
+1_T0, 1_CPU0, Worker, Container
+1_CPU0, InCtx1, InCtx1, State
+1_CPU0, InCtx2, InCtx2, State
+1_CPU0, InCtx3, InCtx3, State
+1_CPU0, InCtx4, InCtx4, State
+1_CPU0, InCtx5, InCtx5, State
+1_CPU0, InCtx6, InCtx6, State
+1_CPU0, InCtx7, InCtx7, State
+1_CPU0, InCtx8, InCtx8, State
+1_CPU0, InCtx9, InCtx9, State
+1_CPU0, Worker State, Worker State, State
+1_CPU0, GFlops, GFlops, Variable
+1_MEMNODE0, 1_MEMMANAGER0, Memory Manager, Container
+1_MEMMANAGER0, Allocating Start, Allocating Start, Event
+1_MEMMANAGER0, Allocating End, Allocating End, Event
+1_MEMMANAGER0, Allocating Async Start, Allocating Async Start, Event
+1_MEMMANAGER0, Allocating Async End, Allocating Async End, Event
+1_MEMMANAGER0, DriverCopy Start, DriverCopy Start, Event
+1_MEMMANAGER0, DriverCopyAsync Start, DriverCopyAsync Start, Event
+1_MEMMANAGER0, DriverCopyAsync End, DriverCopyAsync End, Event
+1_MEMMANAGER0, DriverCopy End, DriverCopy End, Event
+1_MEMMANAGER0, Free Start, Free Start, Event
+1_MEMMANAGER0, Free End, Free End, Event
+1_MEMMANAGER0, Memory Node State, Memory Node State, State
+1_MEMMANAGER0, data state invalid, data state invalid, Event
+1_MEMMANAGER0, data state owner, data state owner, Event
+1_MEMMANAGER0, data state shared, data state shared, Event
+1_MEMMANAGER0, data wont use, data wont use, Event
+1_MEMMANAGER0, WritingBack Start, WritingBack Start, Event
+1_MEMMANAGER0, WritingBack End, WritingBack End, Event
+1_MEMMANAGER0, Bandwidth In (MB/s), Bandwidth In (MB/s), Variable
+1_MEMMANAGER0, Bandwidth Out (MB/s), Bandwidth Out (MB/s), Variable
+1_MEMMANAGER0, Request Created, Request Created, Event
+1_MEMMANAGER0, Used (MB), Used (MB), Variable
+1_program, 1_mpict, MPI Communication Thread, Container
+1_mpict, Communication Thread State, Communication Thread State, State
+1_mpict, MPI event type, MPI event type, Event
+1_mpict, Bandwidth In (MB/s), Bandwidth In (MB/s), Variable
+1_mpict, Bandwidth Out (MB/s), Bandwidth Out (MB/s), Variable
+root, 0_program, Program, Container
+0_program, Intra-node data Fetch, Intra-node data Fetch, Link
+0_program, Intra-node data IdleFetch, Intra-node data IdleFetch, Link
+0_program, Intra-node data PreFetch, Intra-node data PreFetch, Link
+0_program, Work steal, Work steal, Link
+0_program, Task Pop, Task Pop, Event
+0_program, program event type, program event type, Event
+0_program, Task Push, Task Push, Event
+0_program, data registration, data registration, Event
+0_program, data unregistration, data unregistration, Event
+0_program, user event type, user event type, Event
+0_program, 0_UserThread495, User Thread, Container
+0_UserThread495, User Thread State, User Thread State, State
+0_UserThread495, thread event type, thread event type, Event
+0_UserThread495, user event type, user event type, Event
+0_program, 0_scheduler, Scheduler State, Container
+0_scheduler, Total GFlops, Total GFlops, Variable
+0_scheduler, Number of Ready Tasks, Number of Ready Tasks, Variable
+0_scheduler, Number of Submitted Uncompleted Tasks, Number of Submitted Uncompleted Tasks, Variable
+0_program, 0_MEMNODE1, Memory Node, Container
+0_MEMNODE1, 0_T28, Thread, Container
+0_T28, Thread State, Thread State, State
+0_T28, thread event type, thread event type, Event
+0_T28, 0_CUDA0_0, Worker, Container
+0_CUDA0_0, InCtx1, InCtx1, State
+0_CUDA0_0, InCtx2, InCtx2, State
+0_CUDA0_0, InCtx3, InCtx3, State
+0_CUDA0_0, InCtx4, InCtx4, State
+0_CUDA0_0, InCtx5, InCtx5, State
+0_CUDA0_0, InCtx6, InCtx6, State
+0_CUDA0_0, InCtx7, InCtx7, State
+0_CUDA0_0, InCtx8, InCtx8, State
+0_CUDA0_0, InCtx9, InCtx9, State
+0_CUDA0_0, Worker State, Worker State, State
+0_CUDA0_0, GFlops, GFlops, Variable
+0_MEMNODE1, 0_MEMMANAGER1, Memory Manager, Container
+0_MEMMANAGER1, Allocating Start, Allocating Start, Event
+0_MEMMANAGER1, Allocating End, Allocating End, Event
+0_MEMMANAGER1, Allocating Async Start, Allocating Async Start, Event
+0_MEMMANAGER1, Allocating Async End, Allocating Async End, Event
+0_MEMMANAGER1, DriverCopy Start, DriverCopy Start, Event
+0_MEMMANAGER1, DriverCopyAsync Start, DriverCopyAsync Start, Event
+0_MEMMANAGER1, DriverCopyAsync End, DriverCopyAsync End, Event
+0_MEMMANAGER1, DriverCopy End, DriverCopy End, Event
+0_MEMMANAGER1, Free Start, Free Start, Event
+0_MEMMANAGER1, Free End, Free End, Event
+0_MEMMANAGER1, Memory Node State, Memory Node State, State
+0_MEMMANAGER1, data state invalid, data state invalid, Event
+0_MEMMANAGER1, data state owner, data state owner, Event
+0_MEMMANAGER1, data state shared, data state shared, Event
+0_MEMMANAGER1, data wont use, data wont use, Event
+0_MEMMANAGER1, WritingBack Start, WritingBack Start, Event
+0_MEMMANAGER1, WritingBack End, WritingBack End, Event
+0_MEMMANAGER1, Bandwidth In (MB/s), Bandwidth In (MB/s), Variable
+0_MEMMANAGER1, Bandwidth Out (MB/s), Bandwidth Out (MB/s), Variable
+0_MEMMANAGER1, Request Created, Request Created, Event
+0_MEMMANAGER1, Used (MB), Used (MB), Variable
+0_program, 0_MEMNODE0, Memory Node, Container
+0_MEMNODE0, 0_T26, Thread, Container
+0_T26, Thread State, Thread State, State
+0_T26, thread event type, thread event type, Event
+0_T26, 0_CPU13, Worker, Container
+0_CPU13, InCtx1, InCtx1, State
+0_CPU13, InCtx2, InCtx2, State
+0_CPU13, InCtx3, InCtx3, State
+0_CPU13, InCtx4, InCtx4, State
+0_CPU13, InCtx5, InCtx5, State
+0_CPU13, InCtx6, InCtx6, State
+0_CPU13, InCtx7, InCtx7, State
+0_CPU13, InCtx8, InCtx8, State
+0_CPU13, InCtx9, InCtx9, State
+0_CPU13, Worker State, Worker State, State
+0_CPU13, GFlops, GFlops, Variable
+0_MEMNODE0, 0_T24, Thread, Container
+0_T24, Thread State, Thread State, State
+0_T24, thread event type, thread event type, Event
+0_T24, 0_CPU12, Worker, Container
+0_CPU12, InCtx1, InCtx1, State
+0_CPU12, InCtx2, InCtx2, State
+0_CPU12, InCtx3, InCtx3, State
+0_CPU12, InCtx4, InCtx4, State
+0_CPU12, InCtx5, InCtx5, State
+0_CPU12, InCtx6, InCtx6, State
+0_CPU12, InCtx7, InCtx7, State
+0_CPU12, InCtx8, InCtx8, State
+0_CPU12, InCtx9, InCtx9, State
+0_CPU12, Worker State, Worker State, State
+0_CPU12, GFlops, GFlops, Variable
+0_MEMNODE0, 0_T22, Thread, Container
+0_T22, Thread State, Thread State, State
+0_T22, thread event type, thread event type, Event
+0_T22, 0_CPU11, Worker, Container
+0_CPU11, InCtx1, InCtx1, State
+0_CPU11, InCtx2, InCtx2, State
+0_CPU11, InCtx3, InCtx3, State
+0_CPU11, InCtx4, InCtx4, State
+0_CPU11, InCtx5, InCtx5, State
+0_CPU11, InCtx6, InCtx6, State
+0_CPU11, InCtx7, InCtx7, State
+0_CPU11, InCtx8, InCtx8, State
+0_CPU11, InCtx9, InCtx9, State
+0_CPU11, Worker State, Worker State, State
+0_CPU11, GFlops, GFlops, Variable
+0_MEMNODE0, 0_T20, Thread, Container
+0_T20, Thread State, Thread State, State
+0_T20, thread event type, thread event type, Event
+0_T20, 0_CPU10, Worker, Container
+0_CPU10, InCtx1, InCtx1, State
+0_CPU10, InCtx2, InCtx2, State
+0_CPU10, InCtx3, InCtx3, State
+0_CPU10, InCtx4, InCtx4, State
+0_CPU10, InCtx5, InCtx5, State
+0_CPU10, InCtx6, InCtx6, State
+0_CPU10, InCtx7, InCtx7, State
+0_CPU10, InCtx8, InCtx8, State
+0_CPU10, InCtx9, InCtx9, State
+0_CPU10, Worker State, Worker State, State
+0_CPU10, GFlops, GFlops, Variable
+0_MEMNODE0, 0_T18, Thread, Container
+0_T18, Thread State, Thread State, State
+0_T18, thread event type, thread event type, Event
+0_T18, 0_CPU9, Worker, Container
+0_CPU9, InCtx1, InCtx1, State
+0_CPU9, InCtx2, InCtx2, State
+0_CPU9, InCtx3, InCtx3, State
+0_CPU9, InCtx4, InCtx4, State
+0_CPU9, InCtx5, InCtx5, State
+0_CPU9, InCtx6, InCtx6, State
+0_CPU9, InCtx7, InCtx7, State
+0_CPU9, InCtx8, InCtx8, State
+0_CPU9, InCtx9, InCtx9, State
+0_CPU9, Worker State, Worker State, State
+0_CPU9, GFlops, GFlops, Variable
+0_MEMNODE0, 0_T16, Thread, Container
+0_T16, Thread State, Thread State, State
+0_T16, thread event type, thread event type, Event
+0_T16, 0_CPU8, Worker, Container
+0_CPU8, InCtx1, InCtx1, State
+0_CPU8, InCtx2, InCtx2, State
+0_CPU8, InCtx3, InCtx3, State
+0_CPU8, InCtx4, InCtx4, State
+0_CPU8, InCtx5, InCtx5, State
+0_CPU8, InCtx6, InCtx6, State
+0_CPU8, InCtx7, InCtx7, State
+0_CPU8, InCtx8, InCtx8, State
+0_CPU8, InCtx9, InCtx9, State
+0_CPU8, Worker State, Worker State, State
+0_CPU8, GFlops, GFlops, Variable
+0_MEMNODE0, 0_T14, Thread, Container
+0_T14, Thread State, Thread State, State
+0_T14, thread event type, thread event type, Event
+0_T14, 0_CPU7, Worker, Container
+0_CPU7, InCtx1, InCtx1, State
+0_CPU7, InCtx2, InCtx2, State
+0_CPU7, InCtx3, InCtx3, State
+0_CPU7, InCtx4, InCtx4, State
+0_CPU7, InCtx5, InCtx5, State
+0_CPU7, InCtx6, InCtx6, State
+0_CPU7, InCtx7, InCtx7, State
+0_CPU7, InCtx8, InCtx8, State
+0_CPU7, InCtx9, InCtx9, State
+0_CPU7, Worker State, Worker State, State
+0_CPU7, GFlops, GFlops, Variable
+0_MEMNODE0, 0_T12, Thread, Container
+0_T12, Thread State, Thread State, State
+0_T12, thread event type, thread event type, Event
+0_T12, 0_CPU6, Worker, Container
+0_CPU6, InCtx1, InCtx1, State
+0_CPU6, InCtx2, InCtx2, State
+0_CPU6, InCtx3, InCtx3, State
+0_CPU6, InCtx4, InCtx4, State
+0_CPU6, InCtx5, InCtx5, State
+0_CPU6, InCtx6, InCtx6, State
+0_CPU6, InCtx7, InCtx7, State
+0_CPU6, InCtx8, InCtx8, State
+0_CPU6, InCtx9, InCtx9, State
+0_CPU6, Worker State, Worker State, State
+0_CPU6, GFlops, GFlops, Variable
+0_MEMNODE0, 0_T10, Thread, Container
+0_T10, Thread State, Thread State, State
+0_T10, thread event type, thread event type, Event
+0_T10, 0_CPU5, Worker, Container
+0_CPU5, InCtx1, InCtx1, State
+0_CPU5, InCtx2, InCtx2, State
+0_CPU5, InCtx3, InCtx3, State
+0_CPU5, InCtx4, InCtx4, State
+0_CPU5, InCtx5, InCtx5, State
+0_CPU5, InCtx6, InCtx6, State
+0_CPU5, InCtx7, InCtx7, State
+0_CPU5, InCtx8, InCtx8, State
+0_CPU5, InCtx9, InCtx9, State
+0_CPU5, Worker State, Worker State, State
+0_CPU5, GFlops, GFlops, Variable
+0_MEMNODE0, 0_T8, Thread, Container
+0_T8, Thread State, Thread State, State
+0_T8, thread event type, thread event type, Event
+0_T8, 0_CPU4, Worker, Container
+0_CPU4, InCtx1, InCtx1, State
+0_CPU4, InCtx2, InCtx2, State
+0_CPU4, InCtx3, InCtx3, State
+0_CPU4, InCtx4, InCtx4, State
+0_CPU4, InCtx5, InCtx5, State
+0_CPU4, InCtx6, InCtx6, State
+0_CPU4, InCtx7, InCtx7, State
+0_CPU4, InCtx8, InCtx8, State
+0_CPU4, InCtx9, InCtx9, State
+0_CPU4, Worker State, Worker State, State
+0_CPU4, GFlops, GFlops, Variable
+0_MEMNODE0, 0_T6, Thread, Container
+0_T6, Thread State, Thread State, State
+0_T6, thread event type, thread event type, Event
+0_T6, 0_CPU3, Worker, Container
+0_CPU3, InCtx1, InCtx1, State
+0_CPU3, InCtx2, InCtx2, State
+0_CPU3, InCtx3, InCtx3, State
+0_CPU3, InCtx4, InCtx4, State
+0_CPU3, InCtx5, InCtx5, State
+0_CPU3, InCtx6, InCtx6, State
+0_CPU3, InCtx7, InCtx7, State
+0_CPU3, InCtx8, InCtx8, State
+0_CPU3, InCtx9, InCtx9, State
+0_CPU3, Worker State, Worker State, State
+0_CPU3, GFlops, GFlops, Variable
+0_MEMNODE0, 0_T4, Thread, Container
+0_T4, Thread State, Thread State, State
+0_T4, thread event type, thread event type, Event
+0_T4, 0_CPU2, Worker, Container
+0_CPU2, InCtx1, InCtx1, State
+0_CPU2, InCtx2, InCtx2, State
+0_CPU2, InCtx3, InCtx3, State
+0_CPU2, InCtx4, InCtx4, State
+0_CPU2, InCtx5, InCtx5, State
+0_CPU2, InCtx6, InCtx6, State
+0_CPU2, InCtx7, InCtx7, State
+0_CPU2, InCtx8, InCtx8, State
+0_CPU2, InCtx9, InCtx9, State
+0_CPU2, Worker State, Worker State, State
+0_CPU2, GFlops, GFlops, Variable
+0_MEMNODE0, 0_T2, Thread, Container
+0_T2, Thread State, Thread State, State
+0_T2, thread event type, thread event type, Event
+0_T2, 0_CPU1, Worker, Container
+0_CPU1, InCtx1, InCtx1, State
+0_CPU1, InCtx2, InCtx2, State
+0_CPU1, InCtx3, InCtx3, State
+0_CPU1, InCtx4, InCtx4, State
+0_CPU1, InCtx5, InCtx5, State
+0_CPU1, InCtx6, InCtx6, State
+0_CPU1, InCtx7, InCtx7, State
+0_CPU1, InCtx8, InCtx8, State
+0_CPU1, InCtx9, InCtx9, State
+0_CPU1, Worker State, Worker State, State
+0_CPU1, GFlops, GFlops, Variable
+0_MEMNODE0, 0_T0, Thread, Container
+0_T0, Thread State, Thread State, State
+0_T0, thread event type, thread event type, Event
+0_T0, 0_CPU0, Worker, Container
+0_CPU0, InCtx1, InCtx1, State
+0_CPU0, InCtx2, InCtx2, State
+0_CPU0, InCtx3, InCtx3, State
+0_CPU0, InCtx4, InCtx4, State
+0_CPU0, InCtx5, InCtx5, State
+0_CPU0, InCtx6, InCtx6, State
+0_CPU0, InCtx7, InCtx7, State
+0_CPU0, InCtx8, InCtx8, State
+0_CPU0, InCtx9, InCtx9, State
+0_CPU0, Worker State, Worker State, State
+0_CPU0, GFlops, GFlops, Variable
+0_MEMNODE0, 0_MEMMANAGER0, Memory Manager, Container
+0_MEMMANAGER0, Allocating Start, Allocating Start, Event
+0_MEMMANAGER0, Allocating End, Allocating End, Event
+0_MEMMANAGER0, Allocating Async Start, Allocating Async Start, Event
+0_MEMMANAGER0, Allocating Async End, Allocating Async End, Event
+0_MEMMANAGER0, DriverCopy Start, DriverCopy Start, Event
+0_MEMMANAGER0, DriverCopyAsync Start, DriverCopyAsync Start, Event
+0_MEMMANAGER0, DriverCopyAsync End, DriverCopyAsync End, Event
+0_MEMMANAGER0, DriverCopy End, DriverCopy End, Event
+0_MEMMANAGER0, Free Start, Free Start, Event
+0_MEMMANAGER0, Free End, Free End, Event
+0_MEMMANAGER0, Memory Node State, Memory Node State, State
+0_MEMMANAGER0, data state invalid, data state invalid, Event
+0_MEMMANAGER0, data state owner, data state owner, Event
+0_MEMMANAGER0, data state shared, data state shared, Event
+0_MEMMANAGER0, data wont use, data wont use, Event
+0_MEMMANAGER0, WritingBack Start, WritingBack Start, Event
+0_MEMMANAGER0, WritingBack End, WritingBack End, Event
+0_MEMMANAGER0, Bandwidth In (MB/s), Bandwidth In (MB/s), Variable
+0_MEMMANAGER0, Bandwidth Out (MB/s), Bandwidth Out (MB/s), Variable
+0_MEMMANAGER0, Request Created, Request Created, Event
+0_MEMMANAGER0, Used (MB), Used (MB), Variable
+0_program, 0_mpict, MPI Communication Thread, Container
+0_mpict, Communication Thread State, Communication Thread State, State
+0_mpict, MPI event type, MPI event type, Event
+0_mpict, Bandwidth In (MB/s), Bandwidth In (MB/s), Variable
+0_mpict, Bandwidth Out (MB/s), Bandwidth Out (MB/s), Variable

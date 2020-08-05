@@ -146,30 +146,77 @@ utilization_per_step <- function(data_app, step) {
     mutate(UtilizationTime = .data$Utilization * step)
 }
 
-var_imbalance <- function(data, step) {
+panel_imbalance <- function(data, legend=data$config$imbalance$legend,
+  x_start=data$config$limits$start,
+  x_end=data$config$limits$end,
+  y_start=0,
+  y_end=data$config$imbalance$limit,
+  step=data$config$imbalance$step
+) {
+
+  if(is.null(step) || !is.numeric(step)){
+    if(is.null(data$config$global_agg_step)){
+      agg_step <- as.double(100)
+    }else{
+      agg_step <- as.double(data$config$global_agg_step)
+    }
+  }else{
+      agg_step <- as.double(step)
+  }
+
   data_app <- data$Application
-  utilization_per_step(data_app, step) %>%
+  utilization_per_step(data_app, agg_step) %>%
     ungroup() %>%
     group_by(.data$Step) %>%
     summarize(
       "IP" = metric_imbalance_percentage(.data$UtilizationTime),
-      "IT" = metric_imbalance_time(.data$UtilizationTime, step),
-      "STD" = metric_imbalance_std(.data$UtilizationTime, step),
-      "AVG" = metric_imbalance_norm(.data$UtilizationTime, step)
+      "IT" = metric_imbalance_time(.data$UtilizationTime, agg_step),
+      "STD" = metric_imbalance_std(.data$UtilizationTime, agg_step),
+      "AVG" = metric_imbalance_norm(.data$UtilizationTime, agg_step)
     ) %>%
     pivot_longer(-.data$Step, names_to = "metric", values_to = "value") %>%
-    mutate(Time = .data$Step * step + step / 2) -> to_plot
+    mutate(Time = .data$Step * agg_step + agg_step / 2) -> to_plot
 
-  to_plot %>% var_imbalance_plot("Imb Metric", step, data$config$base_size, data$config$expand)
+  to_plot %>% var_imbalance_plot("Imb Metric", agg_step, data$config$base_size, data$config$expand)-> panel
+
+  if (!legend) {
+    panel <- panel + theme(legend.position = "none")
+  } else {
+    panel <- panel + theme(legend.position = "top")
+  }
+  panel <- panel +
+            coord_cartesian(
+                xlim = c(x_start, x_end),
+                ylim = c(0, y_end)
+            )
+  return(panel)
 }
 
-var_imbalance_power <- function(data, step) {
+panel_power_imbalance <- function(data, legend=data$config$power_imbalance$legend,
+  x_start=data$config$limits$start,
+  x_end=data$config$limits$end,
+  y_start=0,
+  y_end=data$config$power_imbalance$limit,
+  step=data$config$power_imbalance$step
+) {
   # Compute POWER
   task <- data$config$power_imbalance$task
   if (is.null(task)) {
     logwarn("Task is not available for imbalance power")
-    return(NULL)
+    return(geom_blank())
   }
+
+  if(is.null(step) || !is.numeric(step)){
+    if(is.null(data$config$global_agg_step)){
+      agg_step <- as.double(100)
+    }else{
+      agg_step <- as.double(data$config$global_agg_step)
+    }
+  }else{
+      agg_step <- as.double(step)
+  }
+
+
   data$Application %>%
     filter(.data$Value == task) %>%
     group_by(.data$Node, .data$ResourceId) %>%
@@ -182,10 +229,10 @@ var_imbalance_power <- function(data, step) {
       unique() %>%
       nrow()) {
     logwarn("Power could not be computed for all resource in imbalance power")
-    return(NULL)
+    return(geom_blank())
   }
 
-  utilization_per_step(data$Application, step) %>%
+  utilization_per_step(data$Application, agg_step) %>%
     ungroup() %>%
     group_by(.data$Step) %>%
     summarize(
@@ -195,25 +242,66 @@ var_imbalance_power <- function(data, step) {
       "AVG" = metric_power_imbalance_norm(.data$Utilization, power)
     ) %>%
     pivot_longer(-.data$Step, names_to = "metric", values_to = "value") %>%
-    mutate(Time = .data$Step * step + step / 2) -> to_plot
+    mutate(Time = .data$Step * agg_step + agg_step / 2) -> to_plot
 
-  to_plot %>% var_imbalance_plot("Imb Metric\nPower", step, data$config$base_size, data$config$expand)
+  to_plot %>% var_imbalance_plot("Imb Metric\nPower", agg_step, data$config$base_size, data$config$expand) -> panel
+
+  if (!legend) {
+    panel <- panel + theme(legend.position = "none")
+  } else {
+    panel <- panel + theme(legend.position = "top")
+  }
+  panel <- panel +
+            coord_cartesian(
+                xlim = c(x_start, x_end),
+                ylim = c(0, y_end)
+            )
+  return(panel)
 }
 
-var_imbalance_double_hetero <- function(data, step) {
+panel_hete_imbalance  <- function(data, legend=data$config$hete_imbalance$legend,
+  x_start=data$config$limits$start,
+  x_end=data$config$limits$end,
+  y_start=0,
+  y_end=data$config$hete_imbalance$limit,
+  step=data$config$hete_imbalance$step
+) {
+
+  if(is.null(step) || !is.numeric(step)){
+    if(is.null(data$config$global_agg_step)){
+      agg_step <- 100.0
+    }else{
+      agg_step <- data$config$global_agg_step
+    }
+  }else{
+      agg_step <- as.double(step)
+  }
+
   data_app <- data$Application
-  utilization_per_step_double_hetero(step, data_app) %>%
+  utilization_per_step_double_hetero(agg_step, data_app) %>%
     group_by(.data$Step) %>%
     summarize( # "PI"=metric_percent_imbalance(UtilizationTime, step),
-      "IP" = metric_abe_imbalance_percentage(.data$Utilization, .data$ABE, .data$nmABE, step),
-      "IT" = metric_abe_imbalance_time(.data$Utilization, .data$ABE, step),
+      "IP" = metric_abe_imbalance_percentage(.data$Utilization, .data$ABE, .data$nmABE, agg_step),
+      "IT" = metric_abe_imbalance_time(.data$Utilization, .data$ABE, agg_step),
       "STD" = metric_abe_imbalance_std(.data$Utilization),
-      "AVG" = metric_abe_imbalance_norm(.data$ABE, step)
+      "AVG" = metric_abe_imbalance_norm(.data$ABE, agg_step)
     ) %>%
     pivot_longer(-.data$Step, names_to = "metric", values_to = "value") %>%
-    mutate(Time = .data$Step * step + step / 2) -> to_plot
+    mutate(Time = .data$Step * agg_step + agg_step / 2) -> to_plot
 
-  to_plot %>% var_imbalance_plot("Imb Metric\nHete", step, data$config$base_size, data$config$expand)
+  to_plot %>% var_imbalance_plot("Imb Metric\nHete", agg_step, data$config$base_size, data$config$expand) -> panel
+
+  if (!legend) {
+    panel <- panel + theme(legend.position = "none")
+  } else {
+    panel <- panel + theme(legend.position = "top")
+  }
+  panel <- panel +
+            coord_cartesian(
+                xlim = c(x_start, x_end),
+                ylim = c(0, y_end)
+            )
+  return(panel)
 }
 
 var_imbalance_plot <- function(data, name, step, base_size, expand) {

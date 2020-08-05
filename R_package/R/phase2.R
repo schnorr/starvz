@@ -128,7 +128,7 @@ starvz_compute_plot_heights <- function(plist, config) {
     P[[length(P) + 1]] <- plist$imb_plot
     H[[length(H) + 1]] <- config_value(data$config$imbalance$height, data$config$guided$starvz_height_var)
   }
-  if (data$config$power_imbalance$active) {
+  if (data$config$power_imbalance$active && !all.equal(plist$imb_plot_power, geom_blank())) {
     P[[length(P) + 1]] <- plist$imb_plot_power
     H[[length(H) + 1]] <- config_value(data$config$power_imbalance$height, data$config$guided$starvz_height_var)
   }
@@ -670,50 +670,22 @@ starvz_plot_list <- function(data = NULL) {
     goguv <- panel_usedmemory(data)
   }
 
-
   # Imbalance Metrics
   if (data$config$imbalance$active) {
     loginfo("Creating the Imbalance Metrics plot")
-
-    Step <- as.double(config_value(data$config$imbalance$step, globalAggStep))
-
-    imb_plot <- data %>% var_imbalance(Step)
-    if (!data$config$imbalance$legend) {
-      imb_plot <- imb_plot + theme(legend.position = "none")
-    } else {
-      imb_plot <- imb_plot + theme(legend.position = "top")
-    }
-    imb_plot <- imb_plot + coord_cartesian(xlim = c(tstart, tend), ylim = c(0, data$config$imbalance$limit))
+    imb_plot <- panel_imbalance(data)
   }
 
   # Imbalance Metrics Power
   if (data$config$power_imbalance$active) {
     loginfo("Creating the Imbalance Power Metrics plot")
-
-    Step <- as.double(config_value(data$config$power_imbalance$step, globalAggStep))
-
-    imb_plot_power <- data %>% var_imbalance_power(Step)
-    if (!data$config$power_imbalance$legend) {
-      imb_plot_power <- imb_plot_power + theme(legend.position = "none")
-    } else {
-      imb_plot_power <- imb_plot_power + theme(legend.position = "top")
-    }
-    imb_plot_power <- imb_plot_power + coord_cartesian(xlim = c(tstart, tend), ylim = c(0, data$config$power_imbalance$limit))
+    imb_plot_power <- panel_power_imbalance(data)
   }
 
   # Imbalance Metrics hete
   if (data$config$hete_imbalance$active) {
     loginfo("Creating the Imbalance Hetero Metrics plot")
-
-    Step <- as.double(config_value(data$config$hete_imbalance$step, globalAggStep))
-
-    imb_plot_hete <- data %>% var_imbalance_double_hetero(Step)
-    if (!data$config$hete_imbalance$legend) {
-      imb_plot_hete <- imb_plot_hete + theme(legend.position = "none")
-    } else {
-      imb_plot_hete <- imb_plot_hete + theme(legend.position = "top")
-    }
-    imb_plot_hete <- imb_plot_hete + coord_cartesian(xlim = c(tstart, tend), ylim = c(0, data$config$hete_imbalance$limit))
+    imb_plot_hete <- panel_hete_imbalance(data)
   }
 
   if (data$config$utilheatmap$active) {

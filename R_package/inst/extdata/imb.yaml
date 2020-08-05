@@ -1,0 +1,63 @@
+# Default Configuration, Each yaml file can have multiple configurations
+default:
+  # Cosmetic only options:
+  base_size: 16 # Base size for Text
+  expand: 0.05 # Factor to Expand horizontaly the plots with blank content
+  idleness_factor: 5.5 # Resouces Idleness Text Size division Factor of base_size
+  idleness_all: TRUE # Show all Resouces idleness values
+  guided: 
+    active: TRUE
+  # time: deprecated option
+  title: # Overall Visualization Title
+    active: TRUE # Active with directory name as Title
+    #height: 0.6 # Title Size
+  vanilla: # Options about X and Y axis title and values
+    vertical: FALSE # If True, Remove Y axis' title and values
+    horizontal: FALSE  # If True, Remove X axis' title and values
+  limits: # Set the time limits used
+    start: 0 # Initial Time
+    #end: 10000 # Final Time
+
+  st: # Application State Plot over resources
+    active: TRUE # Enable
+    cpb: FALSE # Show Critical Path Bound makespan metric
+    #height: 4 # Vertical Size in the final visualization
+    idleness: FALSE # Show resource idleness %
+    expand: 0.05 # Expand for y ggplot
+    labels: "ALL" # Labels of the Resources names, "ALL" "1CPU_per_NODE" "1GPU_per_NODE"
+    legend: FALSE # Show the plot's Legends
+    makespan: TRUE # Show the application makespan
+    alpha: 0.25 # Alpha value to control transparency of tasks that are not outliers
+    outliers: FALSE # Differentiate outliers tasks
+    
+  imbalance:
+    active: TRUE
+    legend: TRUE
+    height: 1.1
+    limit: 1
+    step: 100
+ 
+    
+  power_imbalance:
+    active: TRUE
+    legend: FALSE
+    height: 1
+    task: "dgemm"
+    limit: 1
+    step: 100
+
+  hete_imbalance:
+    active: TRUE
+    legend: FALSE
+    height: 1
+    limit: 1
+    step: 100
+    
+  utilheatmap:
+    active: TRUE
+    legend: TRUE
+    #height: 5
+    limit:
+    step: 100
+    labels: "ALL"
+   

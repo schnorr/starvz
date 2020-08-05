@@ -34,7 +34,7 @@ panel_st_raw <- function(data = NULL, ST.Outliers=data$config$st$outliers, base_
   labels=data$config$st$labels, alpha=data$config$st$alpha, idleness=data$config$st$idleness,
   taskdeps=data$config$st$tasks$active, tasklist=data$config$st$tasks$list, levels=data$config$st$tasks$levels,
   makespan=data$config$st$makespan, abe=data$config$st$abe$active, pmtoolbounds=data$config$pmtool$bounds$active,
-  cpb=data$config$st$cpb, cpb_mpi=data$config$st$cpb_mpi$active, legend=data$config$starpu$legend, StarPU.View = FALSE) {
+  cpb=data$config$st$cpb, cpb_mpi=data$config$st$cpb_mpi$active, legend=data$config$st$legend, StarPU.View = FALSE) {
 
 #ST.Outliers = TRUE, base_size=22, expand_x=0.05,
 #  expand_y=0.05, selected_nodes = NULL, labels="ALL", alpha=0.25, idleness=TRUE,

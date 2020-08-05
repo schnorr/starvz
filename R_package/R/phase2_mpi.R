@@ -52,9 +52,15 @@ state_mpi_chart <- function(data = NULL) {
 
   return(gow)
 }
-concurrent_mpi <- function(data = NULL) {
+concurrent_mpi <- function(data = NULL, out=FALSE) {
   if (is.null(data)) {
     return(NULL)
+  }
+
+  col_case <- "Origin"
+
+  if(out){
+    col_case <- "Dest"
   }
 
   data$Link %>%
@@ -79,59 +85,16 @@ concurrent_mpi <- function(data = NULL) {
         TRUE ~ 0
       )
     ))) %>%
-    arrange(.data$Origin, .data$Timestamp) %>%
+    arrange({{col_case}}, .data$Timestamp) %>%
     select(-.data$Start) %>%
     rename(Start = .data$Timestamp) %>%
-    group_by(.data$Origin) %>%
+    group_by({{col_case}}) %>%
     mutate(End = lead(.data$Start)) %>%
     na.omit() %>%
     mutate(Duration = .data$End - .data$Start) %>%
     ungroup() %>%
     mutate(Type = "MPI Concurrent") %>%
-    rename(ResourceId = .data$Origin) %>%
-    separate(.data$ResourceId, into = c("Node", "Resource"), remove = FALSE) %>%
-    mutate(Node = as.factor(.data$Node)) %>%
-    mutate(ResourceType = as.factor(gsub("[[:digit:]]+", "", .data$Resource))) %>%
-    select(.data$Start, .data$End, .data$Duration, .data$Node, .data$ResourceId, .data$ResourceType, .data$Type, .data$Value)
-}
-
-concurrent_mpi_out <- function(data = NULL) {
-  if (is.null(data)) {
-    return(NULL)
-  }
-
-  data$Link %>%
-    filter(grepl("mpicom", .data$Key)) %>%
-    select(-.data$Container, -.data$Type, -.data$Duration) -> dflink
-
-  dflink %>%
-    select(-.data$End) %>%
-    rename(Timestamp = .data$Start) %>%
-    mutate(Start = TRUE) -> dfstart
-  dflink %>%
-    select(-.data$Start) %>%
-    rename(Timestamp = .data$End) %>%
-    mutate(Start = FALSE) %>%
-    bind_rows(dfstart) %>%
-    arrange(.data$Timestamp) %>%
-    group_by(.data$Origin, .data$Dest) %>%
-    mutate(Value = cumsum(as.integer(
-      case_when(
-        .data$Start == TRUE ~ 1,
-        .data$Start == FALSE ~ -1,
-        TRUE ~ 0
-      )
-    ))) %>%
-    arrange(.data$Dest, .data$Timestamp) %>%
-    select(-.data$Start) %>%
-    rename(Start = .data$ Timestamp) %>%
-    group_by(.data$Dest) %>%
-    mutate(End = lead(.data$Start)) %>%
-    na.omit() %>%
-    mutate(Duration = .data$End - .data$Start) %>%
-    ungroup() %>%
-    mutate(Type = "MPI Concurrent") %>%
-    rename(ResourceId = .data$Dest) %>%
+    rename(ResourceId = {{col_case}}) %>%
     separate(.data$ResourceId, into = c("Node", "Resource"), remove = FALSE) %>%
     mutate(Node = as.factor(.data$Node)) %>%
     mutate(ResourceType = as.factor(gsub("[[:digit:]]+", "", .data$Resource))) %>%

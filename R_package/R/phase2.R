@@ -661,21 +661,7 @@ starvz_plot_list <- function(data = NULL) {
   # GFlops
   if (data$config$gflops$active) {
     loginfo("Creating the GFlops plot")
-    aggStep <- config_value(data$config$gflops$step, globalAggStep)
-    facetted <- data$config$gflops$facet
-    gogfv <- data$Variable %>%
-      filter(.data$Type == "GFlops") %>%
-      var_integration_segment_chart(., ylabel = "GFlops", step = aggStep, facetting = facetted, base_size=data$config$base_size, expand=data$config$expand) + tScale
-
-    # adjust GFlops scale
-    if (data$config$gflops$limit) {
-      limit <- data$config$gflops$limit
-      gogfv <- gogfv + coord_cartesian(xlim = c(tstart, tend), ylim = c(0, limit))
-    }
-    if (!data$config$gflops$legend) {
-      gogfv <- gogfv + theme(legend.position = "none")
-    }
-    # TODO: user limit
+    gogfv <- panel_gflops(data)
   }
 
   # Used Memory
@@ -766,37 +752,13 @@ starvz_plot_list <- function(data = NULL) {
   # MPI Concurrent
   if (data$config$mpiconcurrent$active) {
     loginfo("Creating the MPI concurrent ops plot")
-    if ((data$Link %>% filter(grepl("mpicom", .data$Key)) %>% nrow()) == 0) {
-      logwarn("There aren't any information on MPI, ignoring it.")
-      data$config$mpiconcurrent$active <<- FALSE
-    } else {
-      aggStep <- config_value(data$config$mpiconcurrent$step, globalAggStep)
-      gompiconc <- data %>%
-        concurrent_mpi() %>%
-        var_integration_segment_chart(., ylabel = "Concurrent\nMPI Tasks Send", step = aggStep, base_size=data$config$base_size, expand=data$config$expand) + tScale
-      if (!data$config$mpiconcurrent$legend) {
-        gompiconc <- gompiconc + theme(legend.position = "none")
-      }
-      gompiconc <- userYLimit(gompiconc, data$config$mpiconcurrent$limit, c(tstart, tend))
-    }
+    gompiconc <- panel_mpiconcurrent(data)
   }
 
   # MPI Concurrent Out
   if (data$config$mpiconcurrentout$active) {
     loginfo("Creating the MPI concurrent ops out plot")
-    if ((data$Link %>% filter(grepl("mpicom", .data$Key)) %>% nrow()) == 0) {
-      logwarn("There aren't any information on MPI, ignoring it.")
-      data$config$mpiconcurrentout$active <<- FALSE
-    } else {
-      aggStep <- config_value(data$config$mpiconcurrentout$step, globalAggStep)
-      gompiconcout <- data %>%
-        concurrent_mpi_out() %>%
-        var_integration_segment_chart(., ylabel = "Concurrent\nMPI Tasks Recv", step = aggStep, base_size=data$config$base_size, expand=data$config$expand) + tScale
-      if (!data$config$mpiconcurrentout$legend) {
-        gompiconcout <- gompiconcout + theme(legend.position = "none")
-      }
-      gompiconcout <- userYLimit(gompiconcout, data$config$mpiconcurrentout$limit, c(tstart, tend))
-    }
+    gompiconcout <- panel_mpiconcurrentout(data)
   }
 
   # MPI State
@@ -816,48 +778,7 @@ starvz_plot_list <- function(data = NULL) {
   # GPUBandwidth
   if (data$config$gpubandwidth$active) {
     loginfo("Creating the GPU Bandwidth plot")
-    aggStep <- config_value(data$config$gpubandwidth$step, globalAggStep)
-    if (aggStep < 0) {
-      gogov <- data$Variable %>%
-        # Get only GPU memory banwidth (out)
-        filter(grepl("MEMMANAGER", .data$ResourceId), grepl("Out", .data$Type)) %>%
-        # Remove the MANAGER0, which is CPU-only
-        # TODO: After the logical OR there is a support for single-node StarPU traces
-        filter(!grepl("MANAGER0", .data$Resource)) %>%
-        group_by(.data$Type, .data$Node, .data$ResourceType, .data$Start, .data$End, .data$Duration) %>%
-        summarize(Value = sum(.data$Value), N = n()) %>%
-        rename(ResourceId = .data$Node) %>%
-        var_chart(ylabel = "GPU\n(MB/s)", data$config$base_size, data$config$expand) + tScale
-    } else {
-      gogov <- data$Variable %>%
-        # Get only GPU memory banwidth (out)
-        filter(grepl("MEMMANAGER", .data$ResourceId), grepl("Out", .data$Type)) %>%
-        # Remove the MANAGER0, which is CPU-only
-        # TODO: After the logical OR there is a support for single-node StarPU traces
-        filter(.data$Resource != "MEMMANAGER0" | .data$Node != "MEMMANAGER0") %>%
-        var_integration_segment_chart(., ylabel = "GPU\n(MB/s)", step = aggStep, base_size=data$config$base_size, expand=data$config$expand) + tScale
-    }
-    if (!data$config$gpubandwidth$legend) {
-      gogov <- gogov + theme(legend.position = "none")
-    }
-    # Fixed upper bound
-    if (is.double(data$config$gpubandwidth$bound)) {
-      lbound <- data$config$gpubandwidth$bound
-      gogov <- gogov + coord_cartesian(
-        ylim = c(0, lbound),
-        xlim = c(tstart, tend)
-      )
-    }
-    if (data$config$gpubandwidth$total) {
-      ms <- data$Variable %>%
-        filter(grepl("MEMMANAGER", .data$ResourceId), grepl("Out", .data$Type)) %>%
-        filter(.data$Resource != "MEMMANAGER0" | .data$Node != "MEMMANAGER0") %>%
-        group_by(.data$Type, .data$Node, .data$ResourceType, .data$Start, .data$End, .data$Duration) %>%
-        summarize(Value = sum(.data$Value), N = n()) %>%
-        rename(ResourceId = .data$Node)
-      y_size <- layer_scales(gogov)$y$range$range[2]
-      gogov <- gogov + ms %>% var_chart_text(tstart = tstart, tend = tend, y_end = y_size)
-    }
+    gogov <- panel_gpubandwidth(data)
   }
 
   # Active Nodes

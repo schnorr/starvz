@@ -22,7 +22,7 @@ panel_st_raw(
   pmtoolbounds = data$config$pmtool$bounds$active,
   cpb = data$config$st$cpb,
   cpb_mpi = data$config$st$cpb_mpi$active,
-  legend = data$config$starpu$legend,
+  legend = data$config$st$legend,
   StarPU.View = FALSE
 )
 }

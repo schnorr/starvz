@@ -35,21 +35,30 @@ state_pmtool_chart <- function(data = NULL) {
   return(gow)
 }
 
-
-
-k_chart_pmtool <- function(data = NULL, colors = NULL) {
+panel_pmtool_kiteration <- function(data = NULL,
+  legend=data$config$pmtool$kiteration$legend,
+  x_start=data$config$limits$start,
+  x_end=data$config$limits$end) {
 
   starvz_check_data(data, tables=list("Pmtool_states"=c("Value", "sched", "Iteration")))
+
+  if(is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start)) ){
+    x_start <- NA
+  }
+
+  if(is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end)) ){
+    x_end <- NA
+  }
 
   dfw <- data$Pmtool_states %>%
     filter(.data$sched == data$config$pmtool$state$sched)
 
   # Prepare for colors
-  colors %>%
+  data$Colors %>%
     select(.data$Value, .data$Color) %>%
     unique() %>%
     .$Color -> appColors
-  appColors %>% setNames(colors %>% select(.data$Value, .data$Color) %>% unique() %>% .$Value) -> appColors
+  appColors %>% setNames(data$Colors %>% select(.data$Value, .data$Color) %>% unique() %>% .$Value) -> appColors
 
   # Prepare for borders
   dfborders <- dfw %>%
@@ -87,6 +96,17 @@ k_chart_pmtool <- function(data = NULL, colors = NULL) {
       ymin = .data$Iteration,
       ymax = .data$Iteration + height
     ), alpha = .5) -> goijk
+
+    goijk <- goijk +
+    coord_cartesian(
+        xlim = c(x_start, x_end)
+    )
+
+    if (!legend) {
+      goijk <- goijk + theme(legend.position = "none")
+    }else{
+      goijk <- goijk + theme(legend.spacing.x = unit(0.2, "cm"))
+    }
   return(goijk)
 }
 

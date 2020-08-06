@@ -1,9 +1,18 @@
 #' @include starvz_data.R
 
-panel_lackready <- function(data = NULL) {
-  if (is.null(data)) stop("data is NULL when given to geom_lackready")
-  if (is.null(data$Starpu)) stop("state is NULL when given to geom_lackready")
-  if (is.null(data$Variable)) stop("variable is NULL when given to geom_lackready")
+panel_lackready <- function(data = NULL,
+                              x_start=data$config$limits$start,
+                              x_end=data$config$limits$end) {
+
+  starvz_check_data(data, tables=list("Starpu"=c("Node"), "Variable"=c("Type")))
+
+  if(is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start)) ){
+    x_start <- NA
+  }
+
+  if(is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end)) ){
+    x_end <- NA
+  }
 
   data$Starpu %>%
     select(.data$Node, .data$Resource) %>%
@@ -35,7 +44,12 @@ panel_lackready <- function(data = NULL) {
     ungroup() %>%
     ggplot() +
     default_theme(data$config$base_size, data$config$expand) +
-    geom_lackready()
+    geom_lackready() +
+    coord_cartesian(
+        xlim = c(x_start, x_end)
+    ) -> panel
+
+    return(panel)
 }
 
 geom_lackready <- function() {

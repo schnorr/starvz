@@ -110,7 +110,7 @@ outlier_definition <- function(x) {
   (quantile(x)["75%"] + (quantile(x)["75%"] - quantile(x)["25%"]) * 1.5)
 }
 
-title_plot <- function(title = NULL) {
+panel_title <- function(data) {
   ggplot() +
     xlim(0, 1) +
     ylim(0, 1) +
@@ -120,5 +120,5 @@ title_plot <- function(title = NULL) {
       axis.line = element_blank(),
       axis.text = element_blank()
     ) +
-    annotate("text", x = .5, y = .5, label = title, size = 5)
+    annotate("text", x = .5, y = .5, label = data$Origin, size = 5)
 }

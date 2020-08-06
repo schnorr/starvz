@@ -96,10 +96,7 @@ starvz_compute_plot_heights <- function(plist, config) {
     P[[length(P) + 1]] <- plist$st_mm
     H[[length(H) + 1]] <- config_value(data$config$memory$state$height, data$config$guided$starvz_height_nodes)
   }
-  if (data$config$memory$transfers$active && !data$config$memory$combined) {
-    P[[length(P) + 1]] <- plist$transf
-    H[[length(H) + 1]] <- config_value(data$config$memory$transfers$height, data$config$guided$starvz_height_nodes)
-  }
+
   if (data$config$submitted$active) {
     P[[length(P) + 1]] <- plist$submitted
     H[[length(H) + 1]] <- config_value(data$config$submitted$height, data$config$guided$starvz_height_var)
@@ -350,7 +347,6 @@ starvz_plot_list <- function(data = NULL) {
     st = geom_blank(),
     st_pm = geom_blank(),
     st_mm = geom_blank(),
-    transf = geom_blank(),
     starpu = geom_blank(),
     ijk = geom_blank(),
     ijk_pm = geom_blank(),
@@ -424,14 +420,9 @@ starvz_plot_list <- function(data = NULL) {
     plot_list$st_pm <- data %>% state_pmtool_chart() + tScale
   }
 
-  memory_combined <- data$config$memory$combined & data$config$memory$transfers$active
-
   if (data$config$memory$state$active) {
-    plot_list$st_mm <- data %>% events_memory_chart(combined = memory_combined, tstart = tstart, tend = tend) + tScale
-  }
-
-  if (data$config$memory$transfers$active & !memory_combined) {
-    plot_list$transf <- data %>% link_chart(tstart = tstart, tend = tend) + tScale
+    loginfo("Creating memory states")
+    plot_list$st_mm <- panel_memory_state(data)
   }
 
   # StarPU SpaceTime
@@ -451,42 +442,19 @@ starvz_plot_list <- function(data = NULL) {
   # KIteration
   if (data$config$kiteration$active) {
     loginfo("Creating the KIteration")
-    ml <- data$config$kiteration$middlelines
-    if (length(ml) == 0) {
-      ml <- NULL
-    }
-    pn <- data$config$kiteration$pernode
-    plot_list$ijk <- k_chart(data,
-      middle_lines = ml,
-      per_node = pn, colors = data$Colors
-    ) + tScale
-
-    if (!data$config$kiteration$legend) {
-      plot_list$ijk <- plot_list$ijk +
-        theme(legend.position = "none")
-    } else {
-      plot_list$ijk <- plot_list$ijk +
-        theme(legend.spacing.x = unit(0.2, "cm"))
-    }
-    if (pn == TRUE) {
-      plot_list$ijk <- plot_list$ijk + facet_wrap(~Node, ncol = 1)
-    }
+    plot_list$ijk <- panel_kiteration(data)
   }
 
   # KIteration PMTOOL
   if (data$config$pmtool$kiteration$active) {
     loginfo("Creating the KIteration for PMTool")
-    plot_list$ijk_pm <- k_chart_pmtool(data, colors = data$Colors) + tScale
-
-    if (!data$config$pmtool$kiteration$legend) {
-      plot_list$ijk_pm <- plot_list$ijk_pm + theme(legend.position = "none")
-    }
+    plot_list$ijk_pm <- panel_pmtool_kiteration(data)
   }
 
   # Lack ready (companion for Ready Variable)
   if (data$config$lackready$active) {
     loginfo("Creating the Lack Ready Plot")
-    plot_list$lackready <- panel_lackready(data) + tScale
+    plot_list$lackready <- panel_lackready(data)
   }
 
   # Ready
@@ -580,9 +548,8 @@ starvz_plot_list <- function(data = NULL) {
 
   # Title
   if (data$config$title$active) {
-    if (!is.null(data$Origin)) {
-      plot_list$tplot <- title_plot(data$Origin)
-    }
+    loginfo("Creating the title plot")
+    plot_list$tplot <- panel_title(data)
   }
 
   if (data$config$vertical_lines$active) {

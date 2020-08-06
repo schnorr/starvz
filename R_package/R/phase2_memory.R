@@ -1,8 +1,41 @@
-#' @include starvz_data.R
 
-events_memory_chart <- function(data = NULL, globalEndTime = NULL, combined = FALSE, tstart = NULL, tend = NULL) {
+#' Create a memory state space time
+#'
+#' Show memory events
+#'
+#' @param data starvz_data with trace data
+#' @param legend enable/disable legends
+#' @param base_size base_size base font size
+#' @param expand_x expand size for scale_x_continuous padding
+#' @param x_start X-axis start value
+#' @param x_end X-axis end value
+#' @param combined shows links
+#' @return A ggplot object
+#' @include starvz_data.R
+#' @examples
+#' panel_ready(data=starvz_sample_lu)
+#' @export
+panel_memory_state <- function(data = NULL,
+  combined = data$config$memory$combined,
+  legend=data$config$ready$legend,
+  base_size=data$config$base_size,
+  expand_x=data$config$expand,
+  x_start=data$config$limits$start,
+  x_end=data$config$limits$end) {
 
   starvz_check_data(data, tables=list("Events_memory"=c("Type", "Container", "Handle")))
+
+  if(is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start)) ){
+    x_start <- NA
+  }
+
+  if(is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end)) ){
+    x_end <- NA
+  }
+
+  if(is.null(expand_x) || !is.numeric(expand_x)){
+    expand_x <- 0.05
+  }
 
   loginfo("Entry of events_memory_chart")
 
@@ -21,13 +54,13 @@ events_memory_chart <- function(data = NULL, globalEndTime = NULL, combined = FA
 
   # Plot
   gow <- ggplot() +
-    default_theme(data$config$base_size, data$config$expand)
+    default_theme(base_size, expand_x)
 
   # Add states and outliers if requested
-  gow <- gow + geom_events(data, dfwapp, combined = combined, tstart = tstart, tend = tend)
+  gow <- gow + geom_events(data, dfwapp, combined = combined, tstart = x_start, tend = x_end)
   if (combined) {
     gow <- gow + geom_links(data,
-      combined = TRUE, tstart = tstart, tend = tend,
+      combined = TRUE, tstart = tstart, tend = x_end,
       state_height = data$config$state$height,
       arrow_active = data$config$memory$transfers$arrow,
       border_active = data$config$memory$transfers$border,
@@ -35,33 +68,17 @@ events_memory_chart <- function(data = NULL, globalEndTime = NULL, combined = FA
     )
   }
 
-  loginfo("Exit of events_memory_chart")
-  return(gow)
-}
-
-
-link_chart <- function(data = NULL, tstart = NULL, tend = NULL) {
-
-  starvz_check_data(data, tables=list("Link"=c("Dest", "Origin")))
-
-  loginfo("Entry of link_chart")
-
-  # Plot
-  gow <- ggplot() +
-    default_theme(data$config$base_size, data$config$expand)
-
-  # Add states and outliers if requested
-  gow <- gow + geom_links(data,
-    tstart = tstart, tend = tend,
-    state_height = data$config$state$height,
-    arrow_active = data$config$memory$transfers$arrow,
-    border_active = data$config$memory$transfers$border,
-    total_active = data$config$memory$transfers$total
+  gow <- gow + coord_cartesian(
+      xlim = c(x_start, x_end)
   )
 
-  # gow = gow + scale_fill_manual(values = starpu_colors());
+  if (!legend) {
+    gow <- gow + theme(legend.position = "none")
+  }else{
+    gow <- gow + theme(legend.position = "top")
+  }
 
-  loginfo("Exit of link_chart")
+  loginfo("Exit of events_memory_chart")
   return(gow)
 }
 

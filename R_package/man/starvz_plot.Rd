@@ -4,10 +4,21 @@
 \alias{starvz_plot}
 \title{Make a StarVZ plot}
 \usage{
-starvz_plot(data = NULL)
+starvz_plot(
+  data = NULL,
+  name = NULL,
+  save = FALSE,
+  guided = data$config$guided$active
+)
 }
 \arguments{
 \item{data}{starvz_data class with $config}
+
+\item{name}{Path for saved image}
+
+\item{save}{call ggplot to save the image}
+
+\item{guided}{compute ideal figure height}
 }
 \value{
 ggplot object with all starvz plots

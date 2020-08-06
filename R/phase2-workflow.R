@@ -36,10 +36,6 @@ cat("StarVZ - Phase 2 - Start\n", file = stdout())
 
 data <- starvz_read(directory, config_file);
 
-if(data$config$guided$active){
-  r <- starvz_guided_plot(data, name)
-}else{
-  ggsave(name, plot=starvz_plot(data), width = 10, height = 18, units = "in", dpi=120)
-}
+starvz_plot(data, name, save=TRUE)
 
 cat("End of StarVZ - Phase 2\n", file = stdout())

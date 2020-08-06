@@ -279,86 +279,6 @@ starvz_assemble <- function(..., config = NULL, remove_Y_info = TRUE, remove_leg
   return(final_plot)
 }
 
-#' Create a StarVZ plot automaticaly computing height
-#'
-#' Use data to create a starvz plot and save in name
-#'
-#' @param data starvz_data with trace data
-#' @param name Path for saved image
-#' @return The ggplot plot
-#' @examples
-#' # starvz_guided_plot("data/", "file.png")
-#' @export
-starvz_guided_plot <- function(data, name) {
-  # USe Y to compute state and starpu size
-  # Get number of nodes
-
-  # Lets compute some default height values
-  # For plots that show resources, 10px per resource on Y
-  # For plots that show nodes 10px per node
-  # For variable plots, 100px
-  # For atree plot 1.5px per node Position
-  # For plots TODO, default 200px
-  if (!is.null(data$config$selected_nodes)) {
-    nodes <- length(data$config$selected_nodes)
-  } else if (!is.null(data$Tasks)) {
-    nodes <- data$Tasks %>%
-      select(.data$MPIRank) %>%
-      distinct() %>%
-      nrow()
-  } else if (!is.null(data$Application)) {
-    nodes <- data$Application %>%
-      select(.data$Node) %>%
-      distinct() %>%
-      nrow()
-  } else {
-    nodes <- 1
-  }
-
-  types <- data$Application %>%
-    select(.data$ResourceType) %>%
-    distinct() %>%
-    nrow()
-
-  if (!is.null(data$config$selected_nodes)) {
-    data$Y %>%
-      separate(.data$Parent, into = c("Node"), remove = FALSE) %>%
-      filter(.data$Node %in% data$config$selected_nodes) %>%
-      arrange(.data$Position) %>%
-      mutate(New = cumsum(lag(.data$Height, default = 0))) %>%
-      select(.data$Parent, .data$New) -> new_y
-    data$config$guided$starvz_height_resources <- (new_y$New %>% max()) * 10 / 100
-  } else {
-    data$config$guided$starvz_height_resources <- (data$Y$Position %>% max()) * 10 / 100
-  }
-
-  data$config$guided$starvz_height_agg <- max(nodes * types * data$config$guided$agg_type_height / 100, 1)
-  data$config$guided$starvz_height_nodes <- max(nodes * data$config$guided$node_height / 100, 1)
-  data$config$guided$starvz_height_small <- 0.5
-  if (!is.null(data$Atree)) {
-    data$config$guided$starvz_height_atree <- ((data$Atree$Position %>% max()) * 1.5) / 100
-  } else {
-    data$config$guided$starvz_height_atree <- 1
-  }
-
-  p <- starvz_plot(data)
-
-  total_dpi <- 120
-  starvz_height_total <- attr(p, "starvz_height_total")
-  if (is.null(starvz_height_total) || starvz_height_total == 0) {
-    logwarn("Total height is 0, set to 1000")
-    starvz_height_total <- 1000
-  }
-
-  final_px_height <- (starvz_height_total + 5) * 100
-  final_px_width <- 1000
-  final_in_height <- final_px_height / total_dpi
-  final_in_width <- final_px_width / total_dpi
-
-  ggsave(name, plot = p, width = final_in_width, height = final_in_height, units = "in", dpi = total_dpi, limitsize = FALSE)
-  return(list(plot = p, height = final_px_height))
-}
-
 #' Generate the StarVZ Plots
 #'
 #' Use data to create the list of StarVZ plots
@@ -682,13 +602,69 @@ starvz_plot_list <- function(data = NULL) {
 #' Create a StarVZ plot considering the data suplied
 #'
 #' @param data starvz_data class with $config
+#' @param save call ggplot to save the image
+#' @param name Path for saved image
+#' @param guided compute ideal figure height
 #' @return ggplot object with all starvz plots
 #' @examples
 #' # starvz_plot(data)
 #' @export
-starvz_plot <- function(data = NULL) {
+starvz_plot <- function(data = NULL, name=NULL, save=FALSE, guided=data$config$guided$active) {
   if (is.null(data)) {
     return(NULL)
+  }
+
+  if(!is.null(guided) && guided){
+    # USe Y to compute state and starpu size
+    # Get number of nodes
+
+    # Lets compute some default height values
+    # For plots that show resources, 10px per resource on Y
+    # For plots that show nodes 10px per node
+    # For variable plots, 100px
+    # For atree plot 1.5px per node Position
+    # For plots TODO, default 200px
+    if (!is.null(data$config$selected_nodes)) {
+      nodes <- length(data$config$selected_nodes)
+    } else if (!is.null(data$Tasks)) {
+      nodes <- data$Tasks %>%
+        select(.data$MPIRank) %>%
+        distinct() %>%
+        nrow()
+    } else if (!is.null(data$Application)) {
+      nodes <- data$Application %>%
+        select(.data$Node) %>%
+        distinct() %>%
+        nrow()
+    } else {
+      nodes <- 1
+    }
+
+    types <- data$Application %>%
+      select(.data$ResourceType) %>%
+      distinct() %>%
+      nrow()
+
+    if (!is.null(data$config$selected_nodes)) {
+      data$Y %>%
+        separate(.data$Parent, into = c("Node"), remove = FALSE) %>%
+        filter(.data$Node %in% data$config$selected_nodes) %>%
+        arrange(.data$Position) %>%
+        mutate(New = cumsum(lag(.data$Height, default = 0))) %>%
+        select(.data$Parent, .data$New) -> new_y
+      data$config$guided$starvz_height_resources <- (new_y$New %>% max()) * 10 / 100
+    } else {
+      data$config$guided$starvz_height_resources <- (data$Y$Position %>% max()) * 10 / 100
+    }
+
+    data$config$guided$starvz_height_agg <- max(nodes * types * data$config$guided$agg_type_height / 100, 1)
+    data$config$guided$starvz_height_nodes <- max(nodes * data$config$guided$node_height / 100, 1)
+    data$config$guided$starvz_height_small <- 0.5
+    if (!is.null(data$Atree)) {
+      data$config$guided$starvz_height_atree <- ((data$Atree$Position %>% max()) * 1.5) / 100
+    } else {
+      data$config$guided$starvz_height_atree <- 1
+    }
   }
 
   plist <- starvz_plot_list(data)
@@ -696,9 +672,27 @@ starvz_plot <- function(data = NULL) {
   loginfo("Assembling the plot")
 
   # assembling
-  g <- starvz_assemble(plist, config = data$config)
+  plot <- starvz_assemble(plist, config = data$config)
+
+  starvz_height_total <- attr(plot, "starvz_height_total")
+  if (is.null(starvz_height_total) || starvz_height_total == 0) {
+    starvz_height_total <- 1000
+  }
+
+  final_px_height <- (starvz_height_total + 5) * 100
+  attr(plot, "starvz_height_total") <- NULL
+  attr(plot, "height") <- final_px_height
+
+  if(save && !is.null(name)){
+    total_dpi <- 120
+    final_px_width <- 1000
+    final_in_height <- final_px_height / total_dpi
+    final_in_width <- final_px_width / total_dpi
+
+    ggsave(name, plot = plot, width = final_in_width, height = final_in_height, units = "in", dpi = total_dpi, limitsize = FALSE)
+  }
 
   loginfo("Ending Starvz plot function")
 
-  return(g)
+  return(plot)
 }

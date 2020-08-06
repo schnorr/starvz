@@ -1,6 +1,6 @@
 #' @include starvz_data.R
 
-default_theme <- function(base_size = 22, expand = 0.05) {
+default_theme <- function(base_size = 22, expand = 0.05, legend_title=FALSE) {
   ret <- list()
 
   ret[[length(ret) + 1]] <- theme_bw(base_size = base_size)
@@ -11,9 +11,12 @@ default_theme <- function(base_size = 22, expand = 0.05) {
     legend.position = "top",
     legend.justification = "left",
     legend.box.spacing = unit(0, "pt"),
-    legend.box.margin = margin(0, 0, 0, 0),
-    legend.title = element_blank()
+    legend.box.margin = margin(0, 0, 0, 0)
   )
+  if(!legend_title){
+    ret[[length(ret) + 1]] <- theme(legend.title = element_blank())
+  }
+
   ret[[length(ret) + 1]] <- xlab("Time [ms]")
   ret[[length(ret) + 1]] <- scale_x_continuous(
     expand = c(expand, 0),

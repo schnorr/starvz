@@ -438,8 +438,7 @@ panel_utilheatmap <- function(data, legend=data$config$utilheatmap$legend,
     mutate(Time = .data$Step * agg_step + agg_step / 2) %>%
     ggplot(aes(y = .data$Position, x = .data$Time, fill = .data$Utilization)) +
     geom_raster() +
-    default_theme(data$config$base_size, data$config$expand) +
-    theme(legend.title = element_text("black")) +
+    default_theme(data$config$base_size, data$config$expand, legend_title=TRUE) +
     scale_y_continuous(breaks = yconfv$Position, labels = yconfv$ResourceId, expand = c(data$config$expand, 0)) +
     labs(y = "Utilization", x = "Time") +
     scale_fill_gradient2(

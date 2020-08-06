@@ -4,7 +4,14 @@
 \alias{panel_nodememuse}
 \title{Create the node memory usage plot}
 \usage{
-panel_nodememuse(data = NULL, step = 100, aggregation = FALSE, legend = TRUE)
+panel_nodememuse(
+  data = NULL,
+  step = data$config$activenodes$aggregation$step,
+  aggregation = data$config$activenodes$aggregation$active,
+  x_start = data$config$limits$start,
+  x_end = data$config$limits$end,
+  legend = data$config$activenodes$nodememuse$legend
+)
 }
 \arguments{
 \item{data}{starvz_data with trace data}
@@ -12,6 +19,10 @@ panel_nodememuse(data = NULL, step = 100, aggregation = FALSE, legend = TRUE)
 \item{step}{size in milliseconds for the time aggregation step}
 
 \item{aggregation}{enable/disable time aggregation for the plot}
+
+\item{x_start}{X-axis start value}
+
+\item{x_end}{X-axis end value}
 
 \item{legend}{enable/disable plot legends}
 }

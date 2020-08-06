@@ -4,12 +4,21 @@
 \alias{panel_utiltreenode}
 \title{Create the resource utilization by tree node plot}
 \usage{
-panel_utiltreenode(data = NULL, step = 100)
+panel_utiltreenode(
+  data = NULL,
+  step = data$config$utiltreenode$step,
+  x_start = data$config$limits$start,
+  x_end = data$config$limits$end
+)
 }
 \arguments{
 \item{data}{starvz_data with trace data}
 
 \item{step}{size in milliseconds for the time aggregation step}
+
+\item{x_start}{X-axis start value}
+
+\item{x_end}{X-axis end value}
 }
 \value{
 A ggplot object

@@ -6,16 +6,16 @@
 \usage{
 panel_atree(
   data = NULL,
-  step = 100,
-  legend = TRUE,
+  step = data$config$atree$step,
+  legend = data$config$atree$legend,
   zoom = FALSE,
-  computation = TRUE,
-  pruned = TRUE,
-  initialization = TRUE,
+  computation = data$config$atree$computation$active,
+  pruned = data$config$atree$computation$pruned$active,
+  initialization = data$config$atree$initialization$active,
   x_start = data$config$limits$start,
   x_end = data$config$limits$end,
-  communication = TRUE,
-  anomalies = TRUE
+  communication = data$config$atree$communication$active,
+  anomalies = data$config$atree$anomalies$active
 )
 }
 \arguments{

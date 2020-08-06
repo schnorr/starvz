@@ -422,20 +422,6 @@ starvz_plot_list <- function(data = NULL) {
 
   loginfo("Starting the Starvz plot function")
 
-  # Fail Checking
-  if (is.null(data$Atree) && (
-    data$config$utiltreenode$active ||
-      data$config$utiltreedepth$active ||
-      data$config$atree$active ||
-      data$config$activenodes$active
-  )) {
-    logwarn("This dataset dont have atree, disabling some options")
-    data$config$utiltreenode$active <<- FALSE
-    data$config$utiltreedepth$active <<- FALSE
-    data$config$atree$active <<- FALSE
-    data$config$activenodes$active <<- FALSE
-  }
-
   # Create a named list with the ggplot objects + title
   plot_list <- list(
     atree = geom_blank(),
@@ -469,36 +455,21 @@ starvz_plot_list <- function(data = NULL) {
   )
 
   # Atree space/time view
-  if (!is.null(data$Atree) && data$config$atree$active) {
+  if (data$config$atree$active) {
     loginfo("Creating the temporal atree plot")
-    # get default values for parameters
-    aggStep <- config_value(data$config$atree$step, globalAggStep)
-
-    legend <- data$config$atree$legend
-    computation <- data$config$atree$computation$active
-    pruned <- data$config$atree$computation$pruned$active
-    communication <- data$config$atree$communication$active
-    initialization <- data$config$atree$initialization$active
-    anomalies <- data$config$atree$anomalies$active
-
-    plot_list$atree <- panel_atree(data=data, step=aggStep, legend=legend, zoom=FALSE,
-      computation=computation, pruned=pruned, communication=communication,
-      initialization=initialization, anomalies=anomalies) + tScale
+    plot_list$atree <- panel_atree(data)
   }
 
   # Resource utilization by tree node
-  if (!is.null(data$Atree) && data$config$utiltreenode$active) {
+  if (data$config$utiltreenode$active) {
     loginfo("Creating the resource utilization by node plot")
-    aggStep <- config_value(data$config$utiltreenode$step, globalAggStep)
-    plot_list$utiltreenode <- panel_utiltreenode(data=data, step=aggStep) + tScale
+    plot_list$utiltreenode <- panel_utiltreenode(data)
   }
 
   # Resource utilization by tree depth
-  if (!is.null(data$Atree) && data$config$utiltreedepth$active) {
+  if (data$config$utiltreedepth$active) {
     loginfo("Creating the resource utilization by depth plot")
-    aggStep <- config_value(data$config$utiltreenode$step, globalAggStep)
-    plot_list$utiltreedepth <- panel_utiltreedepth(data=data, step=aggStep,
-      legend=data$config$utiltreedepth$legend) + tScale
+    plot_list$utiltreedepth <- panel_utiltreedepth(data)
   }
 
   # SpaceTime
@@ -678,29 +649,13 @@ starvz_plot_list <- function(data = NULL) {
   # Active Nodes
   if (data$config$activenodes$active) {
     loginfo("Creating the Active Nodes plot")
-
-    if ((data$Application %>% filter(!is.na(.data$ANode)) %>% nrow()) == 0) {
-      logwarn("There aren't any information on ANode, ignoring it.")
-      data$config$activenodes$active <<- FALSE
-    } else {
-      aggStep <- config_value(data$config$activenodes$aggregation$step, globalAggStep)
-      plot_list$activenodes <- panel_activenodes(data=data, step=aggStep, aggregation=data$config$activenodes$aggregation$active,
-        legend=data$config$activenodes$legend) + tScale
-    }
+    plot_list$activenodes <- panel_activenodes(data)
   }
 
   # Node memory usage
   if (data$config$activenodes$nodememuse$active) {
     loginfo("Creating the Node Memory Usage plot")
-
-    if ((data$Application %>% filter(grepl("front", .data$Value) & .data$GFlop != 0) %>% nrow()) == 0) {
-      logwarn("There is no memory information on data, ignoring it.")
-      data$config$activenodes$nodememuse$active <<- FALSE
-    } else {
-      aggStep <- config_value(data$config$activenodes$aggregation$step, globalAggStep)
-      plot_list$nodememuse <- panel_nodememuse(data=data, step=aggStep, aggregation=data$config$activenodes$aggregation$active,
-        legend=data$config$activenodes$nodememuse$legend) + tScale
-    }
+    plot_list$nodememuse <- panel_nodememuse(data)
   }
 
   # Title

@@ -4,12 +4,22 @@
 \alias{panel_utiltreedepth}
 \title{Create the resource utilization by tree depth plot}
 \usage{
-panel_utiltreedepth(data, step = 100, legend = TRUE)
+panel_utiltreedepth(
+  data,
+  step = data$config$utiltreenode$step,
+  x_start = data$config$limits$start,
+  x_end = data$config$limits$end,
+  legend = data$config$utiltreedepth$legend
+)
 }
 \arguments{
 \item{data}{starvz_data with trace data}
 
 \item{step}{size in milliseconds for the time aggregation step}
+
+\item{x_start}{X-axis start value}
+
+\item{x_end}{X-axis end value}
 
 \item{legend}{enable/disable plot legends}
 }

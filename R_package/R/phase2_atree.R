@@ -137,14 +137,34 @@ panel_atree_structure <- function(data = NULL) {
 #' #panel_atree(data, step=10)
 #' #panel_atree(data, step=20, communication=FALSE, initialization=FALSE)
 #' @export
-panel_atree <- function(data = NULL, step = 100, legend = TRUE, zoom = FALSE,
-                        computation = TRUE, pruned = TRUE, initialization = TRUE,
+panel_atree <- function(data = NULL, step = data$config$atree$step, legend = data$config$atree$legend, zoom = FALSE,
+                        computation = data$config$atree$computation$active,
+                        pruned = data$config$atree$computation$pruned$active,
+                        initialization = data$config$atree$initialization$active,
                         x_start=data$config$limits$start,
                         x_end=data$config$limits$end,
-                        communication = TRUE, anomalies = TRUE)
+                        communication = data$config$atree$communication$active,
+                        anomalies = data$config$atree$anomalies$active)
 {
-  if (is.null(data)) stop("a NULL data has been provided to panel_atree")
   loginfo("Entry of panel_atree")
+
+  starvz_check_data(data, tables=list("Atree"=c("ANode")))
+
+  if(is.null(step) || !is.numeric(step)){
+    if(is.null(data$config$global_agg_step)){
+      step <- 100
+    }else{
+      step <- data$config$global_agg_step
+    }
+  }
+
+  if(is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start)) ){
+    x_start <- NA
+  }
+
+  if(is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end)) ){
+    x_end <- NA
+  }
 
   data_utilization_node <- resource_utilization_tree_node(data$Application, data$Atree, step = step, group_pruned = TRUE) %>%
     filter(.data$Value != 0) %>%
@@ -248,6 +268,13 @@ panel_atree <- function(data = NULL, step = 100, legend = TRUE, zoom = FALSE,
       )
     )
     atreeplot <- atreeplot + tzScale
+  }else{
+    tzScale <- list(
+      coord_cartesian(
+        xlim = c(x_start, x_end)
+      )
+    )
+    atreeplot <- atreeplot + tzScale
   }
 
   # Add representation for anomalies in the tree
@@ -284,11 +311,35 @@ panel_atree <- function(data = NULL, step = 100, legend = TRUE, zoom = FALSE,
 #'
 #' @param data starvz_data with trace data
 #' @param step size in milliseconds for the time aggregation step
+#' @param x_start X-axis start value
+#' @param x_end X-axis end value
 #' @return A ggplot object
 #' @examples
 #' #panel_utiltreenode(data=starvz_data, step=100)
 #' @export
-panel_utiltreenode <- function(data = NULL, step = 100) {
+panel_utiltreenode <- function(data = NULL,
+  step = data$config$utiltreenode$step,
+  x_start=data$config$limits$start,
+  x_end=data$config$limits$end) {
+
+  starvz_check_data(data, tables=list("Atree"=c("ANode")))
+
+  if(is.null(step) || !is.numeric(step)){
+    if(is.null(data$config$global_agg_step)){
+      step <- 100
+    }else{
+      step <- data$config$global_agg_step
+    }
+  }
+
+  if(is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start)) ){
+    x_start <- NA
+  }
+
+  if(is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end)) ){
+    x_end <- NA
+  }
+
   df1 <- resource_utilization_tree_node(data$Application, data$Atree, step = step, group_pruned=FALSE)
 
   event_data <- df1 %>%
@@ -368,7 +419,15 @@ panel_utiltreenode <- function(data = NULL, step = 100) {
     default_theme(data$config$base_size, data$config$expand) +
     theme(legend.position = "none") +
     ylab("Usage %\nANode") +
-    ylim(0, 100)
+    ylim(0, 100) -> panel
+
+    tzScale <- list(
+      coord_cartesian(
+        xlim = c(x_start, x_end)
+      )
+    )
+    panel <- panel + tzScale
+    return(panel)
 }
 
 #' Create the resource utilization by tree depth plot
@@ -379,11 +438,36 @@ panel_utiltreenode <- function(data = NULL, step = 100) {
 #' @param data starvz_data with trace data
 #' @param step size in milliseconds for the time aggregation step
 #' @param legend enable/disable plot legends
+#' @param x_start X-axis start value
+#' @param x_end X-axis end value
 #' @return A ggplot object
 #' @examples
 #' #panel_utiltreedepth(data, step=100, legend=TRUE)
 #' @export
-panel_utiltreedepth <- function(data, step = 100, legend=TRUE) {
+panel_utiltreedepth <- function(data,
+  step = data$config$utiltreenode$step,
+  x_start=data$config$limits$start,
+  x_end=data$config$limits$end,
+  legend = data$config$utiltreedepth$legend) {
+
+  starvz_check_data(data, tables=list("Atree"=c("ANode")))
+
+  if(is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start)) ){
+    x_start <- NA
+  }
+
+  if(is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end)) ){
+    x_end <- NA
+  }
+
+  if(is.null(step) || !is.numeric(step)){
+    if(is.null(data$config$global_agg_step)){
+      step <- 100
+    }else{
+      step <- data$config$global_agg_step
+    }
+  }
+
   #Prepare data
   depth_plot_data <- resource_utilization_tree_depth(data$Application, data$Atree, step)
 
@@ -406,7 +490,21 @@ panel_utiltreedepth <- function(data, step = 100, legend=TRUE) {
     panel <- panel + theme(legend.position="none")
   }
 
+  tzScale <- list(
+    coord_cartesian(
+      xlim = c(x_start, x_end)
+    )
+  )
+  panel <- panel + tzScale
+
   return(panel)
+}
+
+nodememuse_check <- function(data){
+  data$Application %>%
+  filter(grepl("front", .data$Value) & .data$GFlop != 0) %>%
+  nrow() -> nr
+  return(!(nr==0))
 }
 
 #' Create the node memory usage plot
@@ -417,13 +515,41 @@ panel_utiltreedepth <- function(data, step = 100, legend=TRUE) {
 #' @param data starvz_data with trace data
 #' @param step size in milliseconds for the time aggregation step
 #' @param aggregation enable/disable time aggregation for the plot
+#' @param x_start X-axis start value
+#' @param x_end X-axis end value
 #' @param legend enable/disable plot legends
 #' @examples
 #' #panel_nodememuse(data$Application, step=100)
 #' @export
-panel_nodememuse <- function(data = NULL, step = 100, aggregation=FALSE, legend=TRUE) {
+panel_nodememuse <- function(data = NULL,
+  step = data$config$activenodes$aggregation$step,
+  aggregation=data$config$activenodes$aggregation$active,
+  x_start=data$config$limits$start,
+  x_end=data$config$limits$end,
+  legend=data$config$activenodes$nodememuse$legend) {
   loginfo("Entry of panel_nodememuse")
-  if (is.null(data)) stop("a NULL data has been provided to panel_nodememuse")
+
+  starvz_check_data(data,
+    tables=list("Atree"=c("ANode"),
+                "Application"=c("Value", "GFlop")),
+    extra_func=nodememuse_check)
+
+  if(is.null(step) || !is.numeric(step)){
+    if(is.null(data$config$global_agg_step)){
+      step <- 100
+    }else{
+      step <- data$config$global_agg_step
+    }
+  }
+
+  if(is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start)) ){
+    x_start <- NA
+  }
+
+  if(is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end)) ){
+    x_end <- NA
+  }
+
   panel <- geom_blank()
 
   # Prepare data
@@ -468,6 +594,13 @@ panel_nodememuse <- function(data = NULL, step = 100, aggregation=FALSE, legend=
     panel <- panel + theme(legend.position="none")
   }
 
+  tzScale <- list(
+    coord_cartesian(
+      xlim = c(x_start, x_end)
+    )
+  )
+  panel <- panel + tzScale
+
   loginfo("Exit of panel_nodememuse")
   return(panel)
 }
@@ -481,13 +614,39 @@ panel_nodememuse <- function(data = NULL, step = 100, aggregation=FALSE, legend=
 #' @param step size in milliseconds for the time aggregation step
 #' @param aggregation enable/disable time aggregation for the plot
 #' @param legend enable/disable plot legends
+#' @param x_start X-axis start value
+#' @param x_end X-axis end value
 #' @return A ggplot object
 #' @examples
 #' #panel_activenodes(data=starvz_data, step=100)
 #' @export
-panel_activenodes <- function(data = NULL, step = 100, aggregation=FALSE, legend=TRUE) {
-  if (is.null(data)) stop("a NULL data has been provided to panel_activenodes")
+panel_activenodes <- function(data = NULL,
+  step = data$config$activenodes$aggregation$step,
+  aggregation=data$config$activenodes$aggregation$active,
+  x_start=data$config$limits$start,
+  x_end=data$config$limits$end,
+  legend=data$config$activenodes$legend) {
+
   loginfo("Entry of panel_activenodes")
+
+  starvz_check_data(data, tables=list("Atree"=c("ANode")))
+
+  if(is.null(step) || !is.numeric(step)){
+    if(is.null(data$config$global_agg_step)){
+      step <- 100
+    }else{
+      step <- data$config$global_agg_step
+    }
+  }
+
+  if(is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start)) ){
+    x_start <- NA
+  }
+
+  if(is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end)) ){
+    x_end <- NA
+  }
+
   panel <- geom_blank()
 
   # Prepare data
@@ -537,6 +696,13 @@ panel_activenodes <- function(data = NULL, step = 100, aggregation=FALSE, legend
   if (!legend) {
     panel <- panel + theme(legend.position = "none")
   }
+
+  tzScale <- list(
+    coord_cartesian(
+      xlim = c(x_start, x_end)
+    )
+  )
+  panel <- panel + tzScale
 
   loginfo("Exit of panel_activenodes")
   return(panel)

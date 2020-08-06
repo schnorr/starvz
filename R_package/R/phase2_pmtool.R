@@ -1,7 +1,8 @@
 #' @include starvz_data.R
 
 state_pmtool_chart <- function(data = NULL) {
-  if (is.null(data)) stop("data provided to state_chart is NULL")
+
+  starvz_check_data(data, tables=list("Pmtool_states"=c("Value", "sched")))
 
   # Get traces
   dfw <- data$Pmtool_states
@@ -37,7 +38,8 @@ state_pmtool_chart <- function(data = NULL) {
 
 
 k_chart_pmtool <- function(data = NULL, colors = NULL) {
-  if (is.null(data$Pmtool_states)) stop("dfw provided to pm k_chart is NULL")
+
+  starvz_check_data(data, tables=list("Pmtool_states"=c("Value", "sched", "Iteration")))
 
   dfw <- data$Pmtool_states %>%
     filter(.data$sched == data$config$pmtool$state$sched)
@@ -129,7 +131,11 @@ geom_pmtool_states <- function(data = NULL) {
 
 
 geom_pmtool_bounds <- function(data = NULL) {
-  if (is.null(data)) stop("data is NULL when given to geom_pmtool_bounds")
+
+  if (is.null(data$Pmtool)) {
+    logwarn("Pmtool bounds config is active but the data is NULL")
+    return(NULL)
+  }
 
   dftemp <- data$Application %>%
     filter(grepl("CPU|CUDA", .data$ResourceId)) %>%

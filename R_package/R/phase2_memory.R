@@ -1,7 +1,8 @@
 #' @include starvz_data.R
 
 events_memory_chart <- function(data = NULL, globalEndTime = NULL, combined = FALSE, tstart = NULL, tend = NULL) {
-  if (is.null(data)) stop("data provided to memory_chart is NULL")
+
+  starvz_check_data(data, tables=list("Events_memory"=c("Type", "Container", "Handle")))
 
   loginfo("Entry of events_memory_chart")
 
@@ -40,7 +41,8 @@ events_memory_chart <- function(data = NULL, globalEndTime = NULL, combined = FA
 
 
 link_chart <- function(data = NULL, tstart = NULL, tend = NULL) {
-  if (is.null(data)) stop("data provided to memory_chart is NULL")
+
+  starvz_check_data(data, tables=list("Link"=c("Dest", "Origin")))
 
   loginfo("Entry of link_chart")
 
@@ -191,7 +193,8 @@ geom_links <- function(data = NULL, combined = FALSE,
                        arrow_active = FALSE,
                        border_active = FALSE,
                        total_active = FALSE) {
-  if (is.null(data)) stop("data is NULL when given to geom_links")
+
+  starvz_check_data(data, tables=list("Link"=c("Dest", "Origin")))
 
   # Get the start info on states because link dont have nodes & Position
 
@@ -502,12 +505,12 @@ pre_handle_gantt <- function(data, name_func = NULL) {
       select(.data$Type, .data$Start, .data$End, .data$Value, .data$origin_y, .data$dest_y) %>%
       rename(Transfer = .data$Type) %>%
       unique()
-   
+
     all_links <- bind_rows(mpi_links, final_links)
   } else {
     all_links <- final_links
   }
-    
+
   return(list(
     all_st_m_data = all_st_m_data,
     events_points = events_points,

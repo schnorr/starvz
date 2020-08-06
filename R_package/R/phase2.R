@@ -395,27 +395,7 @@ starvz_plot_list <- function(data = NULL) {
       distinct()
   }
 
-  # Get data
-  directory <- data$Origin
-
-  if (is.null(data$Application)) {
-    stop("The Application data was not loaded, check if the feather files exists.")
-  }
-
-  # Define makespan
-  makespan <- data$Application %>%
-    pull(.data$End) %>%
-    max()
-
-  #  Filter out everything after the makespan
-  # TODO: Maybe this will make sense to transfer to Phase1
-  # data$Application <- data$Application %>% filter(Start < makespan)
-  # data$Starpu <- data$Starpu %>% filter(Start < makespan)
-  # data$Dag <- data$Dag %>% filter(Start < makespan)
-  # data$Events <- data$Events %>% filter(Start < makespan)
-  # data$Gaps <- data$Gaps %>% filter(Start.x < makespan)
-  # data$Link <- data$Link %>% filter(Start < makespan)
-  # data$Variable <- data$Variable %>% filter(End < makespan)
+  starvz_check_data(data, tables=list("Application"=c("Start", "End")))
 
   # Adjust temporal scale
   if(is.null(data$config$limits$start)){
@@ -426,7 +406,7 @@ starvz_plot_list <- function(data = NULL) {
   }
 
   # Define the global aggregation step as 0.1% of the total window
-  data$config$global_agg_step <- (data$config$limits$end - data$config$limits$start) * .001
+  data$config$global_agg_step <- (data$config$limits$end - data$config$limits$start) * 0.001
 
   # To be deprecated
   tstart <- data$config$limits$start
@@ -443,36 +423,6 @@ starvz_plot_list <- function(data = NULL) {
   loginfo("Starting the Starvz plot function")
 
   # Fail Checking
-  if ((data$config$pmtool$state$active || data$config$pmtool$kiteration$active) && is.null(data$Pmtool_states)) {
-    logwarn("Pmtool states config is active but the data is NULL")
-    data$config$pmtool$state$active <<- FALSE
-    data$config$pmtool$kiteration$active <<- FALSE
-  }
-
-  if (data$config$pmtool$bounds$active && is.null(data$Pmtool)) {
-    logwarn("Pmtool bounds config is active but the data is NULL")
-    data$config$pmtool$bounds$active <<- FALSE
-  }
-
-  if ((data$Memory_state %>% nrow()) == 0 && data$config$memory$state$active) {
-    logwarn("There is not information about memory states")
-    data$config$memory$state$active <<- FALSE
-    data$config$memory$combined <<- FALSE
-  }
-
-  if (is.null(data$Link) && (data$config$memory$transfers$active || data$config$memory$combined)) {
-    logwarn("This dataset dont have links, disabling some options")
-    data$config$memory$transfers$active <<- FALSE
-    data$config$memory$combined <<- FALSE
-  }
-
-  dfevents <- data$Memory_state
-  if (!is.null(dfevents) && ((dfevents %>% nrow()) == 0) && data$config$memory$new_data) {
-    logwarn("This dataset dont have memory node states")
-    data$config$memory$state$active <<- FALSE
-    data$config$memory$combined <<- FALSE
-  }
-
   if (is.null(data$Atree) && (
     data$config$utiltreenode$active ||
       data$config$utiltreedepth$active ||
@@ -486,35 +436,37 @@ starvz_plot_list <- function(data = NULL) {
     data$config$activenodes$active <<- FALSE
   }
 
-  # Set all possible plots to NULL
-  goatreet <- geom_blank()
-  goutiltreenode <- geom_blank()
-  goutiltreedepth <- geom_blank()
-  gow <- geom_blank()
-  go_sn <- geom_blank()
-  gow_pm <- geom_blank()
-  gow_mm <- geom_blank()
-  gow_tf <- geom_blank()
-  gstarpu <- geom_blank()
-  goijk <- geom_blank()
-  goijk_pm <- geom_blank()
-  golrv <- geom_blank()
-  gorv <- geom_blank()
-  gosv <- geom_blank()
-  gomov <- geom_blank()
-  gompiconc <- geom_blank()
-  gompiconcout <- geom_blank()
-  gompistate <- geom_blank()
-  gogov <- geom_blank()
-  goguv <- geom_blank()
-  gogfv <- geom_blank()
-  imb_plot <- geom_blank()
-  imb_plot_power <- geom_blank()
-  imb_plot_hete <- geom_blank()
-  heatmap <- geom_blank()
-  goactivenodes <- geom_blank()
-  gonodememuse <- geom_blank()
-  tplot <- geom_blank()
+  # Create a named list with the ggplot objects + title
+  plot_list <- list(
+    atree = geom_blank(),
+    utiltreenode = geom_blank(),
+    utiltreedepth = geom_blank(),
+    st = geom_blank(),
+    st_pm = geom_blank(),
+    st_mm = geom_blank(),
+    transf = geom_blank(),
+    starpu = geom_blank(),
+    ijk = geom_blank(),
+    ijk_pm = geom_blank(),
+    lackready = geom_blank(),
+    ready = geom_blank(),
+    submitted = geom_blank(),
+    mpi = geom_blank(),
+    mpiconc = geom_blank(),
+    mpiconcout = geom_blank(),
+    mpistate = geom_blank(),
+    gpu = geom_blank(),
+    memory = geom_blank(),
+    imb_plot = geom_blank(),
+    imb_plot_power = geom_blank(),
+    imb_plot_hete = geom_blank(),
+    heatmap = geom_blank(),
+    gflops = geom_blank(),
+    activenodes = geom_blank(),
+    nodememuse = geom_blank(),
+    summary_nodes = geom_blank(),
+    tplot = geom_blank()
+  )
 
   # Atree space/time view
   if (!is.null(data$Atree) && data$config$atree$active) {
@@ -529,7 +481,7 @@ starvz_plot_list <- function(data = NULL) {
     initialization <- data$config$atree$initialization$active
     anomalies <- data$config$atree$anomalies$active
 
-    goatreet <- panel_atree(data=data, step=aggStep, legend=legend, zoom=FALSE,
+    plot_list$atree <- panel_atree(data=data, step=aggStep, legend=legend, zoom=FALSE,
       computation=computation, pruned=pruned, communication=communication,
       initialization=initialization, anomalies=anomalies) + tScale
   }
@@ -538,14 +490,14 @@ starvz_plot_list <- function(data = NULL) {
   if (!is.null(data$Atree) && data$config$utiltreenode$active) {
     loginfo("Creating the resource utilization by node plot")
     aggStep <- config_value(data$config$utiltreenode$step, globalAggStep)
-    goutiltreenode <- panel_utiltreenode(data=data, step=aggStep) + tScale
+    plot_list$utiltreenode <- panel_utiltreenode(data=data, step=aggStep) + tScale
   }
 
   # Resource utilization by tree depth
   if (!is.null(data$Atree) && data$config$utiltreedepth$active) {
     loginfo("Creating the resource utilization by depth plot")
     aggStep <- config_value(data$config$utiltreenode$step, globalAggStep)
-    goutiltreedepth <- panel_utiltreedepth(data=data, step=aggStep,
+    plot_list$utiltreedepth <- panel_utiltreedepth(data=data, step=aggStep,
       legend=data$config$utiltreedepth$legend) + tScale
   }
 
@@ -558,37 +510,37 @@ starvz_plot_list <- function(data = NULL) {
       if (data$config$st$aggregation$method == "lucas") {
         aggStep <- config_value(data$config$st$aggregation$step, globalAggStep)
         dfw_agg <- st_time_aggregation(data$Application, step = aggStep)
-        data %>% st_time_aggregation_plot(dfw_agg) + coord_cartesian(xlim = c(tstart, tend), ylim = c(0, NA)) -> gow
+        plot_list$st <- data %>% st_time_aggregation_plot(dfw_agg) + coord_cartesian(xlim = c(tstart, tend), ylim = c(0, NA))
       } else if (data$config$st$aggregation$method == "vinicius") {
         loginfo("Call vinicius aggregation")
-        data %>% st_time_aggregation_vinicius_plot() + coord_cartesian(xlim = c(tstart, tend), ylim = c(0, NA)) -> gow
+        plot_list$st <- data %>% st_time_aggregation_vinicius_plot() + coord_cartesian(xlim = c(tstart, tend), ylim = c(0, NA))
       } else if (data$config$st$aggregation$method == "nodes") {
         loginfo("Call Node aggregation")
-        node_aggregation(data) + coord_cartesian(xlim = c(tstart, tend), ylim = c(0, NA)) -> gow
+        plot_list$st <- node_aggregation(data) + coord_cartesian(xlim = c(tstart, tend), ylim = c(0, NA))
       }
     } else {
-      gow <- panel_st_raw(data=data, StarPU.View = FALSE) +
+      plot_list$st <- panel_st_raw(data=data, StarPU.View = FALSE) +
         coord_cartesian(xlim = c(tstart, tend), ylim = c(0, NA))
     }
   }
 
   if (data$config$summary_nodes$active) {
     loginfo("Creating node summary")
-    panel_node_summary(data) + tScale -> go_sn
+    plot_list$summary_nodes <- panel_node_summary(data) + tScale
   }
 
   if (data$config$pmtool$state$active) {
-    data %>% state_pmtool_chart() + tScale -> gow_pm
+    plot_list$st_pm <- data %>% state_pmtool_chart() + tScale
   }
 
   memory_combined <- data$config$memory$combined & data$config$memory$transfers$active
 
   if (data$config$memory$state$active) {
-    data %>% events_memory_chart(combined = memory_combined, tstart = tstart, tend = tend) + tScale -> gow_mm
+    plot_list$st_mm <- data %>% events_memory_chart(combined = memory_combined, tstart = tstart, tend = tend) + tScale
   }
 
   if (data$config$memory$transfers$active & !memory_combined) {
-    data %>% link_chart(tstart = tstart, tend = tend) + tScale -> gow_tf
+    plot_list$transf <- data %>% link_chart(tstart = tstart, tend = tend) + tScale
   }
 
   # StarPU SpaceTime
@@ -598,9 +550,9 @@ starvz_plot_list <- function(data = NULL) {
       loginfo("Will call st_time_aggregation")
       aggStep <- config_value(data$config$starpu$aggregation$step, globalAggStep)
       dfw_agg <- st_time_aggregation(data$Starpu, StarPU.View = TRUE, step = aggStep)
-      data %>% st_time_aggregation_plot(dfw_agg, StarPU.View = TRUE) + coord_cartesian(xlim = c(tstart, tend), ylim = c(0, NA)) -> gstarpu
+      plot_list$starpu <- data %>% st_time_aggregation_plot(dfw_agg, StarPU.View = TRUE) + coord_cartesian(xlim = c(tstart, tend), ylim = c(0, NA))
     } else {
-      gstarpu <- panel_st_raw(data=data, StarPU.View = TRUE) +
+      plot_list$starpu <- panel_st_raw(data=data, StarPU.View = TRUE) +
         coord_cartesian(xlim = c(tstart, tend), ylim = c(0, NA))
     }
   }
@@ -613,114 +565,114 @@ starvz_plot_list <- function(data = NULL) {
       ml <- NULL
     }
     pn <- data$config$kiteration$pernode
-    goijk <- k_chart(data,
+    plot_list$ijk <- k_chart(data,
       middle_lines = ml,
       per_node = pn, colors = data$Colors
     ) + tScale
 
     if (!data$config$kiteration$legend) {
-      goijk <- goijk +
+      plot_list$ijk <- plot_list$ijk +
         theme(legend.position = "none")
     } else {
-      goijk <- goijk +
+      plot_list$ijk <- plot_list$ijk +
         theme(legend.spacing.x = unit(0.2, "cm"))
     }
     if (pn == TRUE) {
-      goijk <- goijk + facet_wrap(~Node, ncol = 1)
+      plot_list$ijk <- plot_list$ijk + facet_wrap(~Node, ncol = 1)
     }
   }
 
   # KIteration PMTOOL
   if (data$config$pmtool$kiteration$active) {
     loginfo("Creating the KIteration for PMTool")
-    goijk_pm <- k_chart_pmtool(data, colors = data$Colors) + tScale
+    plot_list$ijk_pm <- k_chart_pmtool(data, colors = data$Colors) + tScale
 
     if (!data$config$pmtool$kiteration$legend) {
-      goijk_pm <- goijk_pm + theme(legend.position = "none")
+      plot_list$ijk_pm <- plot_list$ijk_pm + theme(legend.position = "none")
     }
   }
 
   # Lack ready (companion for Ready Variable)
   if (data$config$lackready$active) {
     loginfo("Creating the Lack Ready Plot")
-    golrv <- panel_lackready(data) + tScale
+    plot_list$lackready <- panel_lackready(data) + tScale
   }
 
   # Ready
   if (data$config$ready$active) {
     loginfo("Creating the Ready plot")
-    gorv <- panel_ready(data)
+    plot_list$ready <- panel_ready(data)
   }
 
   # Submitted
   if (data$config$submitted$active) {
     loginfo("Creating the Submitted plot")
-    gosv <- panel_submitted(data)
+    plot_list$submitted <- panel_submitted(data)
   }
 
   # GFlops
   if (data$config$gflops$active) {
     loginfo("Creating the GFlops plot")
-    gogfv <- panel_gflops(data)
+    plot_list$gflops <- panel_gflops(data)
   }
 
   # Used Memory
   if (data$config$usedmemory$active) {
     loginfo("Creating the Used Memory plot")
-    goguv <- panel_usedmemory(data)
+    plot_list$memory <- panel_usedmemory(data)
   }
 
   # Imbalance Metrics
   if (data$config$imbalance$active) {
     loginfo("Creating the Imbalance Metrics plot")
-    imb_plot <- panel_imbalance(data)
+    plot_list$imb_plot <- panel_imbalance(data)
   }
 
   # Imbalance Metrics Power
   if (data$config$power_imbalance$active) {
     loginfo("Creating the Imbalance Power Metrics plot")
-    imb_plot_power <- panel_power_imbalance(data)
+    plot_list$imb_plot_power <- panel_power_imbalance(data)
   }
 
   # Imbalance Metrics hete
   if (data$config$hete_imbalance$active) {
     loginfo("Creating the Imbalance Hetero Metrics plot")
-    imb_plot_hete <- panel_hete_imbalance(data)
+    plot_list$imb_plot_hete <- panel_hete_imbalance(data)
   }
 
   if (data$config$utilheatmap$active) {
     loginfo("Creating the HeatMap Imbalance plot")
-    heatmap <- panel_utilheatmap(data)
+    plot_list$heatmap <- panel_utilheatmap(data)
   }
 
   # MPIBandwidth
   if (data$config$mpibandwidth$active) {
     loginfo("Creating the MPIBandwidth plot")
-    gomov <- panel_mpibandwidth(data)
+    plot_list$mpi <- panel_mpibandwidth(data)
   }
 
   # MPI Concurrent
   if (data$config$mpiconcurrent$active) {
     loginfo("Creating the MPI concurrent ops plot")
-    gompiconc <- panel_mpiconcurrent(data)
+    plot_list$mpiconc <- panel_mpiconcurrent(data)
   }
 
   # MPI Concurrent Out
   if (data$config$mpiconcurrentout$active) {
     loginfo("Creating the MPI concurrent ops out plot")
-    gompiconcout <- panel_mpiconcurrentout(data)
+    plot_list$mpiconcout <- panel_mpiconcurrentout(data)
   }
 
   # MPI State
   if (data$config$mpistate$active) {
     loginfo("Creating the MPI state")
-    gompistate <- panel_mpistate(data)
+    plot_list$mpistate <- panel_mpistate(data)
   }
 
   # GPUBandwidth
   if (data$config$gpubandwidth$active) {
     loginfo("Creating the GPU Bandwidth plot")
-    gogov <- panel_gpubandwidth(data)
+    plot_list$gpu <- panel_gpubandwidth(data)
   }
 
   # Active Nodes
@@ -732,7 +684,7 @@ starvz_plot_list <- function(data = NULL) {
       data$config$activenodes$active <<- FALSE
     } else {
       aggStep <- config_value(data$config$activenodes$aggregation$step, globalAggStep)
-      goactivenodes <- panel_activenodes(data=data, step=aggStep, aggregation=data$config$activenodes$aggregation$active,
+      plot_list$activenodes <- panel_activenodes(data=data, step=aggStep, aggregation=data$config$activenodes$aggregation$active,
         legend=data$config$activenodes$legend) + tScale
     }
   }
@@ -746,49 +698,17 @@ starvz_plot_list <- function(data = NULL) {
       data$config$activenodes$nodememuse$active <<- FALSE
     } else {
       aggStep <- config_value(data$config$activenodes$aggregation$step, globalAggStep)
-      gonodememuse <- panel_nodememuse(data=data, step=aggStep, aggregation=data$config$activenodes$aggregation$active,
+      plot_list$nodememuse <- panel_nodememuse(data=data, step=aggStep, aggregation=data$config$activenodes$aggregation$active,
         legend=data$config$activenodes$nodememuse$legend) + tScale
     }
   }
 
   # Title
   if (data$config$title$active) {
-    if (!is.null(directory)) {
-      tplot <- title_plot(directory)
+    if (!is.null(data$Origin)) {
+      plot_list$tplot <- title_plot(data$Origin)
     }
   }
-
-  # Create a named list with the ggplot objects + title
-  plot_list <- list(
-    atree = goatreet,
-    utiltreenode = goutiltreenode,
-    utiltreedepth = goutiltreedepth,
-    st = gow,
-    st_pm = gow_pm,
-    st_mm = gow_mm,
-    transf = gow_tf,
-    starpu = gstarpu,
-    ijk = goijk,
-    ijk_pm = goijk_pm,
-    lackready = golrv,
-    ready = gorv,
-    submitted = gosv,
-    mpi = gomov,
-    mpiconc = gompiconc,
-    mpiconcout = gompiconcout,
-    mpistate = gompistate,
-    gpu = gogov,
-    memory = goguv,
-    imb_plot = imb_plot,
-    imb_plot_power = imb_plot_power,
-    imb_plot_hete = imb_plot_hete,
-    heatmap = heatmap,
-    gflops = gogfv,
-    activenodes = goactivenodes,
-    nodememuse = gonodememuse,
-    summary_nodes = go_sn,
-    tplot = tplot
-  )
 
   if (data$config$vertical_lines$active) {
     ret[[length(ret) + 1]] <- geom_vline(

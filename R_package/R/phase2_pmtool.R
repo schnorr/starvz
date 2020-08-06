@@ -1,8 +1,22 @@
 #' @include starvz_data.R
 
-state_pmtool_chart <- function(data = NULL) {
+panel_pmtool_st <- function(data = NULL,
+                legend=data$config$pmtool$state$legend,
+                                base_size=data$config$base_size,
+                                expand_x=data$config$expand,
+                                x_start=data$config$limits$start,
+                                x_end=data$config$limits$end) {
 
   starvz_check_data(data, tables=list("Pmtool_states"=c("Value", "sched")))
+
+
+    if(is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start)) ){
+      x_start <- NA
+    }
+
+    if(is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end)) ){
+      x_end <- NA
+    }
 
   # Get traces
   dfw <- data$Pmtool_states
@@ -23,13 +37,24 @@ state_pmtool_chart <- function(data = NULL) {
 
   # Plot
   gow <- ggplot() +
-    default_theme(data$config$base_size, data$config$expand)
+    default_theme(base_size, expand_x)
 
   # Add states and outliers if requested
   gow <- gow + geom_pmtool_states(data)
 
   # add makespan
   if (data$config$pmtool$makespan) gow <- gow + geom_makespan_pmtool(data)
+
+  gow <- gow + coord_cartesian(
+      xlim = c(x_start, x_end)
+  )
+
+  if (!legend) {
+    gow <- gow + theme(legend.position = "none")
+  }else{
+    gow <- gow + theme(legend.position = "top")
+  }
+
 
   loginfo("Exit of state_pmtool_chart")
   return(gow)

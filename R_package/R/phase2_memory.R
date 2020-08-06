@@ -17,13 +17,17 @@
 #' @export
 panel_memory_state <- function(data = NULL,
   combined = data$config$memory$combined,
-  legend=data$config$ready$legend,
+  legend=data$config$memory$legend,
   base_size=data$config$base_size,
   expand_x=data$config$expand,
   x_start=data$config$limits$start,
   x_end=data$config$limits$end) {
 
   starvz_check_data(data, tables=list("Events_memory"=c("Type", "Container", "Handle")))
+
+  if(is.null(legend) || !is.logical(legend)){
+    legend <- TRUE
+  }
 
   if(is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start)) ){
     x_start <- NA
@@ -60,7 +64,7 @@ panel_memory_state <- function(data = NULL,
   gow <- gow + geom_events(data, dfwapp, combined = combined, tstart = x_start, tend = x_end)
   if (combined) {
     gow <- gow + geom_links(data,
-      combined = TRUE, tstart = tstart, tend = x_end,
+      combined = TRUE, tstart = x_start, tend = x_end,
       state_height = data$config$state$height,
       arrow_active = data$config$memory$transfers$arrow,
       border_active = data$config$memory$transfers$border,

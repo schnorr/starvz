@@ -329,9 +329,6 @@ starvz_plot_list <- function(data = NULL) {
   tstart <- data$config$limits$start
   tend <- data$config$limits$end
   globalAggStep <- data$config$global_agg_step
-  tScale <- list(
-    coord_cartesian(xlim = c(tstart, tend))
-  )
 
   if (!is.null(data$config$selected_nodes)) {
     data$Variable <- data$Variable %>% filter(.data$Node %in% data$config$selected_nodes)
@@ -413,11 +410,12 @@ starvz_plot_list <- function(data = NULL) {
 
   if (data$config$summary_nodes$active) {
     loginfo("Creating node summary")
-    plot_list$summary_nodes <- panel_node_summary(data) + tScale
+    plot_list$summary_nodes <- panel_node_summary(data)
   }
 
   if (data$config$pmtool$state$active) {
-    plot_list$st_pm <- data %>% state_pmtool_chart() + tScale
+    loginfo("Creating pmtool states")
+    plot_list$st_pm <- panel_pmtool_st(data)
   }
 
   if (data$config$memory$state$active) {

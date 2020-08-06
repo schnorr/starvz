@@ -269,9 +269,9 @@ panel_hete_imbalance  <- function(data, legend=data$config$hete_imbalance$legend
 
   if(is.null(step) || !is.numeric(step)){
     if(is.null(data$config$global_agg_step)){
-      agg_step <- 100.0
+      agg_step <- as.double(100)
     }else{
-      agg_step <- data$config$global_agg_step
+      agg_step <- as.double(data$config$global_agg_step)
     }
   }else{
       agg_step <- as.double(step)
@@ -401,10 +401,27 @@ utilization_per_step_double_hetero <- function(step, df) {
   return(ret)
 }
 
-utilization_heatmap <- function(data, Y, step) {
-  utilization_per_step(data$Application, step) %>%
+panel_utilheatmap <- function(data, legend=data$config$utilheatmap$legend,
+  x_start=data$config$limits$start,
+  x_end=data$config$limits$end,
+  y_start=0,
+  y_end=NA,
+  step=data$config$utilheatmap$step
+) {
+
+  if(is.null(step) || !is.numeric(step)){
+    if(is.null(data$config$global_agg_step)){
+      agg_step <- as.double(100)
+    }else{
+      agg_step <- as.double(data$config$global_agg_step)
+    }
+  }else{
+      agg_step <- as.double(step)
+  }
+
+  utilization_per_step(data$Application, agg_step) %>%
     ungroup() %>%
-    left_join(Y, by = c("ResourceId" = "Parent")) -> to_plot
+    left_join(data$Y, by = c("ResourceId" = "Parent")) -> to_plot
 
   to_plot %>%
     select(.data$Position) %>%
@@ -418,7 +435,7 @@ utilization_heatmap <- function(data, Y, step) {
   yconfv <- yconf(to_plot %>% ungroup(), data$config$utilheatmap$labels)
 
   to_plot %>%
-    mutate(Time = .data$Step * step + step / 2) %>%
+    mutate(Time = .data$Step * agg_step + agg_step / 2) %>%
     ggplot(aes(y = .data$Position, x = .data$Time, fill = .data$Utilization)) +
     geom_raster() +
     default_theme(data$config$base_size, data$config$expand) +
@@ -429,5 +446,17 @@ utilization_heatmap <- function(data, Y, step) {
       name = "Load [%]", midpoint = 0.5, low = "blue", mid = "white",
       high = "red", limits = c(0, 1)
     ) +
-    guides(fill = guide_colourbar(barwidth = 10, barheight = 0.5))
+    guides(fill = guide_colourbar(barwidth = 10, barheight = 0.5)) -> panel
+
+    if (!legend) {
+      panel <- panel + theme(legend.position = "none")
+    } else {
+      panel <- panel + theme(legend.position = "top")
+    }
+    panel <- panel +
+              coord_cartesian(
+                  xlim = c(x_start, x_end),
+                  ylim = c(0, y_end)
+              )
+    return(panel)
 }

@@ -690,35 +690,13 @@ starvz_plot_list <- function(data = NULL) {
 
   if (data$config$utilheatmap$active) {
     loginfo("Creating the HeatMap Imbalance plot")
-
-    Step <- as.double(config_value(data$config$utilheatmap$step, globalAggStep))
-
-    heatmap <- data %>%
-      utilization_heatmap(data$Y, Step)
-    if (!data$config$utilheatmap$legend) {
-      heatmap <- heatmap + theme(legend.position = "none")
-    } else {
-      heatmap <- heatmap + theme(legend.position = "top")
-    }
-    heatmap <- heatmap + tScale
+    heatmap <- panel_utilheatmap(data)
   }
 
   # MPIBandwidth
   if (data$config$mpibandwidth$active) {
     loginfo("Creating the MPIBandwidth plot")
-    aggStep <- config_value(data$config$mpibandwidth$step, globalAggStep)
-    mpi_out <- data$Variable %>% filter(grepl("mpict", .data$ResourceId), grepl("Out", .data$Type))
-    if ((mpi_out %>% nrow()) == 0) {
-      logwarn("There aren't any information on MPIBandwidth, ignoring it.")
-      data$config$mpibandwidth$active <<- FALSE
-    } else {
-      gomov <- mpi_out %>%
-        var_integration_segment_chart(., ylabel = "MPI\n(MB/s)", step = aggStep, base_size=data$config$base_size, expand=data$config$expand) + tScale
-      if (!data$config$mpibandwidth$legend) {
-        gomov <- gomov + theme(legend.position = "none")
-      }
-      gomov <- userYLimit(gomov, data$config$mpibandwidth$limit, c(tstart, tend))
-    }
+    gomov <- panel_mpibandwidth(data)
   }
 
   # MPI Concurrent
@@ -736,15 +714,7 @@ starvz_plot_list <- function(data = NULL) {
   # MPI State
   if (data$config$mpistate$active) {
     loginfo("Creating the MPI state")
-    if (is.null(data$Comm_state) || (data$Comm_state %>% nrow()) == 0) {
-      logwarn("There aren't any information on MPI, ignoring it.")
-      data$config$mpistate$active <<- FALSE
-    } else {
-      gompistate <- data %>% state_mpi_chart() + tScale
-      if (!data$config$mpistate$legend) {
-        gompistate <- gompistate + theme(legend.position = "none")
-      }
-    }
+    gompistate <- panel_mpistate(data)
   }
 
   # GPUBandwidth

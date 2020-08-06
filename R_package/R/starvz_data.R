@@ -74,6 +74,59 @@ print.starvz_data <- function(x) {
   cat("TODO")
 }
 
+#' Check if all required data is available
+#'
+#' This is check in order and return FALSE if any fail
+#' - If data is not NULL
+#' - If data is a StarVZ Class
+#' - If data has all tables (given by the names of the list tables)
+#' - If each repective table has all columns (given the associated vector)
+#' - Execute extra_func on data (that should return true or false)
+#' @param data starvz_data with trace data
+#' @param tables A named list (names are tables of data) of vectors (elements
+#' are columns), if tables is null continue
+#' @param extra_func Extra function to be applied on data to do a last check
+#' @return Logical, TRUE if data pass all tests
+#' @include starvz_data.R
+#' @examples
+#' #starvz_check_data(data, list("MemoryState" = c("x") ))
+#' @export
+starvz_check_data <- function(data=NULL, tables=list(), extra_func=NULL){
+  caller <- paste0("", deparse(sys.calls()[[sys.nframe()-1]]), ":")
+  if(is.null(data)) stop(paste(caller, "data is NULL"), call. = FALSE)
+  if(class(data)!="starvz_data") stop(paste(caller, "data is not starvz_data"), call. = FALSE)
+  if(!is.null(tables)){
+    if(!is.list(tables)){
+      stop(paste(caller, "tables is not a list"), call. = FALSE)
+    }
+    if(!is.null(names(tables))){
+      if(!all(names(tables) %in% names(data))){
+        stop(paste(caller, "Missing Table:", names(tables)[!names(tables) %in% names(data)]), call. = FALSE)
+      }
+
+      for(table in names(tables)){
+        cols <- tables[[table]]
+        nrows <- data[[table]] %>% nrow()
+        if(is.null(nrows) || nrows == 0){
+            stop(paste(caller, "Table is empty"), call. = FALSE)
+        }
+        if(is.vector(cols))
+        {
+            if(!all(cols %in% names(data[[table]]))){
+                stop(paste(caller, "Missing Column:", cols[!cols %in% names(data[[table]])]), call. = FALSE)
+            }
+        }else{
+          # Cols is not a vector, continue?
+        }
+      }
+    }
+    if(!is.null(extra_func) && !extra_func(data)){
+      stop(paste(caller, "Error on extra_func"), call. = FALSE)
+    }
+  }
+  return(TRUE)
+}
+
 #' Small StarVZ data of LU Factorization
 #'
 #' A small StarVZ data object obtained from Chameleon+StarPU LU Factorization

@@ -13,8 +13,7 @@ panel_mpiconcurrent(
   x_end = data$config$limits$end,
   y_start = 0,
   y_end = data$config$mpiconcurrent$limit,
-  step = data$config$mpiconcurrent$step,
-  total = data$config$mpiconcurrent$total
+  step = data$config$mpiconcurrent$step
 )
 }
 \arguments{
@@ -35,8 +34,6 @@ panel_mpiconcurrent(
 \item{y_end}{Y-axis end value}
 
 \item{step}{time step for aggregation}
-
-\item{total}{show total bandwidth of the execution per resource}
 }
 \value{
 A ggplot object

@@ -41,17 +41,67 @@ geom_mpistates <- function(dfw = NULL, label = "1", expand = 0.05) {
   return(ret)
 }
 
-state_mpi_chart <- function(data = NULL) {
-  if (is.null(data)) stop("data provided to state_chart is NULL")
+#' Create a space time view of MPI controlers
+#'
+#' Create a space time view of MPI controlers
+#'
+#' @param data starvz_data with trace data
+#' @param legend enable/disable legends
+#' @param base_size base_size base font size
+#' @param expand_x expand size for scale_x_continuous padding
+#' @param x_start X-axis start value
+#' @param x_end X-axis end value
+#' @param y_start Y-axis start value
+#' @param y_end Y-axis end value
+#' @return A ggplot object
+#' @include starvz_data.R
+#' @examples
+#' #panel_mpistate(data=starvz_sample_lu)
+#' @export
+panel_mpistate <- function(data = NULL,
+  legend=data$config$mpibandwidth$legend,
+  base_size=data$config$base_size,
+  expand_x=data$config$expand,
+  x_start=data$config$limits$start,
+  x_end=data$config$limits$end,
+  y_start=0,
+  y_end=data$config$mpibandwidth$limit) {
+
+  starvz_check_data(data, tables=list("Comm_state"=c("Node")))
+
+  if(is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start)) ){
+    x_start <- NA
+  }
+
+  if(is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end)) ){
+    x_end <- NA
+  }
+
+  if(is.null(y_start) || (!is.na(y_start) && !is.numeric(y_start)) ){
+    y_start <- NA
+  }
+
+  if(is.null(y_end) || (!is.na(y_end) && !is.numeric(y_end)) ){
+    y_end <- NA
+  }
 
   # Plot
   gow <- ggplot() +
-    default_theme(data$config$base_size, data$config$expand) +
+    default_theme(base_size, expand_x) +
     # Add states and outliers if requested
-    geom_mpistates(data$Comm_state, data$config$mpistate$label, data$config$expand)
+    geom_mpistates(data$Comm_state, data$config$mpistate$label, expand_x) +
+    coord_cartesian(
+        xlim = c(x_start, x_end),
+        ylim = c(0, y_end)
+    )
+
+    if (!legend) {
+      gow <- gow + theme(legend.position = "none")
+    }
 
   return(gow)
 }
+
 concurrent_mpi <- function(data = NULL, out=FALSE) {
   if (is.null(data)) {
     return(NULL)

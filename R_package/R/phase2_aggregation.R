@@ -60,7 +60,7 @@ time_aggregation_do <- function(dfw_agg_prep = NULL, step = NA) {
     na.omit()
 }
 
-time_aggregation_post <- function(dfw = NULL, dfw_agg = NULL) {
+time_aggregation_post <- function(dfw = NULL, dfw_agg = NULL, colors = NULL) {
   if (is.null(dfw)) {
     return(NULL)
   }
@@ -70,12 +70,12 @@ time_aggregation_post <- function(dfw = NULL, dfw_agg = NULL) {
 
   df_ResourceId <- dfw %>%
     select(
-      .data$ResourceId, .data$Type,
+      .data$ResourceId,
       .data$Node, .data$Resource, .data$ResourceType,
       .data$Position, .data$Height
     ) %>%
     unique()
-  df_Task <- dfw %>%
+  df_Task <- colors %>%
     select(.data$Value, .data$Color) %>%
     unique()
 
@@ -104,7 +104,7 @@ node_spatial_aggregation <- function(dfw) {
 }
 
 
-st_time_aggregation <- function(dfw = NULL, StarPU.View = FALSE, step = 100) {
+st_time_aggregation <- function(dfw = NULL, colors = NULL, StarPU.View = FALSE, step = 100) {
   if (is.null(dfw)) {
     return(NULL)
   }
@@ -112,7 +112,7 @@ st_time_aggregation <- function(dfw = NULL, StarPU.View = FALSE, step = 100) {
   dfw_agg_prep <- time_aggregation_prep(dfw %>% select(-.data$Node, -.data$ResourceType))
   dfw_agg <- time_aggregation_do(dfw_agg_prep %>%
     group_by(.data$ResourceId, .data$Task), step)
-  dfwagg_full <- time_aggregation_post(dfw, dfw_agg)
+  dfwagg_full <- time_aggregation_post(dfw, dfw_agg, colors)
 
   # Preparation for visualization (imitate geom_area)
   dfwagg_full %>%
@@ -158,7 +158,7 @@ compute_chunk <- function(Start, End, Duration, Value, JobId, excludeIds = "", s
 aggregate_trace <- function(df_native, states, excludeIds, min_time_pure) {
   df_native <- df_native %>%
     group_by(.data$ResourceId) %>%
-    mutate(Chunk = compute_chunk(.data$Start, .data$End, .data$Duration, .data$Value, .data$JobId, .data$excludeIds, .data$states, .data$min_time_pure))
+    mutate(Chunk = compute_chunk(.data$Start, .data$End, .data$Duration, .data$Value, .data$JobId, excludeIds, states, min_time_pure))
   df_native2 <- df_native %>%
     group_by(.data$ResourceId, .data$Chunk) %>%
     mutate(Start = head(.data$Start, 1), End = tail(.data$End, 1))
@@ -243,7 +243,9 @@ geom_aggregated_states <- function(data = NULL, Show.Outliers = FALSE, min_time_
 
   return(ret)
 }
-st_time_aggregation_vinicius_plot <- function(data = NULL) {
+panel_st_agg_dynamic <- function(data = NULL,
+  x_start=data$config$limits$start,
+  x_end=data$config$limits$end) {
   if (is.null(data)) {
     return(NULL)
   }
@@ -294,7 +296,7 @@ st_time_aggregation_vinicius_plot <- function(data = NULL) {
   if (data$config$st$abe$active) gow <- gow + geom_abe(data)
 
   # add makespan
-  if (data$config$st$makespan) gow <- gow + geom_makespan(data, bsize = data$config$base_size)
+  if (data$config$st$makespan) gow <- gow + geom_makespan(data$Application, bsize = data$config$base_size)
 
   # add idleness
   if (data$config$st$idleness) gow <- gow + geom_idleness(data)
@@ -319,21 +321,50 @@ st_time_aggregation_vinicius_plot <- function(data = NULL) {
   }
 
   loginfo("ViniciusExit Agg")
+
+  gow <- gow +
+    coord_cartesian(xlim = c(x_start, x_end), ylim = c(0, NA))
+
   return(gow)
 }
 
-st_time_aggregation_plot <- function(data = NULL, dfw_agg = NULL, StarPU.View = FALSE) {
+panel_st_agg_static <- function(data = NULL, runtime = FALSE,
+  x_start=data$config$limits$start,
+  x_end=data$config$limits$end,
+  step=data$config$st$aggregation$step) {
+
   if (is.null(data)) {
     return(NULL)
   }
-  if (is.null(dfw_agg)) {
-    return(NULL)
+
+  if(is.null(step) || !is.numeric(step)){
+    if(is.null(data$config$global_agg_step)){
+      agg_step <- 100
+    }else{
+      agg_step <- data$config$global_agg_step
+    }
+  }else{
+      agg_step <- step
+  }
+
+  if(is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start)) ){
+    x_start <- NA
+  }
+
+  if(is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end)) ){
+    x_end <- NA
+  }
+
+  if(runtime){
+      dfw_agg <- st_time_aggregation(data$StarPU, colors=data$Colors, step = agg_step)
+  }else{
+      dfw_agg <- st_time_aggregation(data$Application, colors=data$Colors, step = agg_step)
   }
 
   loginfo("Entry Agg")
 
   # Considering only application or StarPU data
-  if (StarPU.View == FALSE) {
+  if (runtime == FALSE) {
     dfw <- data$Application
   } else {
     dfw <- data$Starpu
@@ -349,9 +380,6 @@ st_time_aggregation_plot <- function(data = NULL, dfw_agg = NULL, StarPU.View = 
   # Calculate resources idleness
   total_time <- tend - tstart
 
-  # Prepare for colors
-  choleskyColors <- extract_colors(dfw)
-
   # yconf
   yconfm <- yconf(dfw, data$config$st$labels)
 
@@ -362,7 +390,7 @@ st_time_aggregation_plot <- function(data = NULL, dfw_agg = NULL, StarPU.View = 
     default_theme() +
     # coord_cartesian(xlim=c(tstart, tend)) +
     xlab("Time [ms]") +
-    scale_fill_manual(values = choleskyColors) +
+    scale_fill_manual(values = extract_colors(dfw, data$Colors)) +
     scale_y_continuous(
       breaks = yconfm$Position,
       labels = yconfm$ResourceId
@@ -387,7 +415,7 @@ st_time_aggregation_plot <- function(data = NULL, dfw_agg = NULL, StarPU.View = 
       ), alpha = 1
     )
 
-  if (!StarPU.View) {
+  if (!runtime) {
     # Y Label
     gow <- gow + ylab("Application Workers")
 
@@ -395,7 +423,7 @@ st_time_aggregation_plot <- function(data = NULL, dfw_agg = NULL, StarPU.View = 
     if (data$config$st$abe$active) gow <- gow + geom_abe(data)
 
     # add makespan
-    if (data$config$st$makespan) gow <- gow + geom_makespan(data, bsize = data$config$base_size)
+    if (data$config$st$makespan) gow <- gow + geom_makespan(data$Application, bsize = data$config$base_size)
 
     # add idleness
     if (data$config$st$idleness) gow <- gow + geom_idleness(data)
@@ -425,6 +453,10 @@ st_time_aggregation_plot <- function(data = NULL, dfw_agg = NULL, StarPU.View = 
     # add some color palette for StarPU States
     gow <- gow + scale_fill_manual(values = starpu_colors())
   }
+
+  gow <- gow +
+    coord_cartesian(xlim = c(x_start, x_end), ylim = c(0, NA))
+
 
   loginfo("Exit Agg")
   return(gow)

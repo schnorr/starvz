@@ -325,11 +325,6 @@ starvz_plot_list <- function(data = NULL) {
   # Define the global aggregation step as 0.1% of the total window
   data$config$global_agg_step <- (data$config$limits$end - data$config$limits$start) * 0.001
 
-  # To be deprecated
-  tstart <- data$config$limits$start
-  tend <- data$config$limits$end
-  globalAggStep <- data$config$global_agg_step
-
   if (!is.null(data$config$selected_nodes)) {
     data$Variable <- data$Variable %>% filter(.data$Node %in% data$config$selected_nodes)
   }
@@ -388,24 +383,7 @@ starvz_plot_list <- function(data = NULL) {
   # SpaceTime
   if (data$config$st$active) {
     loginfo("Creating the Space/Time")
-
-
-    if (data$config$st$aggregation$active) {
-      if (data$config$st$aggregation$method == "lucas") {
-        aggStep <- config_value(data$config$st$aggregation$step, globalAggStep)
-        dfw_agg <- st_time_aggregation(data$Application, step = aggStep)
-        plot_list$st <- data %>% st_time_aggregation_plot(dfw_agg) + coord_cartesian(xlim = c(tstart, tend), ylim = c(0, NA))
-      } else if (data$config$st$aggregation$method == "vinicius") {
-        loginfo("Call vinicius aggregation")
-        plot_list$st <- data %>% st_time_aggregation_vinicius_plot() + coord_cartesian(xlim = c(tstart, tend), ylim = c(0, NA))
-      } else if (data$config$st$aggregation$method == "nodes") {
-        loginfo("Call Node aggregation")
-        plot_list$st <- node_aggregation(data) + coord_cartesian(xlim = c(tstart, tend), ylim = c(0, NA))
-      }
-    } else {
-      plot_list$st <- panel_st_raw(data=data, StarPU.View = FALSE) +
-        coord_cartesian(xlim = c(tstart, tend), ylim = c(0, NA))
-    }
+    plot_list$st <- panel_st(data)
   }
 
   if (data$config$summary_nodes$active) {
@@ -426,15 +404,7 @@ starvz_plot_list <- function(data = NULL) {
   # StarPU SpaceTime
   if (data$config$starpu$active) {
     loginfo("Creating the StarPU Space/Time")
-    if (data$config$starpu$aggregation$active) {
-      loginfo("Will call st_time_aggregation")
-      aggStep <- config_value(data$config$starpu$aggregation$step, globalAggStep)
-      dfw_agg <- st_time_aggregation(data$Starpu, StarPU.View = TRUE, step = aggStep)
-      plot_list$starpu <- data %>% st_time_aggregation_plot(dfw_agg, StarPU.View = TRUE) + coord_cartesian(xlim = c(tstart, tend), ylim = c(0, NA))
-    } else {
-      plot_list$starpu <- panel_st_raw(data=data, StarPU.View = TRUE) +
-        coord_cartesian(xlim = c(tstart, tend), ylim = c(0, NA))
-    }
+    plot_list$starpu <- panel_st_runtime(data)
   }
 
   # KIteration

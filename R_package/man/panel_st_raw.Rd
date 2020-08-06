@@ -23,7 +23,9 @@ panel_st_raw(
   cpb = data$config$st$cpb,
   cpb_mpi = data$config$st$cpb_mpi$active,
   legend = data$config$st$legend,
-  StarPU.View = FALSE
+  x_start = data$config$limits$start,
+  x_end = data$config$limits$end,
+  runtime = FALSE
 )
 }
 \arguments{
@@ -63,7 +65,11 @@ panel_st_raw(
 
 \item{legend}{enable/disable legends}
 
-\item{StarPU.View}{TODO I think we should create a separated function for it}
+\item{x_start}{X-axis start value}
+
+\item{x_end}{X-axis end value}
+
+\item{runtime}{TODO I think we should create a separated function for it}
 }
 \value{
 A ggplot object

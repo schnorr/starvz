@@ -1,5 +1,29 @@
 
 
+panel_st <- function(data){
+  if (data$config$st$aggregation$active) {
+    if (data$config$st$aggregation$method == "lucas") {
+      panel <- panel_st_agg_static(data)
+    } else if (data$config$st$aggregation$method == "vinicius") {
+      panel <- panel_st_agg_dynamic(data)
+    } else if (data$config$st$aggregation$method == "nodes") {
+      panel <- panel_st_agg_node(data)
+    }
+  } else {
+    panel <- panel_st_raw(data=data, runtime = FALSE)
+  }
+  return(panel)
+}
+
+panel_st_runtime <- function(data){
+  if (data$config$starpu$aggregation$active) {
+    panel <- panel_st_agg_static(data, runtime = TRUE, step=data$config$starpu$aggregation$step)
+  } else {
+    panel <- panel_st_raw(data=data, runtime = TRUE)
+  }
+  return(panel)
+}
+
 #' Create a space time visualization as a Gantt chart
 #'
 #' Use the Application trace data to plot the task computations by ResourceId
@@ -22,7 +46,9 @@
 #' @param pmtoolbounds enable/disable pmtool theoretical bounds
 #' @param cpb enable/disable critical path bound makespan metric
 #' @param cpb_mpi enable/disable critical path bound makespan considering MPI
-#' @param StarPU.View TODO I think we should create a separated function for it
+#' @param runtime TODO I think we should create a separated function for it
+#' @param x_start X-axis start value
+#' @param x_end X-axis end value
 #' @param legend enable/disable legends
 #' @return A ggplot object
 #' @include starvz_data.R
@@ -34,7 +60,9 @@ panel_st_raw <- function(data = NULL, ST.Outliers=data$config$st$outliers, base_
   labels=data$config$st$labels, alpha=data$config$st$alpha, idleness=data$config$st$idleness,
   taskdeps=data$config$st$tasks$active, tasklist=data$config$st$tasks$list, levels=data$config$st$tasks$levels,
   makespan=data$config$st$makespan, abe=data$config$st$abe$active, pmtoolbounds=data$config$pmtool$bounds$active,
-  cpb=data$config$st$cpb, cpb_mpi=data$config$st$cpb_mpi$active, legend=data$config$st$legend, StarPU.View = FALSE) {
+  cpb=data$config$st$cpb, cpb_mpi=data$config$st$cpb_mpi$active, legend=data$config$st$legend,
+  x_start=data$config$limits$start,
+  x_end=data$config$limits$end, runtime = FALSE) {
 
 #ST.Outliers = TRUE, base_size=22, expand_x=0.05,
 #  expand_y=0.05, selected_nodes = NULL, labels="ALL", alpha=0.25, idleness=TRUE,
@@ -43,9 +71,17 @@ panel_st_raw <- function(data = NULL, ST.Outliers=data$config$st$outliers, base_
 
   if (is.null(data)) stop("data provided to state_chart is NULL")
 
-  # Obtain time interval
-  tstart <- data$Application$Start %>% min()
-  tend <- data$Application$End %>% max()
+  if(is.null(expand_x) || !is.numeric(expand_x)){
+    expand_x <- 0.05
+  }
+
+  if(is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start)) ){
+    x_start <- NA
+  }
+
+  if(is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end)) ){
+    x_end <- NA
+  }
 
   # Plot
   gow <- ggplot() +
@@ -60,7 +96,7 @@ panel_st_raw <- function(data = NULL, ST.Outliers=data$config$st$outliers, base_
       arrange(.data$Position) %>%
       mutate(New = cumsum(lag(.data$Height, default = 0))) %>%
       select(.data$Parent, .data$New) -> new_y
-    if (StarPU.View) {
+    if (runtime) {
       data$Starpu <- data$Starpu %>%
         left_join(new_y, by = c("ResourceId" = "Parent")) %>%
         mutate(Position = if_else(is.na(.data$New), -3, .data$New)) %>%
@@ -77,9 +113,9 @@ panel_st_raw <- function(data = NULL, ST.Outliers=data$config$st$outliers, base_
   }
 
   # Add states and outliers if requested
-  if (StarPU.View) {
+  if (runtime) {
     gow <- gow + geom_states(data$Starpu,
-      ST.Outliers, StarPU.View, data$Colors,
+      ST.Outliers, runtime, data$Colors,
       labels = labels,
       expand = expand_y,
       rect_outline = data$config$st$rect_outline,
@@ -87,7 +123,7 @@ panel_st_raw <- function(data = NULL, ST.Outliers=data$config$st$outliers, base_
     )
   } else {
     gow <- gow + geom_states(App,
-      ST.Outliers, StarPU.View, data$Colors,
+      ST.Outliers, runtime, data$Colors,
       labels = labels,
       expand = expand_y,
       rect_outline = data$config$st$rect_outline,
@@ -95,7 +131,7 @@ panel_st_raw <- function(data = NULL, ST.Outliers=data$config$st$outliers, base_
     )
   }
 
-  if (!StarPU.View) {
+  if (!runtime) {
 
     # add idleness
     if (idleness) gow <- gow + geom_idleness(data)
@@ -133,6 +169,9 @@ panel_st_raw <- function(data = NULL, ST.Outliers=data$config$st$outliers, base_
   if(!legend) {
     gow <- gow + theme(legend.position = "none")
   }
+
+  gow <- gow +
+    coord_cartesian(xlim = c(x_start, x_end), ylim = c(0, NA))
 
   return(gow)
 }
@@ -246,7 +285,29 @@ geom_path_highlight <- function(paths = NULL) {
   return(ret)
 }
 
-node_aggregation <- function(data) {
+panel_st_agg_node <- function(data,
+  x_start=data$config$limits$start,
+  x_end=data$config$limits$end,
+  step=data$config$st$aggregation$step) {
+
+  if(is.null(step) || !is.numeric(step)){
+    if(is.null(data$config$global_agg_step)){
+      agg_step <- 100
+    }else{
+      agg_step <- data$config$global_agg_step
+    }
+  }else{
+      agg_step <- step
+  }
+
+  if(is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start)) ){
+    x_start <- NA
+  }
+
+  if(is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end)) ){
+    x_end <- NA
+  }
+
   step <- 100
   df <- time_aggregation_prep(data$Application)
   df <- time_aggregation_do(df %>%
@@ -349,6 +410,10 @@ node_aggregation <- function(data) {
       new_state_plot <- new_state_plot + geom_cpb_internal(df.spatial_prep, cpbmpit, "CPB-MPI*:", bsize = data$config$base_size)
     }
   }
+
+  new_state_plot <- new_state_plot +
+    coord_cartesian(xlim = c(x_start, x_end), ylim = c(0, NA))
+
 
   return(new_state_plot)
 }

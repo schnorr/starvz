@@ -32,4 +32,12 @@ test_that("starvz_plot works", {
  other_data <- starvz_read(system.file("extdata", "lu_trace", package = "starvz"), system.file("extdata", "config.yaml", package = "starvz"))
  result <- all.equal(nrow(other_data$Application), nrow(starvz_sample_lu$Application))
  expect_equal(result, TRUE)
+
+ other_data <- starvz_phase1_read_write(system.file("extdata", "qr_trace", package = "starvz"), qrmumps_colors, state_filter=1, whichApplication="qrmumps")
+ other_data <- starvz_read(system.file("extdata", "qr_trace", package = "starvz"), system.file("extdata", "qr.yaml", package = "starvz"))
+ pl <- starvz_plot(other_data)
+ expect_equal(class(pl),c("patchwork", "gg", "ggplot"))
+
+ other_data <- starvz_read(system.file("extdata", "lu_trace", package = "starvz"), system.file("extdata", "config.yaml", package = "starvz"))
+
 })

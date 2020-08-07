@@ -1,0 +1,14 @@
+matfile       '/scratch/mmiletto//matrices/TF16.mtx'
+qrm_ounit     6
+qrm_eunit     6
+qrm_dunit     0
+qrm_ordering  5
+qrm_mb        640
+qrm_nb        640
+qrm_ib        64
+qrm_bh        0
+qrm_keeph     0
+nrhs          1
+qrm_rhsnb     1
+qrm_mem_relax 1
+end

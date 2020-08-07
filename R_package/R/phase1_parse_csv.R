@@ -202,8 +202,10 @@ read_worker_csv <- function(where = ".",
       model <- lm(Duration ~ GFlop, data = df)
     }
 
-    if (file.exists("conf.txt")) {
-      ib <- as.integer(gsub("\\D", "", c(grep("qrm_ib", readLines("conf.txt"), value = TRUE))))
+    conf <- file.path(where, "conf.txt")
+
+    if (file.exists(conf)) {
+      ib <- as.integer(gsub("\\D", "", c(grep("qrm_ib", readLines(conf), value = TRUE))))
     } else {
       stop(paste("File conf.txt do not exist!"))
     }

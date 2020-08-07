@@ -65,7 +65,7 @@ default:
     tasks: # Shows Tasks Dependencies
       active: TRUE # Enable
       levels: 100 # Max Number of Dependencies
-      list: ["1_493"] # List of Tasks Ids
+      list: ["1_308"] # List of Tasks Ids
 
   pmtool: # Create plots based on pmtool generated data
     bounds: # Shows pmtool theoretical bounds
@@ -83,7 +83,7 @@ default:
   summary_nodes:
     active: TRUE
   memory:
-    combined: FALSE
+    combined: TRUE
     state:
       active: TRUE
       border: FALSE

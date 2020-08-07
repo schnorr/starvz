@@ -63,9 +63,8 @@ panel_memory_state <- function(data = NULL,
   # Add states and outliers if requested
   gow <- gow + geom_events(data, dfwapp, combined = combined, tstart = x_start, tend = x_end)
   if (combined) {
-    gow <- gow + geom_links(data,
+    gow <- gow + geom_links(data, dfwapp,
       combined = TRUE, tstart = x_start, tend = x_end,
-      state_height = data$config$state$height,
       arrow_active = data$config$memory$transfers$arrow,
       border_active = data$config$memory$transfers$border,
       total_active = data$config$memory$transfers$total
@@ -208,9 +207,8 @@ geom_events <- function(main_data = NULL, data = NULL,
   return(ret)
 }
 
-geom_links <- function(data = NULL, combined = FALSE,
+geom_links <- function(data = NULL, dfw = NULL, combined = FALSE,
                        tstart = NULL, tend = NULL,
-                       state_height = 1,
                        arrow_active = FALSE,
                        border_active = FALSE,
                        total_active = FALSE) {
@@ -223,19 +221,29 @@ geom_links <- function(data = NULL, combined = FALSE,
 
   loginfo("Starting geom_links")
 
-  col_pos <- as.tibble(data.frame(ResourceId = unique(dfl$Dest)) %>% arrange(.data$ResourceId) %>% rowid_to_column("Position"))
-  col_pos[2] <- data.frame(lapply(col_pos[2], as.character), stringsAsFactors = FALSE)
+  #TODO MPI HERE
+  col_pos_1 <- data.frame(Container = unique(dfl$Dest)) %>%
+    arrange(.data$Container) %>%
+    rowid_to_column("Position")
 
-  if (combined) {
-    col_pos$Position <- col_pos$Position * state_height
+  col_pos_2 <- data.frame(Container = unique(dfw$Container)) %>%
+    arrange(.data$Container) %>%
+    rowid_to_column("Position")
+
+  if (nrow(col_pos_1) > nrow(col_pos_2)) {
+    col_pos <- col_pos_1
+  } else {
+    col_pos <- col_pos_2
   }
+
+  col_pos[2] <- data.frame(lapply(col_pos[2], as.character), stringsAsFactors = FALSE)
 
   ret <- list()
 
   dfl <- dfl %>%
-    left_join(col_pos, by = c("Origin" = "ResourceId")) %>%
+    left_join(col_pos, by = c("Origin" = "Container")) %>%
     rename(O_Position = .data$Position) %>%
-    left_join(col_pos, by = c("Dest" = "ResourceId")) %>%
+    left_join(col_pos, by = c("Dest" = "Container")) %>%
     rename(D_Position = .data$Position)
   stride <- 0.3
 
@@ -252,7 +260,6 @@ geom_links <- function(data = NULL, combined = FALSE,
   yconfm$Origin <- lapply(yconfm$Origin, function(x) gsub("MEMMANAGER", "MM", x))
 
   if (combined) {
-    stride <- stride * state_height
     ret[[length(ret) + 1]] <- scale_y_continuous(breaks = yconfm$O_Position, labels = yconfm$Origin, expand = c(0.10, 0.1))
     stride <- 0.0
   }
@@ -283,7 +290,7 @@ geom_links <- function(data = NULL, combined = FALSE,
       aes(x = .data$Start, xend = .data$End, y = .data$O_Position, yend = .data$D_Position), arrow = arrow_g, alpha = 0.5, size = 1.5, color = "black"
     )
   }
-
+  
   ret[[length(ret) + 1]] <- geom_segment(data = dfl, aes(
     x = .data$Start, xend = .data$End,
     y = .data$O_Position, yend = .data$D_Position, color = .data$Origin
@@ -541,7 +548,27 @@ pre_handle_gantt <- function(data, name_func = NULL) {
   ))
 }
 
-handles_gantt <- function(data, JobId = NA, lines = NA, lHandle = NA) {
+#' Create a space time visualization of data handles
+#'
+#' Visualizate data handles movement
+#' To accelerate the process:
+#' data$handle_states <- handles_presence_states(data)
+#' data$handle_gantt_data <- pre_handle_gantt(data)
+#' To Select time:
+#' handles_gantt(data, JobId=c(jobid))
+#' snap_data <- pre_snap(data, data$handle_states)
+#' memory_snap(snap_data, 1000, tasks_size=200, step=1)
+#'
+#' @param data starvz_data with trace data
+#' @param JobId Select handles of jobid
+#' @param lines vertical lines
+#' @param lHandle select handles
+#' @return A ggplot object
+#' @include starvz_data.R
+#' @examples
+#' panel_handles(data=starvz_sample_lu)
+#' @export
+panel_handles <- function(data, JobId = NA, lines = NA, lHandle = NA) {
   if (is.null(data$handle_gantt_data)) {
     data$handle_gantt_data <- pre_handle_gantt(data)
   }
@@ -756,39 +783,70 @@ pre_snap <- function(data, f_data) {
   data$Application %>%
     mutate(JobId = .data$JobId) %>%
     inner_join(data$Tasks, by = c("JobId" = "JobId")) %>%
-    select(.data$Start, .data$End, .data$Value, .data$JobId, .data$MemoryNode, .data$MPIRank, .data$Color) %>%
+    select(.data$Start, .data$End, .data$Value, .data$JobId, .data$MemoryNode, .data$MPIRank) %>%
     inner_join(data$Task_handles, by = c("JobId" = "JobId")) %>%
     mutate(Container = ifelse(.data$MPIRank >= 0, paste0(.data$MPIRank, "_MEMMANAGER", .data$MemoryNode), paste0("MEMMANAGER", .data$MemoryNode))) %>%
-    select(.data$Handles, .data$Modes, .data$Start, .data$End, .data$Value, .data$JobId, .data$Container, .data$Color) -> tasks
+    select(.data$Handles, .data$Modes, .data$Start, .data$End, .data$Value, .data$JobId, .data$Container) -> tasks
 
   return(list(d_presence, hand, tasks))
 }
 
-memory_snap <- function(data, selected_time, step, tasks_size = 30) {
-  data[[3]] %>%
-    select(.data$Value, .data$Color) %>%
-    distinct() -> c_info
+#' Create a snapshot of memory
+#'
+#' Visualizate memory in a specific time
+#' To accelerate the process:
+#' data$handle_states <- handles_presence_states(data)
+#' data$handle_gantt_data <- pre_handle_gantt(data)
+#' To Select time:
+#' handles_gantt(data, JobId=c(jobid))
+#' snap_data <- pre_snap(data, data$handle_states)
+#' memory_snap(snap_data, 1000, tasks_size=200, step=1)
+#'
+#' @param data starvz_data with trace data
+#' @param selected_time time
+#' @param step for discreate events
+#' @param tasks_size size of tasks in the visualization
+#' @return A ggplot object
+#' @include starvz_data.R
+#' @examples
+#' panel_memory_snap(data=starvz_sample_lu, 100, 10)
+#' @export
+panel_memory_snap <- function(data, selected_time, step, tasks_size = 30) {
 
-  colors <- c("darksalmon", "steelblue1")
+  if (is.null(data$handle_states)) {
+    data$handle_states <- handles_presence_states(data)
+  }
 
-  colors <- c(colors, c_info$Color)
+  if (is.null(data$pre_snap)) {
+    data$pre_snap <- pre_snap(data, data$handle_states)
+  }
 
-  c_names <- c("Owner", "Shared")
-  c_names <- c(c_names, c_info$Value)
+  extra <- c(
+    "Owner" = "darksalmon",
+    "Shared" = "steelblue1"
+  )
 
-  data[[1]] %>%
+  data$Colors %>% select(.data$Value, .data$Color) -> lc
+
+  lc %>%
+    .$Color %>%
+    setNames(lc %>% .$Value) -> fc
+
+  fills <- append(fc, extra)
+
+  data$pre_snap[[1]] %>%
     filter(.data$Start < selected_time, .data$End > selected_time) %>%
-    right_join(data[[2]], by = c("Value" = "Handle", "Container" = "Container")) -> d_presence
+    right_join(data$pre_snap[[2]], by = c("Value" = "Handle", "Container" = "Container")) -> d_presence
 
-  task_presence <- data[[3]] %>%
+  task_presence <- data$pre_snap[[3]] %>%
     filter(.data$Start <= selected_time, .data$End >= selected_time) %>%
-    inner_join(data[[2]], by = c("Handles" = "Handle", "Container" = "Container"))
+    inner_join(data$pre_snap[[2]], by = c("Handles" = "Handle", "Container" = "Container"))
 
-  task_presence_alpha <- data[[3]] %>%
+  task_presence_alpha <- data$pre_snap[[3]] %>%
     filter(.data$Start > selected_time - step, .data$End <= selected_time) %>%
-    inner_join(data[[2]], by = c("Handles" = "Handle", "Container" = "Container"))
+    inner_join(data$pre_snap[[2]], by = c("Handles" = "Handle", "Container" = "Container"))
 
-  max_x <- data[[2]] %>%
+  max_x <- data$pre_snap[[2]] %>%
     arrange(-.data$X) %>%
     slice(1) %>%
     .$X %>%
@@ -826,8 +884,8 @@ memory_snap <- function(data, selected_time, step, tasks_size = 30) {
       guide = guide_legend(title.position = "top")
     ) +
     scale_fill_manual(
-      name = "State", values = colors, drop = FALSE,
-      limits = c_names,
+      name = "State", values = fills, drop = FALSE,
+      limits = names(fills),
       guide = guide_legend(
         title.position = "top", override.aes =
           list(shape = NA, stroke = 1)
@@ -852,24 +910,14 @@ memory_snap <- function(data, selected_time, step, tasks_size = 30) {
   return(p)
 }
 
-multiple_snaps <- function(snap_data, start, end, step, path) {
+multiple_snaps <- function(data, start, end, step, path) {
   se <- seq(start, end, step)
   se <- c(se, end)
   i <- 1
   for (time in se) {
-    p <- memory_snap(snap_data, time, step, tasks_size = 40)
+    p <- panel_memory_snap(data, time, step, tasks_size = 40)
     p <- p + ggtitle(paste0("Time: ", as.character(time)))
     ggsave(paste0(path, i, ".png"), plot = p, scale = 4, width = 4, height = 3, units = "cm")
     i <- i + 1
   }
-}
-
-handles_help <- function() {
-  print("To accelerate the process:")
-  print("data$handle_states <- handles_presence_states(data)")
-  print("data$handle_gantt_data <- pre_handle_gantt(data)")
-  print("To Select time:")
-  print("handles_gantt(data, JobId=c(jobid)) + coord_cartesian(xlim=c(start, end))")
-  print("snap_data <- pre_snap(data, data$handle_states)")
-  print("memory_snap(snap_data, 1000, tasks_size=200, step=1)")
 }

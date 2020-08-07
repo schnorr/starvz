@@ -33,6 +33,11 @@ lu_colors <- function() {
   )
 }
 
+#' Colors for lu
+#'
+#' This will be deprecated
+#'
+#' @export
 cholesky_colors <- function() {
   tibble(
     Kernel = c("potrf", "trsm", "syrk", "gemm", "plgsy"),
@@ -119,11 +124,11 @@ qrmumps_colors <- function() {
     Kernel = c("geqrt", "gemqrt", "tpqrt", "tpmqrt", "block_extadd",                           # qrm new
                "lapack_geqrt", "lapack_gemqrt", "lapack_tpqrt", "lapack_tpmqrt", "block_copy", # qrm older
                "do_subtree", "init_block", "clean_block", "init_front", "clean_front"),
-    Color = c("#FF7F00", "#377EB8", "#F781BF", "#A65628", "#E41A1C", 
+    Color = c("#FF7F00", "#377EB8", "#F781BF", "#A65628", "#E41A1C",
               "#FF7F00", "#377EB8", "#F781BF", "#A65628", "#E41A1C",
               "#4DAF4A", "#FFFF33", "#984EA3", "#FFFF33", "#984EA3"),
     Use = c(TRUE, TRUE, TRUE, TRUE, TRUE,
-            TRUE, TRUE, TRUE, TRUE, TRUE, 
+            TRUE, TRUE, TRUE, TRUE, TRUE,
             TRUE, TRUE, TRUE, TRUE, TRUE)
   )
 }

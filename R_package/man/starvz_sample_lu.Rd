@@ -5,7 +5,7 @@
 \alias{starvz_sample_lu}
 \title{Small StarVZ data of LU Factorization}
 \format{
-An object of class \code{starvz_data} of length 21.
+An object of class \code{starvz_data} of length 24.
 }
 \source{
 Chameleon+StarPU

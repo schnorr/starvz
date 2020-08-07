@@ -634,7 +634,7 @@ pmtool_states_csv_parser <- function(where = ".", whichApplication = NULL, Y = N
 
     pm <- separate(data = pm, col = .data$JobId, into = c("JobId", "Tag"), sep = "\\:")
 
-    fileName <- "platform_file.rec"
+    fileName <- paste0(where, "/platform_file.rec")
     conn <- file(fileName, open = "r")
     linn <- readLines(conn)
 

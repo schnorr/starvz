@@ -33,6 +33,10 @@ panel_kiteration <- function(data = NULL,
     middle_lines <- NULL
   }
 
+  if(is.null(legend) || !is.logical(legend)){
+    legend <- TRUE
+  }
+
   if(is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start)) ){
     x_start <- NA
   }

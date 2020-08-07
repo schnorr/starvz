@@ -1,0 +1,52 @@
+%rec: worker_count
+
+Architecture: cpu0
+NbWorkers: 19
+
+%rec: memory_workers
+
+MemoryNode: 0
+Name: NUMA 0
+Size: 33542934528
+Workers: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18
+
+%rec: memory_performance
+
+%rec: timing
+
+Model: dplrnt
+Architecture: cpu0
+Footprint: 87dba6c6
+Size: 7372800
+Flops: 0.000000e+00   
+Mean: 5.076191e+03   
+Stddev: 2.483079e+02   
+Samples: 4999
+
+Model: dgetrf_nopiv
+Architecture: cpu0
+Footprint: 87dba6c6
+Size: 7372800
+Flops: 0.000000e+00   
+Mean: 2.573344e+04   
+Stddev: 2.657680e+03   
+Samples: 43
+
+Model: dtrsm
+Architecture: cpu0
+Footprint: e9dc7d8b
+Size: 14745600
+Flops: 0.000000e+00   
+Mean: 3.526222e+04   
+Stddev: 2.780618e+03   
+Samples: 2482
+
+Model: dgemm
+Architecture: cpu0
+Footprint: 9ade6b37
+Size: 22118400
+Flops: 0.000000e+00   
+Mean: 5.834976e+04   
+Stddev: 3.810451e+03   
+Samples: 41164
+

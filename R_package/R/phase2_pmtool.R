@@ -9,6 +9,9 @@ panel_pmtool_st <- function(data = NULL,
 
   starvz_check_data(data, tables=list("Pmtool_states"=c("Value", "sched")))
 
+  if(is.null(legend) || !is.logical(legend)){
+    legend <- TRUE
+  }
 
     if(is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start)) ){
       x_start <- NA
@@ -66,6 +69,10 @@ panel_pmtool_kiteration <- function(data = NULL,
   x_end=data$config$limits$end) {
 
   starvz_check_data(data, tables=list("Pmtool_states"=c("Value", "sched", "Iteration")))
+
+  if(is.null(legend) || !is.logical(legend)){
+    legend <- TRUE
+  }
 
   if(is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start)) ){
     x_start <- NA
@@ -130,7 +137,7 @@ panel_pmtool_kiteration <- function(data = NULL,
     if (!legend) {
       goijk <- goijk + theme(legend.position = "none")
     }else{
-      goijk <- goijk + theme(legend.spacing.x = unit(0.2, "cm"))
+      goijk <- goijk + theme(legend.position = "top")
     }
   return(goijk)
 }

@@ -1,6 +1,4 @@
 starvz\.Rproj
-extdata/*
-exttest/*
 \.gitignore
 \.travis\.yml
 codecov\.yml
@@ -10,3 +8,5 @@ INSTALL\.org
 LICENSE
 PHASE1\.org
 README\.org
+^extra_data$
+^extra_test$

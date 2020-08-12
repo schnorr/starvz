@@ -11,8 +11,5 @@ apt_packages:
 
 cache: packages
 
-before_install:
-  - cd R_package
-
 after_success:
   - Rscript -e 'library(covr); codecov()'

@@ -1,5 +1,4 @@
-fixes:
-  - "::R_package/"         # move root
+
 coverage:
   status:
     project:

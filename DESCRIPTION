@@ -2,9 +2,9 @@ Package: starvz
 Title: R-based visualization techniques for task-based applications
 Version: 0.2.0
 Authors@R: as.person(c(
-    "Lucas Mello Schnorr <schnorr@inf.ufrgs.br> [aut, cre]",
+    "Lucas Mello Schnorr <schnorr@inf.ufrgs.br> [aut]",
     "Vinicius Garcia Pinto <vgpinto@inf.ufrgs.br> [aut]",
-    "Lucas Leandro Nesi <llnesi@inf.ufrgs.br> [aut]",
+    "Lucas Leandro Nesi <lucas.nesi@inf.ufrgs.br> [aut, cre]",
     "Marcelo Cogo Miletto <marcelo.miletto@inf.ufrgs.br> [aut]",
     "Guilherme Alles <galles@inf.ufrgs.br> [ctb]"
   ))

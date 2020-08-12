@@ -85,3 +85,7 @@ while true; do
 done
 
 # Process, lets check if all we need is here
+pushd $STARVZ_HOME/src/
+./phase1-workflow.sh $1 $2
+popd
+$STARVZ_HOME/R/phase2-workflow.R $1 $3

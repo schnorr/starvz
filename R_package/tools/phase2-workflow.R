@@ -36,6 +36,6 @@ cat("StarVZ - Phase 2 - Start\n", file = stdout())
 
 data <- starvz_read(directory, config_file);
 
-starvz_plot(data, name, save=TRUE)
+p <- starvz_plot(data, name, save=TRUE)
 
 cat("End of StarVZ - Phase 2\n", file = stdout())

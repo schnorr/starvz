@@ -185,7 +185,7 @@ fi
 
 echo "Post-processing CSV files"
 date "+%a %d %b %Y %H:%M:%S %Z"
-${DIR}/../R/phase1-workflow.R . ${APPLICATION} ${3:-}
+phase1-workflow.R . ${APPLICATION} ${3:-}
 es=$?
 if [ $es -ne 0 ]
 then

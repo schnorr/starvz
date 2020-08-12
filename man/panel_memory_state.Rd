@@ -36,5 +36,5 @@ A ggplot object
 Show memory events
 }
 \examples{
-panel_ready(data=starvz_sample_lu)
+panel_ready(data = starvz_sample_lu)
 }

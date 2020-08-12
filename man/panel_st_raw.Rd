@@ -79,5 +79,5 @@ Use the Application trace data to plot the task computations by ResourceId
 over the execution time.
 }
 \examples{
-panel_st_raw(data=starvz_sample_lu)
+panel_st_raw(data = starvz_sample_lu)
 }

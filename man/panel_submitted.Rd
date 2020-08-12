@@ -43,5 +43,5 @@ Use the Variable traces to create a line chart panel with submmited tasks
 submission per node, aggregated by a configurable time step
 }
 \examples{
-panel_submitted(data=starvz_sample_lu)
+panel_submitted(data = starvz_sample_lu)
 }

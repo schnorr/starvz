@@ -31,5 +31,5 @@ Use starvz_data Application and Atree to create a plot that shows the
 total resource utilization, painted by tree depth level using geom_ribbon
 }
 \examples{
-#panel_utiltreedepth(data, step=100, legend=TRUE)
+# panel_utiltreedepth(data, step=100, legend=TRUE)
 }

@@ -33,5 +33,5 @@ A ggplot object
 Bar plot with makespan and abe per node
 }
 \examples{
-panel_ready(data=starvz_sample_lu)
+panel_ready(data = starvz_sample_lu)
 }

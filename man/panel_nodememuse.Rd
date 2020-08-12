@@ -31,5 +31,5 @@ Use starvz_data to create a line plot of the memory usage in MB of
 active nodes along the application execution time
 }
 \examples{
-#panel_nodememuse(data$Application, step=100)
+# panel_nodememuse(data$Application, step=100)
 }

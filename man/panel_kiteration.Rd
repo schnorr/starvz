@@ -39,5 +39,5 @@ A ggplot object
 Plot iteraionts Y over Time X
 }
 \examples{
-panel_ready(data=starvz_sample_lu)
+panel_ready(data = starvz_sample_lu)
 }

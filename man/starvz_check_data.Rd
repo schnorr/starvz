@@ -26,5 +26,5 @@ This is check in order and return FALSE if any fail
 - Execute extra_func on data (that should return true or false)
 }
 \examples{
-#starvz_check_data(data, list("MemoryState" = c("x") ))
+# starvz_check_data(data, list("MemoryState" = c("x") ))
 }

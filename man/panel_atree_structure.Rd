@@ -17,5 +17,5 @@ Use Atree and Application data to create the elimination tree
 strucutre plot in a ggplot object and return it
 }
 \examples{
-#panel_atree_structure(data)
+# panel_atree_structure(data)
 }

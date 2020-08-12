@@ -1,2 +1,12 @@
-starvz.Rproj
-^\.Rproj\.user$     # used for temporary files.
+starvz\.Rproj
+extdata/*
+exttest/*
+\.gitignore
+\.travis\.yml
+codecov\.yml
+DEV\.org
+Dockerfile
+INSTALL\.org
+LICENSE
+PHASE1\.org
+README\.org

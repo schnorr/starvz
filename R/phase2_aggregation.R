@@ -244,8 +244,8 @@ geom_aggregated_states <- function(data = NULL, Show.Outliers = FALSE, min_time_
   return(ret)
 }
 panel_st_agg_dynamic <- function(data = NULL,
-  x_start=data$config$limits$start,
-  x_end=data$config$limits$end) {
+                                 x_start = data$config$limits$start,
+                                 x_end = data$config$limits$end) {
   if (is.null(data)) {
     return(NULL)
   }
@@ -329,36 +329,35 @@ panel_st_agg_dynamic <- function(data = NULL,
 }
 
 panel_st_agg_static <- function(data = NULL, runtime = FALSE,
-  x_start=data$config$limits$start,
-  x_end=data$config$limits$end,
-  step=data$config$st$aggregation$step) {
-
+                                x_start = data$config$limits$start,
+                                x_end = data$config$limits$end,
+                                step = data$config$st$aggregation$step) {
   if (is.null(data)) {
     return(NULL)
   }
 
-  if(is.null(step) || !is.numeric(step)){
-    if(is.null(data$config$global_agg_step)){
+  if (is.null(step) || !is.numeric(step)) {
+    if (is.null(data$config$global_agg_step)) {
       agg_step <- 100
-    }else{
+    } else {
       agg_step <- data$config$global_agg_step
     }
-  }else{
-      agg_step <- step
+  } else {
+    agg_step <- step
   }
 
-  if(is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start)) ){
+  if (is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start))) {
     x_start <- NA
   }
 
-  if(is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end)) ){
+  if (is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end))) {
     x_end <- NA
   }
 
-  if(runtime){
-      dfw_agg <- st_time_aggregation(data$StarPU, colors=data$Colors, step = agg_step)
-  }else{
-      dfw_agg <- st_time_aggregation(data$Application, colors=data$Colors, step = agg_step)
+  if (runtime) {
+    dfw_agg <- st_time_aggregation(data$StarPU, colors = data$Colors, step = agg_step)
+  } else {
+    dfw_agg <- st_time_aggregation(data$Application, colors = data$Colors, step = agg_step)
   }
 
   loginfo("Entry Agg")

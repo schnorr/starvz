@@ -1,16 +1,15 @@
 #' @include starvz_data.R
 
 panel_lackready <- function(data = NULL,
-                              x_start=data$config$limits$start,
-                              x_end=data$config$limits$end) {
+                            x_start = data$config$limits$start,
+                            x_end = data$config$limits$end) {
+  starvz_check_data(data, tables = list("Starpu" = c("Node"), "Variable" = c("Type")))
 
-  starvz_check_data(data, tables=list("Starpu"=c("Node"), "Variable"=c("Type")))
-
-  if(is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start)) ){
+  if (is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start))) {
     x_start <- NA
   }
 
-  if(is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end)) ){
+  if (is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end))) {
     x_end <- NA
   }
 
@@ -46,10 +45,10 @@ panel_lackready <- function(data = NULL,
     default_theme(data$config$base_size, data$config$expand) +
     geom_lackready() +
     coord_cartesian(
-        xlim = c(x_start, x_end)
+      xlim = c(x_start, x_end)
     ) -> panel
 
-    return(panel)
+  return(panel)
 }
 
 geom_lackready <- function() {

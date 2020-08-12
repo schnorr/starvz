@@ -12,32 +12,32 @@
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
-#' panel_ready(data=starvz_sample_lu)
+#' panel_ready(data = starvz_sample_lu)
 #' @export
-panel_node_summary <- function(data, legend=data$config$summary_nodes$legend,
-  base_size=data$config$base_size,
-  expand_x=data$config$expand,
-  x_start=data$config$limits$start,
-  x_end=data$config$limits$end){
+panel_node_summary <- function(data, legend = data$config$summary_nodes$legend,
+                               base_size = data$config$base_size,
+                               expand_x = data$config$expand,
+                               x_start = data$config$limits$start,
+                               x_end = data$config$limits$end) {
 
   ## Check for non-valid arguments
-  if(is.null(legend) || !is.logical(legend)){
+  if (is.null(legend) || !is.logical(legend)) {
     legend <- TRUE
   }
 
-  if(is.null(base_size) || !is.numeric(base_size)){
+  if (is.null(base_size) || !is.numeric(base_size)) {
     base_size <- 22
   }
 
-  if(is.null(expand_x) || !is.numeric(expand_x)){
+  if (is.null(expand_x) || !is.numeric(expand_x)) {
     expand_x <- 0.05
   }
 
-  if(is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start)) ){
+  if (is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start))) {
     x_start <- NA
   }
 
-  if(is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end)) ){
+  if (is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end))) {
     x_end <- NA
   }
 
@@ -78,13 +78,13 @@ panel_node_summary <- function(data, legend=data$config$summary_nodes$legend,
       expand = c(expand_x, 0)
     ) +
     geom_col(width = 0.8, orientation = "y") -> splot
-    if(legend){
-      splot <- splot + theme(legend.position = "none")
-    }
+  if (legend) {
+    splot <- splot + theme(legend.position = "none")
+  }
 
-  splot <- splot  +
-  coord_cartesian(
+  splot <- splot +
+    coord_cartesian(
       xlim = c(x_start, x_end)
-  )
+    )
   return(splot)
 }

@@ -14,18 +14,17 @@
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
-#' panel_ready(data=starvz_sample_lu)
+#' panel_ready(data = starvz_sample_lu)
 #' @export
 panel_kiteration <- function(data = NULL,
-  middle_lines = data$config$kiteration$middlelines,
-  base_size=data$config$base_size,
-  expand_x=data$config$expand,
-  legend=data$config$ready$legend,
-  x_start=data$config$limits$start,
-  x_end=data$config$limits$end,
-  per_node = data$config$kiteration$pernode) {
-
-  starvz_check_data(data, tables=list("Application"=c("Iteration")))
+                             middle_lines = data$config$kiteration$middlelines,
+                             base_size = data$config$base_size,
+                             expand_x = data$config$expand,
+                             legend = data$config$ready$legend,
+                             x_start = data$config$limits$start,
+                             x_end = data$config$limits$end,
+                             per_node = data$config$kiteration$pernode) {
+  starvz_check_data(data, tables = list("Application" = c("Iteration")))
 
   dfw <- data$Application
 
@@ -33,15 +32,15 @@ panel_kiteration <- function(data = NULL,
     middle_lines <- NULL
   }
 
-  if(is.null(legend) || !is.logical(legend)){
+  if (is.null(legend) || !is.logical(legend)) {
     legend <- TRUE
   }
 
-  if(is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start)) ){
+  if (is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start))) {
     x_start <- NA
   }
 
-  if(is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end)) ){
+  if (is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end))) {
     x_end <- NA
   }
 
@@ -132,14 +131,14 @@ panel_kiteration <- function(data = NULL,
     goijk <- goijk + facet_wrap(~Node, ncol = 1)
   }
 
-  goijk <- goijk  +
-  coord_cartesian(
+  goijk <- goijk +
+    coord_cartesian(
       xlim = c(x_start, x_end)
-  )
+    )
 
   if (!legend) {
     goijk <- goijk + theme(legend.position = "none")
-  }else{
+  } else {
     goijk <- goijk + theme(legend.spacing.x = unit(0.2, "cm"))
   }
 

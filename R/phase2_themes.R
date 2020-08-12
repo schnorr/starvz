@@ -1,6 +1,6 @@
 #' @include starvz_data.R
 
-default_theme <- function(base_size = 22, expand = 0.05, legend_title=FALSE) {
+default_theme <- function(base_size = 22, expand = 0.05, legend_title = FALSE) {
   ret <- list()
 
   ret[[length(ret) + 1]] <- theme_bw(base_size = base_size)
@@ -13,7 +13,7 @@ default_theme <- function(base_size = 22, expand = 0.05, legend_title=FALSE) {
     legend.box.spacing = unit(0, "pt"),
     legend.box.margin = margin(0, 0, 0, 0)
   )
-  if(!legend_title){
+  if (!legend_title) {
     ret[[length(ret) + 1]] <- theme(legend.title = element_blank())
   }
 

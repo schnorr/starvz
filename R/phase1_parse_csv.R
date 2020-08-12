@@ -230,7 +230,7 @@ read_worker_csv <- function(where = ".",
       })) -> df.pre.outliers
 
     # Step 1.1: Check if any anomaly was detected
-    if(df.pre.outliers %>% nrow() > 0) {
+    if (df.pre.outliers %>% nrow() > 0) {
 
       # Step 2: identify outliers rows
       df.pre.outliers %>%
@@ -257,7 +257,7 @@ read_worker_csv <- function(where = ".",
       # Step 4: regroup the Outlier data to the original Application
       Application <- Application %>%
         left_join(df.outliers %>%
-                  select(.data$JobId, .data$Outlier), by = c("JobId"))
+          select(.data$JobId, .data$Outlier), by = c("JobId"))
     } else {
       loginfo("No anomalies were detected.")
       Application <- Application %>%

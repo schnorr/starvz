@@ -31,7 +31,7 @@ starvz_default_config <- function() {
   config$atree$initialization$active <- FALSE
   config$atree$communication$active <- FALSE
   config$atree$anomalies$active <- FALSE
-  
+
   config$activenodes$active <- FALSE
   config$activenodes$nodememuse$active <- FALSE
   config$activenodes$nodememuse$legend <- TRUE

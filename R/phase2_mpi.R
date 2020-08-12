@@ -56,32 +56,31 @@ geom_mpistates <- function(dfw = NULL, label = "1", expand = 0.05) {
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
-#' #panel_mpistate(data=starvz_sample_lu)
+#' # panel_mpistate(data=starvz_sample_lu)
 #' @export
 panel_mpistate <- function(data = NULL,
-  legend=data$config$mpibandwidth$legend,
-  base_size=data$config$base_size,
-  expand_x=data$config$expand,
-  x_start=data$config$limits$start,
-  x_end=data$config$limits$end,
-  y_start=0,
-  y_end=data$config$mpibandwidth$limit) {
+                           legend = data$config$mpibandwidth$legend,
+                           base_size = data$config$base_size,
+                           expand_x = data$config$expand,
+                           x_start = data$config$limits$start,
+                           x_end = data$config$limits$end,
+                           y_start = 0,
+                           y_end = data$config$mpibandwidth$limit) {
+  starvz_check_data(data, tables = list("Comm_state" = c("Node")))
 
-  starvz_check_data(data, tables=list("Comm_state"=c("Node")))
-
-  if(is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start)) ){
+  if (is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start))) {
     x_start <- NA
   }
 
-  if(is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end)) ){
+  if (is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end))) {
     x_end <- NA
   }
 
-  if(is.null(y_start) || (!is.na(y_start) && !is.numeric(y_start)) ){
+  if (is.null(y_start) || (!is.na(y_start) && !is.numeric(y_start))) {
     y_start <- NA
   }
 
-  if(is.null(y_end) || (!is.na(y_end) && !is.numeric(y_end)) ){
+  if (is.null(y_end) || (!is.na(y_end) && !is.numeric(y_end))) {
     y_end <- NA
   }
 
@@ -91,25 +90,25 @@ panel_mpistate <- function(data = NULL,
     # Add states and outliers if requested
     geom_mpistates(data$Comm_state, data$config$mpistate$label, expand_x) +
     coord_cartesian(
-        xlim = c(x_start, x_end),
-        ylim = c(0, y_end)
+      xlim = c(x_start, x_end),
+      ylim = c(0, y_end)
     )
 
-    if (!legend) {
-      gow <- gow + theme(legend.position = "none")
-    }
+  if (!legend) {
+    gow <- gow + theme(legend.position = "none")
+  }
 
   return(gow)
 }
 
-concurrent_mpi <- function(data = NULL, out=FALSE) {
+concurrent_mpi <- function(data = NULL, out = FALSE) {
   if (is.null(data)) {
     return(NULL)
   }
 
   col_case <- "Origin"
 
-  if(out){
+  if (out) {
     col_case <- "Dest"
   }
 
@@ -135,16 +134,16 @@ concurrent_mpi <- function(data = NULL, out=FALSE) {
         TRUE ~ 0
       )
     ))) %>%
-    arrange({{col_case}}, .data$Timestamp) %>%
+    arrange({{ col_case }}, .data$Timestamp) %>%
     select(-.data$Start) %>%
     rename(Start = .data$Timestamp) %>%
-    group_by({{col_case}}) %>%
+    group_by({{ col_case }}) %>%
     mutate(End = lead(.data$Start)) %>%
     na.omit() %>%
     mutate(Duration = .data$End - .data$Start) %>%
     ungroup() %>%
     mutate(Type = "MPI Concurrent") %>%
-    rename(ResourceId = {{col_case}}) %>%
+    rename(ResourceId = {{ col_case }}) %>%
     separate(.data$ResourceId, into = c("Node", "Resource"), remove = FALSE) %>%
     mutate(Node = as.factor(.data$Node)) %>%
     mutate(ResourceType = as.factor(gsub("[[:digit:]]+", "", .data$Resource))) %>%

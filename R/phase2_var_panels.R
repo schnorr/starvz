@@ -15,65 +15,67 @@
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
-#' panel_ready(data=starvz_sample_lu)
+#' panel_ready(data = starvz_sample_lu)
 #' @export
-panel_ready <- function(data, legend=data$config$ready$legend,
-                              base_size=data$config$base_size,
-                              expand_x=data$config$expand,
-                              x_start=data$config$limits$start,
-                              x_end=data$config$limits$end,
-                              y_start=0,
-                              y_end=data$config$ready$limit,
-                              step=data$config$ready$step){
+panel_ready <- function(data, legend = data$config$ready$legend,
+                        base_size = data$config$base_size,
+                        expand_x = data$config$expand,
+                        x_start = data$config$limits$start,
+                        x_end = data$config$limits$end,
+                        y_start = 0,
+                        y_end = data$config$ready$limit,
+                        step = data$config$ready$step) {
 
   ## Check for non-valid arguments
-  if(is.null(legend) || !is.logical(legend)){
+  if (is.null(legend) || !is.logical(legend)) {
     legend <- TRUE
   }
 
-  if(is.null(base_size) || !is.numeric(base_size)){
+  if (is.null(base_size) || !is.numeric(base_size)) {
     base_size <- 22
   }
 
-  if(is.null(expand_x) || !is.numeric(expand_x)){
+  if (is.null(expand_x) || !is.numeric(expand_x)) {
     expand_x <- 0.05
   }
 
-  if(is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start)) ){
+  if (is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start))) {
     x_start <- NA
   }
 
-  if(is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end)) ){
+  if (is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end))) {
     x_end <- NA
   }
 
-  if(is.null(y_start) || (!is.na(y_start) && !is.numeric(y_start)) ){
+  if (is.null(y_start) || (!is.na(y_start) && !is.numeric(y_start))) {
     y_start <- NA
   }
 
-  if(is.null(y_end) || (!is.na(y_end) && !is.numeric(y_end)) ){
+  if (is.null(y_end) || (!is.na(y_end) && !is.numeric(y_end))) {
     y_end <- NA
   }
 
-  if(is.null(step) || !is.numeric(step)){
-    if(is.null(data$config$global_agg_step)){
+  if (is.null(step) || !is.numeric(step)) {
+    if (is.null(data$config$global_agg_step)) {
       agg_step <- 100
-    }else{
+    } else {
       agg_step <- data$config$global_agg_step
     }
-  }else{
-      agg_step <- step
+  } else {
+    agg_step <- step
   }
 
   panel <- data$Variable %>%
     filter(grepl("sched", .data$ResourceId), grepl("Ready", .data$Type)) %>%
-    var_integration_segment_chart(step = agg_step,
-      base_size=base_size,
-      expand=expand_x,
-      legend=legend) +
+    var_integration_segment_chart(
+      step = agg_step,
+      base_size = base_size,
+      expand = expand_x,
+      legend = legend
+    ) +
     coord_cartesian(
-        xlim = c(x_start, x_end),
-        ylim = c(0, y_end)
+      xlim = c(x_start, x_end),
+      ylim = c(0, y_end)
     )
   return(panel)
 }
@@ -96,65 +98,67 @@ panel_ready <- function(data, legend=data$config$ready$legend,
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
-#' panel_submitted(data=starvz_sample_lu)
+#' panel_submitted(data = starvz_sample_lu)
 #' @export
-panel_submitted <- function(data, legend=data$config$submmited$legend,
-                              base_size=data$config$base_size,
-                              expand_x=data$config$expand,
-                              x_start=data$config$limits$start,
-                              x_end=data$config$limits$end,
-                              y_start=0,
-                              y_end=data$config$submmited$limit,
-                              step=data$config$submmited$step){
+panel_submitted <- function(data, legend = data$config$submmited$legend,
+                            base_size = data$config$base_size,
+                            expand_x = data$config$expand,
+                            x_start = data$config$limits$start,
+                            x_end = data$config$limits$end,
+                            y_start = 0,
+                            y_end = data$config$submmited$limit,
+                            step = data$config$submmited$step) {
 
   ## Check for non-valid arguments
-  if(is.null(legend) || !is.logical(legend)){
+  if (is.null(legend) || !is.logical(legend)) {
     legend <- TRUE
   }
 
-  if(is.null(base_size) || !is.numeric(base_size)){
+  if (is.null(base_size) || !is.numeric(base_size)) {
     base_size <- 22
   }
 
-  if(is.null(expand_x) || !is.numeric(expand_x)){
+  if (is.null(expand_x) || !is.numeric(expand_x)) {
     expand_x <- 0.05
   }
 
-  if(is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start)) ){
+  if (is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start))) {
     x_start <- NA
   }
 
-  if(is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end)) ){
+  if (is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end))) {
     x_end <- NA
   }
 
-  if(is.null(y_start) || (!is.na(y_start) && !is.numeric(y_start)) ){
+  if (is.null(y_start) || (!is.na(y_start) && !is.numeric(y_start))) {
     y_start <- NA
   }
 
-  if(is.null(y_end) || (!is.na(y_end) && !is.numeric(y_end)) ){
+  if (is.null(y_end) || (!is.na(y_end) && !is.numeric(y_end))) {
     y_end <- NA
   }
 
-  if(is.null(step) || !is.numeric(step)){
-    if(is.null(data$config$global_agg_step)){
+  if (is.null(step) || !is.numeric(step)) {
+    if (is.null(data$config$global_agg_step)) {
       agg_step <- 100
-    }else{
+    } else {
       agg_step <- data$config$global_agg_step
     }
-  }else{
-      agg_step <- step
+  } else {
+    agg_step <- step
   }
 
   panel <- data$Variable %>%
     filter(grepl("sched", .data$ResourceId), grepl("Submitted", .data$Type)) %>%
-    var_integration_segment_chart(step = agg_step,
-      base_size=base_size,
-      expand=expand_x,
-      legend=legend) +
+    var_integration_segment_chart(
+      step = agg_step,
+      base_size = base_size,
+      expand = expand_x,
+      legend = legend
+    ) +
     coord_cartesian(
-        xlim = c(x_start, x_end),
-        ylim = c(0, y_end)
+      xlim = c(x_start, x_end),
+      ylim = c(0, y_end)
     )
   return(panel)
 }
@@ -177,65 +181,67 @@ panel_submitted <- function(data, legend=data$config$submmited$legend,
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
-#' panel_submitted(data=starvz_sample_lu)
+#' panel_submitted(data = starvz_sample_lu)
 #' @export
-panel_usedmemory <- function(data, legend=data$config$usedmemory$legend,
-                              base_size=data$config$base_size,
-                              expand_x=data$config$expand,
-                              x_start=data$config$limits$start,
-                              x_end=data$config$limits$end,
-                              y_start=0,
-                              y_end=data$config$usedmemory$limit,
-                              step=data$config$usedmemory$step){
+panel_usedmemory <- function(data, legend = data$config$usedmemory$legend,
+                             base_size = data$config$base_size,
+                             expand_x = data$config$expand,
+                             x_start = data$config$limits$start,
+                             x_end = data$config$limits$end,
+                             y_start = 0,
+                             y_end = data$config$usedmemory$limit,
+                             step = data$config$usedmemory$step) {
 
   ## Check for non-valid arguments
-  if(is.null(legend) || !is.logical(legend)){
+  if (is.null(legend) || !is.logical(legend)) {
     legend <- TRUE
   }
 
-  if(is.null(base_size) || !is.numeric(base_size)){
+  if (is.null(base_size) || !is.numeric(base_size)) {
     base_size <- 22
   }
 
-  if(is.null(expand_x) || !is.numeric(expand_x)){
+  if (is.null(expand_x) || !is.numeric(expand_x)) {
     expand_x <- 0.05
   }
 
-  if(is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start)) ){
+  if (is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start))) {
     x_start <- NA
   }
 
-  if(is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end)) ){
+  if (is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end))) {
     x_end <- NA
   }
 
-  if(is.null(y_start) || (!is.na(y_start) && !is.numeric(y_start)) ){
+  if (is.null(y_start) || (!is.na(y_start) && !is.numeric(y_start))) {
     y_start <- NA
   }
 
-  if(is.null(y_end) || (!is.na(y_end) && !is.numeric(y_end)) ){
+  if (is.null(y_end) || (!is.na(y_end) && !is.numeric(y_end))) {
     y_end <- NA
   }
 
-  if(is.null(step) || !is.numeric(step)){
-    if(is.null(data$config$global_agg_step)){
+  if (is.null(step) || !is.numeric(step)) {
+    if (is.null(data$config$global_agg_step)) {
       agg_step <- 100
-    }else{
+    } else {
       agg_step <- data$config$global_agg_step
     }
-  }else{
-      agg_step <- step
+  } else {
+    agg_step <- step
   }
 
   panel <- data$Variable %>%
     filter(grepl("Used", .data$Type)) %>%
-    var_integration_segment_chart(step = agg_step,
-      base_size=base_size,
-      expand=expand_x,
-      legend=legend) +
+    var_integration_segment_chart(
+      step = agg_step,
+      base_size = base_size,
+      expand = expand_x,
+      legend = legend
+    ) +
     coord_cartesian(
-        xlim = c(x_start, x_end),
-        ylim = c(0, y_end)
+      xlim = c(x_start, x_end),
+      ylim = c(0, y_end)
     )
   return(panel)
 }
@@ -258,65 +264,67 @@ panel_usedmemory <- function(data, legend=data$config$usedmemory$legend,
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
-#' #panel_gflops(data=starvz_sample_lu)
+#' # panel_gflops(data=starvz_sample_lu)
 #' @export
-panel_gflops <- function(data, legend=data$config$gflops$legend,
-                              base_size=data$config$base_size,
-                              expand_x=data$config$expand,
-                              x_start=data$config$limits$start,
-                              x_end=data$config$limits$end,
-                              y_start=0,
-                              y_end=data$config$gflops$limit,
-                              step=data$config$gflops$step){
+panel_gflops <- function(data, legend = data$config$gflops$legend,
+                         base_size = data$config$base_size,
+                         expand_x = data$config$expand,
+                         x_start = data$config$limits$start,
+                         x_end = data$config$limits$end,
+                         y_start = 0,
+                         y_end = data$config$gflops$limit,
+                         step = data$config$gflops$step) {
 
   ## Check for non-valid arguments
-  if(is.null(legend) || !is.logical(legend)){
+  if (is.null(legend) || !is.logical(legend)) {
     legend <- TRUE
   }
 
-  if(is.null(base_size) || !is.numeric(base_size)){
+  if (is.null(base_size) || !is.numeric(base_size)) {
     base_size <- 22
   }
 
-  if(is.null(expand_x) || !is.numeric(expand_x)){
+  if (is.null(expand_x) || !is.numeric(expand_x)) {
     expand_x <- 0.05
   }
 
-  if(is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start)) ){
+  if (is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start))) {
     x_start <- NA
   }
 
-  if(is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end)) ){
+  if (is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end))) {
     x_end <- NA
   }
 
-  if(is.null(y_start) || (!is.na(y_start) && !is.numeric(y_start)) ){
+  if (is.null(y_start) || (!is.na(y_start) && !is.numeric(y_start))) {
     y_start <- NA
   }
 
-  if(is.null(y_end) || (!is.na(y_end) && !is.numeric(y_end)) ){
+  if (is.null(y_end) || (!is.na(y_end) && !is.numeric(y_end))) {
     y_end <- NA
   }
 
-  if(is.null(step) || !is.numeric(step)){
-    if(is.null(data$config$global_agg_step)){
+  if (is.null(step) || !is.numeric(step)) {
+    if (is.null(data$config$global_agg_step)) {
       agg_step <- 100
-    }else{
+    } else {
       agg_step <- data$config$global_agg_step
     }
-  }else{
-      agg_step <- step
+  } else {
+    agg_step <- step
   }
 
   panel <- data$Variable %>%
     filter(.data$Type == "GFlops") %>%
-    var_integration_segment_chart(step = agg_step,
-      base_size=base_size,
-      expand=expand_x,
-      legend=legend) +
+    var_integration_segment_chart(
+      step = agg_step,
+      base_size = base_size,
+      expand = expand_x,
+      legend = legend
+    ) +
     coord_cartesian(
-        xlim = c(x_start, x_end),
-        ylim = c(0, y_end)
+      xlim = c(x_start, x_end),
+      ylim = c(0, y_end)
     )
   return(panel)
 }
@@ -340,55 +348,55 @@ panel_gflops <- function(data, legend=data$config$gflops$legend,
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
-#' #panel_gpubandwidth(data=starvz_sample_lu)
+#' # panel_gpubandwidth(data=starvz_sample_lu)
 #' @export
-panel_gpubandwidth <- function(data, legend=data$config$gpubandwidth$legend,
-                              base_size=data$config$base_size,
-                              expand_x=data$config$expand,
-                              x_start=data$config$limits$start,
-                              x_end=data$config$limits$end,
-                              y_start=0,
-                              y_end=data$config$gpubandwidth$limit,
-                              step=data$config$gpubandwidth$step,
-                              total=data$config$gpubandwidth$total){
+panel_gpubandwidth <- function(data, legend = data$config$gpubandwidth$legend,
+                               base_size = data$config$base_size,
+                               expand_x = data$config$expand,
+                               x_start = data$config$limits$start,
+                               x_end = data$config$limits$end,
+                               y_start = 0,
+                               y_end = data$config$gpubandwidth$limit,
+                               step = data$config$gpubandwidth$step,
+                               total = data$config$gpubandwidth$total) {
 
   ## Check for non-valid arguments
-  if(is.null(legend) || !is.logical(legend)){
+  if (is.null(legend) || !is.logical(legend)) {
     legend <- TRUE
   }
 
-  if(is.null(base_size) || !is.numeric(base_size)){
+  if (is.null(base_size) || !is.numeric(base_size)) {
     base_size <- 22
   }
 
-  if(is.null(expand_x) || !is.numeric(expand_x)){
+  if (is.null(expand_x) || !is.numeric(expand_x)) {
     expand_x <- 0.05
   }
 
-  if(is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start)) ){
+  if (is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start))) {
     x_start <- NA
   }
 
-  if(is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end)) ){
+  if (is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end))) {
     x_end <- NA
   }
 
-  if(is.null(y_start) || (!is.na(y_start) && !is.numeric(y_start)) ){
+  if (is.null(y_start) || (!is.na(y_start) && !is.numeric(y_start))) {
     y_start <- NA
   }
 
-  if(is.null(y_end) || (!is.na(y_end) && !is.numeric(y_end)) ){
+  if (is.null(y_end) || (!is.na(y_end) && !is.numeric(y_end))) {
     y_end <- NA
   }
 
-  if(is.null(step) || !is.numeric(step)){
-    if(is.null(data$config$global_agg_step)){
+  if (is.null(step) || !is.numeric(step)) {
+    if (is.null(data$config$global_agg_step)) {
       agg_step <- 100
-    }else{
+    } else {
       agg_step <- data$config$global_agg_step
     }
-  }else{
-      agg_step <- step
+  } else {
+    agg_step <- step
   }
 
   bandwidth_data <- data$Variable %>%
@@ -398,23 +406,25 @@ panel_gpubandwidth <- function(data, legend=data$config$gpubandwidth$legend,
     filter(.data$Resource != "MEMMANAGER0" | .data$Node != "MEMMANAGER0")
 
   panel <- bandwidth_data %>%
-    var_integration_segment_chart(step = agg_step,
+    var_integration_segment_chart(
+      step = agg_step,
       ylabel = "GPU\n(MB/s)",
-      base_size=base_size,
-      expand=expand_x,
-      legend=legend) +
+      base_size = base_size,
+      expand = expand_x,
+      legend = legend
+    ) +
     coord_cartesian(
-        xlim = c(x_start, x_end),
-        ylim = c(0, y_end)
+      xlim = c(x_start, x_end),
+      ylim = c(0, y_end)
     )
 
-  if(total){
+  if (total) {
     ms <- bandwidth_data %>%
       group_by(.data$Type, .data$Node, .data$ResourceType, .data$Start, .data$End, .data$Duration) %>%
       summarize(Value = sum(.data$Value), N = n()) %>%
       rename(ResourceId = .data$Node)
-      y_size <- layer_scales(panel)$y$range$range[2]
-      panel <- panel + ms %>% var_chart_text(tstart = x_start, tend = x_end, y_end = y_size)
+    y_size <- layer_scales(panel)$y$range$range[2]
+    panel <- panel + ms %>% var_chart_text(tstart = x_start, tend = x_end, y_end = y_size)
   }
   return(panel)
 }
@@ -437,54 +447,54 @@ panel_gpubandwidth <- function(data, legend=data$config$gpubandwidth$legend,
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
-#' #panel_mpiconcurrent(data=starvz_sample_lu)
+#' # panel_mpiconcurrent(data=starvz_sample_lu)
 #' @export
-panel_mpiconcurrent <- function(data, legend=data$config$mpiconcurrent$legend,
-                              base_size=data$config$base_size,
-                              expand_x=data$config$expand,
-                              x_start=data$config$limits$start,
-                              x_end=data$config$limits$end,
-                              y_start=0,
-                              y_end=data$config$mpiconcurrent$limit,
-                              step=data$config$mpiconcurrent$step){
+panel_mpiconcurrent <- function(data, legend = data$config$mpiconcurrent$legend,
+                                base_size = data$config$base_size,
+                                expand_x = data$config$expand,
+                                x_start = data$config$limits$start,
+                                x_end = data$config$limits$end,
+                                y_start = 0,
+                                y_end = data$config$mpiconcurrent$limit,
+                                step = data$config$mpiconcurrent$step) {
 
   ## Check for non-valid arguments
-  if(is.null(legend) || !is.logical(legend)){
+  if (is.null(legend) || !is.logical(legend)) {
     legend <- TRUE
   }
 
-  if(is.null(base_size) || !is.numeric(base_size)){
+  if (is.null(base_size) || !is.numeric(base_size)) {
     base_size <- 22
   }
 
-  if(is.null(expand_x) || !is.numeric(expand_x)){
+  if (is.null(expand_x) || !is.numeric(expand_x)) {
     expand_x <- 0.05
   }
 
-  if(is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start)) ){
+  if (is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start))) {
     x_start <- NA
   }
 
-  if(is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end)) ){
+  if (is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end))) {
     x_end <- NA
   }
 
-  if(is.null(y_start) || (!is.na(y_start) && !is.numeric(y_start)) ){
+  if (is.null(y_start) || (!is.na(y_start) && !is.numeric(y_start))) {
     y_start <- NA
   }
 
-  if(is.null(y_end) || (!is.na(y_end) && !is.numeric(y_end)) ){
+  if (is.null(y_end) || (!is.na(y_end) && !is.numeric(y_end))) {
     y_end <- NA
   }
 
-  if(is.null(step) || !is.numeric(step)){
-    if(is.null(data$config$global_agg_step)){
+  if (is.null(step) || !is.numeric(step)) {
+    if (is.null(data$config$global_agg_step)) {
       agg_step <- 100
-    }else{
+    } else {
       agg_step <- data$config$global_agg_step
     }
-  }else{
-      agg_step <- step
+  } else {
+    agg_step <- step
   }
 
   if ((data$Link %>% filter(grepl("mpicom", .data$Key)) %>% nrow()) == 0) {
@@ -493,14 +503,16 @@ panel_mpiconcurrent <- function(data, legend=data$config$mpiconcurrent$legend,
   }
 
   panel <- concurrent_mpi(data) %>%
-    var_integration_segment_chart(step = agg_step,
+    var_integration_segment_chart(
+      step = agg_step,
       ylabel = "Concurrent\nMPI Tasks Send",
-      base_size=base_size,
-      expand=expand_x,
-      legend=legend) +
+      base_size = base_size,
+      expand = expand_x,
+      legend = legend
+    ) +
     coord_cartesian(
-        xlim = c(x_start, x_end),
-        ylim = c(0, y_end)
+      xlim = c(x_start, x_end),
+      ylim = c(0, y_end)
     )
 
   return(panel)
@@ -525,54 +537,54 @@ panel_mpiconcurrent <- function(data, legend=data$config$mpiconcurrent$legend,
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
-#' #panel_mpiconcurrentout(data=starvz_sample_lu)
+#' # panel_mpiconcurrentout(data=starvz_sample_lu)
 #' @export
-panel_mpiconcurrentout <- function(data, legend=data$config$mpiconcurrentout$legend,
-                              base_size=data$config$base_size,
-                              expand_x=data$config$expand,
-                              x_start=data$config$limits$start,
-                              x_end=data$config$limits$end,
-                              y_start=0,
-                              y_end=data$config$mpiconcurrentout$limit,
-                              step=data$config$mpiconcurrentout$step){
+panel_mpiconcurrentout <- function(data, legend = data$config$mpiconcurrentout$legend,
+                                   base_size = data$config$base_size,
+                                   expand_x = data$config$expand,
+                                   x_start = data$config$limits$start,
+                                   x_end = data$config$limits$end,
+                                   y_start = 0,
+                                   y_end = data$config$mpiconcurrentout$limit,
+                                   step = data$config$mpiconcurrentout$step) {
 
   ## Check for non-valid arguments
-  if(is.null(legend) || !is.logical(legend)){
+  if (is.null(legend) || !is.logical(legend)) {
     legend <- TRUE
   }
 
-  if(is.null(base_size) || !is.numeric(base_size)){
+  if (is.null(base_size) || !is.numeric(base_size)) {
     base_size <- 22
   }
 
-  if(is.null(expand_x) || !is.numeric(expand_x)){
+  if (is.null(expand_x) || !is.numeric(expand_x)) {
     expand_x <- 0.05
   }
 
-  if(is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start)) ){
+  if (is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start))) {
     x_start <- NA
   }
 
-  if(is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end)) ){
+  if (is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end))) {
     x_end <- NA
   }
 
-  if(is.null(y_start) || (!is.na(y_start) && !is.numeric(y_start)) ){
+  if (is.null(y_start) || (!is.na(y_start) && !is.numeric(y_start))) {
     y_start <- NA
   }
 
-  if(is.null(y_end) || (!is.na(y_end) && !is.numeric(y_end)) ){
+  if (is.null(y_end) || (!is.na(y_end) && !is.numeric(y_end))) {
     y_end <- NA
   }
 
-  if(is.null(step) || !is.numeric(step)){
-    if(is.null(data$config$global_agg_step)){
+  if (is.null(step) || !is.numeric(step)) {
+    if (is.null(data$config$global_agg_step)) {
       agg_step <- 100
-    }else{
+    } else {
       agg_step <- data$config$global_agg_step
     }
-  }else{
-      agg_step <- step
+  } else {
+    agg_step <- step
   }
 
   if ((data$Link %>% filter(grepl("mpicom", .data$Key)) %>% nrow()) == 0) {
@@ -580,15 +592,17 @@ panel_mpiconcurrentout <- function(data, legend=data$config$mpiconcurrentout$leg
     return(geom_blank())
   }
 
-  panel <- concurrent_mpi(data, out=TRUE) %>%
-    var_integration_segment_chart(step = agg_step,
+  panel <- concurrent_mpi(data, out = TRUE) %>%
+    var_integration_segment_chart(
+      step = agg_step,
       ylabel = "Concurrent\nMPI Tasks Recv",
-      base_size=base_size,
-      expand=expand_x,
-      legend=legend) +
+      base_size = base_size,
+      expand = expand_x,
+      legend = legend
+    ) +
     coord_cartesian(
-        xlim = c(x_start, x_end),
-        ylim = c(0, y_end)
+      xlim = c(x_start, x_end),
+      ylim = c(0, y_end)
     )
 
   return(panel)
@@ -612,54 +626,54 @@ panel_mpiconcurrentout <- function(data, legend=data$config$mpiconcurrentout$leg
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
-#' #panel_mpibandwidth(data=starvz_sample_lu)
+#' # panel_mpibandwidth(data=starvz_sample_lu)
 #' @export
-panel_mpibandwidth <- function(data, legend=data$config$mpibandwidth$legend,
-                              base_size=data$config$base_size,
-                              expand_x=data$config$expand,
-                              x_start=data$config$limits$start,
-                              x_end=data$config$limits$end,
-                              y_start=0,
-                              y_end=data$config$mpibandwidth$limit,
-                              step=data$config$mpibandwidth$step){
+panel_mpibandwidth <- function(data, legend = data$config$mpibandwidth$legend,
+                               base_size = data$config$base_size,
+                               expand_x = data$config$expand,
+                               x_start = data$config$limits$start,
+                               x_end = data$config$limits$end,
+                               y_start = 0,
+                               y_end = data$config$mpibandwidth$limit,
+                               step = data$config$mpibandwidth$step) {
 
   ## Check for non-valid arguments
-  if(is.null(legend) || !is.logical(legend)){
+  if (is.null(legend) || !is.logical(legend)) {
     legend <- TRUE
   }
 
-  if(is.null(base_size) || !is.numeric(base_size)){
+  if (is.null(base_size) || !is.numeric(base_size)) {
     base_size <- 22
   }
 
-  if(is.null(expand_x) || !is.numeric(expand_x)){
+  if (is.null(expand_x) || !is.numeric(expand_x)) {
     expand_x <- 0.05
   }
 
-  if(is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start)) ){
+  if (is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start))) {
     x_start <- NA
   }
 
-  if(is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end)) ){
+  if (is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end))) {
     x_end <- NA
   }
 
-  if(is.null(y_start) || (!is.na(y_start) && !is.numeric(y_start)) ){
+  if (is.null(y_start) || (!is.na(y_start) && !is.numeric(y_start))) {
     y_start <- NA
   }
 
-  if(is.null(y_end) || (!is.na(y_end) && !is.numeric(y_end)) ){
+  if (is.null(y_end) || (!is.na(y_end) && !is.numeric(y_end))) {
     y_end <- NA
   }
 
-  if(is.null(step) || !is.numeric(step)){
-    if(is.null(data$config$global_agg_step)){
+  if (is.null(step) || !is.numeric(step)) {
+    if (is.null(data$config$global_agg_step)) {
       agg_step <- 100
-    }else{
+    } else {
       agg_step <- data$config$global_agg_step
     }
-  }else{
-      agg_step <- step
+  } else {
+    agg_step <- step
   }
 
   if ((data$Link %>% filter(grepl("mpicom", .data$Key)) %>% nrow()) == 0) {
@@ -670,14 +684,16 @@ panel_mpibandwidth <- function(data, legend=data$config$mpibandwidth$legend,
   mpi_out <- data$Variable %>% filter(grepl("mpict", .data$ResourceId), grepl("Out", .data$Type))
 
   panel <- mpi_out %>%
-    var_integration_segment_chart(step = agg_step,
+    var_integration_segment_chart(
+      step = agg_step,
       ylabel = "MPI\n(MB/s)",
-      base_size=base_size,
-      expand=expand_x,
-      legend=legend) +
+      base_size = base_size,
+      expand = expand_x,
+      legend = legend
+    ) +
     coord_cartesian(
-        xlim = c(x_start, x_end),
-        ylim = c(0, y_end)
+      xlim = c(x_start, x_end),
+      ylim = c(0, y_end)
     )
 
   return(panel)

@@ -191,7 +191,7 @@ starvz_assemble <- function(..., config = NULL, remove_Y_info = TRUE, remove_leg
     }
   }
 
-  if(is.null(config)){
+  if (is.null(config)) {
     logerror("config is null")
     stop()
   }
@@ -312,14 +312,18 @@ starvz_plot_list <- function(data = NULL) {
       distinct()
   }
 
-  starvz_check_data(data, tables=list("Application"=c("Start", "End")))
+  starvz_check_data(data, tables = list("Application" = c("Start", "End")))
 
   # Adjust temporal scale
-  if(is.null(data$config$limits$start)){
-    data$config$limits$start <- data$Application %>% pull(.data$Start) %>% min()
+  if (is.null(data$config$limits$start)) {
+    data$config$limits$start <- data$Application %>%
+      pull(.data$Start) %>%
+      min()
   }
-  if(is.null(data$config$limits$end)){
-    data$config$limits$end <- data$Application %>% pull(.data$End) %>% max() + 1 # Just to give space
+  if (is.null(data$config$limits$end)) {
+    data$config$limits$end <- data$Application %>%
+      pull(.data$End) %>%
+      max() + 1 # Just to give space
   }
 
   # Define the global aggregation step as 0.1% of the total window
@@ -544,12 +548,12 @@ starvz_plot_list <- function(data = NULL) {
 #' @examples
 #' # starvz_plot(data)
 #' @export
-starvz_plot <- function(data = NULL, name=NULL, save=FALSE, guided=data$config$guided$active) {
+starvz_plot <- function(data = NULL, name = NULL, save = FALSE, guided = data$config$guided$active) {
   if (is.null(data)) {
     return(NULL)
   }
 
-  if(!is.null(guided) && guided){
+  if (!is.null(guided) && guided) {
     # USe Y to compute state and starpu size
     # Get number of nodes
 
@@ -618,7 +622,7 @@ starvz_plot <- function(data = NULL, name=NULL, save=FALSE, guided=data$config$g
   attr(plot, "starvz_height_total") <- NULL
   attr(plot, "height") <- final_px_height
 
-  if(save && !is.null(name)){
+  if (save && !is.null(name)) {
     total_dpi <- 120
     final_px_width <- 1000
     final_in_height <- final_px_height / total_dpi

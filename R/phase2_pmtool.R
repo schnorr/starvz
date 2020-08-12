@@ -1,25 +1,24 @@
 #' @include starvz_data.R
 
 panel_pmtool_st <- function(data = NULL,
-                legend=data$config$pmtool$state$legend,
-                                base_size=data$config$base_size,
-                                expand_x=data$config$expand,
-                                x_start=data$config$limits$start,
-                                x_end=data$config$limits$end) {
+                            legend = data$config$pmtool$state$legend,
+                            base_size = data$config$base_size,
+                            expand_x = data$config$expand,
+                            x_start = data$config$limits$start,
+                            x_end = data$config$limits$end) {
+  starvz_check_data(data, tables = list("Pmtool_states" = c("Value", "sched")))
 
-  starvz_check_data(data, tables=list("Pmtool_states"=c("Value", "sched")))
-
-  if(is.null(legend) || !is.logical(legend)){
+  if (is.null(legend) || !is.logical(legend)) {
     legend <- TRUE
   }
 
-    if(is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start)) ){
-      x_start <- NA
-    }
+  if (is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start))) {
+    x_start <- NA
+  }
 
-    if(is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end)) ){
-      x_end <- NA
-    }
+  if (is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end))) {
+    x_end <- NA
+  }
 
   # Get traces
   dfw <- data$Pmtool_states
@@ -49,12 +48,12 @@ panel_pmtool_st <- function(data = NULL,
   if (data$config$pmtool$makespan) gow <- gow + geom_makespan_pmtool(data)
 
   gow <- gow + coord_cartesian(
-      xlim = c(x_start, x_end)
+    xlim = c(x_start, x_end)
   )
 
   if (!legend) {
     gow <- gow + theme(legend.position = "none")
-  }else{
+  } else {
     gow <- gow + theme(legend.position = "top")
   }
 
@@ -64,21 +63,20 @@ panel_pmtool_st <- function(data = NULL,
 }
 
 panel_pmtool_kiteration <- function(data = NULL,
-  legend=data$config$pmtool$kiteration$legend,
-  x_start=data$config$limits$start,
-  x_end=data$config$limits$end) {
+                                    legend = data$config$pmtool$kiteration$legend,
+                                    x_start = data$config$limits$start,
+                                    x_end = data$config$limits$end) {
+  starvz_check_data(data, tables = list("Pmtool_states" = c("Value", "sched", "Iteration")))
 
-  starvz_check_data(data, tables=list("Pmtool_states"=c("Value", "sched", "Iteration")))
-
-  if(is.null(legend) || !is.logical(legend)){
+  if (is.null(legend) || !is.logical(legend)) {
     legend <- TRUE
   }
 
-  if(is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start)) ){
+  if (is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start))) {
     x_start <- NA
   }
 
-  if(is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end)) ){
+  if (is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end))) {
     x_end <- NA
   }
 
@@ -129,16 +127,16 @@ panel_pmtool_kiteration <- function(data = NULL,
       ymax = .data$Iteration + height
     ), alpha = .5) -> goijk
 
-    goijk <- goijk +
+  goijk <- goijk +
     coord_cartesian(
-        xlim = c(x_start, x_end)
+      xlim = c(x_start, x_end)
     )
 
-    if (!legend) {
-      goijk <- goijk + theme(legend.position = "none")
-    }else{
-      goijk <- goijk + theme(legend.position = "top")
-    }
+  if (!legend) {
+    goijk <- goijk + theme(legend.position = "none")
+  } else {
+    goijk <- goijk + theme(legend.position = "top")
+  }
   return(goijk)
 }
 
@@ -183,7 +181,6 @@ geom_pmtool_states <- function(data = NULL) {
 
 
 geom_pmtool_bounds <- function(data = NULL) {
-
   if (is.null(data$Pmtool)) {
     logwarn("Pmtool bounds config is active but the data is NULL")
     return(NULL)

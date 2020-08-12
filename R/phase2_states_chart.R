@@ -1,6 +1,6 @@
 
 
-panel_st <- function(data){
+panel_st <- function(data) {
   if (data$config$st$aggregation$active) {
     if (data$config$st$aggregation$method == "lucas") {
       panel <- panel_st_agg_static(data)
@@ -10,16 +10,16 @@ panel_st <- function(data){
       panel <- panel_st_agg_node(data)
     }
   } else {
-    panel <- panel_st_raw(data=data, runtime = FALSE)
+    panel <- panel_st_raw(data = data, runtime = FALSE)
   }
   return(panel)
 }
 
-panel_st_runtime <- function(data){
+panel_st_runtime <- function(data) {
   if (data$config$starpu$aggregation$active) {
-    panel <- panel_st_agg_static(data, runtime = TRUE, step=data$config$starpu$aggregation$step)
+    panel <- panel_st_agg_static(data, runtime = TRUE, step = data$config$starpu$aggregation$step)
   } else {
-    panel <- panel_st_raw(data=data, runtime = TRUE)
+    panel <- panel_st_raw(data = data, runtime = TRUE)
   }
   return(panel)
 }
@@ -53,33 +53,33 @@ panel_st_runtime <- function(data){
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
-#' panel_st_raw(data=starvz_sample_lu)
+#' panel_st_raw(data = starvz_sample_lu)
 #' @export
-panel_st_raw <- function(data = NULL, ST.Outliers=data$config$st$outliers, base_size=data$config$base_size,
-  expand_x=data$config$expand, expand_y=data$config$st$expand, selected_nodes=data$config$selected_nodes,
-  labels=data$config$st$labels, alpha=data$config$st$alpha, idleness=data$config$st$idleness,
-  taskdeps=data$config$st$tasks$active, tasklist=data$config$st$tasks$list, levels=data$config$st$tasks$levels,
-  makespan=data$config$st$makespan, abe=data$config$st$abe$active, pmtoolbounds=data$config$pmtool$bounds$active,
-  cpb=data$config$st$cpb, cpb_mpi=data$config$st$cpb_mpi$active, legend=data$config$st$legend,
-  x_start=data$config$limits$start,
-  x_end=data$config$limits$end, runtime = FALSE) {
+panel_st_raw <- function(data = NULL, ST.Outliers = data$config$st$outliers, base_size = data$config$base_size,
+                         expand_x = data$config$expand, expand_y = data$config$st$expand, selected_nodes = data$config$selected_nodes,
+                         labels = data$config$st$labels, alpha = data$config$st$alpha, idleness = data$config$st$idleness,
+                         taskdeps = data$config$st$tasks$active, tasklist = data$config$st$tasks$list, levels = data$config$st$tasks$levels,
+                         makespan = data$config$st$makespan, abe = data$config$st$abe$active, pmtoolbounds = data$config$pmtool$bounds$active,
+                         cpb = data$config$st$cpb, cpb_mpi = data$config$st$cpb_mpi$active, legend = data$config$st$legend,
+                         x_start = data$config$limits$start,
+                         x_end = data$config$limits$end, runtime = FALSE) {
 
-#ST.Outliers = TRUE, base_size=22, expand_x=0.05,
-#  expand_y=0.05, selected_nodes = NULL, labels="ALL", alpha=0.25, idleness=TRUE,
-#  taskdeps=FALSE, tasklist = NULL,  levels=10, makespan=TRUE, abe=FALSE, pmtoolbounds=FALSE,
-#  cpb = FALSE, cpb_mpi = FALSE, legend=TRUE
+  # ST.Outliers = TRUE, base_size=22, expand_x=0.05,
+  #  expand_y=0.05, selected_nodes = NULL, labels="ALL", alpha=0.25, idleness=TRUE,
+  #  taskdeps=FALSE, tasklist = NULL,  levels=10, makespan=TRUE, abe=FALSE, pmtoolbounds=FALSE,
+  #  cpb = FALSE, cpb_mpi = FALSE, legend=TRUE
 
   if (is.null(data)) stop("data provided to state_chart is NULL")
 
-  if(is.null(expand_x) || !is.numeric(expand_x)){
+  if (is.null(expand_x) || !is.numeric(expand_x)) {
     expand_x <- 0.05
   }
 
-  if(is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start)) ){
+  if (is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start))) {
     x_start <- NA
   }
 
-  if(is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end)) ){
+  if (is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end))) {
     x_end <- NA
   }
 
@@ -91,7 +91,7 @@ panel_st_raw <- function(data = NULL, ST.Outliers=data$config$st$outliers, base_
   # Select Nodes
   if (!is.null(selected_nodes)) {
     data$Y %>%
-      separate(.data$Parent, into = c("Node"), remove = FALSE, extra="drop") %>%
+      separate(.data$Parent, into = c("Node"), remove = FALSE, extra = "drop") %>%
       filter(.data$Node %in% selected_nodes) %>%
       arrange(.data$Position) %>%
       mutate(New = cumsum(lag(.data$Height, default = 0))) %>%
@@ -143,7 +143,7 @@ panel_st_raw <- function(data = NULL, ST.Outliers=data$config$st$outliers, base_
         tasks = tasklist,
         levels = levels
       )
-      if (nrow(tasksel)>0 & !is.null(selected_nodes)) {
+      if (nrow(tasksel) > 0 & !is.null(selected_nodes)) {
         tasksel <- tasksel %>%
           left_join(new_y, by = c("ResourceId" = "Parent")) %>%
           mutate(Position = if_else(is.na(.data$New), -3, .data$New)) %>%
@@ -166,7 +166,7 @@ panel_st_raw <- function(data = NULL, ST.Outliers=data$config$st$outliers, base_
     if (makespan) gow <- gow + geom_makespan(App, bsize = base_size)
   }
 
-  if(!legend) {
+  if (!legend) {
     gow <- gow + theme(legend.position = "none")
   }
 
@@ -286,25 +286,24 @@ geom_path_highlight <- function(paths = NULL) {
 }
 
 panel_st_agg_node <- function(data,
-  x_start=data$config$limits$start,
-  x_end=data$config$limits$end,
-  step=data$config$st$aggregation$step) {
-
-  if(is.null(step) || !is.numeric(step)){
-    if(is.null(data$config$global_agg_step)){
+                              x_start = data$config$limits$start,
+                              x_end = data$config$limits$end,
+                              step = data$config$st$aggregation$step) {
+  if (is.null(step) || !is.numeric(step)) {
+    if (is.null(data$config$global_agg_step)) {
       agg_step <- 100
-    }else{
+    } else {
       agg_step <- data$config$global_agg_step
     }
-  }else{
-      agg_step <- step
+  } else {
+    agg_step <- step
   }
 
-  if(is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start)) ){
+  if (is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start))) {
     x_start <- NA
   }
 
-  if(is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end)) ){
+  if (is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end))) {
     x_end <- NA
   }
 

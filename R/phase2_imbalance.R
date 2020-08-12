@@ -123,7 +123,8 @@ utilization_per_step <- function(data_app, step) {
   min_time <- min(data_app$Start)
   max_time <- max(data_app$End)
 
-  data_app %>% filter(.data$Start>=0) %>%
+  data_app %>%
+    filter(.data$Start >= 0) %>%
     select(.data$JobId, .data$Duration, .data$Node, .data$ResourceId, .data$ResourceType, .data$Start, .data$End) %>%
     mutate(
       SStep = as.integer(floor(.data$Start / step)),
@@ -146,22 +147,20 @@ utilization_per_step <- function(data_app, step) {
     mutate(UtilizationTime = .data$Utilization * step)
 }
 
-panel_imbalance <- function(data, legend=data$config$imbalance$legend,
-  x_start=data$config$limits$start,
-  x_end=data$config$limits$end,
-  y_start=0,
-  y_end=data$config$imbalance$limit,
-  step=data$config$imbalance$step
-) {
-
-  if(is.null(step) || !is.numeric(step)){
-    if(is.null(data$config$global_agg_step)){
+panel_imbalance <- function(data, legend = data$config$imbalance$legend,
+                            x_start = data$config$limits$start,
+                            x_end = data$config$limits$end,
+                            y_start = 0,
+                            y_end = data$config$imbalance$limit,
+                            step = data$config$imbalance$step) {
+  if (is.null(step) || !is.numeric(step)) {
+    if (is.null(data$config$global_agg_step)) {
       agg_step <- as.double(100)
-    }else{
+    } else {
       agg_step <- as.double(data$config$global_agg_step)
     }
-  }else{
-      agg_step <- as.double(step)
+  } else {
+    agg_step <- as.double(step)
   }
 
   data_app <- data$Application
@@ -177,7 +176,7 @@ panel_imbalance <- function(data, legend=data$config$imbalance$legend,
     pivot_longer(-.data$Step, names_to = "metric", values_to = "value") %>%
     mutate(Time = .data$Step * agg_step + agg_step / 2) -> to_plot
 
-  to_plot %>% var_imbalance_plot("Imb Metric", agg_step, data$config$base_size, data$config$expand)-> panel
+  to_plot %>% var_imbalance_plot("Imb Metric", agg_step, data$config$base_size, data$config$expand) -> panel
 
   if (!legend) {
     panel <- panel + theme(legend.position = "none")
@@ -185,20 +184,19 @@ panel_imbalance <- function(data, legend=data$config$imbalance$legend,
     panel <- panel + theme(legend.position = "top")
   }
   panel <- panel +
-            coord_cartesian(
-                xlim = c(x_start, x_end),
-                ylim = c(0, y_end)
-            )
+    coord_cartesian(
+      xlim = c(x_start, x_end),
+      ylim = c(0, y_end)
+    )
   return(panel)
 }
 
-panel_power_imbalance <- function(data, legend=data$config$power_imbalance$legend,
-  x_start=data$config$limits$start,
-  x_end=data$config$limits$end,
-  y_start=0,
-  y_end=data$config$power_imbalance$limit,
-  step=data$config$power_imbalance$step
-) {
+panel_power_imbalance <- function(data, legend = data$config$power_imbalance$legend,
+                                  x_start = data$config$limits$start,
+                                  x_end = data$config$limits$end,
+                                  y_start = 0,
+                                  y_end = data$config$power_imbalance$limit,
+                                  step = data$config$power_imbalance$step) {
   # Compute POWER
   task <- data$config$power_imbalance$task
   if (is.null(task)) {
@@ -206,14 +204,14 @@ panel_power_imbalance <- function(data, legend=data$config$power_imbalance$legen
     return(geom_blank())
   }
 
-  if(is.null(step) || !is.numeric(step)){
-    if(is.null(data$config$global_agg_step)){
+  if (is.null(step) || !is.numeric(step)) {
+    if (is.null(data$config$global_agg_step)) {
       agg_step <- as.double(100)
-    }else{
+    } else {
       agg_step <- as.double(data$config$global_agg_step)
     }
-  }else{
-      agg_step <- as.double(step)
+  } else {
+    agg_step <- as.double(step)
   }
 
 
@@ -252,29 +250,27 @@ panel_power_imbalance <- function(data, legend=data$config$power_imbalance$legen
     panel <- panel + theme(legend.position = "top")
   }
   panel <- panel +
-            coord_cartesian(
-                xlim = c(x_start, x_end),
-                ylim = c(0, y_end)
-            )
+    coord_cartesian(
+      xlim = c(x_start, x_end),
+      ylim = c(0, y_end)
+    )
   return(panel)
 }
 
-panel_hete_imbalance  <- function(data, legend=data$config$hete_imbalance$legend,
-  x_start=data$config$limits$start,
-  x_end=data$config$limits$end,
-  y_start=0,
-  y_end=data$config$hete_imbalance$limit,
-  step=data$config$hete_imbalance$step
-) {
-
-  if(is.null(step) || !is.numeric(step)){
-    if(is.null(data$config$global_agg_step)){
+panel_hete_imbalance <- function(data, legend = data$config$hete_imbalance$legend,
+                                 x_start = data$config$limits$start,
+                                 x_end = data$config$limits$end,
+                                 y_start = 0,
+                                 y_end = data$config$hete_imbalance$limit,
+                                 step = data$config$hete_imbalance$step) {
+  if (is.null(step) || !is.numeric(step)) {
+    if (is.null(data$config$global_agg_step)) {
       agg_step <- as.double(100)
-    }else{
+    } else {
       agg_step <- as.double(data$config$global_agg_step)
     }
-  }else{
-      agg_step <- as.double(step)
+  } else {
+    agg_step <- as.double(step)
   }
 
   data_app <- data$Application
@@ -297,10 +293,10 @@ panel_hete_imbalance  <- function(data, legend=data$config$hete_imbalance$legend
     panel <- panel + theme(legend.position = "top")
   }
   panel <- panel +
-            coord_cartesian(
-                xlim = c(x_start, x_end),
-                ylim = c(0, y_end)
-            )
+    coord_cartesian(
+      xlim = c(x_start, x_end),
+      ylim = c(0, y_end)
+    )
   return(panel)
 }
 
@@ -326,7 +322,8 @@ var_imbalance_plot <- function(data, name, step, base_size, expand) {
 utilization_per_step_double_hetero <- function(step, df) {
   max_time <- max(df$End)
 
-  df %>% filter(.data$Start>0) %>%
+  df %>%
+    filter(.data$Start > 0) %>%
     select(
       .data$JobId, .data$Value, .data$Duration, .data$Node,
       .data$ResourceId, .data$ResourceType, .data$Start, .data$End
@@ -401,22 +398,20 @@ utilization_per_step_double_hetero <- function(step, df) {
   return(ret)
 }
 
-panel_utilheatmap <- function(data, legend=data$config$utilheatmap$legend,
-  x_start=data$config$limits$start,
-  x_end=data$config$limits$end,
-  y_start=0,
-  y_end=NA,
-  step=data$config$utilheatmap$step
-) {
-
-  if(is.null(step) || !is.numeric(step)){
-    if(is.null(data$config$global_agg_step)){
+panel_utilheatmap <- function(data, legend = data$config$utilheatmap$legend,
+                              x_start = data$config$limits$start,
+                              x_end = data$config$limits$end,
+                              y_start = 0,
+                              y_end = NA,
+                              step = data$config$utilheatmap$step) {
+  if (is.null(step) || !is.numeric(step)) {
+    if (is.null(data$config$global_agg_step)) {
       agg_step <- as.double(100)
-    }else{
+    } else {
       agg_step <- as.double(data$config$global_agg_step)
     }
-  }else{
-      agg_step <- as.double(step)
+  } else {
+    agg_step <- as.double(step)
   }
 
   utilization_per_step(data$Application, agg_step) %>%
@@ -438,7 +433,7 @@ panel_utilheatmap <- function(data, legend=data$config$utilheatmap$legend,
     mutate(Time = .data$Step * agg_step + agg_step / 2) %>%
     ggplot(aes(y = .data$Position, x = .data$Time, fill = .data$Utilization)) +
     geom_raster() +
-    default_theme(data$config$base_size, data$config$expand, legend_title=TRUE) +
+    default_theme(data$config$base_size, data$config$expand, legend_title = TRUE) +
     scale_y_continuous(breaks = yconfv$Position, labels = yconfv$ResourceId, expand = c(data$config$expand, 0)) +
     labs(y = "Utilization", x = "Time") +
     scale_fill_gradient2(
@@ -447,15 +442,15 @@ panel_utilheatmap <- function(data, legend=data$config$utilheatmap$legend,
     ) +
     guides(fill = guide_colourbar(barwidth = 10, barheight = 0.5)) -> panel
 
-    if (!legend) {
-      panel <- panel + theme(legend.position = "none")
-    } else {
-      panel <- panel + theme(legend.position = "top")
-    }
-    panel <- panel +
-              coord_cartesian(
-                  xlim = c(x_start, x_end),
-                  ylim = c(0, y_end)
-              )
-    return(panel)
+  if (!legend) {
+    panel <- panel + theme(legend.position = "none")
+  } else {
+    panel <- panel + theme(legend.position = "top")
+  }
+  panel <- panel +
+    coord_cartesian(
+      xlim = c(x_start, x_end),
+      ylim = c(0, y_end)
+    )
+  return(panel)
 }

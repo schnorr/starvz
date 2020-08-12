@@ -89,38 +89,37 @@ print.starvz_data <- function(x) {
 #' @return Logical, TRUE if data pass all tests
 #' @include starvz_data.R
 #' @examples
-#' #starvz_check_data(data, list("MemoryState" = c("x") ))
+#' # starvz_check_data(data, list("MemoryState" = c("x") ))
 #' @export
-starvz_check_data <- function(data=NULL, tables=list(), extra_func=NULL){
-  caller <- paste0("", deparse(sys.calls()[[sys.nframe()-1]]), ":")
-  if(is.null(data)) stop(paste(caller, "data is NULL"), call. = FALSE)
-  if(class(data)!="starvz_data") stop(paste(caller, "data is not starvz_data"), call. = FALSE)
-  if(!is.null(tables)){
-    if(!is.list(tables)){
+starvz_check_data <- function(data = NULL, tables = list(), extra_func = NULL) {
+  caller <- paste0("", deparse(sys.calls()[[sys.nframe() - 1]]), ":")
+  if (is.null(data)) stop(paste(caller, "data is NULL"), call. = FALSE)
+  if (class(data) != "starvz_data") stop(paste(caller, "data is not starvz_data"), call. = FALSE)
+  if (!is.null(tables)) {
+    if (!is.list(tables)) {
       stop(paste(caller, "tables is not a list"), call. = FALSE)
     }
-    if(!is.null(names(tables))){
-      if(!all(names(tables) %in% names(data))){
+    if (!is.null(names(tables))) {
+      if (!all(names(tables) %in% names(data))) {
         stop(paste(caller, "Missing Table:", names(tables)[!names(tables) %in% names(data)]), call. = FALSE)
       }
 
-      for(table in names(tables)){
+      for (table in names(tables)) {
         cols <- tables[[table]]
         nrows <- data[[table]] %>% nrow()
-        if(is.null(nrows) || nrows == 0){
-            stop(paste(caller, "Table is empty"), call. = FALSE)
+        if (is.null(nrows) || nrows == 0) {
+          stop(paste(caller, "Table is empty"), call. = FALSE)
         }
-        if(is.vector(cols))
-        {
-            if(!all(cols %in% names(data[[table]]))){
-                stop(paste(caller, "Missing Column:", cols[!cols %in% names(data[[table]])]), call. = FALSE)
-            }
-        }else{
+        if (is.vector(cols)) {
+          if (!all(cols %in% names(data[[table]]))) {
+            stop(paste(caller, "Missing Column:", cols[!cols %in% names(data[[table]])]), call. = FALSE)
+          }
+        } else {
           # Cols is not a vector, continue?
         }
       }
     }
-    if(!is.null(extra_func) && !extra_func(data)){
+    if (!is.null(extra_func) && !extra_func(data)) {
       stop(paste(caller, "Error on extra_func"), call. = FALSE)
     }
   }

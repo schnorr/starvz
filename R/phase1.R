@@ -5,10 +5,10 @@ isolate_read_write <- function(input.parquet, fun, name, directory, ZERO) {
   data[[name]] <- fun(where = directory, ZERO = ZERO)
   if (input.parquet == "1") {
     loginfo("Saving as parquet")
-    starvz_write_parquet(data, directory=directory)
+    starvz_write_parquet(data, directory = directory)
   } else {
     loginfo("Saving as feather")
-    starvz_write_feather(data, directory=directory)
+    starvz_write_feather(data, directory = directory)
   }
   return(NULL)
 }
@@ -17,10 +17,10 @@ isolate_read_write_m <- function(input.parquet, fun, directory, ZERO) {
   data <- fun(where = directory, ZERO = ZERO)
   if (input.parquet == "1") {
     loginfo("Saving as parquet")
-    starvz_write_parquet(data, directory=directory)
+    starvz_write_parquet(data, directory = directory)
   } else {
     loginfo("Saving as feather")
-    starvz_write_feather(data, directory=directory)
+    starvz_write_feather(data, directory = directory)
   }
   return(NULL)
 }
@@ -144,10 +144,10 @@ starvz_phase1_read_write <- function(directory = ".", app_states_fun = NULL, sta
 
   if (input.parquet == "1") {
     loginfo("Saving as parquet")
-    starvz_write_parquet(data, directory=directory)
+    starvz_write_parquet(data, directory = directory)
   } else {
     loginfo("Saving as feather")
-    starvz_write_feather(data, directory=directory)
+    starvz_write_feather(data, directory = directory)
   }
 }
 
@@ -223,11 +223,12 @@ reorder_elimination_tree <- function(Atree, Application) {
     unique() %>%
     left_join(Atree %>%
       select(.data$ANode, .data$Position, .data$Height),
-      by=c("Parent" = "ANode"), suffix = c("", ".Parent")
+    by = c("Parent" = "ANode"), suffix = c("", ".Parent")
     ) %>%
     # pruned child node have the same position as its father
-    mutate(Position = case_when(.data$NodeType == "Pruned" ~ .data$Position.Parent, TRUE ~ .data$Position),
-             Height = case_when(.data$NodeType == "Pruned" ~ .data$Height.Parent, TRUE ~ .data$Height)
+    mutate(
+      Position = case_when(.data$NodeType == "Pruned" ~ .data$Position.Parent, TRUE ~ .data$Position),
+      Height = case_when(.data$NodeType == "Pruned" ~ .data$Height.Parent, TRUE ~ .data$Height)
     ) %>%
     select(-.data$Parent, -.data$Position.Parent, -.data$Height.Parent)
 

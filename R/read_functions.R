@@ -96,7 +96,7 @@ starvz_read_some <- function(directory = ".", tables = c("application"), config_
 #' starvz_read(directory = "folder_to_parquet_files/", config_file = "path_to_config.yaml")
 #' starvz_read() # Read current directory
 #' @export
-starvz_read <- function(directory = ".", config_file = NULL, selective=TRUE) {
+starvz_read <- function(directory = ".", config_file = NULL, selective = TRUE) {
   check_arrow()
 
   if (is.null(config_file)) {
@@ -105,7 +105,7 @@ starvz_read <- function(directory = ".", config_file = NULL, selective=TRUE) {
 
   config <- starvz_read_config(config_file)
 
-  if(selective){
+  if (selective) {
     # Always try to load Version, Colors and Y
     tables_to_load <- c("version", "colors", "y")
 
@@ -232,8 +232,7 @@ starvz_read <- function(directory = ".", config_file = NULL, selective=TRUE) {
     tables_to_load <- tables_to_load %>% unique()
     loginfo(paste("Read:", paste(tables_to_load, collapse = " ")))
     data <- starvz_read_some(directory = directory, tables = tables_to_load, config_file)
-
-  }else{
+  } else {
     # Check if there is arrow gz files
     filenames <- list.files(path = directory, pattern = "*.parquet", full.names = TRUE, recursive = FALSE)
     if (length(filenames) > 0) {

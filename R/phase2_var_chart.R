@@ -103,7 +103,7 @@ var_integration_chart <- function(dfv = NULL, ylabel = NA, step = 250, facetting
   }
   return(result)
 }
-var_integration_segment_chart <- function(dfv = NULL, ylabel = NA, step = 250, facetting = FALSE, base_size = 22, expand = 0.05, legend=TRUE) {
+var_integration_segment_chart <- function(dfv = NULL, ylabel = NA, step = 250, facetting = FALSE, base_size = 22, expand = 0.05, legend = TRUE) {
   if (is.null(dfv)) {
     return(NULL)
   }
@@ -136,9 +136,9 @@ var_integration_segment_chart <- function(dfv = NULL, ylabel = NA, step = 250, f
         panel.spacing = unit(1, "mm")
       )
   }
-  if(legend){
+  if (legend) {
     result <- result + theme(legend.position = "top")
-  }else{
+  } else {
     result <- result + theme(legend.position = "none")
   }
   return(result)

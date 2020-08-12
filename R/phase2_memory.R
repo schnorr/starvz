@@ -13,31 +13,30 @@
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
-#' panel_ready(data=starvz_sample_lu)
+#' panel_ready(data = starvz_sample_lu)
 #' @export
 panel_memory_state <- function(data = NULL,
-  combined = data$config$memory$combined,
-  legend=data$config$memory$legend,
-  base_size=data$config$base_size,
-  expand_x=data$config$expand,
-  x_start=data$config$limits$start,
-  x_end=data$config$limits$end) {
+                               combined = data$config$memory$combined,
+                               legend = data$config$memory$legend,
+                               base_size = data$config$base_size,
+                               expand_x = data$config$expand,
+                               x_start = data$config$limits$start,
+                               x_end = data$config$limits$end) {
+  starvz_check_data(data, tables = list("Events_memory" = c("Type", "Container", "Handle")))
 
-  starvz_check_data(data, tables=list("Events_memory"=c("Type", "Container", "Handle")))
-
-  if(is.null(legend) || !is.logical(legend)){
+  if (is.null(legend) || !is.logical(legend)) {
     legend <- TRUE
   }
 
-  if(is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start)) ){
+  if (is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start))) {
     x_start <- NA
   }
 
-  if(is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end)) ){
+  if (is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end))) {
     x_end <- NA
   }
 
-  if(is.null(expand_x) || !is.numeric(expand_x)){
+  if (is.null(expand_x) || !is.numeric(expand_x)) {
     expand_x <- 0.05
   }
 
@@ -72,12 +71,12 @@ panel_memory_state <- function(data = NULL,
   }
 
   gow <- gow + coord_cartesian(
-      xlim = c(x_start, x_end)
+    xlim = c(x_start, x_end)
   )
 
   if (!legend) {
     gow <- gow + theme(legend.position = "none")
-  }else{
+  } else {
     gow <- gow + theme(legend.position = "top")
   }
 
@@ -212,8 +211,7 @@ geom_links <- function(data = NULL, dfw = NULL, combined = FALSE,
                        arrow_active = FALSE,
                        border_active = FALSE,
                        total_active = FALSE) {
-
-  starvz_check_data(data, tables=list("Link"=c("Dest", "Origin")))
+  starvz_check_data(data, tables = list("Link" = c("Dest", "Origin")))
 
   # Get the start info on states because link dont have nodes & Position
 
@@ -221,7 +219,7 @@ geom_links <- function(data = NULL, dfw = NULL, combined = FALSE,
 
   loginfo("Starting geom_links")
 
-  #TODO MPI HERE
+  # TODO MPI HERE
   col_pos_1 <- data.frame(Container = unique(dfl$Dest)) %>%
     arrange(.data$Container) %>%
     rowid_to_column("Position")
@@ -290,7 +288,7 @@ geom_links <- function(data = NULL, dfw = NULL, combined = FALSE,
       aes(x = .data$Start, xend = .data$End, y = .data$O_Position, yend = .data$D_Position), arrow = arrow_g, alpha = 0.5, size = 1.5, color = "black"
     )
   }
-  
+
   ret[[length(ret) + 1]] <- geom_segment(data = dfl, aes(
     x = .data$Start, xend = .data$End,
     y = .data$O_Position, yend = .data$D_Position, color = .data$Origin
@@ -566,7 +564,7 @@ pre_handle_gantt <- function(data, name_func = NULL) {
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
-#' panel_handles(data=starvz_sample_lu)
+#' panel_handles(data = starvz_sample_lu)
 #' @export
 panel_handles <- function(data, JobId = NA, lines = NA, lHandle = NA) {
   if (is.null(data$handle_gantt_data)) {
@@ -809,10 +807,9 @@ pre_snap <- function(data, f_data) {
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
-#' panel_memory_snap(data=starvz_sample_lu, 100, 10)
+#' panel_memory_snap(data = starvz_sample_lu, 100, 10)
 #' @export
 panel_memory_snap <- function(data, selected_time, step, tasks_size = 30) {
-
   if (is.null(data$handle_states)) {
     data$handle_states <- handles_presence_states(data)
   }

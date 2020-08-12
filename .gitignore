@@ -1,2 +1,6 @@
 *.feather
 *.parquet
+*.csv.gz
+*.png
+*.rec
+*.csv

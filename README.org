@@ -62,8 +62,8 @@ With =starpu_fxt_tool= and =pajeng= in =$PATH=
 
 #+begin_src bash :results output :session *R* :exports both
 export EXP_FOLDER=/folder_to_fxt_files/
-src/phase1-workflow.sh $EXP_FOLDER
-R/phase2-workflow.R $EXP_FOLDER full_config.yaml
+inst/tools/phase1-workflow.sh $EXP_FOLDER
+inst/tools/phase2-workflow.R $EXP_FOLDER full_config.yaml
 #+end_src
 
 This generates =$EXP_FOLDER/starvz.png=
@@ -133,7 +133,7 @@ library(starvz)
 
 ** Team and Contact
 
-- [[http://www.inf.ufrgs.br/~schnorr][Lucas Mello Schnorr (schnorr@inf.ufrgs.br)]] 
+- [[http://www.inf.ufrgs.br/~schnorr][Lucas Mello Schnorr (schnorr@inf.ufrgs.br)]]
 - Vinicius Garcia (vgpinto@inf.ufrgs.br)
 - Lucas Nesi (lucas.nesi@inf.ufrgs.br)
 - Marcelo Miletto (mcmiletto@inf.ufrgs.br)

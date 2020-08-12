@@ -8,7 +8,7 @@ RUN echo "install.packages(c('tidyverse', 'devtools'), repos = 'http://cran.us.r
 
 RUN echo "install.packages('devtools', repos = 'http://cran.us.r-project.org')" | R --vanilla
 
-RUN echo "library(devtools); devtools::install_github('schnorr/starvz', subdir='R_package')" | R --vanilla
+RUN echo "library(devtools); devtools::install_github('schnorr/starvz')" | R --vanilla
 
 RUN useradd -s /bin/bash --create-home user
 USER user

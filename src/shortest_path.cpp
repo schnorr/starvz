@@ -1,6 +1,8 @@
+// [[Rcpp::depends(BH)]]
+
 #include <Rcpp.h>
 #include <boost/graph/dag_shortest_paths.hpp>
-#include<boost/graph/adjacency_list.hpp>
+#include <boost/graph/adjacency_list.hpp>
 
 using namespace Rcpp;
 

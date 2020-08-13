@@ -53,7 +53,7 @@ jobs:
       - Rscript.exe -e 'deps <- devtools::dev_package_deps(dependencies = TRUE); inst <- installed.packages(); install.packages(deps$package[!deps$package %in% inst[,"Package"]])'
     script:
       - R.exe CMD build .
-      - R.exe CMD check *tar.gz --as-cran --install-args=--build
+      - R.exe CMD check *tar.gz --as-cran --no-manual --install-args=--build
     after_failure:
       - cat 'C:/Users/travis/build/schnorr/starvz/starvz.Rcheck/00install.out'
       - cat 'C:/Users/travis/build/schnorr/starvz/starvz.Rcheck/00check.log'

@@ -17,7 +17,7 @@ jobs:
   include:
   - r: release
     name: "Linux CRAN build"
-    if: commit_message =~ /^.*\(test\)$"/
+    if: commit_message =~ /^.*\(test\)$/
     os: linux
     before_script: export NOT_CRAN=false
     script:

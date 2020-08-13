@@ -53,7 +53,7 @@ starvz_log <- function(msg){
 }
 
 starvz_warn <- function(msg){
-  cat(paste0(format(Sys.time(), "%X"), " ", msg, "\n"))
+  cat(paste0(format(Sys.time(), "%X"), " WARNING: ", msg, "\n"))
 }
 
 # This follows:

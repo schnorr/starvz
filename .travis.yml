@@ -17,6 +17,7 @@ jobs:
   include:
   - r: release
     name: "Linux CRAN build"
+    if: commit_message =~ /(RC)/
     os: linux
     before_script: export NOT_CRAN=false
     script:
@@ -26,6 +27,7 @@ jobs:
       - Rscript -e 'library(covr); codecov(flags = "cran")'
   - r: release
     name: "OSX CRAN build"
+    if: commit_message =~ /(RC)/
     os: osx
     before_script: export NOT_CRAN=false
     script:
@@ -37,7 +39,9 @@ jobs:
     name: "Windows CRAN build"
     os: windows
     before_script:
-      - choco install -y r.project --params "/AddToPath"
+      - choco install -y r.project
+      - export R_VERSION=`ls 'C:\Program Files\R\'`
+      - export PATH=$PATH:';C:\Program Files\R\'$R_VERSION'\bin\x64\'
       - export NOT_CRAN=false
       - echo $PATH
     script:

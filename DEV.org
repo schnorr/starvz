@@ -40,3 +40,6 @@ t %>% filter(filename=="R/phase2.R", value==0) %>% select(functions, first_line,
 ** For manual build
 Install:
 - texi2dvi
+
+** For travis Run all test
+add (test) in the end of your commit message

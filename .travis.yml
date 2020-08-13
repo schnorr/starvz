@@ -39,6 +39,7 @@ jobs:
     before_script:
       - choco install -y r.project --params "/AddToPath"
       - export NOT_CRAN=false
+      - echo $PATH
     script:
       - R.exe CMD build .
       - R.exe CMD check *tar.gz --as-cran

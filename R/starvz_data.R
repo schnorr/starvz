@@ -7,7 +7,6 @@
 # For packages that we use a small set of function a lot of times:
 #' @importFrom Rcpp sourceCpp
 #' @importFrom magrittr %>%
-#' @importFrom pipeR %>>%
 #' @importFrom magrittr set_colnames
 #' @importFrom rlang .data
 #' @importFrom lpSolve lp

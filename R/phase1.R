@@ -335,11 +335,11 @@ tree_filtering <- function(dfe, natures, types) {
     as.Node(mode = "network") -> tree
   # Remove all nodes that are present in the natures list
   if (!is.null(natures)) {
-    tree <- tree %>>% (~ Prune(., function(node) !(node$Nature %in% natures)))
+    Prune(tree, function(node) !(node$Nature %in% natures))
   }
   # Remove all types that are present in the types list
   if (!is.null(types)) {
-    tree <- tree %>>% (~ Prune(., function(node) !(node$Type %in% types)))
+    Prune(tree, function(node) !(node$Type %in% types))
   }
 
   return(tree)

@@ -27,7 +27,7 @@ jobs:
       - Rscript -e 'library(covr); codecov(flags = "fast")'
   - r: release
     name: "OSX CRAN build"
-    if: commit_message =~ /(RC)/
+    if: commit_message =~ /^.*\(test\)$/
     os: osx
     before_script: export NOT_CRAN=false
     script:
@@ -37,7 +37,7 @@ jobs:
       - Rscript -e 'library(covr); codecov(flags = "fast")'
   - language: shell
     name: "Windows CRAN build"
-    if: commit_message =~ /(RC)/
+    if: commit_message =~ /^.*\(test\)$/
     os: windows
     before_script:
       - choco install -y r.project

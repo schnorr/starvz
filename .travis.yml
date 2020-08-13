@@ -42,9 +42,12 @@ jobs:
       - choco install -y r.project
       - export R_VERSION=`ls 'C:\Program Files\R\'`
       - export PATH=$PATH:';C:\Program Files\R\'$R_VERSION'\bin\x64\'
+      - echo 'options(repos = "https://cloud.r-project.org", install.packages.compile.from.source = "never")' > ~/.Rprofile.site
+      - export R_PROFILE=~/.Rprofile.site
       - export NOT_CRAN=false
       - echo $PATH
       - Rscript.exe -e 'install.packages("devtools", dependencies = TRUE)'
+      - Rscript.exe -e 'd <- devtools::dev_package_deps(dependencies = TRUE); install.packages(d, dependencies = TRUE)'
     script:
       - R.exe CMD build .
       - R.exe CMD check *tar.gz --as-cran

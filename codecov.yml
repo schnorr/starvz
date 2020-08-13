@@ -12,3 +12,7 @@ require_ci_to_pass: no
 notify:
   after_n_builds: 1
   wait_for_ci: no
+
+flags:
+  cran:
+    joined: false

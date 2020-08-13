@@ -21,7 +21,7 @@ jobs:
       - R CMD build .
       - R CMD check *tar.gz --as-cran
     after_success:
-      - Rscript -e 'library(covr); codecov()'
+      - Rscript -e 'library(covr); codecov(flags = "cran")'
   - r: release
     name: "OSX CRAN build"
     os: osx
@@ -30,7 +30,7 @@ jobs:
       - R CMD build .
       - R CMD check *tar.gz --as-cran
     after_success:
-      - Rscript -e 'library(covr); codecov()'
+      - Rscript -e 'library(covr); codecov(flags = "cran")'
   - r: release
     name: "Linux full Test and Coverage"
     os: linux

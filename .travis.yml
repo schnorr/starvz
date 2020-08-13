@@ -40,6 +40,7 @@ jobs:
     os: windows
     before_script:
       - choco install -y r.project
+      - choco install rtools
       - export R_VERSION=`ls 'C:\Program Files\R\'`
       - export PATH=$PATH:';C:\Program Files\R\'$R_VERSION'\bin\x64\'
       - echo 'options(repos = "https://cloud.r-project.org", install.packages.compile.from.source = "never")' > ~/.Rprofile.site
@@ -50,7 +51,7 @@ jobs:
       - Rscript.exe -e 'deps <- devtools::dev_package_deps(dependencies = TRUE); inst <- installed.packages(); install.packages(deps$package[!deps$package %in% inst[,"Package"]])'
     script:
       - R.exe CMD build .
-      - R.exe CMD check *tar.gz --as-cran
+      - R.exe CMD check *tar.gz --as-cran --install-args=--build
     after_failure:
       - cat 'C:/Users/travis/build/schnorr/starvz/starvz.Rcheck/00install.out'
       - cat 'C:/Users/travis/build/schnorr/starvz/starvz.Rcheck/00check.log'

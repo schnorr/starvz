@@ -1,9 +1,5 @@
 language: r
 
-os:
-  - linux
-  - osx
-
 r_packages:
   - devtools
   - tidyverse
@@ -15,5 +11,26 @@ apt_packages:
 
 cache: packages
 
-after_success:
-  - Rscript -e 'library(covr); codecov()'
+jobs:
+  include:
+  - r: release
+    name: "Linux CRAN build"
+    os: linux
+    script:
+      - R CMD build .
+      - R CMD check *tar.gz --as-cran
+  - r: release
+    name: "OSX CRAN build"
+    os: osx
+    script:
+      - R CMD build .
+      - R CMD check *tar.gz --as-cran
+  - r: release
+    name: "Linux full Test and Coverage"
+    os: linux
+    script:
+      - cp -r extra_data/qr_trace inst/extdata/
+      - R CMD build .
+      - R CMD check *tar.gz --as-cran
+    after_success:
+      - Rscript -e 'Sys.setenv(NOT_CRAN = "true"); library(covr); codecov()'

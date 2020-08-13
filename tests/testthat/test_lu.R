@@ -7,13 +7,9 @@ test_that("starvz_plot works", {
  pl <- starvz_plot(starvz_sample_lu)
  expect_equal(class(pl),c("patchwork", "gg", "ggplot"))
 
+ skip_on_cran()
+ 
  other_data <- starvz_sample_lu
-
- pl <-  panel_handles(starvz_sample_lu, JobId="0_1")
- expect_equal(class(pl),c("gg", "ggplot"))
-
- pl <-  panel_memory_snap(starvz_sample_lu, 100, 10)
- expect_equal(class(pl),c("gg", "ggplot"))
 
  other_data$config <- starvz_read_config(system.file("extdata", "config.yaml", package = "starvz"))
  pl <- starvz_plot(other_data)
@@ -53,4 +49,9 @@ test_that("starvz_plot works", {
  pl <- starvz_plot(other_data)
  expect_equal(class(pl),c("patchwork", "gg", "ggplot"))
 
+ pl <-  panel_handles(starvz_sample_lu, JobId="0_1")
+ expect_equal(class(pl),c("gg", "ggplot"))
+
+ pl <-  panel_memory_snap(starvz_sample_lu, 100, 10)
+ expect_equal(class(pl),c("gg", "ggplot"))
 })

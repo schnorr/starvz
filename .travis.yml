@@ -47,10 +47,13 @@ jobs:
       - export NOT_CRAN=false
       - echo $PATH
       - Rscript.exe -e 'install.packages("devtools", dependencies = TRUE)'
-      - Rscript.exe -e 'd <- devtools::dev_package_deps(dependencies = TRUE); install.packages(d$package, dependencies = TRUE)'
+      - Rscript.exe -e 'deps <- devtools::dev_package_deps(dependencies = TRUE); inst <- installed.packages(); install.packages(deps$package[!deps$package %in% inst[,"Package"]])'
     script:
       - R.exe CMD build .
       - R.exe CMD check *tar.gz --as-cran
+    after_failure:
+      - cat 'C:/Users/travis/build/schnorr/starvz/starvz.Rcheck/00install.out'
+      - cat 'C:/Users/travis/build/schnorr/starvz/starvz.Rcheck/00check.log'
     after_success:
       - Rscript.exe -e 'library(covr); codecov(flags = "cran")'
   - r: release

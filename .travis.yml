@@ -42,11 +42,11 @@ jobs:
       - choco install -y r.project
       - choco install rtools
       - export R_VERSION=`ls 'C:\Program Files\R\'`
-      - export PATH=$PATH:';C:\Program Files\R\'$R_VERSION'\bin\x64\'
+      - export PATH='C:\Program Files\R\'$R_VERSION'\bin\x64\':$PATH
       - echo 'options(repos = "https://cloud.r-project.org", install.packages.compile.from.source = "never")' > ~/.Rprofile.site
       - export R_PROFILE=~/.Rprofile.site
       - export NOT_CRAN=false
-      - export PATH=$PATH:';C:\rtools40\usr\bin\'
+      - export PATH='C:\rtools40\usr\bin\;':$PATH
       - echo $PATH
       - ls 'C:\rtools40\'
       - Rscript.exe -e 'install.packages("devtools", dependencies = TRUE)'

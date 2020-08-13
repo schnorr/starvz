@@ -591,9 +591,9 @@ starvz_plot <- function(data = NULL, name = NULL, save = FALSE, guided = data$co
         arrange(.data$Position) %>%
         mutate(New = cumsum(lag(.data$Height, default = 0))) %>%
         select(.data$Parent, .data$New) -> new_y
-      data$config$guided$starvz_height_resources <- (new_y$New %>% max()) * 10 / 100
+      data$config$guided$starvz_height_resources <- (new_y$New %>% max()) * 15 / 100
     } else {
-      data$config$guided$starvz_height_resources <- (data$Y$Position %>% max()) * 10 / 100
+      data$config$guided$starvz_height_resources <- (data$Y$Position %>% max()) * 15 / 100
     }
 
     data$config$guided$starvz_height_agg <- max(nodes * types * data$config$guided$agg_type_height / 100, 1)

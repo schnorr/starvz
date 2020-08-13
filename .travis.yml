@@ -12,6 +12,8 @@ apt_packages:
 cache: packages
 
 jobs:
+  allow_failures:
+    - os: windows
   include:
   - r: release
     name: "Linux CRAN build"
@@ -31,10 +33,12 @@ jobs:
       - R CMD check *tar.gz --as-cran
     after_success:
       - Rscript -e 'library(covr); codecov(flags = "cran")'
-  - r: release
+  - language: shell
     name: "Windows CRAN build"
     os: windows
-    before_script: SET NOT_CRAN=false
+    before_script:
+      - choco install -y r.project --params "/AddToPath"
+      - export NOT_CRAN=false
     script:
       - R CMD build .
       - R CMD check *tar.gz --as-cran

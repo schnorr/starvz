@@ -119,7 +119,6 @@ geom_events <- function(main_data = NULL, data = NULL,
   # Y axis breaks and their labels
   # Hardcoded here because yconf is specific to Resources Workers
   yconfm <- dfw %>%
-    unnest() %>%
     ungroup() %>%
     select(.data$Container, .data$Position, .data$Height) %>%
     distinct() %>%
@@ -128,7 +127,6 @@ geom_events <- function(main_data = NULL, data = NULL,
     ungroup()
 
   yconfm <- yconfm %>%
-    unnest() %>%
     arrange(.data$Container)
 
   if (!combined) {

@@ -29,5 +29,7 @@ snap_data <- pre_snap(data, data$handle_states)
 memory_snap(snap_data, 1000, tasks_size=200, step=1)
 }
 \examples{
+\dontrun{
 panel_handles(data = starvz_sample_lu)
+}
 }

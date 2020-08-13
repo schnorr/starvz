@@ -810,7 +810,7 @@ tasks_csv_parser <- function(where = ".", ZERO = 0) {
         Sizes = lapply(strsplit(pm$Sizes, " "), as.integer)
       )
     # unnest the lists
-    task_handles <- unnest(handles_dep) %>%
+    task_handles <- unnest(handles_dep, cols = c(Handles, Modes, Sizes)) %>%
       mutate(
         Handles = as.factor(.data$Handles),
         Modes = as.factor(.data$Modes)

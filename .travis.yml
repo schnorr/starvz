@@ -47,7 +47,7 @@ jobs:
       - export NOT_CRAN=false
       - echo $PATH
       - Rscript.exe -e 'install.packages("devtools", dependencies = TRUE)'
-      - Rscript.exe -e 'd <- devtools::dev_package_deps(dependencies = TRUE); install.packages(d, dependencies = TRUE)'
+      - Rscript.exe -e 'd <- devtools::dev_package_deps(dependencies = TRUE); install.packages(d$package, dependencies = TRUE)'
     script:
       - R.exe CMD build .
       - R.exe CMD check *tar.gz --as-cran

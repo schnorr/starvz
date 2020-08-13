@@ -1,14 +1,15 @@
 #!/bin/bash
 
-cd ../../src/
-#./phase1-workflow.sh ../test/lu_test/fxt/ lu 1
-cd ../R/
-./phase2-workflow.R ../test/lu_test/fxt/ ../test/lu_test/config.yaml ../test/lu_test/img.png
-#./phase2-workflow.R ../test/lu_test/fxt/ ../test/lu_test/min.yaml ../test/lu_test/min.png
-#./phase2-workflow.R ../test/lu_test/fxt/ ../test/lu_test/selected.yaml ../test/lu_test/selected.png
-#./phase2-workflow.R ../test/lu_test/fxt/ ../test/lu_test/agg.yaml ../test/lu_test/agg.png
-#./phase2-workflow.R ../test/lu_test/fxt/ ../test/lu_test/agg_dynamic.yaml ../test/lu_test/agg_dynamic.png
-#./phase2-workflow.R ../test/lu_test/fxt/ ../test/lu_test/agg_static.yaml ../test/lu_test/agg_static.png
-#./phase2-workflow.R ../test/lu_test/fxt/ ../test/lu_test/imb.yaml ../test/lu_test/imb.png
-#./phase2-workflow.R ../test/lu_test/fxt/ ../test/lu_test/pmtool.yaml ../test/lu_test/pmtool.png
-cd ../test/lu_test/
+TEST="../../extra_test/lu_test/"
+
+cd ../../inst/tools/
+#./phase1-workflow.sh $TEST/fxt/ lu 1
+./phase2-workflow.R $TEST/fxt/ $TEST/config.yaml $TEST/img.png
+#./phase2-workflow.R $TEST/fxt/ $TEST/min.yaml $TEST/min.png
+#./phase2-workflow.R $TEST/fxt/ $TEST/selected.yaml $TEST/selected.png
+#./phase2-workflow.R $TEST/fxt/ $TEST/agg.yaml $TEST/agg.png
+#./phase2-workflow.R $TEST/fxt/ $TEST/agg_dynamic.yaml $TEST/agg_dynamic.png
+#./phase2-workflow.R $TEST/fxt/ $TEST/agg_static.yaml $TEST/agg_static.png
+#./phase2-workflow.R $TEST/fxt/ $TEST/imb.yaml $TEST/imb.png
+#./phase2-workflow.R $TEST/fxt/ $TEST/pmtool.yaml $TEST/pmtool.png
+cd $TEST

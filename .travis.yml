@@ -32,6 +32,15 @@ jobs:
     after_success:
       - Rscript -e 'library(covr); codecov(flags = "cran")'
   - r: release
+    name: "Windows CRAN build"
+    os: windows
+    before_script: SET NOT_CRAN=false
+    script:
+      - R CMD build .
+      - R CMD check *tar.gz --as-cran
+    after_success:
+      - Rscript -e 'library(covr); codecov(flags = "cran")'
+  - r: release
     name: "Linux full Test and Coverage"
     os: linux
     script:

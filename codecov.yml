@@ -14,5 +14,5 @@ notify:
   wait_for_ci: no
 
 flags:
-  cran:
+  fast:
     joined: false

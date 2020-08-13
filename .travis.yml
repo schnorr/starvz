@@ -24,7 +24,7 @@ jobs:
       - R CMD build .
       - R CMD check *tar.gz --as-cran
     after_success:
-      - Rscript -e 'library(covr); codecov(flags = "cran")'
+      - Rscript -e 'library(covr); codecov(flags = "fast")'
   - r: release
     name: "OSX CRAN build"
     if: commit_message =~ /(RC)/
@@ -34,7 +34,7 @@ jobs:
       - R CMD build .
       - R CMD check *tar.gz --as-cran
     after_success:
-      - Rscript -e 'library(covr); codecov(flags = "cran")'
+      - Rscript -e 'library(covr); codecov(flags = "fast")'
   - language: shell
     name: "Windows CRAN build"
     os: windows
@@ -58,7 +58,7 @@ jobs:
       - cat 'C:/Users/travis/build/schnorr/starvz/starvz.Rcheck/00install.out'
       - cat 'C:/Users/travis/build/schnorr/starvz/starvz.Rcheck/00check.log'
     after_success:
-      - Rscript.exe -e 'library(covr); codecov(flags = "cran")'
+      - Rscript.exe -e 'library(covr); codecov(flags = "fast")'
   - r: release
     name: "Linux full Test and Coverage"
     os: linux

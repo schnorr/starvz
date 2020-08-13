@@ -377,7 +377,7 @@ geom_makespan <- function(dfw = NULL, bsize = 22) {
   tend <- dfw %>%
     pull(.data$End) %>%
     max()
-  loginfo(paste("Makespan is", tend))
+  starvz_log(paste("Makespan is", tend))
   height <- dfw %>%
     select(.data$Position) %>%
     na.omit() %>%
@@ -392,7 +392,7 @@ geom_makespan <- function(dfw = NULL, bsize = 22) {
 geom_cpb <- function(data = NULL) {
   if (is.null(data)) stop("data is NULL when given to geom_cpb")
   if (is.null(data$Dag)) {
-    logwarn("CPB is active but data$Dag is NULL")
+    starvz_warn("CPB is active but data$Dag is NULL")
     return(list())
   }
 
@@ -405,10 +405,10 @@ geom_cpb <- function(data = NULL) {
   }
   if (data$config$st$cpb_mpi$active) {
     if (is.null(data$config$st$cpb_mpi$tile_size)) {
-      logwarn("CPB_MPI is active and st$cpb_mpi$tile_size is NULL")
+      starvz_warn("CPB_MPI is active and st$cpb_mpi$tile_size is NULL")
     }
     if (is.null(data$config$st$cpb_mpi$bandwidth)) {
-      logwarn("CPB_MPI is active and st$cpb_mpi$bandwidth is NULL")
+      starvz_warn("CPB_MPI is active and st$cpb_mpi$bandwidth is NULL")
     }
     tile_size <- data$config$st$cpb_mpi$tile_size
     bandwidth <- data$config$st$cpb_mpi$bandwidth

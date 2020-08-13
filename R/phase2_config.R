@@ -163,10 +163,10 @@ starvz_default_config <- function() {
 starvz_read_config <- function(file = NULL) {
   defaut_config <- starvz_default_config()
   if (is.null(file)) {
-    loginfo("Using default config")
+    starvz_log("Using default config")
     return(defaut_config)
   } else if (!file.exists(file)) {
-    logwarn(paste0("Config file dont exist, using default, wd:", getwd(), " file:", file))
+    starvz_warn(paste0("Config file dont exist, using default, wd:", getwd(), " file:", file))
     return(defaut_config)
   } else {
     config <- yaml::read_yaml(file)

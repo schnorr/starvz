@@ -498,7 +498,7 @@ panel_mpiconcurrent <- function(data, legend = data$config$mpiconcurrent$legend,
   }
 
   if ((data$Link %>% filter(grepl("mpicom", .data$Key)) %>% nrow()) == 0) {
-    logwarn("There aren't any information on MPI, ignoring it.")
+    starvz_warn("There aren't any information on MPI, ignoring it.")
     return(geom_blank())
   }
 
@@ -588,7 +588,7 @@ panel_mpiconcurrentout <- function(data, legend = data$config$mpiconcurrentout$l
   }
 
   if ((data$Link %>% filter(grepl("mpicom", .data$Key)) %>% nrow()) == 0) {
-    logwarn("There aren't any information on MPI, ignoring it.")
+    starvz_warn("There aren't any information on MPI, ignoring it.")
     return(geom_blank())
   }
 
@@ -677,7 +677,7 @@ panel_mpibandwidth <- function(data, legend = data$config$mpibandwidth$legend,
   }
 
   if ((data$Link %>% filter(grepl("mpicom", .data$Key)) %>% nrow()) == 0) {
-    logwarn("There aren't any information on MPI, ignoring it.")
+    starvz_warn("There aren't any information on MPI, ignoring it.")
     return(geom_blank())
   }
 

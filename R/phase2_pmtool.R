@@ -23,7 +23,7 @@ panel_pmtool_st <- function(data = NULL,
   # Get traces
   dfw <- data$Pmtool_states
 
-  loginfo("Entry of state_pmtool_chart")
+  starvz_log("Entry of state_pmtool_chart")
 
   # Filter
   dfwapp <- dfw %>%
@@ -58,7 +58,7 @@ panel_pmtool_st <- function(data = NULL,
   }
 
 
-  loginfo("Exit of state_pmtool_chart")
+  starvz_log("Exit of state_pmtool_chart")
   return(gow)
 }
 
@@ -149,7 +149,7 @@ geom_pmtool_states <- function(data = NULL) {
   dfw <- data$Pmtool_states %>% filter(.data$sched == data$config$pmtool$state$sched)
 
 
-  loginfo("Starting geom_pmtool_states")
+  starvz_log("Starting geom_pmtool_states")
 
   ret <- list()
 
@@ -174,7 +174,7 @@ geom_pmtool_states <- function(data = NULL) {
     ), alpha = 0.5, color = ifelse(data$config$st$rect_outline, "black", NA))
 
 
-  loginfo("Finishing geom_pmtool_states")
+  starvz_log("Finishing geom_pmtool_states")
 
   return(ret)
 }
@@ -182,7 +182,7 @@ geom_pmtool_states <- function(data = NULL) {
 
 geom_pmtool_bounds <- function(data = NULL) {
   if (is.null(data$Pmtool)) {
-    logwarn("Pmtool bounds config is active but the data is NULL")
+    starvz_warn("Pmtool bounds config is active but the data is NULL")
     return(NULL)
   }
 
@@ -265,13 +265,13 @@ geom_makespan_pmtool <- function(data = NULL) {
     filter(.data$sched == data$config$pmtool$state$sched) %>%
     pull(.data$End) %>%
     max()
-  loginfo(paste("makespan pm tool is", tend))
+  starvz_log(paste("makespan pm tool is", tend))
   height <- dfw %>%
     select(.data$Position) %>%
     na.omit() %>%
     pull(.data$Position) %>%
     max()
-  loginfo(paste("max height for makespan is", height))
+  starvz_log(paste("max height for makespan is", height))
   ret <- geom_text(data = data.frame(), x = tend, y = height * .5, aes(label = round(tend, 0)), angle = 90, size = bsize / 4)
   return(ret)
 }

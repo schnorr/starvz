@@ -2,7 +2,7 @@
 
 check_arrow <- function() {
   if (!arrow_available()) {
-    logwarn("Arrow was not property installed, use: install_arrow()")
+    starvz_warn("Arrow was not property installed, use: install_arrow()")
   }
 }
 

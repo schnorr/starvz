@@ -5,15 +5,15 @@ starvz_write_feather <- function(data, directory = ".") {
   invisible(data %>% list_modify("Origin" = NULL) %>% names() %>%
     lapply(function(x) {
       filename <- paste0(directory, "/", tolower(x), ".feather")
-      loginfo(filename)
+      starvz_log(filename)
       if (!is.null(data[[x]])) {
         if (is.data.frame(data[[x]])) {
           write_feather(data[[x]], filename)
         } else {
-          loginfo(paste(filename, "must be a data frame."))
+          starvz_log(paste(filename, "must be a data frame."))
         }
       } else {
-        loginfo(paste("Data for", filename, "has not been feathered because is empty."))
+        starvz_log(paste("Data for", filename, "has not been feathered because is empty."))
       }
     }))
 }
@@ -21,21 +21,21 @@ starvz_write_feather <- function(data, directory = ".") {
 starvz_write_parquet <- function(data, directory = ".") {
   check_arrow()
   if (!codec_is_available("gzip")) {
-    logwarn("Arrow Gzip is not available, try using arrow::install_arrow()")
+    starvz_warn("Arrow Gzip is not available, try using arrow::install_arrow()")
   }
   invisible(data %>% list_modify("Origin" = NULL) %>% names() %>%
     lapply(function(x) {
       filename <- paste0(directory, "/", tolower(x), ".parquet")
-      loginfo(filename)
+      starvz_log(filename)
       if (!is.null(data[[x]])) {
         if (is.data.frame(data[[x]])) {
           properties <- ParquetWriterProperties$create(data[[x]], compression = "gzip")
           write_parquet(data[[x]], filename, properties = properties)
         } else {
-          loginfo(paste(filename, "must be a data frame."))
+          starvz_log(paste(filename, "must be a data frame."))
         }
       } else {
-        loginfo(paste("Data for", filename, "has not been feathered because is empty."))
+        starvz_log(paste("Data for", filename, "has not been feathered because is empty."))
       }
     }))
 }

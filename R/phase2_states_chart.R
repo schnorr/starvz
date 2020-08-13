@@ -394,10 +394,10 @@ panel_st_agg_node <- function(data,
   }
   if (data$config$st$cpb_mpi$active) {
     if (is.na(data$config$st$cpb_mpi$tile_size)) {
-      logwarn("CPB_MPI is active and st$cpb_mpi$tile_size is NULL")
+      starvz_warn("CPB_MPI is active and st$cpb_mpi$tile_size is NULL")
     }
     if (is.na(data$config$st$cpb_mpi$bandwidth)) {
-      logwarn("CPB_MPI is active and st$cpb_mpi$bandwidth is NULL")
+      starvz_warn("CPB_MPI is active and st$cpb_mpi$bandwidth is NULL")
     }
     tile_size <- data$config$st$cpb_mpi$tile_size
     bandwidth <- data$config$st$cpb_mpi$bandwidth

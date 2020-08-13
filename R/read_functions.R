@@ -7,7 +7,7 @@ starvz_read_some_feather <- function(directory = ".", tables = c("application"))
     if (file.exists(table_file)) {
       read_parquet(table_file)
     } else {
-      loginfo(paste("The file:", table_file, " does not exist on that directory. Ignore."))
+      starvz_log(paste("The file:", table_file, " does not exist on that directory. Ignore."))
       NULL
     }
   })
@@ -32,7 +32,7 @@ the_fast_reader_function <- starvz_read_feather
 
 starvz_read_some_parquet <- function(directory = ".", tables = c("application")) {
   if (!codec_is_available("gzip")) {
-    logwarn("Arrow Gzip is not available, try using arrow::install_arrow()")
+    starvz_warn("Arrow Gzip is not available, try using arrow::install_arrow()")
   }
   l1 <- list(Origin = directory)
   l2 <- lapply(tables, function(table) {
@@ -40,7 +40,7 @@ starvz_read_some_parquet <- function(directory = ".", tables = c("application"))
     if (file.exists(table_file)) {
       read_parquet(table_file)
     } else {
-      loginfo(paste("The file:", table_file, " does not exist on that directory. Ignore."))
+      starvz_log(paste("The file:", table_file, " does not exist on that directory. Ignore."))
       NULL
     }
   })
@@ -65,7 +65,7 @@ starvz_read_some <- function(directory = ".", tables = c("application"), config_
   # Check if there is arrow gz files
   filenames <- list.files(path = directory, pattern = "*.parquet", full.names = TRUE, recursive = FALSE)
   if (length(filenames) > 0) {
-    loginfo("Detected parquet files")
+    starvz_log("Detected parquet files")
     data <- starvz_read_some_parquet(directory, tables = tables)
   } else {
     data <- starvz_read_some_feather(directory, tables = tables)
@@ -230,13 +230,13 @@ starvz_read <- function(directory = ".", config_file = NULL, selective = TRUE) {
     }
 
     tables_to_load <- tables_to_load %>% unique()
-    loginfo(paste("Read:", paste(tables_to_load, collapse = " ")))
+    starvz_log(paste("Read:", paste(tables_to_load, collapse = " ")))
     data <- starvz_read_some(directory = directory, tables = tables_to_load, config_file)
   } else {
     # Check if there is arrow gz files
     filenames <- list.files(path = directory, pattern = "*.parquet", full.names = TRUE, recursive = FALSE)
     if (length(filenames) > 0) {
-      loginfo("Detected parquet files")
+      starvz_log("Detected parquet files")
       data <- starvz_read_parquet(directory)
     } else {
       data <- starvz_read_feather(directory)

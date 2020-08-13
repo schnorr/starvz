@@ -40,7 +40,7 @@ panel_memory_state <- function(data = NULL,
     expand_x <- 0.05
   }
 
-  loginfo("Entry of events_memory_chart")
+  starvz_log("Entry of events_memory_chart")
 
   memory_states <- c("Allocating Async Start", "Allocating Async End", "Allocating Start", "Allocating End", "WritingBack Start", "WritingBack End", "Free Start", "Free End")
   memory_states_start <- c("Allocating Async Start", "Allocating Start", "WritingBack Start", "Free Start")
@@ -80,7 +80,7 @@ panel_memory_state <- function(data = NULL,
     gow <- gow + theme(legend.position = "top")
   }
 
-  loginfo("Exit of events_memory_chart")
+  starvz_log("Exit of events_memory_chart")
   return(gow)
 }
 
@@ -89,7 +89,7 @@ geom_events <- function(main_data = NULL, data = NULL,
                         tend = NULL) {
   if (is.null(data)) stop("data is NULL when given to geom_events")
 
-  loginfo("Starting geom_events")
+  starvz_log("Starting geom_events")
 
   dfw <- data
 
@@ -199,7 +199,7 @@ geom_events <- function(main_data = NULL, data = NULL,
     }
   }
 
-  loginfo("Finishing geom_events")
+  starvz_log("Finishing geom_events")
 
   return(ret)
 }
@@ -215,7 +215,7 @@ geom_links <- function(data = NULL, dfw = NULL, combined = FALSE,
 
   dfl <- data$Link
 
-  loginfo("Starting geom_links")
+  starvz_log("Starting geom_links")
 
   # TODO MPI HERE
   col_pos_1 <- data.frame(Container = unique(dfl$Dest)) %>%
@@ -310,7 +310,7 @@ geom_links <- function(data = NULL, dfw = NULL, combined = FALSE,
       )
     }
   }
-  loginfo("Finishing geom_links")
+  starvz_log("Finishing geom_links")
 
   return(ret)
 }

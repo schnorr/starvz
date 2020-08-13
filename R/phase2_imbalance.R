@@ -200,7 +200,7 @@ panel_power_imbalance <- function(data, legend = data$config$power_imbalance$leg
   # Compute POWER
   task <- data$config$power_imbalance$task
   if (is.null(task)) {
-    logwarn("Task is not available for imbalance power")
+    starvz_warn("Task is not available for imbalance power")
     return(geom_blank())
   }
 
@@ -226,7 +226,7 @@ panel_power_imbalance <- function(data, legend = data$config$power_imbalance$leg
       select(.data$Node, .data$ResourceId) %>%
       unique() %>%
       nrow()) {
-    logwarn("Power could not be computed for all resource in imbalance power")
+    starvz_warn("Power could not be computed for all resource in imbalance power")
     return(geom_blank())
   }
 

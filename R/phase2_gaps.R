@@ -61,7 +61,7 @@ gaps_backward_deps_rec <- function(data = NULL, path = NULL, task = NULL, levels
     filter(.data$JobId == task)
 
   if ((dta %>% nrow()) == 0) {
-    loginfo(paste0("The selected task on config$st$tasks$list is invalid (skipping it):", task))
+    starvz_log(paste0("The selected task on config$st$tasks$list is invalid (skipping it):", task))
     return(NULL)
   }
 

@@ -5,40 +5,55 @@
 #' @import ggplot2
 
 # For packages that we use a small set of function a lot of times:
-#' @importFrom Rcpp sourceCpp
-#' @importFrom magrittr %>%
-#' @importFrom magrittr set_colnames
-#' @importFrom rlang .data
-#' @importFrom lpSolve lp
-#' @importFrom logging loginfo logwarn logerror basicConfig addHandler removeHandler writeToConsole
-#' @importFrom tibble rowid_to_column as.tibble enframe
-#' @importFrom utils head tail modifyList
-#' @importFrom tidyr pivot_longer pivot_wider complete separate gather nest unnest expand replace_na
-#' @importFrom readr read_csv cols col_integer col_character col_double col_logical
-#' @importFrom data.tree as.Node Prune Set
-#' @importFrom stats na.omit complete.cases setNames sd quantile lm resid
-#' @importFrom arrow arrow_available read_feather read_parquet write_feather write_parquet codec_is_available ParquetWriterProperties
-#' @importFrom stringr str_replace str_replace_all str_to_title
-#' @importFrom purrr list_modify map
 #' @importFrom grDevices colorRampPalette
 #' @importFrom methods is
+#' @importFrom utils head tail modifyList
+#' @importFrom stats na.omit complete.cases setNames sd quantile lm resid
+#' @importFrom magrittr %>% set_colnames
+#' @importFrom rlang .data
+#' @importFrom tibble rowid_to_column as.tibble enframe
+#' @importFrom tidyr pivot_longer pivot_wider complete separate gather nest unnest expand replace_na
+#' @importFrom readr read_csv cols col_integer col_character col_double col_logical
+#' @importFrom stringr str_replace str_replace_all str_to_title
+#' @importFrom purrr list_modify map
 #' @importFrom patchwork wrap_plots
+#' @importFrom arrow arrow_available read_feather read_parquet write_feather write_parquet codec_is_available ParquetWriterProperties
+#' @importFrom lpSolve lp
+#' @importFrom data.tree as.Node Prune Set
 #' @importFrom gtools mixedorder mixedsort
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom zoo na.locf
 #' @importFrom car outlierTest
 
-# For functions that we use a small number of times use package::function
+# Ignore .
 utils::globalVariables(c("."))
 
 # For some rare cases of internal global variables
 pkg.env <- new.env()
 
-# This fixes some problems on recent versions of tidyverse
-# Check: https://github.com/tidyverse/tidyr/issues/751
-# Check: https://github.com/tidyverse/tidyr/issues/694
-if (exists("unnest_legacy")) {
-  unnest <- unnest_legacy
+# Option for DEBUG
+pkg.env$log <- FALSE
+
+#' Active internal debug logs
+#'
+#' Active internal debug logs
+#' @param state Active or not logs
+#' @return Nothing
+#' @examples
+#' starvz_set_log(FALSE)
+#' @export
+starvz_set_log <- function(state){
+  pkg.env$log <- state
+}
+
+starvz_log <- function(msg){
+  if(pkg.env$log){
+    cat(paste0(format(Sys.time(), "%X"), " ", msg, "\n"))
+  }
+}
+
+starvz_warn <- function(msg){
+  cat(paste0(format(Sys.time(), "%X"), " ", msg, "\n"))
 }
 
 # This follows:

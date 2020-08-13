@@ -4,10 +4,10 @@ isolate_read_write <- function(input.parquet, fun, name, directory, ZERO) {
   data <- list()
   data[[name]] <- fun(where = directory, ZERO = ZERO)
   if (input.parquet == "1") {
-    loginfo("Saving as parquet")
+    starvz_log("Saving as parquet")
     starvz_write_parquet(data, directory = directory)
   } else {
-    loginfo("Saving as feather")
+    starvz_log("Saving as feather")
     starvz_write_feather(data, directory = directory)
   }
   return(NULL)
@@ -16,10 +16,10 @@ isolate_read_write <- function(input.parquet, fun, name, directory, ZERO) {
 isolate_read_write_m <- function(input.parquet, fun, directory, ZERO) {
   data <- fun(where = directory, ZERO = ZERO)
   if (input.parquet == "1") {
-    loginfo("Saving as parquet")
+    starvz_log("Saving as parquet")
     starvz_write_parquet(data, directory = directory)
   } else {
-    loginfo("Saving as feather")
+    starvz_log("Saving as feather")
     starvz_write_feather(data, directory = directory)
   }
   return(NULL)
@@ -38,10 +38,6 @@ isolate_read_write_m <- function(input.parquet, fun, directory, ZERO) {
 #'
 #' @export
 starvz_phase1_read_write <- function(directory = ".", app_states_fun = NULL, state_filter = 0, whichApplication = NULL, input.parquet = "1") {
-  # Logging configuration
-  addHandler(writeToConsole)
-  removeHandler("basic.stdout")
-
   # Start of reading procedure
   if (is.null(app_states_fun)) stop("app_states_fun is obligatory for reading")
 
@@ -127,7 +123,7 @@ starvz_phase1_read_write <- function(directory = ".", app_states_fun = NULL, sta
   # Enframe Version
   Version <- enframe("0.2.0", name = NULL)
 
-  loginfo("Assembling the named list with the data from this case.")
+  starvz_log("Assembling the named list with the data from this case.")
 
   data <- list(
     Origin = directory,
@@ -139,14 +135,14 @@ starvz_phase1_read_write <- function(directory = ".", app_states_fun = NULL, sta
     Zero = ZERO, Version = Version
   )
 
-  loginfo("Call Gaps.")
+  starvz_log("Call Gaps.")
   data$Gaps <- gaps(data)
 
   if (input.parquet == "1") {
-    loginfo("Saving as parquet")
+    starvz_log("Saving as parquet")
     starvz_write_parquet(data, directory = directory)
   } else {
-    loginfo("Saving as feather")
+    starvz_log("Saving as feather")
     starvz_write_feather(data, directory = directory)
   }
 }
@@ -245,10 +241,10 @@ hl_y_paje_tree <- function(where = ".") {
   entities.csv <- paste0(where, "/entities.csv")
 
   if (file.exists(entities.feather)) {
-    loginfo(paste("Reading ", entities.feather))
+    starvz_log(paste("Reading ", entities.feather))
     dfe <- read_feather(entities.feather)
   } else if (file.exists(entities.csv)) {
-    loginfo(paste("Reading ", entities.csv))
+    starvz_log(paste("Reading ", entities.csv))
     dfe <- read_csv(entities.csv,
       trim_ws = TRUE,
       col_types = cols(
@@ -259,7 +255,7 @@ hl_y_paje_tree <- function(where = ".") {
       )
     )
   } else {
-    loginfo(paste("Files", entities.feather, "or", entities.csv, "do not exist."))
+    starvz_log(paste("Files", entities.feather, "or", entities.csv, "do not exist."))
     return(NULL)
   }
 
@@ -306,7 +302,7 @@ hl_y_coordinates <- function(dfw = NULL, dfhie = NULL) {
 }
 
 tree_filtering <- function(dfe, natures, types) {
-  loginfo("Starting the tree filtering to create Y coordinates")
+  starvz_log("Starting the tree filtering to create Y coordinates")
 
   dfe %>%
     # Mutate things to character since data.tree don't like factors
@@ -345,7 +341,7 @@ tree_filtering <- function(dfe, natures, types) {
   return(tree)
 }
 y_coordinates <- function(atree, heights, paddings) {
-  loginfo("Starting y_coordinates")
+  starvz_log("Starting y_coordinates")
   defineHeightPosition <- function(node, dfhs, dfps, curPos) {
     node$P <- curPos
     if (!is.null(node$Nature) && node$Nature == "State") {
@@ -477,7 +473,7 @@ gaps.f_forward <- function(data) {
 }
 
 gaps <- function(data) {
-  loginfo("Starting the gaps calculation.")
+  starvz_log("Starting the gaps calculation.")
 
   if (is.null(data$DAG)) {
     return(NULL)

@@ -146,7 +146,7 @@ panel_atree <- function(data = NULL, step = data$config$atree$step, legend = dat
                         x_end = data$config$limits$end,
                         communication = data$config$atree$communication$active,
                         anomalies = data$config$atree$anomalies$active) {
-  loginfo("Entry of panel_atree")
+  starvz_log("Entry of panel_atree")
 
   starvz_check_data(data, tables = list("Atree" = c("ANode")))
 
@@ -299,7 +299,7 @@ panel_atree <- function(data = NULL, step = data$config$atree$step, legend = dat
     atreeplot <- atreeplot + theme(legend.position = "none")
   }
 
-  loginfo("Exit of panel_atree")
+  starvz_log("Exit of panel_atree")
   return(atreeplot)
 }
 
@@ -525,7 +525,7 @@ panel_nodememuse <- function(data = NULL,
                              x_start = data$config$limits$start,
                              x_end = data$config$limits$end,
                              legend = data$config$activenodes$nodememuse$legend) {
-  loginfo("Entry of panel_nodememuse")
+  starvz_log("Entry of panel_nodememuse")
 
   starvz_check_data(data,
     tables = list(
@@ -602,7 +602,7 @@ panel_nodememuse <- function(data = NULL,
   )
   panel <- panel + tzScale
 
-  loginfo("Exit of panel_nodememuse")
+  starvz_log("Exit of panel_nodememuse")
   return(panel)
 }
 
@@ -627,7 +627,7 @@ panel_activenodes <- function(data = NULL,
                               x_start = data$config$limits$start,
                               x_end = data$config$limits$end,
                               legend = data$config$activenodes$legend) {
-  loginfo("Entry of panel_activenodes")
+  starvz_log("Entry of panel_activenodes")
 
   starvz_check_data(data, tables = list("Atree" = c("ANode")))
 
@@ -704,13 +704,13 @@ panel_activenodes <- function(data = NULL,
   )
   panel <- panel + tzScale
 
-  loginfo("Exit of panel_activenodes")
+  starvz_log("Exit of panel_activenodes")
   return(panel)
 }
 
 # Calculate the computational resource utilization by tree node
 resource_utilization_tree_node <- function(Application = NULL, Atree = NULL, step = 100, group_pruned = FALSE) {
-  loginfo("Entry of resource_utilization_tree_node")
+  starvz_log("Entry of resource_utilization_tree_node")
   # Prepare and filter data
   df_filter <- Application %>%
     filter(
@@ -775,13 +775,13 @@ resource_utilization_tree_node <- function(Application = NULL, Atree = NULL, ste
       select(-.data$originalAnode)
   }
 
-  loginfo("Exit of resource_utilization_tree_node")
+  starvz_log("Exit of resource_utilization_tree_node")
   return(data_node_plot)
 }
 
 # Calculate the computational resource utilization by tree depth
 resource_utilization_tree_depth <- function(Application = NULL, Atree = NULL, step = 100) {
-  loginfo("Entry of resource_utilization_tree_depth_plot")
+  starvz_log("Entry of resource_utilization_tree_depth_plot")
   # Prepare and filter data
   df_filter <- Application %>%
     filter(grepl("qrt", .data$Value) | grepl("do_subtree", .data$Value)) %>%

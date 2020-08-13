@@ -22,9 +22,9 @@ panel_lackready <- function(data = NULL,
     min() -> minResources
 
   aggStep <- data$config$lackready$aggregation
-  # loginfo(paste("lack ready aggregation is", aggStep));
+  # starvz_log(paste("lack ready aggregation is", aggStep));
   threshold <- config_value(data$config$lackready$threshold, minResources)
-  # loginfo(paste("lack ready threshold is", threshold));
+  # starvz_log(paste("lack ready threshold is", threshold));
 
   data$Variable %>%
     filter(.data$Type == "Ready") %>%

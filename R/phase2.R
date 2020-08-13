@@ -186,19 +186,18 @@ starvz_assemble <- function(..., config = NULL, remove_Y_info = TRUE, remove_leg
     } else if (is(i[[1]], "gg")) {
       plists <- append(plists, list(i))
     } else {
-      logerror("starvz_assemble needs a list of plots or a list of list of plots")
+      stop("starvz_assemble needs a list of plots or a list of list of plots")
       return(NULL)
     }
   }
 
   if (is.null(config)) {
-    logerror("config is null")
-    stop()
+    stop("config is null")
   }
 
   number_plots <- length(plists)
 
-  loginfo(paste0("Assembling ", number_plots, " groups of plots"))
+  starvz_log(paste0("Assembling ", number_plots, " groups of plots"))
 
   AllP <- list()
   AllH <- list()
@@ -227,8 +226,7 @@ starvz_assemble <- function(..., config = NULL, remove_Y_info = TRUE, remove_leg
     # Check if its a group of plots
     # TODO: check is weak but will protect for many errors
     if (!is(plot_list[[1]], "gg")) {
-      logerror("starvz_assemble element is not a plot list")
-      return(NULL)
+      stop("starvz_assemble element is not a plot list")
     }
 
     # Computer Heights and sequence
@@ -288,13 +286,8 @@ starvz_assemble <- function(..., config = NULL, remove_Y_info = TRUE, remove_leg
 starvz_plot_list <- function(data = NULL) {
   if (is.null(data)) stop("data passed as parameter is null")
 
-  # Activate logs
-  if (!data$config$log) {
-    removeHandler(writeToConsole)
-  }
-
   if (is.null(data$Version)) {
-    logwarn("This is a old StarVZ trace, trying to be retrocompatible")
+    starvz_warn("This is a old StarVZ trace, trying to be retrocompatible")
     data$Application <- data$State %>% filter(.data$Application)
     data$Application <- data$Application %>% mutate(Size = as.integer(.data$Size))
     data$Starpu <- data$State %>%
@@ -333,7 +326,7 @@ starvz_plot_list <- function(data = NULL) {
     data$Variable <- data$Variable %>% filter(.data$Node %in% data$config$selected_nodes)
   }
 
-  loginfo("Starting the Starvz plot function")
+  starvz_log("Starting the Starvz plot function")
 
   # Create a named list with the ggplot objects + title
   plot_list <- list(
@@ -368,159 +361,159 @@ starvz_plot_list <- function(data = NULL) {
 
   # Atree space/time view
   if (data$config$atree$active) {
-    loginfo("Creating the temporal atree plot")
+    starvz_log("Creating the temporal atree plot")
     plot_list$atree <- panel_atree(data)
   }
 
   # Resource utilization by tree node
   if (data$config$utiltreenode$active) {
-    loginfo("Creating the resource utilization by node plot")
+    starvz_log("Creating the resource utilization by node plot")
     plot_list$utiltreenode <- panel_utiltreenode(data)
   }
 
   # Resource utilization by tree depth
   if (data$config$utiltreedepth$active) {
-    loginfo("Creating the resource utilization by depth plot")
+    starvz_log("Creating the resource utilization by depth plot")
     plot_list$utiltreedepth <- panel_utiltreedepth(data)
   }
 
   # SpaceTime
   if (data$config$st$active) {
-    loginfo("Creating the Space/Time")
+    starvz_log("Creating the Space/Time")
     plot_list$st <- panel_st(data)
   }
 
   if (data$config$summary_nodes$active) {
-    loginfo("Creating node summary")
+    starvz_log("Creating node summary")
     plot_list$summary_nodes <- panel_node_summary(data)
   }
 
   if (data$config$pmtool$state$active) {
-    loginfo("Creating pmtool states")
+    starvz_log("Creating pmtool states")
     plot_list$st_pm <- panel_pmtool_st(data)
   }
 
   if (data$config$memory$state$active) {
-    loginfo("Creating memory states")
+    starvz_log("Creating memory states")
     plot_list$st_mm <- panel_memory_state(data)
   }
 
   # StarPU SpaceTime
   if (data$config$starpu$active) {
-    loginfo("Creating the StarPU Space/Time")
+    starvz_log("Creating the StarPU Space/Time")
     plot_list$starpu <- panel_st_runtime(data)
   }
 
   # KIteration
   if (data$config$kiteration$active) {
-    loginfo("Creating the KIteration")
+    starvz_log("Creating the KIteration")
     plot_list$ijk <- panel_kiteration(data)
   }
 
   # KIteration PMTOOL
   if (data$config$pmtool$kiteration$active) {
-    loginfo("Creating the KIteration for PMTool")
+    starvz_log("Creating the KIteration for PMTool")
     plot_list$ijk_pm <- panel_pmtool_kiteration(data)
   }
 
   # Lack ready (companion for Ready Variable)
   if (data$config$lackready$active) {
-    loginfo("Creating the Lack Ready Plot")
+    starvz_log("Creating the Lack Ready Plot")
     plot_list$lackready <- panel_lackready(data)
   }
 
   # Ready
   if (data$config$ready$active) {
-    loginfo("Creating the Ready plot")
+    starvz_log("Creating the Ready plot")
     plot_list$ready <- panel_ready(data)
   }
 
   # Submitted
   if (data$config$submitted$active) {
-    loginfo("Creating the Submitted plot")
+    starvz_log("Creating the Submitted plot")
     plot_list$submitted <- panel_submitted(data)
   }
 
   # GFlops
   if (data$config$gflops$active) {
-    loginfo("Creating the GFlops plot")
+    starvz_log("Creating the GFlops plot")
     plot_list$gflops <- panel_gflops(data)
   }
 
   # Used Memory
   if (data$config$usedmemory$active) {
-    loginfo("Creating the Used Memory plot")
+    starvz_log("Creating the Used Memory plot")
     plot_list$memory <- panel_usedmemory(data)
   }
 
   # Imbalance Metrics
   if (data$config$imbalance$active) {
-    loginfo("Creating the Imbalance Metrics plot")
+    starvz_log("Creating the Imbalance Metrics plot")
     plot_list$imb_plot <- panel_imbalance(data)
   }
 
   # Imbalance Metrics Power
   if (data$config$power_imbalance$active) {
-    loginfo("Creating the Imbalance Power Metrics plot")
+    starvz_log("Creating the Imbalance Power Metrics plot")
     plot_list$imb_plot_power <- panel_power_imbalance(data)
   }
 
   # Imbalance Metrics hete
   if (data$config$hete_imbalance$active) {
-    loginfo("Creating the Imbalance Hetero Metrics plot")
+    starvz_log("Creating the Imbalance Hetero Metrics plot")
     plot_list$imb_plot_hete <- panel_hete_imbalance(data)
   }
 
   if (data$config$utilheatmap$active) {
-    loginfo("Creating the HeatMap Imbalance plot")
+    starvz_log("Creating the HeatMap Imbalance plot")
     plot_list$heatmap <- panel_utilheatmap(data)
   }
 
   # MPIBandwidth
   if (data$config$mpibandwidth$active) {
-    loginfo("Creating the MPIBandwidth plot")
+    starvz_log("Creating the MPIBandwidth plot")
     plot_list$mpi <- panel_mpibandwidth(data)
   }
 
   # MPI Concurrent
   if (data$config$mpiconcurrent$active) {
-    loginfo("Creating the MPI concurrent ops plot")
+    starvz_log("Creating the MPI concurrent ops plot")
     plot_list$mpiconc <- panel_mpiconcurrent(data)
   }
 
   # MPI Concurrent Out
   if (data$config$mpiconcurrentout$active) {
-    loginfo("Creating the MPI concurrent ops out plot")
+    starvz_log("Creating the MPI concurrent ops out plot")
     plot_list$mpiconcout <- panel_mpiconcurrentout(data)
   }
 
   # MPI State
   if (data$config$mpistate$active) {
-    loginfo("Creating the MPI state")
+    starvz_log("Creating the MPI state")
     plot_list$mpistate <- panel_mpistate(data)
   }
 
   # GPUBandwidth
   if (data$config$gpubandwidth$active) {
-    loginfo("Creating the GPU Bandwidth plot")
+    starvz_log("Creating the GPU Bandwidth plot")
     plot_list$gpu <- panel_gpubandwidth(data)
   }
 
   # Active Nodes
   if (data$config$activenodes$active) {
-    loginfo("Creating the Active Nodes plot")
+    starvz_log("Creating the Active Nodes plot")
     plot_list$activenodes <- panel_activenodes(data)
   }
 
   # Node memory usage
   if (data$config$activenodes$nodememuse$active) {
-    loginfo("Creating the Node Memory Usage plot")
+    starvz_log("Creating the Node Memory Usage plot")
     plot_list$nodememuse <- panel_nodememuse(data)
   }
 
   # Title
   if (data$config$title$active) {
-    loginfo("Creating the title plot")
+    starvz_log("Creating the title plot")
     plot_list$tplot <- panel_title(data)
   }
 
@@ -608,7 +601,7 @@ starvz_plot <- function(data = NULL, name = NULL, save = FALSE, guided = data$co
 
   plist <- starvz_plot_list(data)
 
-  loginfo("Assembling the plot")
+  starvz_log("Assembling the plot")
 
   # assembling
   plot <- starvz_assemble(plist, config = data$config)
@@ -631,7 +624,7 @@ starvz_plot <- function(data = NULL, name = NULL, save = FALSE, guided = data$co
     ggsave(name, plot = plot, width = final_in_width, height = final_in_height, units = "in", dpi = total_dpi, limitsize = FALSE)
   }
 
-  loginfo("Ending Starvz plot function")
+  starvz_log("Ending Starvz plot function")
 
   return(plot)
 }

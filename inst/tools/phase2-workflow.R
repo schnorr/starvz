@@ -18,7 +18,7 @@ if (length(args)==3) {
 }
 
 cat("StarVZ - Phase 2 - Start\n", file = stdout())
-
+starvz_set_log(TRUE)
 data <- starvz_read(directory, config_file);
 
 p <- starvz_plot(data, name, save=TRUE)

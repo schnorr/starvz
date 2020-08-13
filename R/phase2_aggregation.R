@@ -187,7 +187,7 @@ geom_aggregated_states <- function(data = NULL, Show.Outliers = FALSE, min_time_
   if (is.null(data)) stop("data is NULL when given to geom_aggregated_states")
   if (is.na(states)) stop("states is NA when given to geom_aggregated_states")
 
-  loginfo("Starting geom_aggregated_states")
+  starvz_log("Starting geom_aggregated_states")
 
   # Define the exclude ids based on the Show.Outliers parameter
   if (Show.Outliers) {
@@ -239,7 +239,7 @@ geom_aggregated_states <- function(data = NULL, Show.Outliers = FALSE, min_time_
   ret[[length(ret) + 1]] <- scale_alpha_discrete(range = c(1, .6))
   ret[[length(ret) + 1]] <- scale_fill_manual(values = extract_colors(dfw, data$Colors))
 
-  loginfo("Finishing geom_aggregated_states")
+  starvz_log("Finishing geom_aggregated_states")
 
   return(ret)
 }
@@ -250,7 +250,7 @@ panel_st_agg_dynamic <- function(data = NULL,
     return(NULL)
   }
 
-  loginfo("Vinicius Entry Agg")
+  starvz_log("Vinicius Entry Agg")
 
   # Parameters
   with.outliers <- data$config$st$outliers
@@ -260,7 +260,7 @@ panel_st_agg_dynamic <- function(data = NULL,
     filter(.data$Outlier == TRUE) %>%
     pull(.data$Duration) %>%
     max()
-  loginfo(paste("Longer outlier for min_time_pure definition is", longer.outlier))
+  starvz_log(paste("Longer outlier for min_time_pure definition is", longer.outlier))
   with.min_time_pure <- config_value(data$config$st$aggregation$step, longer.outlier)
 
   # Considering only application states
@@ -274,7 +274,7 @@ panel_st_agg_dynamic <- function(data = NULL,
     .$End %>%
     max()
 
-  loginfo("Vinicius Plotting Agg")
+  starvz_log("Vinicius Plotting Agg")
 
   # Plot
   gow <- ggplot() +
@@ -317,10 +317,10 @@ panel_st_agg_dynamic <- function(data = NULL,
 
     gow <- gow + geom_path_highlight(tasksel)
   } else {
-    loginfo("DO NOT add dependencies")
+    starvz_log("DO NOT add dependencies")
   }
 
-  loginfo("ViniciusExit Agg")
+  starvz_log("ViniciusExit Agg")
 
   gow <- gow +
     coord_cartesian(xlim = c(x_start, x_end), ylim = c(0, NA))
@@ -360,7 +360,7 @@ panel_st_agg_static <- function(data = NULL, runtime = FALSE,
     dfw_agg <- st_time_aggregation(data$Application, colors = data$Colors, step = agg_step)
   }
 
-  loginfo("Entry Agg")
+  starvz_log("Entry Agg")
 
   # Considering only application or StarPU data
   if (runtime == FALSE) {
@@ -382,7 +382,7 @@ panel_st_agg_static <- function(data = NULL, runtime = FALSE,
   # yconf
   yconfm <- yconf(dfw, data$config$st$labels)
 
-  loginfo("Plotting Agg")
+  starvz_log("Plotting Agg")
 
   # Plot
   gow <- dfw_agg %>% ggplot() +
@@ -443,7 +443,7 @@ panel_st_agg_static <- function(data = NULL, runtime = FALSE,
 
       gow <- gow + geom_path_highlight(tasksel)
     } else {
-      loginfo("DO NOT add dependencies")
+      starvz_log("DO NOT add dependencies")
     }
   } else {
     # Y Label
@@ -457,6 +457,6 @@ panel_st_agg_static <- function(data = NULL, runtime = FALSE,
     coord_cartesian(xlim = c(x_start, x_end), ylim = c(0, NA))
 
 
-  loginfo("Exit Agg")
+  starvz_log("Exit Agg")
   return(gow)
 }

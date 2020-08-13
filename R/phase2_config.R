@@ -66,7 +66,7 @@ starvz_default_config <- function() {
   config$st$cpb_mpi$active <- FALSE
   config$st$abe$active <- FALSE
   config$st$aggregation$active <- FALSE
-  config$st$aggregation$method <- "lucas"
+  config$st$aggregation$method <- "static"
   config$st$aggregation$states <- c("dgemm")
   config$st$rect_outline <- FALSE
   config$st$abe$size <- 5

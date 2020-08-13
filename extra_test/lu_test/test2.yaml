@@ -5,7 +5,7 @@ default:
   expand: 0.05 # Factor to Expand horizontaly the plots with blank content
   idleness_factor: 5.5 # Resouces Idleness Text Size division Factor of base_size
   idleness_all: TRUE # Show all Resouces idleness values
-  guided:
+  guided: 
     active: TRUE
   # time: deprecated option
   title: # Overall Visualization Title
@@ -54,7 +54,7 @@ default:
       label: TRUE # Enable Label
     aggregation: # If enable, aggregates the visualization tasks inside a time step.
       active: FALSE # Enable
-      method: "static" # Method Used for aggregation "static" / "dynamic" (For Worker aggregation) or "nodes" for node Aggregation
+      method: "vinicius" # Method Used for aggregation "lucas" or "vinicius"
       states: ["dgemm"] # Option for vinicius aggregation, Tasks for aggregation
       step: 1000 # Time step used for aggregation
     cpb_mpi: # Show Critical Path bound makespan considering MPI
@@ -127,32 +127,6 @@ default:
     #height: 1.5
     limit:
     step:
-
-  mpibandwidth:
-    active: TRUE
-    step: 100
-    legend: FALSE
-    #height: 1.5
-    limit:
-
-  mpiconcurrent:
-    active: TRUE
-    legend: FALSE
-    #height: 1.5
-    step:
-    limit:
-
-  mpiconcurrentout:
-    active: TRUE
-    legend: FALSE
-    #height: 1.5
-    step:
-    limit:
-
-  mpistate:
-    active: TRUE
-    legend: FALSE
-    #height: 1.5
 
   gpubandwidth:
     active: TRUE

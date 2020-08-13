@@ -1,12 +1,25 @@
 
-
-panel_st <- function(data) {
-  if (data$config$st$aggregation$active) {
-    if (data$config$st$aggregation$method == "lucas") {
+#' Create a space time visualization of the application as a Gantt chart
+#'
+#' Use the Application trace data to plot the task computations by ResourceId
+#' over the execution time. It will select the aggregation mode if requested.
+#'
+#' @param data starvz_data with trace data
+#' @param agg boolean Active or not aggregation
+#' @param agg_met Aggregation method, possible: static, dynamic, nodes
+#' @return A ggplot object
+#' @include starvz_data.R
+#' @examples
+#' panel_st(data = starvz_sample_lu)
+#' @export
+panel_st <- function(data, agg = data$config$st$aggregation$active,
+                           agg_met = data$config$st$aggregation$method) {
+  if (agg) {
+    if (agg_met == "static") {
       panel <- panel_st_agg_static(data)
-    } else if (data$config$st$aggregation$method == "vinicius") {
+    } else if (agg_met == "dynamic") {
       panel <- panel_st_agg_dynamic(data)
-    } else if (data$config$st$aggregation$method == "nodes") {
+    } else if (agg_met == "nodes") {
       panel <- panel_st_agg_node(data)
     }
   } else {
@@ -15,8 +28,21 @@ panel_st <- function(data) {
   return(panel)
 }
 
-panel_st_runtime <- function(data) {
-  if (data$config$starpu$aggregation$active) {
+#' Create a space time visualization of the runtime as a Gantt chart
+#'
+#' Use the runtime trace data to plot the task computations by ResourceId
+#' over the execution time. It will select the aggregation mode if requested,
+#' only static aggragation is avilable for runtime.
+#'
+#' @param data starvz_data with trace data
+#' @param agg Active or not static aggregation
+#' @return A ggplot object
+#' @include starvz_data.R
+#' @examples
+#' panel_st_runtime(data = starvz_sample_lu)
+#' @export
+panel_st_runtime <- function(data, agg = data$config$starpu$aggregation$active) {
+  if (agg) {
     panel <- panel_st_agg_static(data, runtime = TRUE, step = data$config$starpu$aggregation$step)
   } else {
     panel <- panel_st_raw(data = data, runtime = TRUE)

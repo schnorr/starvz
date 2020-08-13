@@ -401,9 +401,11 @@ panel_st_agg_static <- function(data = NULL, runtime = FALSE,
       xmax = .data$End,
       ymin = .data$Position + .data$TaskPosition,
       ymax = .data$Position + (.data$TaskPosition + .data$TaskHeight), color = .data$Task
-    ), alpha = .5) +
+    ), alpha = .5)
+    
+  if(!runtime){
     # Print outliers on top
-    geom_rect(
+    gow <- gow + geom_rect(
       data = (dfw %>% filter(.data$Outlier == TRUE)),
       aes(
         fill = .data$Value,
@@ -413,6 +415,7 @@ panel_st_agg_static <- function(data = NULL, runtime = FALSE,
         ymax = .data$Position + .data$Height - 0.4
       ), alpha = 1
     )
+  }
 
   if (!runtime) {
     # Y Label

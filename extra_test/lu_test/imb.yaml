@@ -57,6 +57,7 @@ default:
     active: TRUE
     legend: TRUE
     #height: 5
+    limit:
     step: 100
     labels: "ALL"
    

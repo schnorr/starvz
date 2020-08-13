@@ -36,3 +36,7 @@ covr::package_coverage()
 c %>% as.tibble() -> t
 t %>% filter(filename=="R/phase2.R", value==0) %>% select(functions, first_line, last_line) %>% data.frame()
 #+end_src
+
+** For manual build
+Install:
+- texi2dvi

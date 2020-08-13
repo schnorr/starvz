@@ -1,5 +1,15 @@
+#' Shows if the runtimes is lacking ready tasks
+#'
+#' Plot a bar over time that shows when the runtime is lacking ready tasks
+#'
+#' @param data starvz_data with trace data
+#' @param x_start X-axis start value
+#' @param x_end X-axis end value
+#' @return A ggplot object
 #' @include starvz_data.R
-
+#' @examples
+#' panel_lackready(data = starvz_sample_lu)
+#' @export
 panel_lackready <- function(data = NULL,
                             x_start = data$config$limits$start,
                             x_end = data$config$limits$end) {

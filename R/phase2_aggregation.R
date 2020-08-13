@@ -243,6 +243,20 @@ geom_aggregated_states <- function(data = NULL, Show.Outliers = FALSE, min_time_
 
   return(ret)
 }
+
+#' Create a space time visualization as a Gantt chart with dynamic aggregation
+#'
+#' Use the any state trace data to plot the task computations by ResourceId
+#' over the execution time. Dynamic aggregating by selecting the best time-step
+#'
+#' @param data starvz_data with trace data
+#' @param x_start X-axis start value
+#' @param x_end X-axis end value
+#' @return A ggplot object
+#' @include starvz_data.R
+#' @examples
+#' #panel_st_agg_dynamic(data = starvz_sample_lu)
+#' @export
 panel_st_agg_dynamic <- function(data = NULL,
                                  x_start = data$config$limits$start,
                                  x_end = data$config$limits$end) {
@@ -328,6 +342,21 @@ panel_st_agg_dynamic <- function(data = NULL,
   return(gow)
 }
 
+#' Create a space time visualization as a Gantt chart with static aggregation
+#'
+#' Use the any state trace data to plot the task computations by ResourceId
+#' over the execution time. Aggregating by a fixed time-step
+#'
+#' @param data starvz_data with trace data
+#' @param runtime if this is runtime data
+#' @param x_start X-axis start value
+#' @param x_end X-axis end value
+#' @param step time-step
+#' @return A ggplot object
+#' @include starvz_data.R
+#' @examples
+#' #panel_st_agg_static(data = starvz_sample_lu)
+#' @export
 panel_st_agg_static <- function(data = NULL, runtime = FALSE,
                                 x_start = data$config$limits$start,
                                 x_end = data$config$limits$end,
@@ -402,7 +431,7 @@ panel_st_agg_static <- function(data = NULL, runtime = FALSE,
       ymin = .data$Position + .data$TaskPosition,
       ymax = .data$Position + (.data$TaskPosition + .data$TaskHeight), color = .data$Task
     ), alpha = .5)
-    
+
   if(!runtime){
     # Print outliers on top
     gow <- gow + geom_rect(

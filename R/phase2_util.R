@@ -110,6 +110,16 @@ outlier_definition <- function(x) {
   (quantile(x)["75%"] + (quantile(x)["75%"] - quantile(x)["25%"]) * 1.5)
 }
 
+#' Create the title of StarVZ plot
+#'
+#' Use the directory of traces name to create a plot title
+#'
+#' @param data starvz_data with trace data
+#' @return A ggplot object
+#' @include starvz_data.R
+#' @examples
+#' panel_title(data = starvz_sample_lu)
+#' @export
 panel_title <- function(data) {
   ggplot() +
     xlim(0, 1) +

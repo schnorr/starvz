@@ -147,7 +147,27 @@ utilization_per_step <- function(data_app, step) {
     mutate(UtilizationTime = .data$Utilization * step)
 }
 
+#' Create a line chart with homogeneous imbalance metrics
+#'
+#' The metrics will be calculated by fixed time-spets
+#'
+#' @param data starvz_data with trace data
+#' @param legend enable/disable legends
+#' @param base_size base_size base font size
+#' @param expand_x expand size for scale_x_continuous padding
+#' @param x_start X-axis start value
+#' @param x_end X-axis end value
+#' @param y_start Y-axis start value
+#' @param y_end Y-axis end value
+#' @param step time step for aggregation
+#' @return A ggplot object
+#' @include starvz_data.R
+#' @examples
+#' #panel_imbalance(data = starvz_sample_lu)
+#' @export
 panel_imbalance <- function(data, legend = data$config$imbalance$legend,
+                            base_size = data$config$base_size,
+                            expand_x = data$config$expand,
                             x_start = data$config$limits$start,
                             x_end = data$config$limits$end,
                             y_start = 0,
@@ -176,7 +196,7 @@ panel_imbalance <- function(data, legend = data$config$imbalance$legend,
     pivot_longer(-.data$Step, names_to = "metric", values_to = "value") %>%
     mutate(Time = .data$Step * agg_step + agg_step / 2) -> to_plot
 
-  to_plot %>% var_imbalance_plot("Imb Metric", agg_step, data$config$base_size, data$config$expand) -> panel
+  to_plot %>% var_imbalance_plot("Imb Metric", agg_step, base_size, expand) -> panel
 
   if (!legend) {
     panel <- panel + theme(legend.position = "none")
@@ -191,7 +211,27 @@ panel_imbalance <- function(data, legend = data$config$imbalance$legend,
   return(panel)
 }
 
+#' Create a line chart with heterogeneous imbalance metrics
+#'
+#' The metrics will be calculated by fixed time-spets
+#'
+#' @param data starvz_data with trace data
+#' @param legend enable/disable legends
+#' @param base_size base_size base font size
+#' @param expand_x expand size for scale_x_continuous padding
+#' @param x_start X-axis start value
+#' @param x_end X-axis end value
+#' @param y_start Y-axis start value
+#' @param y_end Y-axis end value
+#' @param step time step for aggregation
+#' @return A ggplot object
+#' @include starvz_data.R
+#' @examples
+#' #panel_power_imbalance(data = starvz_sample_lu)
+#' @export
 panel_power_imbalance <- function(data, legend = data$config$power_imbalance$legend,
+                                  base_size = data$config$base_size,
+                                  expand_x = data$config$expand,
                                   x_start = data$config$limits$start,
                                   x_end = data$config$limits$end,
                                   y_start = 0,
@@ -242,7 +282,7 @@ panel_power_imbalance <- function(data, legend = data$config$power_imbalance$leg
     pivot_longer(-.data$Step, names_to = "metric", values_to = "value") %>%
     mutate(Time = .data$Step * agg_step + agg_step / 2) -> to_plot
 
-  to_plot %>% var_imbalance_plot("Imb Metric\nPower", agg_step, data$config$base_size, data$config$expand) -> panel
+  to_plot %>% var_imbalance_plot("Imb Metric\nPower", agg_step, base_size, expand) -> panel
 
   if (!legend) {
     panel <- panel + theme(legend.position = "none")
@@ -257,7 +297,27 @@ panel_power_imbalance <- function(data, legend = data$config$power_imbalance$leg
   return(panel)
 }
 
+#' Create a line chart with heterogeneous resources and tasks imbalance metrics
+#'
+#' The metrics will be calculated by fixed time-spets
+#'
+#' @param data starvz_data with trace data
+#' @param legend enable/disable legends
+#' @param base_size base_size base font size
+#' @param expand_x expand size for scale_x_continuous padding
+#' @param x_start X-axis start value
+#' @param x_end X-axis end value
+#' @param y_start Y-axis start value
+#' @param y_end Y-axis end value
+#' @param step time step for aggregation
+#' @return A ggplot object
+#' @include starvz_data.R
+#' @examples
+#' #panel_hete_imbalance(data = starvz_sample_lu)
+#' @export
 panel_hete_imbalance <- function(data, legend = data$config$hete_imbalance$legend,
+                                 base_size = data$config$base_size,
+                                 expand_x = data$config$expand,
                                  x_start = data$config$limits$start,
                                  x_end = data$config$limits$end,
                                  y_start = 0,
@@ -285,7 +345,7 @@ panel_hete_imbalance <- function(data, legend = data$config$hete_imbalance$legen
     pivot_longer(-.data$Step, names_to = "metric", values_to = "value") %>%
     mutate(Time = .data$Step * agg_step + agg_step / 2) -> to_plot
 
-  to_plot %>% var_imbalance_plot("Imb Metric\nHete", agg_step, data$config$base_size, data$config$expand) -> panel
+  to_plot %>% var_imbalance_plot("Imb Metric\nHete", agg_step, base_size, expand) -> panel
 
   if (!legend) {
     panel <- panel + theme(legend.position = "none")
@@ -398,7 +458,28 @@ utilization_per_step_double_hetero <- function(step, df) {
   return(ret)
 }
 
+#' Create a heatmap of resource utilization
+#'
+#' Similar to the other resource oriented plots but shows the utilization
+#' per time step
+#'
+#' @param data starvz_data with trace data
+#' @param legend enable/disable legends
+#' @param base_size base_size base font size
+#' @param expand_x expand size for scale_x_continuous padding
+#' @param x_start X-axis start value
+#' @param x_end X-axis end value
+#' @param y_start Y-axis start value
+#' @param y_end Y-axis end value
+#' @param step time step for aggregation
+#' @return A ggplot object
+#' @include starvz_data.R
+#' @examples
+#' #panel_utilheatmap(data = starvz_sample_lu)
+#' @export
 panel_utilheatmap <- function(data, legend = data$config$utilheatmap$legend,
+                              base_size = data$config$base_size,
+                              expand_x = data$config$expand,
                               x_start = data$config$limits$start,
                               x_end = data$config$limits$end,
                               y_start = 0,
@@ -433,8 +514,8 @@ panel_utilheatmap <- function(data, legend = data$config$utilheatmap$legend,
     mutate(Time = .data$Step * agg_step + agg_step / 2) %>%
     ggplot(aes(y = .data$Position, x = .data$Time, fill = .data$Utilization)) +
     geom_raster() +
-    default_theme(data$config$base_size, data$config$expand, legend_title = TRUE) +
-    scale_y_continuous(breaks = yconfv$Position, labels = yconfv$ResourceId, expand = c(data$config$expand, 0)) +
+    default_theme(base_size, expand, legend_title = TRUE) +
+    scale_y_continuous(breaks = yconfv$Position, labels = yconfv$ResourceId, expand = c(expand, 0)) +
     labs(y = "Utilization", x = "Time") +
     scale_fill_gradient2(
       name = "Load [%]", midpoint = 0.5, low = "blue", mid = "white",

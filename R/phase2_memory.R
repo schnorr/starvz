@@ -315,6 +315,18 @@ geom_links <- function(data = NULL, dfw = NULL, combined = FALSE,
   return(ret)
 }
 
+#' Computes presence of handles over resources
+#'
+#' Use for precomputation of other memory-related functions
+#'
+#' @param data starvz_data with trace data
+#' @return Time-Step aggregated handle presences
+#' @include starvz_data.R
+#' @examples
+#'\dontrun{
+#' handles_presence_states(data = starvz_sample_lu)
+#'}
+#' @export
 handles_presence_states <- function(data) {
   # Selecting only the data state events
   data$Events_data %>%
@@ -349,10 +361,34 @@ handles_presence_states <- function(data) {
   return(f_data)
 }
 
+#' Handles Name coordinates
+#'
+#' Give handles name by their coordinates
+#'
+#' @param df data_handle table of Starvz data
+#' @return data_handle table  with new column Value with the name
+#' @include starvz_data.R
+#' @examples
+#'\dontrun{
+#' data_name_coordinates(data = starvz_sample_lu)
+#'}
+#' @export
 data_name_coordinates <- function(df) {
   df %>% mutate(Value = paste0("Memory Block ", .data$Coordinates, ""))
 }
 
+#' Handles Name Tag
+#'
+#' Give handles name by their tag
+#'
+#' @param df data_handle table of Starvz data
+#' @return data_handle table  with new column Value with the name
+#' @include starvz_data.R
+#' @examples
+#'\dontrun{
+#' data_name_tag(data = starvz_sample_lu)
+#'}
+#' @export
 data_name_tag <- function(df) {
   if ("MPITag" %in% names(df)) {
     df %>% mutate(Value = paste0("Memory Block ", as.character(.data$MPITag), "")) -> ret
@@ -362,10 +398,35 @@ data_name_tag <- function(df) {
   return(ret)
 }
 
+#' Handles Name address
+#'
+#' Give handles name by their address
+#'
+#' @param df data_handle table of Starvz data
+#' @return data_handle table  with new column Value with the name
+#' @include starvz_data.R
+#' @examples
+#'\dontrun{
+#' data_name_handle(data = starvz_sample_lu)
+#'}
+#' @export
 data_name_handle <- function(df) {
   df %>% mutate(Value = paste0("Memory Block ", .data$Handle, ""))
 }
 
+#' Pre-Computation for memory handles panel
+#'
+#' Use for precomputation of memory handles panel
+#'
+#' @param data starvz_data with trace data
+#' @param name_func function to give names to handles
+#' @return Pre-Computated data for panel_handles
+#' @include starvz_data.R
+#' @examples
+#'\dontrun{
+#' pre_handle_gantt(data = starvz_sample_lu)
+#'}
+#' @export
 pre_handle_gantt <- function(data, name_func = NULL) {
   # If not user defined lets try to select the best
   # function to give name to our handles
@@ -547,13 +608,13 @@ pre_handle_gantt <- function(data, name_func = NULL) {
 #' Create a space time visualization of data handles
 #'
 #' Visualizate data handles movement
-#' To accelerate the process:
+#' To accelerate the process:\code{
 #' data$handle_states <- handles_presence_states(data)
 #' data$handle_gantt_data <- pre_handle_gantt(data)
 #' To Select time:
 #' handles_gantt(data, JobId=c(jobid))
 #' snap_data <- pre_snap(data, data$handle_states)
-#' memory_snap(snap_data, 1000, tasks_size=200, step=1)
+#' memory_snap(snap_data, 1000, tasks_size=200, step=1)}
 #'
 #' @param data starvz_data with trace data
 #' @param JobId Select handles of jobid
@@ -792,13 +853,6 @@ pre_snap <- function(data, f_data) {
 #' Create a snapshot of memory
 #'
 #' Visualizate memory in a specific time
-#' To accelerate the process:
-#' data$handle_states <- handles_presence_states(data)
-#' data$handle_gantt_data <- pre_handle_gantt(data)
-#' To Select time:
-#' handles_gantt(data, JobId=c(jobid))
-#' snap_data <- pre_snap(data, data$handle_states)
-#' memory_snap(snap_data, 1000, tasks_size=200, step=1)
 #'
 #' @param data starvz_data with trace data
 #' @param selected_time time

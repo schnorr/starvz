@@ -1,5 +1,20 @@
-#' @include starvz_data.R
 
+#' Create a space time visualization of pmtool application as a Gantt chart
+#'
+#' Use the PMTOOL Application trace data to plot the task computations by ResourceId
+#' over the execution time.
+#'
+#' @param data starvz_data with trace data
+#' @param base_size base_size base font size
+#' @param expand_x expand size for scale_x_continuous padding
+#' @param x_start X-axis start value
+#' @param x_end X-axis end value
+#' @param legend enable/disable legends
+#' @return A ggplot object
+#' @include starvz_data.R
+#' @examples
+#' #panel_pmtool_st(data = starvz_sample_lu)
+#' @export
 panel_pmtool_st <- function(data = NULL,
                             legend = data$config$pmtool$state$legend,
                             base_size = data$config$base_size,
@@ -62,6 +77,19 @@ panel_pmtool_st <- function(data = NULL,
   return(gow)
 }
 
+#' Create a special chart for applications with iterations with PMtool data
+#'
+#' Plot iteraionts Y over Time X of PMtool data
+#'
+#' @param data starvz_data with trace data
+#' @param legend enable/disable legends
+#' @param x_start X-axis start value
+#' @param x_end X-axis end value
+#' @return A ggplot object
+#' @include starvz_data.R
+#' @examples
+#' #panel_pmtool_kiteration(data = starvz_sample_lu)
+#' @export
 panel_pmtool_kiteration <- function(data = NULL,
                                     legend = data$config$pmtool$kiteration$legend,
                                     x_start = data$config$limits$start,

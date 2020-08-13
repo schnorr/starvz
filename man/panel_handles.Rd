@@ -20,13 +20,13 @@ A ggplot object
 }
 \description{
 Visualizate data handles movement
-To accelerate the process:
+To accelerate the process:\code{
 data$handle_states <- handles_presence_states(data)
 data$handle_gantt_data <- pre_handle_gantt(data)
 To Select time:
 handles_gantt(data, JobId=c(jobid))
 snap_data <- pre_snap(data, data$handle_states)
-memory_snap(snap_data, 1000, tasks_size=200, step=1)
+memory_snap(snap_data, 1000, tasks_size=200, step=1)}
 }
 \examples{
 \dontrun{

@@ -20,13 +20,6 @@ A ggplot object
 }
 \description{
 Visualizate memory in a specific time
-To accelerate the process:
-data$handle_states <- handles_presence_states(data)
-data$handle_gantt_data <- pre_handle_gantt(data)
-To Select time:
-handles_gantt(data, JobId=c(jobid))
-snap_data <- pre_snap(data, data$handle_states)
-memory_snap(snap_data, 1000, tasks_size=200, step=1)
 }
 \examples{
 panel_memory_snap(data = starvz_sample_lu, 100, 10)

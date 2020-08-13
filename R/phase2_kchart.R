@@ -14,7 +14,7 @@
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
-#' panel_ready(data = starvz_sample_lu)
+#' #panel_kiteration(data = starvz_sample_lu)
 #' @export
 panel_kiteration <- function(data = NULL,
                              middle_lines = data$config$kiteration$middlelines,

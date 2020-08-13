@@ -564,7 +564,9 @@ pre_handle_gantt <- function(data, name_func = NULL) {
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
+#'\dontrun{
 #' panel_handles(data = starvz_sample_lu)
+#'}
 #' @export
 panel_handles <- function(data, JobId = NA, lines = NA, lHandle = NA) {
   if (is.null(data$handle_gantt_data)) {

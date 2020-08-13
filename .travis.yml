@@ -16,12 +16,14 @@ jobs:
   - r: release
     name: "Linux CRAN build"
     os: linux
+    before_script: export NOT_CRAN=false
     script:
       - R CMD build .
       - R CMD check *tar.gz --as-cran
   - r: release
     name: "OSX CRAN build"
     os: osx
+    before_script: export NOT_CRAN=false
     script:
       - R CMD build .
       - R CMD check *tar.gz --as-cran

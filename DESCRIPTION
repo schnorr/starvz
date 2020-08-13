@@ -1,5 +1,5 @@
 Package: starvz
-Title: R-based visualization techniques for task-based applications
+Title: R-Based Visualization Techniques for Task-Based Applications
 Version: 0.3.0
 Authors@R: c(
     person("Lucas Mello Schnorr", email = "schnorr@inf.ufrgs.br", role = c("aut", "ths"), comment = c(ORCID = "0000-0003-4828-9942")),
@@ -8,7 +8,7 @@ Authors@R: c(
     person("Marcelo Cogo Miletto", email = "marcelo.miletto@inf.ufrgs.br", role = c("aut"), comment = c(ORCID = "0000-0002-1191-3863")),
     person("Guilherme Alles", email = "galles@inf.ufrgs.br", role = c("ctb"))
   )
-Description: StarVZ consists in a performance analysis workflow that combines
+Description: Performance analysis workflow that combines
     the power of the R language (and the tidyverse realm) and many auxiliary
     tools to provide a consistent, flexible, extensible, fast, and versatile
     framework for the performance analysis of task-based applications that run

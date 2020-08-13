@@ -46,7 +46,9 @@ jobs:
       - echo 'options(repos = "https://cloud.r-project.org", install.packages.compile.from.source = "never")' > ~/.Rprofile.site
       - export R_PROFILE=~/.Rprofile.site
       - export NOT_CRAN=false
+      - export PATH=$PATH:';C:\rtools40\usr\bin\'
       - echo $PATH
+      - ls 'C:\rtools40\'
       - Rscript.exe -e 'install.packages("devtools", dependencies = TRUE)'
       - Rscript.exe -e 'deps <- devtools::dev_package_deps(dependencies = TRUE); inst <- installed.packages(); install.packages(deps$package[!deps$package %in% inst[,"Package"]])'
     script:

@@ -46,14 +46,6 @@ cholesky_colors <- function() {
   )
 }
 
-cfd_colors <- function() {
-  tibble(
-    Kernel = c("fluid_bound", "diffuse_1", "diffuse_relax", "macCormack_commit", "macCormack_2", "macCormack_1", "obstacle_boundary_1", "conserve_1", "conserve_relax", "conserve_commit", "obstacle_velocity", "initial_state"),
-    Color = c("#e41a1c", "#377eb8", "#984ea3", "#9a4ea3", "#4daf4a", "#ffff33", "#a65628", "#f781bf", "#ea1a1c", "#37beb8", "#4eaf4a", "#ff7f00"),
-    Use = c(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE)
-  )
-}
-
 qr_colors <- function() {
   tibble(
     Kernel = c("dgeqrt", "dlarfb", "dtpqrt", "dtpmqrt", "lapack_dgeqrt", "lapack_dlarfb", "lapack_dtpqrt", "lapack_dtpmqrt"),
@@ -68,10 +60,6 @@ scalfmm_colors <- function() {
     Kernel = c("L2L-level", "L2P", "M2L-level", "M2L-out-level", "M2M", "P2M", "P2P", "P2P-out"),
     Color = c("#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00", "#ffff33", "#a65628", "#f781bf")
   )
-
-  # For paper https://hal.inria.fr/hal-01474556/document
-  #        Kernel = c("L2L",     "L2P",     "M2L_in",  "M2L_out", "M2M",     "P2M",     "P2P_in",  "P2P_out"),
-  #        Color =  c("#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00", "#ffff33", "#a65628", "#f781bf"));
 }
 
 starpu_colors <- function() {

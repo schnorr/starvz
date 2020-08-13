@@ -2,21 +2,6 @@
 options(crayon.enabled = FALSE)
 suppressMessages(library(starvz))
 
-# Options to help debug
-# https://stackoverflow.com/questions/1975110/printing-stack-trace-and-continuing-after-error-occurs-in-r
-options(keep.source = TRUE, error = quote({
-  dump.frames()  # writes to last.dump
-  n <- length(last.dump)
-  if (n > 0) {
-    calls <- names(last.dump)
-    cat("Environment:\n", file = stderr())
-    cat(paste0("  ", seq_len(n), ": ", calls), sep = "\n", file = stderr())
-    cat("\n", file = stderr())
-  }
-
-  if (!interactive()) q()
-}))
-
 ##############################
 # Usage                      #
 ##############################
@@ -46,13 +31,6 @@ if (length(args) < 1) {
 }
 
 input.directory = args[[1]];
-
-# This fixes some problems on recent versions of tidyverse
-# Check: https://github.com/tidyverse/tidyr/issues/751
-# Check: https://github.com/tidyverse/tidyr/issues/694
-if(exists("unnest_legacy")){
-  unnest <- unnest_legacy
-}
 
 if ( is.null(input.directory) ){
     usage();

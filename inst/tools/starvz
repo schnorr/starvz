@@ -1,22 +1,6 @@
 #!/bin/bash
 # StarVZ - R-based visualization techniques for the StarPU runtime
 #  Main command encapsulator
-#
-# This file is part of the StarVZ project.
-# Copyright (c) 2020 Federal University of Rio Grande do Sul (UFRGS)
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, version 3.
-#
-# This program is distributed in the hope that it will be useful, but
-# WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-# General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program. If not, see <http://www.gnu.org/licenses/>.
-#
 
 STARVZ_HOME="$( cd "$(dirname "$0")/../" >/dev/null 2>&1 ; pwd -P )"
 

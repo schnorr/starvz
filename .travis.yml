@@ -44,11 +44,12 @@ jobs:
       - export PATH=$PATH:';C:\Program Files\R\'$R_VERSION'\bin\x64\'
       - export NOT_CRAN=false
       - echo $PATH
+      - Rscript.exe -e 'install.packages("devtools", dependencies = TRUE)'
     script:
       - R.exe CMD build .
       - R.exe CMD check *tar.gz --as-cran
     after_success:
-      - Rscript -e 'library(covr); codecov(flags = "cran")'
+      - Rscript.exe -e 'library(covr); codecov(flags = "cran")'
   - r: release
     name: "Linux full Test and Coverage"
     os: linux

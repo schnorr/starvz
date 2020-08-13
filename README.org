@@ -60,13 +60,20 @@ devtools::install_github("schnorr/starvz", subdir="R_package")
 *** Full Workflow
 With =starpu_fxt_tool= and =pajeng= in =$PATH=
 
-#+begin_src bash :results output :session *R* :exports both
+#+begin_src bash :results output
 export EXP_FOLDER=/folder_to_fxt_files/
-inst/tools/phase1-workflow.sh $EXP_FOLDER
-inst/tools/phase2-workflow.R $EXP_FOLDER full_config.yaml
+starvz_git/inst/tools/phase1-workflow.sh $EXP_FOLDER
+starvz_git/inst/tools/phase2-workflow.R $EXP_FOLDER full_config.yaml
 #+end_src
 
 This generates =$EXP_FOLDER/starvz.png=
+
+Also, the tools will be available after instalation inside the package folder.
+This can be retrived by:
+
+#+begin_src bash :results output
+Rscript -e 'cat(system.file("tools/", package = "starvz"), sep="\n")'
+#+end_src
 
 *** Phase 2 (/Visualizations/) in R:
 #+begin_src R :results output :session *R* :exports both

@@ -37,6 +37,7 @@ jobs:
       - Rscript -e 'library(covr); codecov(flags = "fast")'
   - language: shell
     name: "Windows CRAN build"
+    if: commit_message =~ /(RC)/
     os: windows
     before_script:
       - choco install -y r.project

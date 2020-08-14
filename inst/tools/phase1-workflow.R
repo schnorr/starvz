@@ -54,11 +54,12 @@ if (input.application == "cholesky"){
     states.fun = qr_colors;
     states.filter = 2;
 }else if (input.application == "") {
-    states.fun = qr_colors;
+    states.fun = lu_colors;
     states.filter = 0;
 }
 
 setwd(input.directory);
+starvz_set_log(TRUE)
 
 data <- starvz_phase1_read_write(directory = input.directory,
                              app_states_fun = states.fun,

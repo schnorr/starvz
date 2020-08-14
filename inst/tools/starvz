@@ -12,10 +12,10 @@ StarVZ - R-based visualization techniques for the StarPU runtime
 Usage: $0 [OPTIONS] [TRACE_FOLDER]
 
 Options:
-  -h, --help                       # show this message
-  -1, --phase1 TRACE_FOLDER        # Execute phase 1 on TRACE_FOLDER
-  -2, --phase2 TRACE_FOLDER        # Execute phase 2 on TRACE_FOLDER
-  -b, --both-phases TRACE_FOLDER   # Execute phase 1 and 2 on TRACE_FOLDER
+  -h, --help                       # Shows this message
+  -1, --phase1 TRACE_FOLDER        # Execute only phase 1 on TRACE_FOLDER
+  -2, --phase2 TRACE_FOLDER        # Execute only phase 2 on TRACE_FOLDER
+  -b, --both-phases TRACE_FOLDER   # Execute phase 1 and 2 on TRACE_FOLDER (Default)
   -a, --application APPLICATION    # Hard define APPLICATION for scripts
   -c, --config CONFIG_FILE         # Use CONFIG_FILE as config file
                                        default is only st chart
@@ -23,9 +23,10 @@ Options:
   -m, --memory                     # Do the extend memory traces options
                                        -memory-states on starpu_fxt_tool
 
-  -f, --fxt                        # Use fxt files intead of parquet
+  -f, --feather                        # Use feather files intead of parquet (Deprecated?)
 
       --git-version                # Shows the git hash
+      --versions                   # Shows R package installed version
 
 Report bugs to: <https://github.com/schnorr/starvz/issues>
 StarVZ home page: <https://github.com/schnorr/starvz/>
@@ -38,38 +39,76 @@ if [ $# -eq 0 ]
     exit 0;
 fi
 
-STARVZ_EXEC_PHASE_1=0
-STARVZ_EXEC_PHASE_2=0
+STARVZ_EXEC_PHASE_1=1
+STARVZ_EXEC_PHASE_2=1
 STARVZ_TRACE_FOLDER=""
 STARVZ_APPLICATION=""
 STARVZ_CONFIG_FILE="$STARVZ_HOME/etc/default.yaml"
 
 while true; do
         case "$1" in
-                "--phase1")
-                        STARVZ_TRACE_FOLDER=$2
-                        if [ ! -r "$STARVZ_TRACE_FOLDER" ]; then
-                                echo "$STARVZ_TRACE_FOLDER can't be read"
-                                exit 1
-                        fi
-                        shift 2
+                --phase1|-1 )
+                        STARVZ_EXEC_PHASE_1=1
+                        STARVZ_EXEC_PHASE_2=0
+                        shift 1
+                        ;;
+                --phase2|-2 )
+                        STARVZ_EXEC_PHASE_1=0
+                        STARVZ_EXEC_PHASE_2=1
+                        shift 1
+                        ;;
+                --both-phases|-b )
+                        STARVZ_EXEC_PHASE_1=1
+                        STARVZ_EXEC_PHASE_2=1
+                        shift 1
                         ;;
                 "--git-version")
                         echo "$(cd $STARVZ_HOME; git rev-parse --verify HEAD)"
                         shift 1
+                        exit 0;
                         ;;
-                "-h")
+                --help|-h)
                         usage;
                         exit 0;
                         ;;
-                *)
+                --memory|-m)
+                        export STARPU_FXT_OPTIONS="-memory-states"
+                        shift 1
+                        ;;
+                --application|-a)
+                        STARVZ_APPLICATION=$2
+                        shift 2
+                        ;;
+                --config|-c)
+                        STARVZ_CONFIG_FILE=$2
+                        shift 2
+                        ;;
+                --version)
+                        VERSION=$(Rscript -e 'message(packageVersion("starvz"))' 2>&1)
+                        echo "StarVZ version $VERSION"
+                        exit 0
+                        ;;
+                "")
                         break
+                        ;;
+                *)
+                        STARVZ_TRACE_FOLDER=$1
+                        shift 1
                         ;;
         esac
 done
 
 # Process, lets check if all we need is here
-pushd $STARVZ_HOME/inst/tools/
-./phase1-workflow.sh $1 $2
+if [ ! -r "$STARVZ_TRACE_FOLDER" ]; then
+        echo "$STARVZ_TRACE_FOLDER can't be read"
+        exit 1
+fi
+
+pushd $STARVZ_HOME/tools/
+  if [ "$STARVZ_EXEC_PHASE_1" -eq 1 ]; then
+    ./phase1-workflow.sh $STARVZ_TRACE_FOLDER $STARVZ_APPLICATION
+  fi
+  if [ "$STARVZ_EXEC_PHASE_2" -eq 1 ]; then
+    ./phase2-workflow.R $STARVZ_TRACE_FOLDER $STARVZ_CONFIG_FILE
+  fi
 popd
-$STARVZ_HOME/tools/phase2-workflow.R $1 $3

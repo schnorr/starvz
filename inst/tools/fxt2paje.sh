@@ -29,8 +29,7 @@ FXTS=$(ls -1 prof_file_* | sort --version-sort)
 echo "Execute stapu_fxt_tool"
 date "+%a %d %b %Y %H:%M:%S %Z"
 # call the conversion
-# -memory-states
-starpu_fxt_tool $(echo $FXTS | sed -e "s/ / -i /g" -e "s/^/-i /") -o /dev/stdout\
+starpu_fxt_tool $STARPU_FXT_OPTIONS $(echo $FXTS | sed -e "s/ / -i /g" -e "s/^/-i /") -o /dev/stdout\
          | gzip -c > paje.trace.gz
 es=$?
 if [ $es -ne 0 ]

@@ -51,24 +51,40 @@ The source code of this framework is released under the GPLv3 license.
 
 ** Instalation
 #+begin_src R :results output :session *R* :exports both
-# To install only the R package
+# To install the R package
 install.packages("devtools")
-devtools::install_github("schnorr/starvz", subdir="R_package")
+devtools::install_github("schnorr/starvz")
 #+end_src
 
+*** Non-R Dependencies for the whole workflow
+- =starpu_fxt_tool=: Provided by StarPU
+- =pj_dump=: Provided by PageNG
+- =rec2csv=: Provided by recutils
+
 ** Quick Usage
-*** Full Workflow
-With =starpu_fxt_tool= and =pajeng= in =$PATH=
+*** Full Workflow - From FxT to Visualization
+With =starpu_fxt_tool=, =pj_dump=, and =rec2csn= in =$PATH=:
 
 #+begin_src bash :results output
 export EXP_FOLDER=/folder_to_fxt_files/
-starvz_git/inst/tools/phase1-workflow.sh $EXP_FOLDER
-starvz_git/inst/tools/phase2-workflow.R $EXP_FOLDER full_config.yaml
+
+export STARVZ_TOOLS=$(Rscript -e 'cat(system.file("tools/", package = "starvz"), sep="\n")')
+
+$STARVZ_TOOLS/starvz $EXP_FOLDER
 #+end_src
 
 This generates =$EXP_FOLDER/starvz.png=
 
-Also, the tools will be available after instalation inside the package folder.
+This is equivalent to:
+
+#+begin_src shell :results output :exports both
+$STARVZ_TOOLS/phase1-workflow.sh $EXP_FOLDER
+$STARVZ_TOOLS/phase2-workflow.R $EXP_FOLDER $STARVZ_TOOLS/../etc/default.yaml
+#+end_src
+
+The tools will be available after instalation inside the package
+folder subdirectory =tools/=. 
+
 This can be retrived by:
 
 #+begin_src bash :results output
@@ -77,7 +93,8 @@ Rscript -e 'cat(system.file("tools/", package = "starvz"), sep="\n")'
 
 *** Phase 2 (/Visualizations/) in R:
 #+begin_src R :results output :session *R* :exports both
-data <- starvz_read("/folder_to_fxt_files/", "starvz_home/full_config.yaml")
+library(starvz)
+data <- starvz_read("/folder_to_fxt_files/")
 plot <- starvz_plot(data)
 plot
 #+end_src

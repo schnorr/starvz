@@ -228,7 +228,7 @@ If you are involved in the development, this might be of your interest:
 
 #+begin_src R :results output :session :exports both
 library(devtools)
-devtools::install_local(path="/starvz_git_path/R_package/", force=TRUE)
+devtools::install_local(path="/starvz_git_path/", force=TRUE)
 #+end_src
 
 *** Reload after reinstall

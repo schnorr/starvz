@@ -13,7 +13,7 @@
 #' panel_st(data = starvz_sample_lu)
 #' @export
 panel_st <- function(data, agg = data$config$st$aggregation$active,
-                           agg_met = data$config$st$aggregation$method) {
+                     agg_met = data$config$st$aggregation$method) {
   if (agg) {
     if (agg_met == "static") {
       panel <- panel_st_agg_static(data)

@@ -9,9 +9,9 @@ NULL
 #' @param file path to file
 #' @return A list containing starvz configuration
 #' @examples
-#'\dontrun{
+#' \dontrun{
 #' data$config <- starvz_read_config("path_to_config")
-#'}
+#' }
 #' @export
 starvz_read_config <- function(file = NULL) {
   defaut_config <- starvz_default_config()

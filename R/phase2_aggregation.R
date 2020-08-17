@@ -13,9 +13,9 @@ NULL
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
-#'\dontrun{
+#' \dontrun{
 #' panel_st_agg_dynamic(data = starvz_sample_lu)
-#'}
+#' }
 #' @export
 panel_st_agg_dynamic <- function(data = NULL,
                                  x_start = data$config$limits$start,
@@ -116,9 +116,9 @@ panel_st_agg_dynamic <- function(data = NULL,
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
-#'\dontrun{
+#' \dontrun{
 #' panel_st_agg_static(data = starvz_sample_lu)
-#'}
+#' }
 #' @export
 panel_st_agg_static <- function(data = NULL, runtime = FALSE,
                                 x_start = data$config$limits$start,
@@ -195,7 +195,7 @@ panel_st_agg_static <- function(data = NULL, runtime = FALSE,
       ymax = .data$Position + (.data$TaskPosition + .data$TaskHeight), color = .data$Task
     ), alpha = .5)
 
-  if(!runtime){
+  if (!runtime) {
     # Print outliers on top
     gow <- gow + geom_rect(
       data = (dfw %>% filter(.data$Outlier == TRUE)),

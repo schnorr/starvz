@@ -18,9 +18,9 @@ NULL
 #' @family phase1 functions
 #'
 #' @examples
-#'\dontrun{
+#' \dontrun{
 #' starvz_phase1(directory = "path_to_csv_folder/")
-#'}
+#' }
 #' @export
 starvz_phase1 <- function(directory = ".", app_states_fun = NULL, state_filter = 0, whichApplication = NULL, input.parquet = "1") {
   # Start of reading procedure

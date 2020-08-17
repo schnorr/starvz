@@ -13,7 +13,7 @@
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
-#' #panel_pmtool_st(data = starvz_sample_lu)
+#' # panel_pmtool_st(data = starvz_sample_lu)
 #' @export
 panel_pmtool_st <- function(data = NULL,
                             legend = data$config$pmtool$state$legend,
@@ -88,7 +88,7 @@ panel_pmtool_st <- function(data = NULL,
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
-#' #panel_pmtool_kiteration(data = starvz_sample_lu)
+#' # panel_pmtool_kiteration(data = starvz_sample_lu)
 #' @export
 panel_pmtool_kiteration <- function(data = NULL,
                                     legend = data$config$pmtool$kiteration$legend,

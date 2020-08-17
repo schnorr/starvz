@@ -19,9 +19,9 @@ NULL
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
-#'\dontrun{
+#' \dontrun{
 #' panel_imbalance(data = starvz_sample_lu)
-#'}
+#' }
 #' @export
 panel_imbalance <- function(data, legend = data$config$imbalance$legend,
                             base_size = data$config$base_size,
@@ -82,9 +82,9 @@ panel_imbalance <- function(data, legend = data$config$imbalance$legend,
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
-#'\dontrun{
+#' \dontrun{
 #' panel_power_imbalance(data = starvz_sample_lu)
-#'}
+#' }
 #' @export
 panel_power_imbalance <- function(data, legend = data$config$power_imbalance$legend,
                                   base_size = data$config$base_size,
@@ -166,9 +166,9 @@ panel_power_imbalance <- function(data, legend = data$config$power_imbalance$leg
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
-#'\dontrun{
+#' \dontrun{
 #' panel_hete_imbalance(data = starvz_sample_lu)
-#'}
+#' }
 #' @export
 panel_hete_imbalance <- function(data, legend = data$config$hete_imbalance$legend,
                                  base_size = data$config$base_size,
@@ -224,7 +224,7 @@ panel_hete_imbalance <- function(data, legend = data$config$hete_imbalance$legen
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
-#' #panel_utilheatmap(data = starvz_sample_lu)
+#' # panel_utilheatmap(data = starvz_sample_lu)
 #' @export
 panel_utilheatmap <- function(data, legend = data$config$utilheatmap$legend,
                               base_size = data$config$base_size,

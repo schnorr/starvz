@@ -323,9 +323,9 @@ geom_links <- function(data = NULL, dfw = NULL, combined = FALSE,
 #' @return Time-Step aggregated handle presences
 #' @include starvz_data.R
 #' @examples
-#'\dontrun{
+#' \dontrun{
 #' handles_presence_states(data = starvz_sample_lu)
-#'}
+#' }
 #' @export
 handles_presence_states <- function(data) {
   # Selecting only the data state events
@@ -369,9 +369,9 @@ handles_presence_states <- function(data) {
 #' @return data_handle table  with new column Value with the name
 #' @include starvz_data.R
 #' @examples
-#'\dontrun{
+#' \dontrun{
 #' data_name_coordinates(data = starvz_sample_lu)
-#'}
+#' }
 #' @export
 data_name_coordinates <- function(df) {
   df %>% mutate(Value = paste0("Memory Block ", .data$Coordinates, ""))
@@ -385,9 +385,9 @@ data_name_coordinates <- function(df) {
 #' @return data_handle table  with new column Value with the name
 #' @include starvz_data.R
 #' @examples
-#'\dontrun{
+#' \dontrun{
 #' data_name_tag(data = starvz_sample_lu)
-#'}
+#' }
 #' @export
 data_name_tag <- function(df) {
   if ("MPITag" %in% names(df)) {
@@ -406,9 +406,9 @@ data_name_tag <- function(df) {
 #' @return data_handle table  with new column Value with the name
 #' @include starvz_data.R
 #' @examples
-#'\dontrun{
+#' \dontrun{
 #' data_name_handle(data = starvz_sample_lu)
-#'}
+#' }
 #' @export
 data_name_handle <- function(df) {
   df %>% mutate(Value = paste0("Memory Block ", .data$Handle, ""))
@@ -423,9 +423,9 @@ data_name_handle <- function(df) {
 #' @return Pre-Computated data for panel_handles
 #' @include starvz_data.R
 #' @examples
-#'\dontrun{
+#' \dontrun{
 #' pre_handle_gantt(data = starvz_sample_lu)
-#'}
+#' }
 #' @export
 pre_handle_gantt <- function(data, name_func = NULL) {
   # If not user defined lets try to select the best
@@ -623,9 +623,9 @@ pre_handle_gantt <- function(data, name_func = NULL) {
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
-#'\dontrun{
+#' \dontrun{
 #' panel_handles(data = starvz_sample_lu)
-#'}
+#' }
 #' @export
 panel_handles <- function(data, JobId = NA, lines = NA, lHandle = NA) {
   if (is.null(data$handle_gantt_data)) {

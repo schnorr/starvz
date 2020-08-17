@@ -41,17 +41,17 @@ pkg.env$log <- FALSE
 #' @examples
 #' starvz_set_log(FALSE)
 #' @export
-starvz_set_log <- function(state){
+starvz_set_log <- function(state) {
   pkg.env$log <- state
 }
 
-starvz_log <- function(msg){
-  if(pkg.env$log){
+starvz_log <- function(msg) {
+  if (pkg.env$log) {
     cat(paste0(format(Sys.time(), "%X"), " ", msg, "\n"))
   }
 }
 
-starvz_warn <- function(msg){
+starvz_warn <- function(msg) {
   cat(paste0(format(Sys.time(), "%X"), " WARNING: ", msg, "\n"))
 }
 

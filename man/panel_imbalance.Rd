@@ -2,7 +2,7 @@
 % Please edit documentation in R/phase2_imbalance.R
 \name{panel_imbalance}
 \alias{panel_imbalance}
-\title{Create a line chart with homogeneous imbalance metrics}
+\title{Create a line chart with homogeneous imbalance metrics.}
 \usage{
 panel_imbalance(
   data,
@@ -39,8 +39,12 @@ panel_imbalance(
 A ggplot object
 }
 \description{
-The metrics will be calculated by fixed time-spets
+This function creates a line chart with imbalance metrics. The function
+applies the metrics on fixed time-steps defined by the user. The metrics
+consider that the resources are homogeneous.
 }
 \examples{
-#panel_imbalance(data = starvz_sample_lu)
+\dontrun{
+panel_imbalance(data = starvz_sample_lu)
+}
 }

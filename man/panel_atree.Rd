@@ -46,7 +46,7 @@ A ggplot object
 }
 \description{
 Use starvz_data to create a representation of the elimination tree structure
-considering the initialization, communication and computational tasks. These
+considering initialization, communication, and computational tasks. These
 representations can be controlled in the configuration file.
 }
 \examples{

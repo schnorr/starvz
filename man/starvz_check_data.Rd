@@ -18,11 +18,11 @@ are columns), if tables is null continue}
 Logical, TRUE if data pass all tests
 }
 \description{
-This is check in order and return FALSE if any fail
+The following conditions are check in order and return FALSE if any fail
 - If data is not NULL
 - If data is a StarVZ Class
 - If data has all tables (given by the names of the list tables)
-- If each repective table has all columns (given the associated vector)
+- If each respective table has all columns (given the associated vector)
 - Execute extra_func on data (that should return true or false)
 }
 \examples{

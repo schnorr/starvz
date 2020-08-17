@@ -81,9 +81,9 @@ panel_ready <- function(data, legend = data$config$ready$legend,
 }
 
 
-#' Create a line chart panel with submmited tasks submission
+#' Create a line chart panel with submitted tasks submission
 #'
-#' Use the Variable traces to create a line chart panel with submmited tasks
+#' Use the Variable traces to create a line chart panel with submitted tasks
 #' submission per node, aggregated by a configurable time step
 #'
 #' @param data starvz_data with trace data
@@ -100,14 +100,14 @@ panel_ready <- function(data, legend = data$config$ready$legend,
 #' @examples
 #' panel_submitted(data = starvz_sample_lu)
 #' @export
-panel_submitted <- function(data, legend = data$config$submmited$legend,
+panel_submitted <- function(data, legend = data$config$submitted$legend,
                             base_size = data$config$base_size,
                             expand_x = data$config$expand,
                             x_start = data$config$limits$start,
                             x_end = data$config$limits$end,
                             y_start = 0,
-                            y_end = data$config$submmited$limit,
-                            step = data$config$submmited$step) {
+                            y_end = data$config$submitted$limit,
+                            step = data$config$submitted$step) {
 
   ## Check for non-valid arguments
   if (is.null(legend) || !is.logical(legend)) {
@@ -247,9 +247,9 @@ panel_usedmemory <- function(data, legend = data$config$usedmemory$legend,
 }
 
 
-#' Create a line chart panel with gflops
+#' Create a line chart panel with GFlops
 #'
-#' Use the Variable traces to create a line chart panel with gflops
+#' Use the Variable traces to create a line chart panel with GFlops
 #' per resource, aggregated by a configurable time step
 #'
 #' @param data starvz_data with trace data
@@ -330,9 +330,9 @@ panel_gflops <- function(data, legend = data$config$gflops$legend,
 }
 
 
-#' Create a line chart panel with gpu bandwidth
+#' Create a line chart panel with GPU bandwidth
 #'
-#' Use the Variable traces to create a line chart panel with gpu bandwidth
+#' Use the Variable traces to create a line chart panel with GPU bandwidth
 #' per resource, aggregated by a configurable time step
 #'
 #' @param data starvz_data with trace data
@@ -430,9 +430,9 @@ panel_gpubandwidth <- function(data, legend = data$config$gpubandwidth$legend,
 }
 
 
-#' Create a line chart panel with mpi concurrent
+#' Create a line chart panel with MPI concurrent
 #'
-#' Use the Variable traces to create a line chart panel with mpi concurrent
+#' Use the Variable traces to create a line chart panel with MPI concurrent
 #' per node, aggregated by a configurable time step
 #'
 #' @param data starvz_data with trace data
@@ -520,9 +520,9 @@ panel_mpiconcurrent <- function(data, legend = data$config$mpiconcurrent$legend,
 
 
 
-#' Create a line chart panel with mpi concurrent out
+#' Create a line chart panel with MPI concurrent out
 #'
-#' Use the Variable traces to create a line chart panel with mpi concurrent out
+#' Use the Variable traces to create a line chart panel with MPI concurrent out
 #' per node, aggregated by a configurable time step
 #'
 #' @param data starvz_data with trace data
@@ -609,9 +609,9 @@ panel_mpiconcurrentout <- function(data, legend = data$config$mpiconcurrentout$l
 }
 
 
-#' Create a line chart panel with mpi bandwidth
+#' Create a line chart panel with MPI bandwidth
 #'
-#' Use the Variable traces to create a line chart panel with mpi bandwidth
+#' Use the Variable traces to create a line chart panel with MPI bandwidth
 #' per node, aggregated by a configurable time step
 #'
 #' @param data starvz_data with trace data

@@ -41,9 +41,9 @@ geom_mpistates <- function(dfw = NULL, label = "1", expand = 0.05) {
   return(ret)
 }
 
-#' Create a space time view of MPI controlers
+#' Create a space-time view of MPI controlers
 #'
-#' Create a space time view of MPI controlers
+#' Create a space-time view of MPI controlers
 #'
 #' @param data starvz_data with trace data
 #' @param legend enable/disable legends

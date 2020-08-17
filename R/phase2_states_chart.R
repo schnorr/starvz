@@ -32,7 +32,7 @@ panel_st <- function(data, agg = data$config$st$aggregation$active,
 #'
 #' Use the runtime trace data to plot the task computations by ResourceId
 #' over the execution time. It will select the aggregation mode if requested,
-#' only static aggragation is avilable for runtime.
+#' only static aggregation is available for runtime.
 #'
 #' @param data starvz_data with trace data
 #' @param agg Active or not static aggregation
@@ -62,7 +62,7 @@ panel_st_runtime <- function(data, agg = data$config$starpu$aggregation$active) 
 #' @param expand_y expand size for scale_y_continuous padding
 #' @param selected_nodes select only some nodes in some plots
 #' @param labels control resources labels: [ALL, 1CPU_per_NODE, 1GPU_per_NODE]
-#' @param alpha alpha value for non anomalous tasks
+#' @param alpha alpha value for non-anomalous tasks
 #' @param idleness enable/disable idleness percentages in the plot
 #' @param taskdeps enable/disable task deps path highlighting
 #' @param tasklist list of JobIds to highlight the dependencies

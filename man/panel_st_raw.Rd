@@ -43,7 +43,7 @@ panel_st_raw(
 
 \item{labels}{control resources labels: [ALL, 1CPU_per_NODE, 1GPU_per_NODE]}
 
-\item{alpha}{alpha value for non anomalous tasks}
+\item{alpha}{alpha value for non-anomalous tasks}
 
 \item{idleness}{enable/disable idleness percentages in the plot}
 

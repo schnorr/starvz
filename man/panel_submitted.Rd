@@ -2,18 +2,18 @@
 % Please edit documentation in R/phase2_var_panels.R
 \name{panel_submitted}
 \alias{panel_submitted}
-\title{Create a line chart panel with submmited tasks submission}
+\title{Create a line chart panel with submitted tasks submission}
 \usage{
 panel_submitted(
   data,
-  legend = data$config$submmited$legend,
+  legend = data$config$submitted$legend,
   base_size = data$config$base_size,
   expand_x = data$config$expand,
   x_start = data$config$limits$start,
   x_end = data$config$limits$end,
   y_start = 0,
-  y_end = data$config$submmited$limit,
-  step = data$config$submmited$step
+  y_end = data$config$submitted$limit,
+  step = data$config$submitted$step
 )
 }
 \arguments{
@@ -39,7 +39,7 @@ panel_submitted(
 A ggplot object
 }
 \description{
-Use the Variable traces to create a line chart panel with submmited tasks
+Use the Variable traces to create a line chart panel with submitted tasks
 submission per node, aggregated by a configurable time step
 }
 \examples{

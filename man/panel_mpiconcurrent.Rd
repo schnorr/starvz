@@ -2,7 +2,7 @@
 % Please edit documentation in R/phase2_var_panels.R
 \name{panel_mpiconcurrent}
 \alias{panel_mpiconcurrent}
-\title{Create a line chart panel with mpi concurrent}
+\title{Create a line chart panel with MPI concurrent}
 \usage{
 panel_mpiconcurrent(
   data,
@@ -39,7 +39,7 @@ panel_mpiconcurrent(
 A ggplot object
 }
 \description{
-Use the Variable traces to create a line chart panel with mpi concurrent
+Use the Variable traces to create a line chart panel with MPI concurrent
 per node, aggregated by a configurable time step
 }
 \examples{

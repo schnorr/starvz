@@ -1,43 +1,28 @@
 #' @include starvz_data.R
+NULL
 
-isolate_read_write <- function(input.parquet, fun, name, directory, ZERO) {
-  data <- list()
-  data[[name]] <- fun(where = directory, ZERO = ZERO)
-  if (input.parquet == "1") {
-    starvz_log("Saving as parquet")
-    starvz_write_parquet(data, directory = directory)
-  } else {
-    starvz_log("Saving as feather")
-    starvz_write_feather(data, directory = directory)
-  }
-  return(NULL)
-}
-
-isolate_read_write_m <- function(input.parquet, fun, directory, ZERO) {
-  data <- fun(where = directory, ZERO = ZERO)
-  if (input.parquet == "1") {
-    starvz_log("Saving as parquet")
-    starvz_write_parquet(data, directory = directory)
-  } else {
-    starvz_log("Saving as feather")
-    starvz_write_feather(data, directory = directory)
-  }
-  return(NULL)
-}
-
-#' Execute StarVZ phase 1
+#' Execute StarVZ Phase one.
 #'
-#' Convert CSVs to StarVZ Files
+#' This function calls all CSV-converter inner-functions to pre-process
+#' they into StarVZ files. Although this can be directly used in a folder
+#' where all CSV compressed (gzip) files reside, we suggest to use the
+#' shell tool \code{starvz} or \code{phase1-workflow.sh} in the \code{tools/}
+#' directory.
 #'
-#' @param directory Directory of csv files
+#' @param directory Directory of CSV files
 #' @param app_states_fun Function to determine application
 #' @param state_filter Type of filder
 #' @param whichApplication Name of Application
 #' @param input.parquet Use or not of parquet files
 #' @return ggplot object with all starvz plots
+#' @family phase1 functions
 #'
+#' @examples
+#'\dontrun{
+#' starvz_phase1(directory = "path_to_csv_folder/")
+#'}
 #' @export
-starvz_phase1_read_write <- function(directory = ".", app_states_fun = NULL, state_filter = 0, whichApplication = NULL, input.parquet = "1") {
+starvz_phase1 <- function(directory = ".", app_states_fun = NULL, state_filter = 0, whichApplication = NULL, input.parquet = "1") {
   # Start of reading procedure
   if (is.null(app_states_fun)) stop("app_states_fun is obligatory for reading")
 
@@ -145,6 +130,31 @@ starvz_phase1_read_write <- function(directory = ".", app_states_fun = NULL, sta
     starvz_log("Saving as feather")
     starvz_write_feather(data, directory = directory)
   }
+}
+
+isolate_read_write <- function(input.parquet, fun, name, directory, ZERO) {
+  data <- list()
+  data[[name]] <- fun(where = directory, ZERO = ZERO)
+  if (input.parquet == "1") {
+    starvz_log("Saving as parquet")
+    starvz_write_parquet(data, directory = directory)
+  } else {
+    starvz_log("Saving as feather")
+    starvz_write_feather(data, directory = directory)
+  }
+  return(NULL)
+}
+
+isolate_read_write_m <- function(input.parquet, fun, directory, ZERO) {
+  data <- fun(where = directory, ZERO = ZERO)
+  if (input.parquet == "1") {
+    starvz_log("Saving as parquet")
+    starvz_write_parquet(data, directory = directory)
+  } else {
+    starvz_log("Saving as feather")
+    starvz_write_feather(data, directory = directory)
+  }
+  return(NULL)
 }
 
 # This function gets a data.tree object and calculate three properties

@@ -2,7 +2,7 @@
 % Please edit documentation in R/phase2_mpi.R
 \name{panel_mpistate}
 \alias{panel_mpistate}
-\title{Create a space time view of MPI controlers}
+\title{Create a space-time view of MPI controlers}
 \usage{
 panel_mpistate(
   data = NULL,
@@ -36,7 +36,7 @@ panel_mpistate(
 A ggplot object
 }
 \description{
-Create a space time view of MPI controlers
+Create a space-time view of MPI controlers
 }
 \examples{
 # panel_mpistate(data=starvz_sample_lu)

@@ -24,7 +24,7 @@ starvz_plot(
 ggplot object with all starvz plots
 }
 \description{
-Create a StarVZ plot considering the data suplied
+Create a StarVZ plot considering the data supplied
 }
 \examples{
 # starvz_plot(data)

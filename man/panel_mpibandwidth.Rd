@@ -2,7 +2,7 @@
 % Please edit documentation in R/phase2_var_panels.R
 \name{panel_mpibandwidth}
 \alias{panel_mpibandwidth}
-\title{Create a line chart panel with mpi bandwidth}
+\title{Create a line chart panel with MPI bandwidth}
 \usage{
 panel_mpibandwidth(
   data,
@@ -39,7 +39,7 @@ panel_mpibandwidth(
 A ggplot object
 }
 \description{
-Use the Variable traces to create a line chart panel with mpi bandwidth
+Use the Variable traces to create a line chart panel with MPI bandwidth
 per node, aggregated by a configurable time step
 }
 \examples{

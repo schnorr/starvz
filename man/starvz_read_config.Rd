@@ -13,8 +13,11 @@ starvz_read_config(file = NULL)
 A list containing starvz configuration
 }
 \description{
-Read starvz config yaml files
+Read starvz configuration yaml files. This function is design to replace
+an already existing configuration on starvz data.
 }
 \examples{
-# starvz_read_config("path_to_config")
+\dontrun{
+data$config <- starvz_read_config("path_to_config")
+}
 }

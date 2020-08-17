@@ -169,8 +169,8 @@ starvz_compute_plot_heights <- function(plist, config) {
 #'
 #' @param ... Panel list or list of panel lists
 #' @param config StarVZ configurations for determaning panels heights
-#' @param remove_Y_info remove Y labels for second and subsequent list of panels
-#' @param remove_legends remove legends for second and subsequent list of panels
+#' @param remove_Y_info remove Y labels for a second and subsequent list of panels
+#' @param remove_legends remove legends for a second and subsequent list of panels
 #' @return The ggplot plot
 #' @examples
 #' # starvz_assemble(TODO)
@@ -531,7 +531,7 @@ starvz_plot_list <- function(data = NULL) {
 
 #' Make a StarVZ plot
 #'
-#' Create a StarVZ plot considering the data suplied
+#' Create a StarVZ plot considering the data supplied
 #'
 #' @param data starvz_data class with $config
 #' @param save call ggplot to save the image

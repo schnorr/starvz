@@ -2,7 +2,7 @@
 % Please edit documentation in R/phase2_imbalance.R
 \name{panel_power_imbalance}
 \alias{panel_power_imbalance}
-\title{Create a line chart with heterogeneous imbalance metrics}
+\title{Create a line chart with heterogeneous imbalance metrics.}
 \usage{
 panel_power_imbalance(
   data,
@@ -13,7 +13,8 @@ panel_power_imbalance(
   x_end = data$config$limits$end,
   y_start = 0,
   y_end = data$config$power_imbalance$limit,
-  step = data$config$power_imbalance$step
+  step = data$config$power_imbalance$step,
+  task = data$config$power_imbalance$task
 )
 }
 \arguments{
@@ -34,13 +35,21 @@ panel_power_imbalance(
 \item{y_end}{Y-axis end value}
 
 \item{step}{time step for aggregation}
+
+\item{task}{Task used to computer relative resource power.}
 }
 \value{
 A ggplot object
 }
 \description{
-The metrics will be calculated by fixed time-spets
+This function creates a line chart with imbalance metrics. The function
+applies the metrics on fixed time-steps defined by the user. The metrics
+consider that the resources are heterogeneous and defined by a constant
+power factor. For the effects of this function, one task is select for
+computing the relative power between resources.
 }
 \examples{
-#panel_power_imbalance(data = starvz_sample_lu)
+\dontrun{
+panel_power_imbalance(data = starvz_sample_lu)
+}
 }

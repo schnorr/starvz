@@ -608,7 +608,7 @@ pre_handle_gantt <- function(data, name_func = NULL) {
 #' Create a space time visualization of data handles
 #'
 #' Visualizate data handles movement
-#' To accelerate the process:\code{
+#' To accelerate the process:\preformatted{
 #' data$handle_states <- handles_presence_states(data)
 #' data$handle_gantt_data <- pre_handle_gantt(data)
 #' To Select time:

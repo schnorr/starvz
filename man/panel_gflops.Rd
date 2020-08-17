@@ -2,7 +2,7 @@
 % Please edit documentation in R/phase2_var_panels.R
 \name{panel_gflops}
 \alias{panel_gflops}
-\title{Create a line chart panel with gflops}
+\title{Create a line chart panel with GFlops}
 \usage{
 panel_gflops(
   data,
@@ -39,7 +39,7 @@ panel_gflops(
 A ggplot object
 }
 \description{
-Use the Variable traces to create a line chart panel with gflops
+Use the Variable traces to create a line chart panel with GFlops
 per resource, aggregated by a configurable time step
 }
 \examples{

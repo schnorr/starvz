@@ -14,7 +14,7 @@ A ggplot object
 }
 \description{
 Use Atree and Application data to create the elimination tree
-strucutre plot in a ggplot object and return it
+structure plot in a ggplot object and return it
 }
 \examples{
 # panel_atree_structure(data)

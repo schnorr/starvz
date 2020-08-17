@@ -1,4 +1,260 @@
 #' @include starvz_data.R
+NULL
+
+#' Create a space-time visualization with dynamic aggregation.
+#'
+#' Use any state trace data to plot the task computations by ResourceId
+#' over the execution time with Gantt Chart. This function dynamically aggregate
+#' states with a dynamic/automatic time-step.
+#'
+#' @param data starvz_data with trace data
+#' @param x_start X-axis start value
+#' @param x_end X-axis end value
+#' @return A ggplot object
+#' @include starvz_data.R
+#' @examples
+#'\dontrun{
+#' panel_st_agg_dynamic(data = starvz_sample_lu)
+#'}
+#' @export
+panel_st_agg_dynamic <- function(data = NULL,
+                                 x_start = data$config$limits$start,
+                                 x_end = data$config$limits$end) {
+  if (is.null(data)) {
+    return(NULL)
+  }
+
+  starvz_log("Vinicius Entry Agg")
+
+  # Parameters
+  with.outliers <- data$config$st$outliers
+  with.states <- data$config$st$aggregation$states
+  # The longer outlier
+  longer.outlier <- data$Application %>%
+    filter(.data$Outlier == TRUE) %>%
+    pull(.data$Duration) %>%
+    max()
+  starvz_log(paste("Longer outlier for min_time_pure definition is", longer.outlier))
+  with.min_time_pure <- config_value(data$config$st$aggregation$step, longer.outlier)
+
+  # Considering only application states
+  dfw <- data$Application
+
+  # Obtain time interval
+  tstart <- dfw %>%
+    .$Start %>%
+    min()
+  tend <- dfw %>%
+    .$End %>%
+    max()
+
+  starvz_log("Vinicius Plotting Agg")
+
+  # Plot
+  gow <- ggplot() +
+    geom_aggregated_states(
+      data = data,
+      Show.Outliers = with.outliers,
+      states = with.states,
+      min_time_pure = with.min_time_pure,
+      base_size = data$config$base_size,
+      labels = data$config$st$labels,
+      expand_value = data$config$st$expand
+    ) +
+    xlab("Time [ms]")
+
+  # Y Label
+  gow <- gow + ylab("Application Workers")
+
+  # The per-node ABE
+  if (data$config$st$abe$active) gow <- gow + geom_abe(data)
+
+  # add makespan
+  if (data$config$st$makespan) gow <- gow + geom_makespan(data$Application, bsize = data$config$base_size)
+
+  # add idleness
+  if (data$config$st$idleness) gow <- gow + geom_idleness(data)
+
+  # add Global CPB
+  if (data$config$st$cpb) gow <- gow + geom_cpb(data)
+
+  # check if task dependencies should be added
+  if (data$config$st$tasks$active) {
+    tasklist <- data$config$st$tasks$list
+    levels <- data$config$st$tasks$levels
+
+    tasksel <- gaps_backward_deps(
+      data = data,
+      tasks = tasklist,
+      levels = levels
+    )
+
+    gow <- gow + geom_path_highlight(tasksel)
+  } else {
+    starvz_log("DO NOT add dependencies")
+  }
+
+  starvz_log("ViniciusExit Agg")
+
+  gow <- gow +
+    coord_cartesian(xlim = c(x_start, x_end), ylim = c(0, NA))
+
+  return(gow)
+}
+
+#' Create a space-time visualization with static aggregation.
+#'
+#' Use any state trace data to plot the task computations by ResourceId
+#' over the execution time with Gantt Chart. This function aggregate
+#' states with a static/user-defined time-step.
+#'
+#' @param data starvz_data with trace data
+#' @param runtime if this is runtime data
+#' @param x_start X-axis start value
+#' @param x_end X-axis end value
+#' @param step time-step
+#' @return A ggplot object
+#' @include starvz_data.R
+#' @examples
+#'\dontrun{
+#' panel_st_agg_static(data = starvz_sample_lu)
+#'}
+#' @export
+panel_st_agg_static <- function(data = NULL, runtime = FALSE,
+                                x_start = data$config$limits$start,
+                                x_end = data$config$limits$end,
+                                step = data$config$st$aggregation$step) {
+  if (is.null(data)) {
+    return(NULL)
+  }
+
+  if (is.null(step) || !is.numeric(step)) {
+    if (is.null(data$config$global_agg_step)) {
+      agg_step <- 100
+    } else {
+      agg_step <- data$config$global_agg_step
+    }
+  } else {
+    agg_step <- step
+  }
+
+  if (is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start))) {
+    x_start <- NA
+  }
+
+  if (is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end))) {
+    x_end <- NA
+  }
+
+  if (runtime) {
+    dfw_agg <- st_time_aggregation(data$StarPU, colors = data$Colors, step = agg_step)
+  } else {
+    dfw_agg <- st_time_aggregation(data$Application, colors = data$Colors, step = agg_step)
+  }
+
+  starvz_log("Entry Agg")
+
+  # Considering only application or StarPU data
+  if (runtime == FALSE) {
+    dfw <- data$Application
+  } else {
+    dfw <- data$Starpu
+  }
+  # Obtain time interval
+  tstart <- dfw %>%
+    .$Start %>%
+    min()
+  tend <- dfw %>%
+    .$End %>%
+    max()
+
+  # Calculate resources idleness
+  total_time <- tend - tstart
+
+  # yconf
+  yconfm <- yconf(dfw, data$config$st$labels)
+
+  starvz_log("Plotting Agg")
+
+  # Plot
+  gow <- dfw_agg %>% ggplot() +
+    default_theme() +
+    # coord_cartesian(xlim=c(tstart, tend)) +
+    xlab("Time [ms]") +
+    scale_fill_manual(values = extract_colors(dfw, data$Colors)) +
+    scale_y_continuous(
+      breaks = yconfm$Position,
+      labels = yconfm$ResourceId
+    ) +
+    # Print time-aggregated data
+    geom_rect(aes(
+      fill = .data$Task,
+      xmin = .data$Start,
+      xmax = .data$End,
+      ymin = .data$Position + .data$TaskPosition,
+      ymax = .data$Position + (.data$TaskPosition + .data$TaskHeight), color = .data$Task
+    ), alpha = .5)
+
+  if(!runtime){
+    # Print outliers on top
+    gow <- gow + geom_rect(
+      data = (dfw %>% filter(.data$Outlier == TRUE)),
+      aes(
+        fill = .data$Value,
+        xmin = .data$Start,
+        xmax = .data$End,
+        ymin = .data$Position,
+        ymax = .data$Position + .data$Height - 0.4
+      ), alpha = 1
+    )
+  }
+
+  if (!runtime) {
+    # Y Label
+    gow <- gow + ylab("Application Workers")
+
+    # The per-node ABE
+    if (data$config$st$abe$active) gow <- gow + geom_abe(data)
+
+    # add makespan
+    if (data$config$st$makespan) gow <- gow + geom_makespan(data$Application, bsize = data$config$base_size)
+
+    # add idleness
+    if (data$config$st$idleness) gow <- gow + geom_idleness(data)
+
+    # add Global CPB
+    if (data$config$st$cpb) gow <- gow + geom_cpb(data)
+
+    # check if task dependencies should be added
+    if (data$config$st$tasks$active) {
+      tasklist <- data$config$st$tasks$list
+      levels <- data$config$st$tasks$levels
+
+      tasksel <- gaps_backward_deps(
+        data = data,
+        tasks = tasklist,
+        levels = levels
+      )
+
+      gow <- gow + geom_path_highlight(tasksel)
+    } else {
+      starvz_log("DO NOT add dependencies")
+    }
+  } else {
+    # Y Label
+    gow <- gow + ylab("StarPU Workers")
+
+    # add some color palette for StarPU States
+    gow <- gow + scale_fill_manual(values = starpu_colors())
+  }
+
+  gow <- gow +
+    coord_cartesian(xlim = c(x_start, x_end), ylim = c(0, NA))
+
+
+  starvz_log("Exit Agg")
+  return(gow)
+}
 
 time_aggregation_prep <- function(dfw = NULL) {
   if (is.null(dfw)) {
@@ -242,253 +498,4 @@ geom_aggregated_states <- function(data = NULL, Show.Outliers = FALSE, min_time_
   starvz_log("Finishing geom_aggregated_states")
 
   return(ret)
-}
-
-#' Create a space time visualization as a Gantt chart with dynamic aggregation
-#'
-#' Use the any state trace data to plot the task computations by ResourceId
-#' over the execution time. Dynamic aggregating by selecting the best time-step
-#'
-#' @param data starvz_data with trace data
-#' @param x_start X-axis start value
-#' @param x_end X-axis end value
-#' @return A ggplot object
-#' @include starvz_data.R
-#' @examples
-#' #panel_st_agg_dynamic(data = starvz_sample_lu)
-#' @export
-panel_st_agg_dynamic <- function(data = NULL,
-                                 x_start = data$config$limits$start,
-                                 x_end = data$config$limits$end) {
-  if (is.null(data)) {
-    return(NULL)
-  }
-
-  starvz_log("Vinicius Entry Agg")
-
-  # Parameters
-  with.outliers <- data$config$st$outliers
-  with.states <- data$config$st$aggregation$states
-  # The longer outlier
-  longer.outlier <- data$Application %>%
-    filter(.data$Outlier == TRUE) %>%
-    pull(.data$Duration) %>%
-    max()
-  starvz_log(paste("Longer outlier for min_time_pure definition is", longer.outlier))
-  with.min_time_pure <- config_value(data$config$st$aggregation$step, longer.outlier)
-
-  # Considering only application states
-  dfw <- data$Application
-
-  # Obtain time interval
-  tstart <- dfw %>%
-    .$Start %>%
-    min()
-  tend <- dfw %>%
-    .$End %>%
-    max()
-
-  starvz_log("Vinicius Plotting Agg")
-
-  # Plot
-  gow <- ggplot() +
-    geom_aggregated_states(
-      data = data,
-      Show.Outliers = with.outliers,
-      states = with.states,
-      min_time_pure = with.min_time_pure,
-      base_size = data$config$base_size,
-      labels = data$config$st$labels,
-      expand_value = data$config$st$expand
-    ) +
-    xlab("Time [ms]")
-
-  # Y Label
-  gow <- gow + ylab("Application Workers")
-
-  # The per-node ABE
-  if (data$config$st$abe$active) gow <- gow + geom_abe(data)
-
-  # add makespan
-  if (data$config$st$makespan) gow <- gow + geom_makespan(data$Application, bsize = data$config$base_size)
-
-  # add idleness
-  if (data$config$st$idleness) gow <- gow + geom_idleness(data)
-
-  # add Global CPB
-  if (data$config$st$cpb) gow <- gow + geom_cpb(data)
-
-  # check if task dependencies should be added
-  if (data$config$st$tasks$active) {
-    tasklist <- data$config$st$tasks$list
-    levels <- data$config$st$tasks$levels
-
-    tasksel <- gaps_backward_deps(
-      data = data,
-      tasks = tasklist,
-      levels = levels
-    )
-
-    gow <- gow + geom_path_highlight(tasksel)
-  } else {
-    starvz_log("DO NOT add dependencies")
-  }
-
-  starvz_log("ViniciusExit Agg")
-
-  gow <- gow +
-    coord_cartesian(xlim = c(x_start, x_end), ylim = c(0, NA))
-
-  return(gow)
-}
-
-#' Create a space time visualization as a Gantt chart with static aggregation
-#'
-#' Use the any state trace data to plot the task computations by ResourceId
-#' over the execution time. Aggregating by a fixed time-step
-#'
-#' @param data starvz_data with trace data
-#' @param runtime if this is runtime data
-#' @param x_start X-axis start value
-#' @param x_end X-axis end value
-#' @param step time-step
-#' @return A ggplot object
-#' @include starvz_data.R
-#' @examples
-#' #panel_st_agg_static(data = starvz_sample_lu)
-#' @export
-panel_st_agg_static <- function(data = NULL, runtime = FALSE,
-                                x_start = data$config$limits$start,
-                                x_end = data$config$limits$end,
-                                step = data$config$st$aggregation$step) {
-  if (is.null(data)) {
-    return(NULL)
-  }
-
-  if (is.null(step) || !is.numeric(step)) {
-    if (is.null(data$config$global_agg_step)) {
-      agg_step <- 100
-    } else {
-      agg_step <- data$config$global_agg_step
-    }
-  } else {
-    agg_step <- step
-  }
-
-  if (is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start))) {
-    x_start <- NA
-  }
-
-  if (is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end))) {
-    x_end <- NA
-  }
-
-  if (runtime) {
-    dfw_agg <- st_time_aggregation(data$StarPU, colors = data$Colors, step = agg_step)
-  } else {
-    dfw_agg <- st_time_aggregation(data$Application, colors = data$Colors, step = agg_step)
-  }
-
-  starvz_log("Entry Agg")
-
-  # Considering only application or StarPU data
-  if (runtime == FALSE) {
-    dfw <- data$Application
-  } else {
-    dfw <- data$Starpu
-  }
-  # Obtain time interval
-  tstart <- dfw %>%
-    .$Start %>%
-    min()
-  tend <- dfw %>%
-    .$End %>%
-    max()
-
-  # Calculate resources idleness
-  total_time <- tend - tstart
-
-  # yconf
-  yconfm <- yconf(dfw, data$config$st$labels)
-
-  starvz_log("Plotting Agg")
-
-  # Plot
-  gow <- dfw_agg %>% ggplot() +
-    default_theme() +
-    # coord_cartesian(xlim=c(tstart, tend)) +
-    xlab("Time [ms]") +
-    scale_fill_manual(values = extract_colors(dfw, data$Colors)) +
-    scale_y_continuous(
-      breaks = yconfm$Position,
-      labels = yconfm$ResourceId
-    ) +
-    # Print time-aggregated data
-    geom_rect(aes(
-      fill = .data$Task,
-      xmin = .data$Start,
-      xmax = .data$End,
-      ymin = .data$Position + .data$TaskPosition,
-      ymax = .data$Position + (.data$TaskPosition + .data$TaskHeight), color = .data$Task
-    ), alpha = .5)
-
-  if(!runtime){
-    # Print outliers on top
-    gow <- gow + geom_rect(
-      data = (dfw %>% filter(.data$Outlier == TRUE)),
-      aes(
-        fill = .data$Value,
-        xmin = .data$Start,
-        xmax = .data$End,
-        ymin = .data$Position,
-        ymax = .data$Position + .data$Height - 0.4
-      ), alpha = 1
-    )
-  }
-
-  if (!runtime) {
-    # Y Label
-    gow <- gow + ylab("Application Workers")
-
-    # The per-node ABE
-    if (data$config$st$abe$active) gow <- gow + geom_abe(data)
-
-    # add makespan
-    if (data$config$st$makespan) gow <- gow + geom_makespan(data$Application, bsize = data$config$base_size)
-
-    # add idleness
-    if (data$config$st$idleness) gow <- gow + geom_idleness(data)
-
-    # add Global CPB
-    if (data$config$st$cpb) gow <- gow + geom_cpb(data)
-
-    # check if task dependencies should be added
-    if (data$config$st$tasks$active) {
-      tasklist <- data$config$st$tasks$list
-      levels <- data$config$st$tasks$levels
-
-      tasksel <- gaps_backward_deps(
-        data = data,
-        tasks = tasklist,
-        levels = levels
-      )
-
-      gow <- gow + geom_path_highlight(tasksel)
-    } else {
-      starvz_log("DO NOT add dependencies")
-    }
-  } else {
-    # Y Label
-    gow <- gow + ylab("StarPU Workers")
-
-    # add some color palette for StarPU States
-    gow <- gow + scale_fill_manual(values = starpu_colors())
-  }
-
-  gow <- gow +
-    coord_cartesian(xlim = c(x_start, x_end), ylim = c(0, NA))
-
-
-  starvz_log("Exit Agg")
-  return(gow)
 }

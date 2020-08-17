@@ -11,14 +11,15 @@ starvz_read(directory = ".", config_file = NULL, selective = TRUE)
 
 \item{config_file}{Path for configuration yaml file}
 
-\item{selective}{if True, only read data needed for creating panels actived in config}
+\item{selective}{if True, only read data needed for creating panels activated
+in config}
 }
 \value{
 The starvz_data with all tables
 }
 \description{
 Read the directory of trace files (feather or parquet) and
-the configfuration file, and return a starvz_data class used
+the configuration file, and return a starvz_data class used
 in starvz functions
 }
 \examples{

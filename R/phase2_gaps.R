@@ -1,4 +1,5 @@
 #' @include starvz_data.R
+NULL
 
 # 2nd phase task dependencies based on Gaps
 gaps_backward_deps <- function(data = NULL, tasks = NULL, levels = 1) {

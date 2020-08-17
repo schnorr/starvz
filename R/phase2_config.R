@@ -1,4 +1,37 @@
 #' @include starvz_data.R
+NULL
+
+#' Read config files
+#'
+#' Read starvz configuration yaml files. This function is design to replace
+#' an already existing configuration on starvz data.
+#'
+#' @param file path to file
+#' @return A list containing starvz configuration
+#' @examples
+#'\dontrun{
+#' data$config <- starvz_read_config("path_to_config")
+#'}
+#' @export
+starvz_read_config <- function(file = NULL) {
+  defaut_config <- starvz_default_config()
+  if (is.null(file)) {
+    starvz_log("Using default config")
+    return(defaut_config)
+  } else if (!file.exists(file)) {
+    starvz_warn(paste0("Config file dont exist, using default, wd:", getwd(), " file:", file))
+    return(defaut_config)
+  } else {
+    config <- yaml::read_yaml(file)
+    # Retrocompatible with default classes
+    if (isTRUE(names(config) == "default")) {
+      config <- config$default
+    }
+    final_config <- modifyList(defaut_config, config)
+    return(final_config)
+  }
+}
+
 
 config_value <- function(property, default) {
   ifelse(is.null(property), default, property)
@@ -149,32 +182,4 @@ starvz_default_config <- function() {
   config$vertical_lines$x_list <- NULL
   config$vertical_lines$color_list <- NULL
   return(config)
-}
-
-#' Read config files
-#'
-#' Read starvz config yaml files
-#'
-#' @param file path to file
-#' @return A list containing starvz configuration
-#' @examples
-#' # starvz_read_config("path_to_config")
-#' @export
-starvz_read_config <- function(file = NULL) {
-  defaut_config <- starvz_default_config()
-  if (is.null(file)) {
-    starvz_log("Using default config")
-    return(defaut_config)
-  } else if (!file.exists(file)) {
-    starvz_warn(paste0("Config file dont exist, using default, wd:", getwd(), " file:", file))
-    return(defaut_config)
-  } else {
-    config <- yaml::read_yaml(file)
-    # Retrocompatible with default classes
-    if (isTRUE(names(config) == "default")) {
-      config <- config$default
-    }
-    final_config <- modifyList(defaut_config, config)
-    return(final_config)
-  }
 }

@@ -1,4 +1,5 @@
 #' @include starvz_data.R
+NULL
 
 read_worker_csv <- function(where = ".",
                             app_states_fun = NULL,

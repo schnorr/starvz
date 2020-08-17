@@ -84,12 +84,13 @@ starvz_read_some <- function(directory = ".", tables = c("application"), config_
 #' Read starvz trace files
 #'
 #' Read the directory of trace files (feather or parquet) and
-#' the configfuration file, and return a starvz_data class used
+#' the configuration file, and return a starvz_data class used
 #' in starvz functions
 #'
 #' @param directory Directory path of trace files
 #' @param config_file Path for configuration yaml file
-#' @param selective if True, only read data needed for creating panels actived in config
+#' @param selective if True, only read data needed for creating panels activated
+#' in config
 #' @return The starvz_data with all tables
 #' @examples
 #' starvz_read("folder_to_parquet_files/")

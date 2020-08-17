@@ -39,8 +39,13 @@ panel_hete_imbalance(
 A ggplot object
 }
 \description{
-The metrics will be calculated by fixed time-spets
+This function creates a line chart with imbalance metrics. The function
+applies the metrics on fixed time-steps defined by the user. The metrics
+consider that the resources are heterogeneous, and each task has a different
+performance per resource.
 }
 \examples{
-#panel_hete_imbalance(data = starvz_sample_lu)
+\dontrun{
+panel_hete_imbalance(data = starvz_sample_lu)
+}
 }

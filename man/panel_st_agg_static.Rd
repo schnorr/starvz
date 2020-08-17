@@ -2,7 +2,7 @@
 % Please edit documentation in R/phase2_aggregation.R
 \name{panel_st_agg_static}
 \alias{panel_st_agg_static}
-\title{Create a space time visualization as a Gantt chart with static aggregation}
+\title{Create a space-time visualization with static aggregation.}
 \usage{
 panel_st_agg_static(
   data = NULL,
@@ -27,9 +27,12 @@ panel_st_agg_static(
 A ggplot object
 }
 \description{
-Use the any state trace data to plot the task computations by ResourceId
-over the execution time. Aggregating by a fixed time-step
+Use any state trace data to plot the task computations by ResourceId
+over the execution time with Gantt Chart. This function aggregate
+states with a static/user-defined time-step.
 }
 \examples{
-#panel_st_agg_static(data = starvz_sample_lu)
+\dontrun{
+panel_st_agg_static(data = starvz_sample_lu)
+}
 }

@@ -2,7 +2,7 @@
 #' Create the elimination tree structure plot along time
 #'
 #' Use Atree and Application data to create the elimination tree
-#' strucutre plot in a ggplot object and return it
+#' structure plot in a ggplot object and return it
 #'
 #' @param data starvz_data with trace data
 #' @return A ggplot object
@@ -119,7 +119,7 @@ panel_atree_structure <- function(data = NULL) {
 #' Create the elimination tree plot with some options in the config file
 #'
 #' Use starvz_data to create a representation of the elimination tree structure
-#' considering the initialization, communication and computational tasks. These
+#' considering initialization, communication, and computational tasks. These
 #' representations can be controlled in the configuration file.
 #'
 #' @param data starvz_data with trace data
@@ -307,7 +307,7 @@ panel_atree <- function(data = NULL, step = data$config$atree$step, legend = dat
 #'
 #' Use starvz_data Application and Atree to create a plot that shows the
 #' total resource utilization, painted by tree node using geom_ribbon. The
-#' colors are reused between nodes, not tied to as specific tree node.
+#' colors are reused between nodes, not tied to a specific tree node.
 #'
 #' @param data starvz_data with trace data
 #' @param step size in milliseconds for the time aggregation step

@@ -2,7 +2,7 @@
 % Please edit documentation in R/phase2_var_panels.R
 \name{panel_gpubandwidth}
 \alias{panel_gpubandwidth}
-\title{Create a line chart panel with gpu bandwidth}
+\title{Create a line chart panel with GPU bandwidth}
 \usage{
 panel_gpubandwidth(
   data,
@@ -42,7 +42,7 @@ panel_gpubandwidth(
 A ggplot object
 }
 \description{
-Use the Variable traces to create a line chart panel with gpu bandwidth
+Use the Variable traces to create a line chart panel with GPU bandwidth
 per resource, aggregated by a configurable time step
 }
 \examples{

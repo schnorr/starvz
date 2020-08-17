@@ -1,9 +1,7 @@
 #' @useDynLib starvz
-
 # For packages that we use a lot of functions:
 #' @import dplyr
 #' @import ggplot2
-
 # For packages that we use a small set of function a lot of times:
 #' @importFrom grDevices colorRampPalette
 #' @importFrom methods is
@@ -24,6 +22,7 @@
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom zoo na.locf
 #' @importFrom car outlierTest
+NULL
 
 # Ignore .
 utils::globalVariables(c("."))
@@ -90,11 +89,11 @@ print.starvz_data <- function(x) {
 
 #' Check if all required data is available
 #'
-#' This is check in order and return FALSE if any fail
+#' The following conditions are check in order and return FALSE if any fail
 #' - If data is not NULL
 #' - If data is a StarVZ Class
 #' - If data has all tables (given by the names of the list tables)
-#' - If each repective table has all columns (given the associated vector)
+#' - If each respective table has all columns (given the associated vector)
 #' - Execute extra_func on data (that should return true or false)
 #' @param data starvz_data with trace data
 #' @param tables A named list (names are tables of data) of vectors (elements

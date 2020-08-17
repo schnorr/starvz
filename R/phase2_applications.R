@@ -1,4 +1,5 @@
 #' @include starvz_data.R
+NULL
 
 starpu_states <- function() {
   c("Callback", "FetchingInput", "Idle", "Initializing", "Overhead", "PushingOutput", "Scheduling", "Submitting task", "Progressing", "Sleeping", "Submiting task", "Waiting all tasks", "Building task", "Deinitializing", "execute_on_all_wrapper")

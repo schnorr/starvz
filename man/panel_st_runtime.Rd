@@ -17,7 +17,7 @@ A ggplot object
 \description{
 Use the runtime trace data to plot the task computations by ResourceId
 over the execution time. It will select the aggregation mode if requested,
-only static aggragation is avilable for runtime.
+only static aggregation is available for runtime.
 }
 \examples{
 panel_st_runtime(data = starvz_sample_lu)

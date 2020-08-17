@@ -61,7 +61,7 @@ if (input.application == "cholesky"){
 setwd(input.directory);
 starvz_set_log(TRUE)
 
-data <- starvz_phase1_read_write(directory = input.directory,
+data <- starvz_phase1(directory = input.directory,
                              app_states_fun = states.fun,
                              state_filter = states.filter,
                              whichApplication = input.application,

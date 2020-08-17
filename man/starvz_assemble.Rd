@@ -16,9 +16,9 @@ starvz_assemble(
 
 \item{config}{StarVZ configurations for determaning panels heights}
 
-\item{remove_Y_info}{remove Y labels for second and subsequent list of panels}
+\item{remove_Y_info}{remove Y labels for a second and subsequent list of panels}
 
-\item{remove_legends}{remove legends for second and subsequent list of panels}
+\item{remove_legends}{remove legends for a second and subsequent list of panels}
 }
 \value{
 The ggplot plot

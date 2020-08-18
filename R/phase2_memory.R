@@ -484,17 +484,18 @@ pre_handle_gantt <- function(data, name_func = NULL) {
 
   data$Task_handles %>%
     filter(!is.na(.data$JobId)) %>%
+    mutate(Modes = as.character(.data$Modes)) %>%
     inner_join(data$Tasks %>% filter(!is.na(.data$JobId)), by = c("JobId" = "JobId")) %>%
-    select(.data$JobId, .data$Handles, .data$MPIRank, .data$MemoryNode) %>%
+    select(.data$JobId, .data$Handles, .data$MPIRank, .data$MemoryNode, .data$Modes) %>%
     mutate(sContainer = paste0(.data$MPIRank, "_MEMMANAGER", .data$MemoryNode)) -> job_handles
 
   job_handles %>%
     inner_join(pre_p_data, by = c("Handles" = "Value")) %>%
-    select(.data$Container, .data$sContainer, .data$JobId, .data$Handles, .data$y1, .data$MemoryNode) %>%
+    select(.data$Container, .data$sContainer, .data$JobId, .data$Handles, .data$y1, .data$MemoryNode, .data$Modes) %>%
     filter(.data$sContainer == .data$Container) %>%
     mutate(JobId = as.character(.data$JobId)) %>%
     inner_join(data$Application, by = c("JobId" = "JobId")) %>%
-    select(.data$Container, .data$JobId, .data$Handles, .data$Start, .data$End, .data$y1, .data$Value) %>%
+    select(.data$Container, .data$JobId, .data$Handles, .data$Start, .data$End, .data$y1, .data$Value, .data$Modes) %>%
     rename(Colour = .data$Value) %>%
     rename(Value = .data$Handles) -> jobs_p_data
   p_data$size <- 0.8
@@ -504,8 +505,12 @@ pre_handle_gantt <- function(data, name_func = NULL) {
     inner_join(data$Data_handle, by = c("Value" = "Handle")) %>%
     ungroup() %>%
     name_func() %>%
-    select(.data$Container, .data$Start, .data$End, .data$Value, .data$y1, .data$Colour, .data$size, .data$JobId) %>%
-    group_by(.data$Value, .data$Container)
+    select(.data$Container, .data$Start, .data$End, .data$Value, .data$y1, .data$Colour, .data$size, .data$JobId, .data$Modes) %>%
+    group_by(.data$Value, .data$Container) %>%
+    mutate(Modes = case_when(is.na(.data$Modes) ~ "1",
+                             .data$Modes=="R" ~ "0",
+                             .data$Modes=="W" ~ "1",
+                             .data$Modes=="RW" ~ "1"))
 
   # Processing the Events: Request & Allocation
 
@@ -697,8 +702,10 @@ panel_handles <- function(data, JobId = NA, lines = NA, lHandle = NA) {
       xmin = .data$Start,
       xmax = .data$End,
       fill = .data$Colour,
-      ymin = .data$y1 + ifelse(is.na(JobId), 0, 0.2),
-      ymax = .data$y1 + .data$size
+      ymin = .data$y1 + ifelse(is.na(.data$JobId), 0, 0.2),
+      ymax = .data$y1 + .data$size,
+      linetype = .data$Modes,
+      alpha = ifelse(is.na(.data$JobId), "0", "1")
     ),
     colour = "black",
     size = 0.1
@@ -712,6 +719,12 @@ panel_handles <- function(data, JobId = NA, lines = NA, lHandle = NA) {
         override.aes =
           list(shape = NA, colour = NA)
       )
+    ) +
+    scale_alpha_manual(
+      values = c("0"=1, "1"=0.7), guide = 'none'
+    ) +
+    scale_linetype_manual(
+      values = c("1"="solid", "0"="dotted"), guide = 'none'
     ) +
     scale_colour_manual(
       name = "Event", values = colors,
@@ -819,7 +832,6 @@ panel_handles <- function(data, JobId = NA, lines = NA, lHandle = NA) {
   # }
   return(p)
 }
-
 
 pre_snap <- function(data, f_data) {
   data$Data_handles %>%

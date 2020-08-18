@@ -27,5 +27,5 @@ A ggplot object
 Plot iteraionts Y over Time X of PMtool data
 }
 \examples{
-#panel_pmtool_kiteration(data = starvz_sample_lu)
+# panel_pmtool_kiteration(data = starvz_sample_lu)
 }

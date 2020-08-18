@@ -39,5 +39,5 @@ A ggplot object
 Plot iteraionts Y over Time X
 }
 \examples{
-#panel_kiteration(data = starvz_sample_lu)
+# panel_kiteration(data = starvz_sample_lu)
 }

@@ -43,5 +43,5 @@ Similar to the other resource oriented plots but shows the utilization
 per time step
 }
 \examples{
-#panel_utilheatmap(data = starvz_sample_lu)
+# panel_utilheatmap(data = starvz_sample_lu)
 }

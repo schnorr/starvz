@@ -1,7 +1,7 @@
 # Default Configuration, Each yaml file can have multiple configurations
 default:
   # Cosmetic only options:
-  base_size: 22 # Base size for Text
+  base_size: 14 # Base size for Text
   expand: 0.05 # Factor to Expand horizontaly the plots with blank content
   idleness_factor: 5.5 # Resouces Idleness Text Size division Factor of base_size
   idleness_all: TRUE # Show all Resouces idleness values
@@ -56,7 +56,7 @@ default:
   st: # Application State Plot over resources
     active: TRUE # Enable
     cpb: TRUE # Show Critical Path Bound makespan metric
-    height: 4 # Vertical Size in the final visualization
+    #height: 4 # Vertical Size in the final visualization
     idleness: TRUE # Show resource idleness %
     expand: 0.01 # Expand for y ggplot
     labels: "ALL" # Labels of the Resources names (for st and starpu), "ALL" "1CPU_per_NODE" "1GPU_per_NODE"

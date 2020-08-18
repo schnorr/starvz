@@ -80,7 +80,7 @@ starvz_default_config <- function() {
   config$kiteration$pernode <- FALSE
 
   config$st$active <- TRUE
-  config$st$idleness_all <- FALSE
+  config$st$idleness_all <- TRUE
   config$st$labels <- "ALL"
   config$st$legend <- TRUE
   config$st$makespan <- TRUE

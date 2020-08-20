@@ -63,7 +63,7 @@ devtools::install_github("schnorr/starvz")
 
 ** Quick Usage
 *** Full Workflow - From FxT to Visualization
-With =starpu_fxt_tool=, =pj_dump=, and =rec2csn= in =$PATH=:
+With =starpu_fxt_tool=, =pj_dump=, and =rec2csv= in =$PATH=:
 
 #+begin_src bash :results output
 export EXP_FOLDER=/folder_to_fxt_files/

@@ -151,10 +151,8 @@ read_worker_csv <- function(where = ".",
     nc <- dfcolors %>% nrow()
 
     # TODO: Using set1 right now to generate colors, max of 9 states
-    c <- brewer.pal(n = nc, name = "Set1")
-    if (nc < 3) {
-      c <- head(c, nc)
-    }
+    c <- rep(brewer.pal(9, "Set1"), (nc / 9) + 1)
+    c <- head(c, nc)
 
     # Match States and Colors
     dfcolors <- dfcolors %>%

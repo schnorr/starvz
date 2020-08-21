@@ -49,7 +49,9 @@ if [ ! -f "paje.sorted.trace" ] || [ ! -f "data.rec" ] || [ ! -f "tasks.rec" ]; 
       echo "ERROR: conversion from FXT failed! (exit status: $es)"
       exit 1
   fi
-  rm -f paje.trace.gz
+  if [ -z "$STARVZ_KEEP" ]; then
+    rm -f paje.trace.gz
+  fi
 else
   echo "fxt2paje files already present"
 fi
@@ -86,8 +88,9 @@ if [ -x "$(command -v pmtool)" ] && [ -f "platform_file.rec" ]; then
 
   # Cleaning states
   cat pmtool_states.out | sed -e 's/[[:space:]][[:space:]]*/,/g' > pmtool_states.csv
-
-  rm -f pmtool.out pmtool_states.out
+  if [ -z "$STARVZ_KEEP" ]; then
+    rm -f pmtool.out pmtool_states.out
+  fi
 else
   echo "Lionel's pmtool or platform_file.rec file are not available, skipping it."
 fi
@@ -111,8 +114,9 @@ else
   echo "WARN: The library recutils is required to read the data.rec and tasks.rec files, skipping this step."
 fi
 
-rm -f activity.data distrib.data trace.html tasks.rec papi.rec data.rec trace.rec
-
+if [ -z "$STARVZ_KEEP" ]; then
+  rm -f activity.data distrib.data trace.html tasks.rec papi.rec data.rec trace.rec
+fi
 echo "Convert from paje.sorted.trace to paje.csv"
 date "+%a %d %b %Y %H:%M:%S %Z"
 
@@ -127,8 +131,10 @@ then
     echo "Error when executing pj_dump (exit status: $es)"
     exit 1
 fi
-rm -f paje.sorted.trace.gz
 
+if [ -z "$STARVZ_KEEP" ]; then
+  rm -f paje.sorted.trace.gz
+fi
 echo "Get states, links and variables in CSV"
 date "+%a %d %b %Y %H:%M:%S %Z"
 
@@ -160,7 +166,9 @@ PAJEEVENT=paje.events.csv.gz
 echo "Nature, Container, Type, Start, Value, Handle, Info, Size, Tid, Src" | gzip -c > $PAJEEVENT
 zgrep -E "^Event" paje.csv.gz | gzip -c >> $PAJEEVENT
 
-rm -f paje.csv.gz
+if [ -z "$STARVZ_KEEP" ]; then
+  rm -f paje.csv.gz
+fi
 
 echo "Convert (DAG) DOT to CSV"
 date "+%a %d %b %Y %H:%M:%S %Z"
@@ -172,7 +180,6 @@ cat dag.dot | \
     sed -e "s/[[:space:]]//g" -e "s/\"//g" -e "s/task_//g" -e "s/->/,/" | \
     sed -e "s/[[:space:]]//g" | \
     sort | gzip -c >> $OUTPUTDAGCSV
-rm -f dag.dot
 
 echo "Convert (ATREE) DOT to CSV"
 date "+%a %d %b %Y %H:%M:%S %Z"
@@ -192,9 +199,12 @@ then
     echo "Error when executing phase1-workflow.R (exit status: $es)"
     exit 2
 fi
-rm -f atree.csv $OUTPUTDAGCSV entities.csv $PAJELINK $PAJEVARIABLE\
-      types.csv comms.rec $PAJEEVENT $PAJE_COMM_STATE $PAJE_MEMORY_STATE $PAJE_OTHER_STATE\
-      $PAJE_WORKER_STATE $DATACSV $TASKSCSV sched_tasks.rec
+
+if [ -z "$STARVZ_KEEP" ]; then
+  rm -f atree.csv $OUTPUTDAGCSV entities.csv $PAJELINK $PAJEVARIABLE\
+        types.csv comms.rec $PAJEEVENT $PAJE_COMM_STATE $PAJE_MEMORY_STATE $PAJE_OTHER_STATE\
+        $PAJE_WORKER_STATE $DATACSV $TASKSCSV sched_tasks.rec dag.dot
+fi
 
 echo
 echo "End of $CASE"

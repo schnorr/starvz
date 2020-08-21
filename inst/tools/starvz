@@ -23,7 +23,8 @@ Options:
   -m, --memory                     # Do the extend memory traces options
                                        -memory-states on starpu_fxt_tool
 
-  -f, --feather                        # Use feather files intead of parquet (Deprecated?)
+  -f, --feather                     # Use feather files intead of parquet (Deprecated?)
+  -k, --keep                        # Keep intermediate files on phase1
 
       --git-version                # Shows the git hash
       --versions                   # Shows R package installed version
@@ -55,6 +56,10 @@ while true; do
                 --phase2|-2 )
                         STARVZ_EXEC_PHASE_1=0
                         STARVZ_EXEC_PHASE_2=1
+                        shift 1
+                        ;;
+                --keep|-k )
+                        export STARVZ_KEEP=1
                         shift 1
                         ;;
                 --both-phases|-b )

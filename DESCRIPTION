@@ -46,7 +46,7 @@ Imports: methods,
     arrow (>= 0.17.0)
 License: GPL-3
 Encoding: UTF-8
-SystemRequirements: C++
+SystemRequirements: C++, bash, StarPU
 LazyData: true
 LinkingTo: Rcpp, BH
 RoxygenNote: 7.1.1

@@ -26,6 +26,11 @@ if [ ! -x "$(command -v pj_dump)" ]; then
     exit 1
 fi
 
+if [ ! -x "$(command -v rec2csv)" ]; then
+    echo "ERROR: Required application rec2csv not found"
+    exit 1
+fi
+
 ##############################
 # Parameters                 #
 ##############################

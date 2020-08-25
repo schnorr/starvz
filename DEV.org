@@ -43,3 +43,31 @@ Install:
 
 ** For travis Run all test
 add (test) in the end of your commit message
+
+** For Gen data
+#+begin_src R
+library(starvz)
+pre_phase1 <- starvz_phase1(system.file("extdata", "lu_trace", package = "starvz"), lu_colors, state_filter=2, whichApplication="lu")
+starvz_sample_lu <- starvz_read(system.file("extdata", "lu_trace", package = "starvz"), system.file("extdata", "config.yaml", package = "starvz"), selective=FALSE)
+usethis::use_data(starvz_sample_lu)
+#+end_src
+
+** Message to CRAN for Submission on 25/08/2020
+*** Test environments
+- local ubuntu 20.04 install, R 3.6.3
+- Travis-CI (https://travis-ci.org/github/schnorr/starvz/builds/721041088):
+  - Linux: R 4.0.0
+  - Windows: R 4.0.2
+  - OS X: 4.0.2
+- Win-Builder (devel, release and oldrelease)
+
+*** R CMD check results
+
+* checking CRAN incoming feasibility ... NOTE
+Maintainer: ‘Lucas Leandro Nesi <lucas.nesi@inf.ufrgs.br>’
+
+New submission
+
+Status: 1 NOTE
+
+This is our first submission.

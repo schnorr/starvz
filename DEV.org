@@ -86,7 +86,7 @@ Thank you for all your comments
 
 *** Test environments
 - local ubuntu 20.04 install, R 3.6.3
-- Travis-CI ():
+- Travis-CI (https://travis-ci.org/github/schnorr/starvz/builds/721814619):
   - Linux: R 4.0.0
   - Windows: R 4.0.2
   - OS X: 4.0.2
@@ -99,6 +99,10 @@ Maintainer: ‘Lucas Leandro Nesi <lucas.nesi@inf.ufrgs.br>’
 
 New submission
 
-Status: 1 NOTE
+* checking for future file timestamps ... NOTE
+unable to verify current time
 
-This is our first submission.
+Status: 2 NOTEs
+
+This is a new package.
+And it seems that http://worldclockapi.com/ is down.

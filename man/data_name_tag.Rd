@@ -17,6 +17,6 @@ Give handles name by their tag
 }
 \examples{
 \donttest{
-data_name_tag(starvz_sample_lu)
+data_name_tag(starvz_sample_lu$Data_handle)
 }
 }

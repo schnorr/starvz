@@ -370,7 +370,7 @@ handles_presence_states <- function(data) {
 #' @include starvz_data.R
 #' @examples
 #' \donttest{
-#' data_name_coordinates(starvz_sample_lu)
+#' data_name_coordinates(starvz_sample_lu$Data_handle)
 #' }
 #' @export
 data_name_coordinates <- function(df) {
@@ -386,7 +386,7 @@ data_name_coordinates <- function(df) {
 #' @include starvz_data.R
 #' @examples
 #' \donttest{
-#' data_name_tag(starvz_sample_lu)
+#' data_name_tag(starvz_sample_lu$Data_handle)
 #' }
 #' @export
 data_name_tag <- function(df) {
@@ -407,7 +407,7 @@ data_name_tag <- function(df) {
 #' @include starvz_data.R
 #' @examples
 #' \donttest{
-#' data_name_handle(data = starvz_sample_lu)
+#' data_name_handle(data = starvz_sample_lu$Data_handle)
 #' }
 #' @export
 data_name_handle <- function(df) {

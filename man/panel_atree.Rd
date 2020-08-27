@@ -50,7 +50,7 @@ considering initialization, communication, and computational tasks. These
 representations can be controlled in the configuration file.
 }
 \examples{
-\donttest{
+\dontrun{
 panel_atree(starvz_sample_lu, step=10)
 panel_atree(starvz_sample_lu, step=20, communication=FALSE, initialization=FALSE)
 }

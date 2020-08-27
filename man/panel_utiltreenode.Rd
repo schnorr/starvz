@@ -29,7 +29,7 @@ total resource utilization, painted by tree node using geom_ribbon. The
 colors are reused between nodes, not tied to a specific tree node.
 }
 \examples{
-\donttest{
+\dontrun{
 panel_utiltreenode(data=starvz_sample_lu, step=100)
 }
 }

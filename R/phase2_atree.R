@@ -8,7 +8,7 @@
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' panel_atree_structure(starvz_sample_lu)
 #' }
 #' @export
@@ -137,7 +137,7 @@ panel_atree_structure <- function(data = NULL) {
 #' @param anomalies enable/disable anomalies tasks representation
 #' @return A ggplot object
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' panel_atree(starvz_sample_lu, step=10)
 #' panel_atree(starvz_sample_lu, step=20, communication=FALSE, initialization=FALSE)
 #' }
@@ -319,7 +319,7 @@ panel_atree <- function(data = NULL, step = data$config$atree$step, legend = dat
 #' @param x_end X-axis end value
 #' @return A ggplot object
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' panel_utiltreenode(data=starvz_sample_lu, step=100)
 #' }
 #' @export
@@ -447,7 +447,7 @@ panel_utiltreenode <- function(data = NULL,
 #' @param x_end X-axis end value
 #' @return A ggplot object
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' panel_utiltreedepth(starvz_sample_lu, step=100, legend=TRUE)
 #' }
 #' @export
@@ -525,7 +525,7 @@ nodememuse_check <- function(data) {
 #' @param x_end X-axis end value
 #' @param legend enable/disable plot legends
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' panel_nodememuse(starvz_sample_lu, step=100)
 #' }
 #' @export
@@ -629,7 +629,7 @@ panel_nodememuse <- function(data = NULL,
 #' @param x_end X-axis end value
 #' @return A ggplot object
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' panel_activenodes(data=starvz_sample_lu, step=100)
 #' }
 #' @export

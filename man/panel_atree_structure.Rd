@@ -17,7 +17,7 @@ Use Atree and Application data to create the elimination tree
 structure plot in a ggplot object and return it
 }
 \examples{
-\donttest{
+\dontrun{
 panel_atree_structure(starvz_sample_lu)
 }
 }

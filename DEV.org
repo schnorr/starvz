@@ -71,3 +71,34 @@ New submission
 Status: 1 NOTE
 
 This is our first submission.
+
+** Message to CRAN for Submission on 27/08/2020
+
+*** Resubmission
+We made all the requested improvements:
+ - Improved acronyms in Description
+ - Removed almost all \dontrun in examples and used \donttest in examples that take >5s
+   - The remaining \dontrun functions (R/atree.R) are for specific data that are not present in the package (large)
+ - Removed commented code lines in examples (added the examples instead)
+ - Removed all calls of options() and setwd() in extra scripts available in inst/tools
+
+Thank you for all your comments
+
+*** Test environments
+- local ubuntu 20.04 install, R 3.6.3
+- Travis-CI ():
+  - Linux: R 4.0.0
+  - Windows: R 4.0.2
+  - OS X: 4.0.2
+- Win-Builder (devel, release and oldrelease)
+
+*** R CMD check results
+
+* checking CRAN incoming feasibility ... NOTE
+Maintainer: ‘Lucas Leandro Nesi <lucas.nesi@inf.ufrgs.br>’
+
+New submission
+
+Status: 1 NOTE
+
+This is our first submission.

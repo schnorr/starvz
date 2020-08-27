@@ -41,6 +41,34 @@ panel_imbalance <- function(data, legend = data$config$imbalance$legend,
     agg_step <- as.double(step)
   }
 
+  if (is.null(legend) || !is.logical(legend)) {
+    legend <- TRUE
+  }
+
+  if (is.null(base_size) || !is.numeric(base_size)) {
+    base_size <- 22
+  }
+
+  if (is.null(expand_x) || !is.numeric(expand_x)) {
+    expand_x <- 0.05
+  }
+
+  if (is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start))) {
+    x_start <- NA
+  }
+
+  if (is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end))) {
+    x_end <- NA
+  }
+
+  if (is.null(y_start) || (!is.na(y_start) && !is.numeric(y_start))) {
+    y_start <- NA
+  }
+
+  if (is.null(y_end) || (!is.na(y_end) && !is.numeric(y_end))) {
+    y_end <- NA
+  }
+
   data_app <- data$Application
   utilization_per_step(data_app, agg_step) %>%
     ungroup() %>%
@@ -99,7 +127,35 @@ panel_power_imbalance <- function(data, legend = data$config$power_imbalance$leg
   task <- data$config$power_imbalance$task
   if (is.null(task)) {
     starvz_warn("Task is not available for imbalance power")
-    return(geom_blank())
+    return(NULL)
+  }
+
+  if (is.null(legend) || !is.logical(legend)) {
+    legend <- TRUE
+  }
+
+  if (is.null(base_size) || !is.numeric(base_size)) {
+    base_size <- 22
+  }
+
+  if (is.null(expand_x) || !is.numeric(expand_x)) {
+    expand_x <- 0.05
+  }
+
+  if (is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start))) {
+    x_start <- NA
+  }
+
+  if (is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end))) {
+    x_end <- NA
+  }
+
+  if (is.null(y_start) || (!is.na(y_start) && !is.numeric(y_start))) {
+    y_start <- NA
+  }
+
+  if (is.null(y_end) || (!is.na(y_end) && !is.numeric(y_end))) {
+    y_end <- NA
   }
 
   if (is.null(step) || !is.numeric(step)) {
@@ -188,6 +244,34 @@ panel_hete_imbalance <- function(data, legend = data$config$hete_imbalance$legen
     agg_step <- as.double(step)
   }
 
+  if (is.null(legend) || !is.logical(legend)) {
+    legend <- TRUE
+  }
+
+  if (is.null(base_size) || !is.numeric(base_size)) {
+    base_size <- 22
+  }
+
+  if (is.null(expand_x) || !is.numeric(expand_x)) {
+    expand_x <- 0.05
+  }
+
+  if (is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start))) {
+    x_start <- NA
+  }
+
+  if (is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end))) {
+    x_end <- NA
+  }
+
+  if (is.null(y_start) || (!is.na(y_start) && !is.numeric(y_start))) {
+    y_start <- NA
+  }
+
+  if (is.null(y_end) || (!is.na(y_end) && !is.numeric(y_end))) {
+    y_end <- NA
+  }
+
   data_app <- data$Application
   utilization_per_step_double_hetero(agg_step, data_app) %>%
     group_by(.data$Step) %>%
@@ -244,6 +328,9 @@ panel_utilheatmap <- function(data, legend = data$config$utilheatmap$legend,
     }
   } else {
     agg_step <- as.double(step)
+  }
+  if (is.null(legend) || !is.logical(legend)) {
+    legend <- TRUE
   }
 
   utilization_per_step(data$Application, agg_step) %>%

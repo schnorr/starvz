@@ -102,10 +102,13 @@ print.starvz_data <- function(x) {
 #' @return Logical, TRUE if data pass all tests
 #' @include starvz_data.R
 #' @examples
-#' starvz_check_data(starvz_sample_lu, list("MemoryState" = c("x") ))
+#' starvz_check_data(starvz_sample_lu, tables = list("Comm_state" = c("Node")))
 #' @export
 starvz_check_data <- function(data = NULL, tables = list(), extra_func = NULL) {
-  caller <- paste0("", deparse(sys.calls()[[sys.nframe() - 1]]), ":")
+  caller <- "starvz_check_data:"
+  if(sys.nframe()>1){
+    caller <- paste0("", deparse(sys.calls()[[sys.nframe() - 1]]), ":")
+  }
   if (is.null(data)) stop(paste(caller, "data is NULL"), call. = FALSE)
   if (class(data) != "starvz_data") stop(paste(caller, "data is not starvz_data"), call. = FALSE)
   if (!is.null(tables)) {

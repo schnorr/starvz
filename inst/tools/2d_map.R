@@ -1,7 +1,7 @@
 #!/usr/bin/Rscript
 # Print the MPI Owner distribution considering a 2D structure of data
 
-suppressMessages(library(starvz))
+library(starvz)
 
 args = commandArgs(trailingOnly=TRUE)
 if (length(args) < 2) {
@@ -11,11 +11,7 @@ if (length(args) < 2) {
 directory = args[[1]];
 name = args[[2]];
 
-loginfo("Map2D Reading");
-
 data <- starvz_read(directory);
-
-loginfo("Generating");
 
 data$Data_handle %>% .$MPIOwner %>% unique() %>% length() -> n_nodes
 
@@ -31,7 +27,5 @@ x <- data$Data_handle %>% select(MPIOwner, Coordinates) %>% unique() %>%
     theme(legend.position="bottom") +
     guides(fill = guide_legend(ncol = 15)) +
     xlab("Column") + ylab("Line")
-
-loginfo("Saving")
 
 ggsave(name, x, width = 10, height = 12, units = "in", dpi = 200)

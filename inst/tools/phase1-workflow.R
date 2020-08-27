@@ -1,6 +1,5 @@
 #!/usr/bin/Rscript
-options(crayon.enabled = FALSE)
-suppressMessages(library(starvz))
+library(starvz)
 
 ##############################
 # Usage                      #
@@ -58,7 +57,6 @@ if (input.application == "cholesky"){
     states.filter = 0;
 }
 
-setwd(input.directory);
 starvz_set_log(TRUE)
 
 data <- starvz_phase1(directory = input.directory,

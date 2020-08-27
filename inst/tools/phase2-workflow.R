@@ -1,6 +1,4 @@
 #!/usr/bin/Rscript
-options(crayon.enabled = FALSE)
-
 library(starvz)
 library(ggplot2)
 

@@ -17,6 +17,6 @@ Give handles name by their address
 }
 \examples{
 \donttest{
-data_name_handle(data = starvz_sample_lu$Data_handle)
+data_name_handle(starvz_sample_lu$Data_handle)
 }
 }

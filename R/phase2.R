@@ -541,7 +541,9 @@ starvz_plot_list <- function(data = NULL) {
 #' @param guided compute ideal figure height
 #' @return ggplot object with all starvz plots
 #' @examples
+#' \donttest{
 #' starvz_plot(starvz_sample_lu)
+#' }
 #' @export
 starvz_plot <- function(data = NULL, name = NULL, save = FALSE, guided = data$config$guided$active) {
   if (is.null(data)) {

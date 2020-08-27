@@ -324,7 +324,7 @@ geom_links <- function(data = NULL, dfw = NULL, combined = FALSE,
 #' @include starvz_data.R
 #' @examples
 #' \donttest{
-#' handles_presence_states(data = starvz_sample_lu)
+#' handles_presence_states(starvz_sample_lu)
 #' }
 #' @export
 handles_presence_states <- function(data) {
@@ -370,7 +370,7 @@ handles_presence_states <- function(data) {
 #' @include starvz_data.R
 #' @examples
 #' \donttest{
-#' data_name_coordinates(data = starvz_sample_lu)
+#' data_name_coordinates(starvz_sample_lu)
 #' }
 #' @export
 data_name_coordinates <- function(df) {
@@ -386,7 +386,7 @@ data_name_coordinates <- function(df) {
 #' @include starvz_data.R
 #' @examples
 #' \donttest{
-#' data_name_tag(data = starvz_sample_lu)
+#' data_name_tag(starvz_sample_lu)
 #' }
 #' @export
 data_name_tag <- function(df) {

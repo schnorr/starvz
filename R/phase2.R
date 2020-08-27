@@ -283,7 +283,9 @@ starvz_assemble <- function(..., config = NULL, remove_Y_info = TRUE, remove_leg
 #' @param data starvz_data with trace data
 #' @return A list of ggplot plots
 #' @examples
+#' \donttest{
 #' starvz_plot_list(starvz_sample_lu)
+#' }
 #' @export
 starvz_plot_list <- function(data = NULL) {
   if (is.null(data)) stop("data passed as parameter is null")

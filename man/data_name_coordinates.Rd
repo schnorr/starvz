@@ -17,6 +17,6 @@ Give handles name by their coordinates
 }
 \examples{
 \donttest{
-data_name_coordinates(data = starvz_sample_lu)
+data_name_coordinates(starvz_sample_lu)
 }
 }

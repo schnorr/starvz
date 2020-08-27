@@ -17,6 +17,6 @@ Use for precomputation of other memory-related functions
 }
 \examples{
 \donttest{
-handles_presence_states(data = starvz_sample_lu)
+handles_presence_states(starvz_sample_lu)
 }
 }

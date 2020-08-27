@@ -407,7 +407,7 @@ data_name_tag <- function(df) {
 #' @include starvz_data.R
 #' @examples
 #' \donttest{
-#' data_name_handle(data = starvz_sample_lu$Data_handle)
+#' data_name_handle(starvz_sample_lu$Data_handle)
 #' }
 #' @export
 data_name_handle <- function(df) {

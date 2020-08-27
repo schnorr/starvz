@@ -54,7 +54,7 @@ panel_imbalance <- function(data, legend = data$config$imbalance$legend,
     pivot_longer(-.data$Step, names_to = "metric", values_to = "value") %>%
     mutate(Time = .data$Step * agg_step + agg_step / 2) -> to_plot
 
-  to_plot %>% var_imbalance_plot("Imb Metric", agg_step, base_size, expand) -> panel
+  to_plot %>% var_imbalance_plot("Imb Metric", agg_step, base_size, expand_x) -> panel
 
   if (!legend) {
     panel <- panel + theme(legend.position = "none")
@@ -140,7 +140,7 @@ panel_power_imbalance <- function(data, legend = data$config$power_imbalance$leg
     pivot_longer(-.data$Step, names_to = "metric", values_to = "value") %>%
     mutate(Time = .data$Step * agg_step + agg_step / 2) -> to_plot
 
-  to_plot %>% var_imbalance_plot("Imb Metric\nPower", agg_step, base_size, expand) -> panel
+  to_plot %>% var_imbalance_plot("Imb Metric\nPower", agg_step, base_size, expand_x) -> panel
 
   if (!legend) {
     panel <- panel + theme(legend.position = "none")
@@ -200,7 +200,7 @@ panel_hete_imbalance <- function(data, legend = data$config$hete_imbalance$legen
     pivot_longer(-.data$Step, names_to = "metric", values_to = "value") %>%
     mutate(Time = .data$Step * agg_step + agg_step / 2) -> to_plot
 
-  to_plot %>% var_imbalance_plot("Imb Metric\nHete", agg_step, base_size, expand) -> panel
+  to_plot %>% var_imbalance_plot("Imb Metric\nHete", agg_step, base_size, expand_x) -> panel
 
   if (!legend) {
     panel <- panel + theme(legend.position = "none")
@@ -265,8 +265,8 @@ panel_utilheatmap <- function(data, legend = data$config$utilheatmap$legend,
     mutate(Time = .data$Step * agg_step + agg_step / 2) %>%
     ggplot(aes(y = .data$Position, x = .data$Time, fill = .data$Utilization)) +
     geom_raster() +
-    default_theme(base_size, expand, legend_title = TRUE) +
-    scale_y_continuous(breaks = yconfv$Position, labels = yconfv$ResourceId, expand = c(expand, 0)) +
+    default_theme(base_size, expand_x, legend_title = TRUE) +
+    scale_y_continuous(breaks = yconfv$Position, labels = yconfv$ResourceId, expand = c(expand_x, 0)) +
     labs(y = "Utilization", x = "Time") +
     scale_fill_gradient2(
       name = "Load [%]", midpoint = 0.5, low = "blue", mid = "white",

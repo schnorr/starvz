@@ -10,7 +10,8 @@ NULL
 #' @return A list containing starvz configuration
 #' @examples
 #' \donttest{
-#' data$config <- starvz_read_config("path_to_config")
+#' example_file <- system.file("extdata", "config.yaml", package = "starvz")
+#' config <- starvz_read_config(example_file)
 #' }
 #' @export
 starvz_read_config <- function(file = NULL) {

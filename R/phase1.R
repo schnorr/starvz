@@ -19,10 +19,11 @@ NULL
 #'
 #' @examples
 #' \donttest{
-#' starvz_phase1(directory = "path_to_csv_folder/")
+#' example_folder <- system.file("extdata", "lu_trace", package = "starvz")
+#' starvz_phase1(directory = example_folder)
 #' }
 #' @export
-starvz_phase1 <- function(directory = ".", app_states_fun = NULL, state_filter = 0, whichApplication = NULL, input.parquet = "1") {
+starvz_phase1 <- function(directory = ".", app_states_fun = lu_colors, state_filter = 0, whichApplication = "", input.parquet = "1") {
   # Start of reading procedure
   if (is.null(app_states_fun)) stop("app_states_fun is obligatory for reading")
 

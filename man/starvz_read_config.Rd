@@ -18,6 +18,7 @@ an already existing configuration on starvz data.
 }
 \examples{
 \donttest{
-data$config <- starvz_read_config("path_to_config")
+example_file <- system.file("extdata", "config.yaml", package = "starvz")
+config <- starvz_read_config(example_file)
 }
 }

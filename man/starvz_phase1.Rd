@@ -6,9 +6,9 @@
 \usage{
 starvz_phase1(
   directory = ".",
-  app_states_fun = NULL,
+  app_states_fun = lu_colors,
   state_filter = 0,
-  whichApplication = NULL,
+  whichApplication = "",
   input.parquet = "1"
 )
 }
@@ -35,7 +35,8 @@ directory.
 }
 \examples{
 \donttest{
-starvz_phase1(directory = "path_to_csv_folder/")
+example_folder <- system.file("extdata", "lu_trace", package = "starvz")
+starvz_phase1(directory = example_folder)
 }
 }
 \concept{phase1 functions}

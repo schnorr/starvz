@@ -333,6 +333,30 @@ panel_utilheatmap <- function(data, legend = data$config$utilheatmap$legend,
     legend <- TRUE
   }
 
+  if (is.null(base_size) || !is.numeric(base_size)) {
+    base_size <- 22
+  }
+
+  if (is.null(expand_x) || !is.numeric(expand_x)) {
+    expand_x <- 0.05
+  }
+
+  if (is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start))) {
+    x_start <- NA
+  }
+
+  if (is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end))) {
+    x_end <- NA
+  }
+
+  if (is.null(y_start) || (!is.na(y_start) && !is.numeric(y_start))) {
+    y_start <- NA
+  }
+
+  if (is.null(y_end) || (!is.na(y_end) && !is.numeric(y_end))) {
+    y_end <- NA
+  }
+
   utilization_per_step(data$Application, agg_step) %>%
     ungroup() %>%
     left_join(data$Y, by = c("ResourceId" = "Parent")) -> to_plot

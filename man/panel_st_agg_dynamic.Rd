@@ -7,7 +7,8 @@
 panel_st_agg_dynamic(
   data = NULL,
   x_start = data$config$limits$start,
-  x_end = data$config$limits$end
+  x_end = data$config$limits$end,
+  expand_x = data$config$st$expand
 )
 }
 \arguments{
@@ -16,6 +17,8 @@ panel_st_agg_dynamic(
 \item{x_start}{X-axis start value}
 
 \item{x_end}{X-axis end value}
+
+\item{expand_x}{expand size for scale_x_continuous padding}
 }
 \value{
 A ggplot object

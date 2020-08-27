@@ -10,6 +10,7 @@ NULL
 #' @param data starvz_data with trace data
 #' @param x_start X-axis start value
 #' @param x_end X-axis end value
+#' @param expand_x expand size for scale_x_continuous padding
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
@@ -19,9 +20,22 @@ NULL
 #' @export
 panel_st_agg_dynamic <- function(data = NULL,
                                  x_start = data$config$limits$start,
-                                 x_end = data$config$limits$end) {
+                                 x_end = data$config$limits$end,
+                                 expand_x = data$config$st$expand) {
   if (is.null(data)) {
     return(NULL)
+  }
+
+  if (is.null(expand_x) || !is.numeric(expand_x)) {
+    expand_x <- 0.05
+  }
+
+  if (is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start))) {
+    x_start <- NA
+  }
+
+  if (is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end))) {
+    x_end <- NA
   }
 
   starvz_log("Vinicius Entry Agg")
@@ -59,7 +73,7 @@ panel_st_agg_dynamic <- function(data = NULL,
       min_time_pure = with.min_time_pure,
       base_size = data$config$base_size,
       labels = data$config$st$labels,
-      expand_value = data$config$st$expand
+      expand_value = expand_x
     ) +
     xlab("Time [ms]")
 

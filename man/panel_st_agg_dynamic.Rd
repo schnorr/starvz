@@ -26,7 +26,7 @@ over the execution time with Gantt Chart. This function dynamically aggregate
 states with a dynamic/automatic time-step.
 }
 \examples{
-\dontrun{
+\donttest{
 panel_st_agg_dynamic(data = starvz_sample_lu)
 }
 }

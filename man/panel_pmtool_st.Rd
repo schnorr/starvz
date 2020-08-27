@@ -34,5 +34,5 @@ Use the PMTOOL Application trace data to plot the task computations by ResourceI
 over the execution time.
 }
 \examples{
-# panel_pmtool_st(data = starvz_sample_lu)
+panel_pmtool_st(data = starvz_sample_lu)
 }

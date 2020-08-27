@@ -27,5 +27,5 @@ ggplot object with all starvz plots
 Create a StarVZ plot considering the data supplied
 }
 \examples{
-# starvz_plot(data)
+starvz_plot(starvz_sample_lu)
 }

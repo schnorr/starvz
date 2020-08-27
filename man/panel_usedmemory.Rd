@@ -43,5 +43,5 @@ Use the Variable traces to create a line chart panel with used memory
 per resource, aggregated by a configurable time step
 }
 \examples{
-panel_submitted(data = starvz_sample_lu)
+panel_usedmemory(data = starvz_sample_lu)
 }

@@ -32,7 +32,7 @@ over the execution time with Gantt Chart. This function aggregate
 states with a static/user-defined time-step.
 }
 \examples{
-\dontrun{
+\donttest{
 panel_st_agg_static(data = starvz_sample_lu)
 }
 }

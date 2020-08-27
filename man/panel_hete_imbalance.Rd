@@ -45,7 +45,7 @@ consider that the resources are heterogeneous, and each task has a different
 performance per resource.
 }
 \examples{
-\dontrun{
+\donttest{
 panel_hete_imbalance(data = starvz_sample_lu)
 }
 }

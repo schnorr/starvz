@@ -22,5 +22,7 @@ A ggplot object
 Visualizate memory in a specific time
 }
 \examples{
+\donttest{
 panel_memory_snap(data = starvz_sample_lu, 100, 10)
+}
 }

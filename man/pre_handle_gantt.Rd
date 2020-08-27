@@ -18,7 +18,7 @@ Pre-Computated data for panel_handles
 Use for precomputation of memory handles panel
 }
 \examples{
-\dontrun{
+\donttest{
 pre_handle_gantt(data = starvz_sample_lu)
 }
 }

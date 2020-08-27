@@ -16,5 +16,5 @@ A list of ggplot plots
 Use data to create the list of StarVZ plots
 }
 \examples{
-# starvz_plot_list(data)
+starvz_plot_list(starvz_sample_lu)
 }

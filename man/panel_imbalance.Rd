@@ -44,7 +44,7 @@ applies the metrics on fixed time-steps defined by the user. The metrics
 consider that the resources are homogeneous.
 }
 \examples{
-\dontrun{
+\donttest{
 panel_imbalance(data = starvz_sample_lu)
 }
 }

@@ -17,7 +17,7 @@ Read starvz configuration yaml files. This function is design to replace
 an already existing configuration on starvz data.
 }
 \examples{
-\dontrun{
+\donttest{
 data$config <- starvz_read_config("path_to_config")
 }
 }

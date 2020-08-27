@@ -16,7 +16,7 @@ Time-Step aggregated handle presences
 Use for precomputation of other memory-related functions
 }
 \examples{
-\dontrun{
+\donttest{
 handles_presence_states(data = starvz_sample_lu)
 }
 }

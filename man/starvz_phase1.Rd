@@ -34,7 +34,7 @@ shell tool \code{starvz} or \code{phase1-workflow.sh} in the \code{tools/}
 directory.
 }
 \examples{
-\dontrun{
+\donttest{
 starvz_phase1(directory = "path_to_csv_folder/")
 }
 }

@@ -49,7 +49,7 @@ power factor. For the effects of this function, one task is select for
 computing the relative power between resources.
 }
 \examples{
-\dontrun{
+\donttest{
 panel_power_imbalance(data = starvz_sample_lu)
 }
 }

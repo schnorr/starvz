@@ -50,6 +50,8 @@ considering initialization, communication, and computational tasks. These
 representations can be controlled in the configuration file.
 }
 \examples{
-# panel_atree(data, step=10)
-# panel_atree(data, step=20, communication=FALSE, initialization=FALSE)
+\donttest{
+panel_atree(starvz_sample_lu, step=10)
+panel_atree(starvz_sample_lu, step=20, communication=FALSE, initialization=FALSE)
+}
 }

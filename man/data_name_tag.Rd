@@ -16,7 +16,7 @@ data_handle table  with new column Value with the name
 Give handles name by their tag
 }
 \examples{
-\dontrun{
+\donttest{
 data_name_tag(data = starvz_sample_lu)
 }
 }

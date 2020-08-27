@@ -43,5 +43,7 @@ Use the Variable traces to create a line chart panel with GFlops
 per resource, aggregated by a configurable time step
 }
 \examples{
-# panel_gflops(data=starvz_sample_lu)
+\donttest{
+panel_gflops(data=starvz_sample_lu)
+}
 }

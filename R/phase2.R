@@ -173,7 +173,9 @@ starvz_compute_plot_heights <- function(plist, config) {
 #' @param remove_legends remove legends for a second and subsequent list of panels
 #' @return The ggplot plot
 #' @examples
-#' starvz_assemble(starvz_plot_list(starvz_sample_lu))
+#' \donttest{
+#' starvz_assemble(starvz_plot_list(starvz_sample_lu), config=starvz_sample_lu$config)
+#' }
 #' @export
 starvz_assemble <- function(..., config = NULL, remove_Y_info = TRUE, remove_legends = TRUE) {
   plists <- list()

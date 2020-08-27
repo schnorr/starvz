@@ -13,7 +13,7 @@
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
-#' panel_ready(data = starvz_sample_lu)
+#' panel_memory_state(data = starvz_sample_lu)
 #' @export
 panel_memory_state <- function(data = NULL,
                                combined = data$config$memory$combined,
@@ -323,7 +323,7 @@ geom_links <- function(data = NULL, dfw = NULL, combined = FALSE,
 #' @return Time-Step aggregated handle presences
 #' @include starvz_data.R
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' handles_presence_states(data = starvz_sample_lu)
 #' }
 #' @export
@@ -369,7 +369,7 @@ handles_presence_states <- function(data) {
 #' @return data_handle table  with new column Value with the name
 #' @include starvz_data.R
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' data_name_coordinates(data = starvz_sample_lu)
 #' }
 #' @export
@@ -385,7 +385,7 @@ data_name_coordinates <- function(df) {
 #' @return data_handle table  with new column Value with the name
 #' @include starvz_data.R
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' data_name_tag(data = starvz_sample_lu)
 #' }
 #' @export
@@ -406,7 +406,7 @@ data_name_tag <- function(df) {
 #' @return data_handle table  with new column Value with the name
 #' @include starvz_data.R
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' data_name_handle(data = starvz_sample_lu)
 #' }
 #' @export
@@ -423,7 +423,7 @@ data_name_handle <- function(df) {
 #' @return Pre-Computated data for panel_handles
 #' @include starvz_data.R
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' pre_handle_gantt(data = starvz_sample_lu)
 #' }
 #' @export
@@ -628,7 +628,7 @@ pre_handle_gantt <- function(data, name_func = NULL) {
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' panel_handles(data = starvz_sample_lu)
 #' }
 #' @export
@@ -873,7 +873,9 @@ pre_snap <- function(data, f_data) {
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
+#' \donttest{
 #' panel_memory_snap(data = starvz_sample_lu, 100, 10)
+#' }
 #' @export
 panel_memory_snap <- function(data, selected_time, step, tasks_size = 30) {
   if (is.null(data$handle_states)) {

@@ -56,7 +56,7 @@ geom_mpistates <- function(dfw = NULL, label = "1", expand = 0.05) {
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
-#' # panel_mpistate(data=starvz_sample_lu)
+#' panel_mpistate(data=starvz_sample_lu)
 #' @export
 panel_mpistate <- function(data = NULL,
                            legend = data$config$mpibandwidth$legend,

@@ -173,7 +173,7 @@ starvz_compute_plot_heights <- function(plist, config) {
 #' @param remove_legends remove legends for a second and subsequent list of panels
 #' @return The ggplot plot
 #' @examples
-#' # starvz_assemble(TODO)
+#' starvz_assemble(starvz_plot_list(starvz_sample_lu))
 #' @export
 starvz_assemble <- function(..., config = NULL, remove_Y_info = TRUE, remove_legends = TRUE) {
   plists <- list()
@@ -281,7 +281,7 @@ starvz_assemble <- function(..., config = NULL, remove_Y_info = TRUE, remove_leg
 #' @param data starvz_data with trace data
 #' @return A list of ggplot plots
 #' @examples
-#' # starvz_plot_list(data)
+#' starvz_plot_list(starvz_sample_lu)
 #' @export
 starvz_plot_list <- function(data = NULL) {
   if (is.null(data)) stop("data passed as parameter is null")
@@ -539,7 +539,7 @@ starvz_plot_list <- function(data = NULL) {
 #' @param guided compute ideal figure height
 #' @return ggplot object with all starvz plots
 #' @examples
-#' # starvz_plot(data)
+#' starvz_plot(starvz_sample_lu)
 #' @export
 starvz_plot <- function(data = NULL, name = NULL, save = FALSE, guided = data$config$guided$active) {
   if (is.null(data)) {

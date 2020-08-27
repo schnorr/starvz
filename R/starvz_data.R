@@ -102,7 +102,7 @@ print.starvz_data <- function(x) {
 #' @return Logical, TRUE if data pass all tests
 #' @include starvz_data.R
 #' @examples
-#' # starvz_check_data(data, list("MemoryState" = c("x") ))
+#' starvz_check_data(starvz_sample_lu, list("MemoryState" = c("x") ))
 #' @export
 starvz_check_data <- function(data = NULL, tables = list(), extra_func = NULL) {
   caller <- paste0("", deparse(sys.calls()[[sys.nframe() - 1]]), ":")

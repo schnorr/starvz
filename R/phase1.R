@@ -18,7 +18,7 @@ NULL
 #' @family phase1 functions
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' starvz_phase1(directory = "path_to_csv_folder/")
 #' }
 #' @export

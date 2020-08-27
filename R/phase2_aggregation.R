@@ -13,7 +13,7 @@ NULL
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' panel_st_agg_dynamic(data = starvz_sample_lu)
 #' }
 #' @export
@@ -116,7 +116,7 @@ panel_st_agg_dynamic <- function(data = NULL,
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' panel_st_agg_static(data = starvz_sample_lu)
 #' }
 #' @export

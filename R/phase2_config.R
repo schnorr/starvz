@@ -9,7 +9,7 @@ NULL
 #' @param file path to file
 #' @return A list containing starvz configuration
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' data$config <- starvz_read_config("path_to_config")
 #' }
 #' @export

@@ -181,7 +181,7 @@ panel_submitted <- function(data, legend = data$config$submitted$legend,
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
-#' panel_submitted(data = starvz_sample_lu)
+#' panel_usedmemory(data = starvz_sample_lu)
 #' @export
 panel_usedmemory <- function(data, legend = data$config$usedmemory$legend,
                              base_size = data$config$base_size,
@@ -264,7 +264,9 @@ panel_usedmemory <- function(data, legend = data$config$usedmemory$legend,
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
-#' # panel_gflops(data=starvz_sample_lu)
+#' \donttest{
+#' panel_gflops(data=starvz_sample_lu)
+#' }
 #' @export
 panel_gflops <- function(data, legend = data$config$gflops$legend,
                          base_size = data$config$base_size,
@@ -348,7 +350,7 @@ panel_gflops <- function(data, legend = data$config$gflops$legend,
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
-#' # panel_gpubandwidth(data=starvz_sample_lu)
+#' panel_gpubandwidth(data=starvz_sample_lu)
 #' @export
 panel_gpubandwidth <- function(data, legend = data$config$gpubandwidth$legend,
                                base_size = data$config$base_size,
@@ -447,7 +449,7 @@ panel_gpubandwidth <- function(data, legend = data$config$gpubandwidth$legend,
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
-#' # panel_mpiconcurrent(data=starvz_sample_lu)
+#' panel_mpiconcurrent(data=starvz_sample_lu)
 #' @export
 panel_mpiconcurrent <- function(data, legend = data$config$mpiconcurrent$legend,
                                 base_size = data$config$base_size,
@@ -537,7 +539,7 @@ panel_mpiconcurrent <- function(data, legend = data$config$mpiconcurrent$legend,
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
-#' # panel_mpiconcurrentout(data=starvz_sample_lu)
+#' panel_mpiconcurrentout(data=starvz_sample_lu)
 #' @export
 panel_mpiconcurrentout <- function(data, legend = data$config$mpiconcurrentout$legend,
                                    base_size = data$config$base_size,
@@ -626,7 +628,7 @@ panel_mpiconcurrentout <- function(data, legend = data$config$mpiconcurrentout$l
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
-#' # panel_mpibandwidth(data=starvz_sample_lu)
+#' panel_mpibandwidth(data=starvz_sample_lu)
 #' @export
 panel_mpibandwidth <- function(data, legend = data$config$mpibandwidth$legend,
                                base_size = data$config$base_size,

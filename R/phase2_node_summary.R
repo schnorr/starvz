@@ -12,7 +12,7 @@
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
-#' panel_ready(data = starvz_sample_lu)
+#' panel_node_summary(data = starvz_sample_lu)
 #' @export
 panel_node_summary <- function(data, legend = data$config$summary_nodes$legend,
                                base_size = data$config$base_size,

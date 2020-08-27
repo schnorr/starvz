@@ -8,7 +8,9 @@
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
-#' # panel_atree_structure(data)
+#' \donttest{
+#' panel_atree_structure(starvz_sample_lu)
+#' }
 #' @export
 panel_atree_structure <- function(data = NULL) {
   if (is.null(data)) stop("input data for geom_atree_plot is NULL")
@@ -135,8 +137,10 @@ panel_atree_structure <- function(data = NULL) {
 #' @param anomalies enable/disable anomalies tasks representation
 #' @return A ggplot object
 #' @examples
-#' # panel_atree(data, step=10)
-#' # panel_atree(data, step=20, communication=FALSE, initialization=FALSE)
+#' \donttest{
+#' panel_atree(starvz_sample_lu, step=10)
+#' panel_atree(starvz_sample_lu, step=20, communication=FALSE, initialization=FALSE)
+#' }
 #' @export
 panel_atree <- function(data = NULL, step = data$config$atree$step, legend = data$config$atree$legend, zoom = FALSE,
                         computation = data$config$atree$computation$active,
@@ -315,7 +319,9 @@ panel_atree <- function(data = NULL, step = data$config$atree$step, legend = dat
 #' @param x_end X-axis end value
 #' @return A ggplot object
 #' @examples
-#' # panel_utiltreenode(data=starvz_data, step=100)
+#' \donttest{
+#' panel_utiltreenode(data=starvz_sample_lu, step=100)
+#' }
 #' @export
 panel_utiltreenode <- function(data = NULL,
                                step = data$config$utiltreenode$step,
@@ -441,7 +447,9 @@ panel_utiltreenode <- function(data = NULL,
 #' @param x_end X-axis end value
 #' @return A ggplot object
 #' @examples
-#' # panel_utiltreedepth(data, step=100, legend=TRUE)
+#' \donttest{
+#' panel_utiltreedepth(starvz_sample_lu, step=100, legend=TRUE)
+#' }
 #' @export
 panel_utiltreedepth <- function(data,
                                 step = data$config$utiltreenode$step,
@@ -517,7 +525,9 @@ nodememuse_check <- function(data) {
 #' @param x_end X-axis end value
 #' @param legend enable/disable plot legends
 #' @examples
-#' # panel_nodememuse(data$Application, step=100)
+#' \donttest{
+#' panel_nodememuse(starvz_sample_lu, step=100)
+#' }
 #' @export
 panel_nodememuse <- function(data = NULL,
                              step = data$config$activenodes$aggregation$step,
@@ -619,7 +629,9 @@ panel_nodememuse <- function(data = NULL,
 #' @param x_end X-axis end value
 #' @return A ggplot object
 #' @examples
-#' # panel_activenodes(data=starvz_data, step=100)
+#' \donttest{
+#' panel_activenodes(data=starvz_sample_lu, step=100)
+#' }
 #' @export
 panel_activenodes <- function(data = NULL,
                               step = data$config$activenodes$aggregation$step,

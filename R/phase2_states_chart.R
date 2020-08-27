@@ -79,7 +79,9 @@ panel_st_runtime <- function(data, agg = data$config$starpu$aggregation$active) 
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
+#' \donttest{
 #' panel_st_raw(data = starvz_sample_lu)
+#' }
 #' @export
 panel_st_raw <- function(data = NULL, ST.Outliers = data$config$st$outliers, base_size = data$config$base_size,
                          expand_x = data$config$expand, expand_y = data$config$st$expand, selected_nodes = data$config$selected_nodes,

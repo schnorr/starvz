@@ -665,6 +665,8 @@ pmtool_states_csv_parser <- function(where = ".", whichApplication = NULL, Y = N
       }
     }
 
+    close(conn)
+
     pm[[3]] <- devices[pm[[3]] + 1]
 
     pm <- pm %>% left_join((Y %>% select(-.data$Type)), by = c("ResourceId" = "Parent"))

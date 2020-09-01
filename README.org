@@ -24,7 +24,7 @@
 #+TAGS: noexport(n) deprecated(d)
 
 #+html: <a href="https://cran.r-project.org/web/packages/starvz/index.html">
-#+html:   <img src="https://www.r-pkg.org/badges/version/ggplot2" />
+#+html:   <img src="https://www.r-pkg.org/badges/version/starvz" />
 #+html: </a>
 #+html: <a href="https://travis-ci.org/schnorr/starvz">
 #+html:   <img src="https://travis-ci.org/schnorr/starvz.svg?branch=master" />

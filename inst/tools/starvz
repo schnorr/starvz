@@ -25,6 +25,7 @@ Options:
 
   -f, --feather                     # Use feather files intead of parquet (Deprecated?)
   -k, --keep                        # Keep intermediate files on phase1
+  -e, --exclude-tasks TASKLIST      # Exclude tasks from the analysis
 
       --git-version                # Shows the git hash
       --versions                   # Shows R package installed version
@@ -86,6 +87,10 @@ while true; do
                         ;;
                 --config|-c)
                         STARVZ_CONFIG_FILE=$2
+                        shift 2
+                        ;;
+                --exclude-tasks|-e)
+                        export STARVZ_EXCLUDE_TASKS=$2
                         shift 2
                         ;;
                 --version)

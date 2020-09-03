@@ -57,6 +57,12 @@ if [ ! -f "paje.sorted.trace" ] || [ ! -f "data.rec" ] || [ ! -f "tasks.rec" ]; 
   if [ -z "$STARVZ_KEEP" ]; then
     rm -f paje.trace.gz
   fi
+  if [ -n "$STARVZ_EXCLUDE_TASKS" ]; then
+    for i in $(echo $STARVZ_EXCLUDE_TASKS | sed "s/,/ /g")
+    do
+      recdel -e "Name = '$i'" tasks.rec
+    done
+  fi
 else
   echo "fxt2paje files already present"
 fi
@@ -70,7 +76,7 @@ echo "Execute pmtool"
 date "+%a %d %b %Y %H:%M:%S %Z"
 # Generating platform_file.rec if both pmtool and performance models are available. Note: hostname should match performance model
 if [ -x "$(command -v pmtool)" ] && [ ! -f "platform_file.rec" ]; then
-  if [ $STARPU_PERF_MODEL_DIR != "" ] && [ $STARPU_HOSTNAME != "" ]; then
+  if [ -n $STARPU_PERF_MODEL_DIR ] && [ -n $STARPU_HOSTNAME ]; then
     starpu_perfmodel_recdump tasks.rec -o platform_file.rec
   else
     echo "Lionel's platform_file.rec file is not available and cannot be generated, skipping it."
@@ -81,6 +87,13 @@ fi
 if [ -x "$(command -v pmtool)" ] && [ -f "platform_file.rec" ]; then
   PMTOOLOUT="pmtool.csv"
 
+  if [ -n "$STARVZ_EXCLUDE_TASKS" ]; then
+    for i in $(echo $STARVZ_EXCLUDE_TASKS | sed "s/,/ /g")
+    do
+      recdel -t timing -e "Model = '$i'" platform_file.rec
+    done
+  fi
+  
   # This command should be executed with the cluster starpu.
   #starpu_perfmodel_recdump tasks.rec -o platform_file.rec
 
@@ -153,7 +166,11 @@ zgrep -e "Communication Thread State" paje.csv.gz | gzip -c >> $PAJE_COMM_STATE
 
 PAJE_WORKER_STATE=paje.worker_state.csv.gz
 echo "Nature, ResourceId, Type, Start, End, Duration, Depth, Value, Size, Params, Footprint, Tag, JobId, SubmitOrder, GFlop, X, Y, Iteration, Subiteration" | gzip -c > $PAJE_WORKER_STATE
-zgrep -e "Worker State" paje.csv.gz | gzip -c >> $PAJE_WORKER_STATE
+if [ -n "$STARVZ_EXCLUDE_TASKS" ]; then
+  zgrep -e "Worker State" paje.csv.gz | grep -E -v $(echo $STARVZ_EXCLUDE_TASKS | sed "s/,/|/g" | sed "s/ //g" ) | gzip -c >> $PAJE_WORKER_STATE
+else
+  zgrep -e "Worker State" paje.csv.gz | gzip -c >> $PAJE_WORKER_STATE
+fi
 
 PAJE_OTHER_STATE=paje.other_state.csv.gz
 echo "Nature, ResourceId, Type, Start, End, Duration, Depth, Value" | gzip -c > $PAJE_OTHER_STATE

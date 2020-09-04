@@ -102,7 +102,8 @@ while true; do
                         break
                         ;;
                 *)
-                        STARVZ_TRACE_FOLDER=$1
+                        # Make it absolute
+                        STARVZ_TRACE_FOLDER=$(cd $1; pwd)
                         shift 1
                         ;;
         esac

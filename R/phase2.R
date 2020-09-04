@@ -105,6 +105,10 @@ starvz_compute_plot_heights <- function(plist, config) {
     P[[length(P) + 1]] <- plist$starpu
     H[[length(H) + 1]] <- config_value(data$config$starpu$height, data$config$guided$starvz_height_resources)
   }
+  if (data$config$node_events$active) {
+    P[[length(P) + 1]] <- plist$node_events
+    H[[length(H) + 1]] <- config_value(data$config$node_events$height, data$config$guided$starvz_height_nodes)
+  }
   if (data$config$ready$active) {
     P[[length(P) + 1]] <- plist$ready
     H[[length(H) + 1]] <- config_value(data$config$ready$height, data$config$guided$starvz_height_var)
@@ -341,6 +345,7 @@ starvz_plot_list <- function(data = NULL) {
     st_pm = geom_blank(),
     st_mm = geom_blank(),
     starpu = geom_blank(),
+    node_events = geom_blank(),
     ijk = geom_blank(),
     ijk_pm = geom_blank(),
     lackready = geom_blank(),
@@ -407,6 +412,13 @@ starvz_plot_list <- function(data = NULL) {
     starvz_log("Creating the StarPU Space/Time")
     plot_list$starpu <- panel_st_runtime(data)
   }
+
+  # Node Events
+  if (data$config$node_events$active) {
+    starvz_log("Creating the Node Events")
+    plot_list$node_events <- panel_node_events(data)
+  }
+
 
   # KIteration
   if (data$config$kiteration$active) {

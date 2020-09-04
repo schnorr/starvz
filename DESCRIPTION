@@ -62,6 +62,7 @@ Collate:
     'phase2_applications.R'
     'phase2_atree.R'
     'phase2_config.R'
+    'phase2_events.R'
     'phase2_gaps.R'
     'phase2_imbalance.R'
     'phase2_kchart.R'

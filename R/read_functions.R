@@ -174,6 +174,10 @@ starvz_read <- function(directory = ".", config_file = NULL, selective = TRUE) {
       tables_to_load <- c(tables_to_load, "starpu")
     }
 
+    if (config$node_events$active) {
+      tables_to_load <- c(tables_to_load, "events")
+    }
+
     if (config$ready$active) {
       tables_to_load <- c(tables_to_load, "variable")
     }

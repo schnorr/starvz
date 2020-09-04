@@ -138,6 +138,9 @@ starvz_default_config <- function() {
   config$starpu$active <- FALSE
   config$starpu$aggregation$active <- FALSE
 
+  config$node_events$active <- TRUE
+  config$node_events$legend <- TRUE
+
   config$ready$active <- FALSE
   config$ready$limit <- NA
 

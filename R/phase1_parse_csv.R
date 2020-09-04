@@ -70,7 +70,17 @@ read_worker_csv <- function(where = ".",
   if (whichApplication == "qrmumps") {
     dfw <- dfw %>%
       mutate(Value = gsub("_perf.*", "", .data$Value)) %>%
-      mutate(Value = gsub("qrm_", "", .data$Value))
+      mutate(Value = gsub("qrm_", "", .data$Value)) %>%
+      mutate(Value = case_when(
+                                grepl("geqrt", Value) ~ "geqrt",
+                                grepl("gemqrt", Value) ~ "gemqrt",
+                                grepl("tpqrt", Value) ~ "tpqrt",
+                                grepl("tpmqrt", Value) ~ "tpmqrt",
+                                grepl("tpqrt", Value) ~ "tpqrt",
+                                grepl("block_extadd", Value) ~ "block_copy",
+                                TRUE ~ Value
+                              )
+            )
   }
 
   # Split application and starpu behavior

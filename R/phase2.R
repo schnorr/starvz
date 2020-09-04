@@ -564,6 +564,10 @@ starvz_plot <- function(data = NULL, name = NULL, save = FALSE, guided = data$co
     return(NULL)
   }
 
+  # Normalize Config
+  defaut_config <- starvz_default_config()
+  data$config <- modifyList(defaut_config, data$config)
+
   if (!is.null(guided) && guided) {
     # USe Y to compute state and starpu size
     # Get number of nodes

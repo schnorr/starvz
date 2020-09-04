@@ -182,6 +182,10 @@ starvz_compute_plot_heights <- function(plist, config) {
 #' }
 #' @export
 starvz_assemble <- function(..., config = NULL, remove_Y_info = TRUE, remove_legends = TRUE) {
+
+  defaut_config <- starvz_default_config()
+  config <- modifyList(defaut_config, config)
+
   plists <- list()
   for (i in list(...)) {
 
@@ -314,6 +318,9 @@ starvz_plot_list <- function(data = NULL) {
   }
 
   starvz_check_data(data, tables = list("Application" = c("Start", "End")))
+
+  defaut_config <- starvz_default_config()
+  data$config <- modifyList(defaut_config, data$config)
 
   # Adjust temporal scale
   if (is.null(data$config$limits$start)) {

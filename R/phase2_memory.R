@@ -214,7 +214,7 @@ geom_links <- function(data = NULL, dfw = NULL, combined = FALSE,
   # Get the start info on states because link dont have nodes & Position
   # Consider that MPI comm are between RAMs (TODO: This is not true for direct inter-nodes GPU transfers)
 
-  dfl <- data$Link %>% 
+  dfl <- data$Link %>%
         mutate(Origin = str_replace(.data$Origin, "mpict", "MEMMANAGER0")) %>%
         mutate(Dest = str_replace(.data$Dest, "mpict", "MEMMANAGER0"))
 
@@ -628,6 +628,7 @@ pre_handle_gantt <- function(data, name_func = NULL) {
 #' @param JobId Select handles of jobid
 #' @param lines vertical lines
 #' @param lHandle select handles
+#' @param name_func function to give names to handles
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
@@ -635,9 +636,9 @@ pre_handle_gantt <- function(data, name_func = NULL) {
 #' panel_handles(data = starvz_sample_lu)
 #' }
 #' @export
-panel_handles <- function(data, JobId = NA, lines = NA, lHandle = NA) {
+panel_handles <- function(data, JobId = NA, lines = NA, lHandle = NA, name_func = NULL) {
   if (is.null(data$handle_gantt_data)) {
-    data$handle_gantt_data <- pre_handle_gantt(data)
+    data$handle_gantt_data <- pre_handle_gantt(data, name_func = name_func)
   }
 
   if (is.na(JobId) && is.na(lHandle)) {

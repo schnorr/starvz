@@ -212,8 +212,11 @@ geom_links <- function(data = NULL, dfw = NULL, combined = FALSE,
   starvz_check_data(data, tables = list("Link" = c("Dest", "Origin")))
 
   # Get the start info on states because link dont have nodes & Position
+  # Consider that MPI comm are between RAMs (TODO: This is not true for direct inter-nodes GPU transfers)
 
-  dfl <- data$Link
+  dfl <- data$Link %>% 
+        mutate(Origin = str_replace(.data$Origin, "mpict", "MEMMANAGER0")) %>%
+        mutate(Dest = str_replace(.data$Dest, "mpict", "MEMMANAGER0"))
 
   starvz_log("Starting geom_links")
 

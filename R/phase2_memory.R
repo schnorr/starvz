@@ -990,3 +990,145 @@ multiple_snaps <- function(data, start, end, step, path) {
     i <- i + 1
   }
 }
+
+#' Heatmap of memory presence
+#'
+#' Visualizate the presence of memory handles across memory managers
+#'
+#' @param data starvz_data with trace data
+#' @param legend enable/disable legends
+#' @param base_size base_size base font size
+#' @param expand_x expand size for scale_x_continuous padding
+#' @return A ggplot object
+#' @include starvz_data.R
+#' @examples
+#' \donttest{
+#' panel_memory_heatmap(data = starvz_sample_lu)
+#' }
+#' @export
+panel_memory_heatmap <- function(data,
+                         legend = data$config$memory_heatmap$legend,
+                         base_size = data$config$base_size,
+                         expand_x = data$config$expand){
+
+  if (is.null(data$handle_states)) {
+    data$handle_states <- handles_presence_states(data)
+  }
+
+  if (is.null(legend) || !is.logical(legend)) {
+    legend <- TRUE
+  }
+
+  if (is.null(base_size) || !is.numeric(base_size)) {
+    base_size <- 22
+  }
+
+  if (is.null(expand_x) || !is.numeric(expand_x)) {
+    expand_x <- 0.05
+  }
+
+
+  data$handle_states %>% mutate(Duration=.data$End-.data$Start) -> d_data
+
+  data$Data_handles %>% separate(.data$Coordinates, c("Y", "X")) %>%
+  mutate(across(c(.data$X, .data$Y), as.integer)) %>%
+  select(.data$Handle, .data$X, .data$Y) -> hand
+  d_data %>% group_by(.data$Value, .data$Container) %>% summarize(sum=sum(.data$Duration), n=n()) %>%
+    inner_join(hand, by=c("Value" = "Handle")) -> d_presence
+  d_presence %>% ungroup %>% group_by(.data$Value) %>% mutate(per=.data$sum/sum(.data$sum)) -> d_percent
+
+  max_x <- data[[2]] %>% arrange(-.data$X) %>% slice(1) %>% .$X %>% unlist()
+
+  panel <- ggplot(d_percent, aes(.data$Y, .data$X)) +
+      default_theme(base_size, expand) +
+      geom_tile(aes(fill = .data$per),
+                colour = "white") +
+
+      scale_fill_gradient(name="Presence Percentage [%]",
+                          breaks = c(0.25, 0.5, 0.75, 1.00),
+                          labels = c("25%", "50%", "75%", "100%"),
+                          limits = c(0.0,1),
+                          low = "white",
+                          high = "steelblue",
+                          guide = guide_legend(title.position = "top")
+                          ) +
+      scale_y_reverse(limits=c(max_x+0.6, -0.6), expand=c(0,0) ) +
+      scale_x_continuous(limits=c(-0.6, max_x+0.6), expand=c(0,0) ) +
+      facet_wrap(~ .data$Container) +
+      labs(x="Block X Coordinate", y="Block Y Coordinate")
+
+  if(legend){
+        panel <- panel + theme(legend.position="top",
+              panel.spacing = unit(1, "mm")) +
+        guides(fill = guide_colorbar(barwidth = 15, barheight = 1))
+  }else{
+      panel <- panel + theme(legend.position = "none")
+  }
+
+ return(panel)
+
+}
+
+
+#' Show the 2D MPI distribution
+#'
+#' Visualizate the data distribution across nodes of 2D structured data
+#'
+#' @param data starvz_data with trace data
+#' @param legend enable/disable legends
+#' @param base_size base_size base font size
+#' @param expand_x expand size for scale_x_continuous padding
+#' @return A ggplot object
+#' @include starvz_data.R
+#' @examples
+#' \donttest{
+#' panel_dist2d(data = starvz_sample_lu)
+#' }
+#' @export
+panel_dist2d <- function(data,
+                         legend = data$config$dist2d$legend,
+                         base_size = data$config$base_size,
+                         expand_x = data$config$expand){
+
+  if (is.null(legend) || !is.logical(legend)) {
+    legend <- TRUE
+  }
+
+  if (is.null(base_size) || !is.numeric(base_size)) {
+    base_size <- 22
+  }
+
+  if (is.null(expand_x) || !is.numeric(expand_x)) {
+    expand_x <- 0.05
+  }
+
+  data$Data_handle %>% .$MPIOwner %>% unique() %>% length() -> n_nodes
+
+  panel <- data$Data_handle %>% select(.data$MPIOwner, .data$Coordinates) %>%
+      unique() %>%
+      mutate(MPIOwner = factor(.data$MPIOwner)) %>%
+      separate(.data$Coordinates, c("Y", "X")) %>%
+      mutate(X=as.numeric(.data$X), Y=as.numeric(.data$Y)) %>%
+      ggplot(aes(x=.data$X, y=.data$Y, fill=.data$MPIOwner)) +
+      default_theme(base_size, expand) +
+      geom_tile(alpha=0.8) +
+      geom_text(aes(label=factor(.data$MPIOwner)), size=2) +
+      scale_y_reverse(expand=c(0.01,0.01)) +
+      scale_x_continuous(expand=c(0.01,0.01)) +
+      guides(fill = guide_legend(ncol = 15)) +
+      xlab("Column") + ylab("Line")
+
+   if (requireNamespace("viridis", quietly = TRUE)) {
+       panel <- panel + viridis::scale_fill_viridis(name = "Node", breaks = seq(0, n_nodes), discrete=TRUE)
+   }else{
+      starvz_warn("In panel_dist2d: We suggest package viridis for high number of nodes")
+   }
+
+  if(legend){
+        panel <- panel + theme(legend.position="top")
+  }else{
+      panel <- panel + theme(legend.position = "none")
+  }
+
+    return(panel)
+}

@@ -81,4 +81,5 @@ Collate:
     'read_functions.R'
     'write_functions.R'
 Suggests:
-    testthat
+    testthat,
+    viridis

@@ -4,7 +4,7 @@
 \alias{panel_handles}
 \title{Create a space time visualization of data handles}
 \usage{
-panel_handles(data, JobId = NA, lines = NA, lHandle = NA)
+panel_handles(data, JobId = NA, lines = NA, lHandle = NA, name_func = NULL)
 }
 \arguments{
 \item{data}{starvz_data with trace data}
@@ -14,6 +14,8 @@ panel_handles(data, JobId = NA, lines = NA, lHandle = NA)
 \item{lines}{vertical lines}
 
 \item{lHandle}{select handles}
+
+\item{name_func}{function to give names to handles}
 }
 \value{
 A ggplot object

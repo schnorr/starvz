@@ -446,15 +446,6 @@ aggregate_trace <- function(df_native, states, excludeIds, min_time_pure) {
   df_aggregate
 }
 
-# This function is used to compute the relative height of different states in the chunk. After, this is used to create a stacked view of each chunk.
-# Input: a data table computed using the aggreate_trace function.
-# Output: a data table with PosY column, representing the height of each state in the chunk. This column is computed using the Activity proportion.
-compute_aggregate_coord <- function(df) {
-  df$Activity <- df$Activity * 0.8 # this is used to reduce the size of the rectangle (a smaller rectangle is better for visualization as we already tested in another gantt charts)
-  df %>%
-    group_by(.data$ResourceId, .data$Chunk) %>%
-    mutate(PosY = (as.numeric(.data$ResourceId) - 0.4) + (cumsum(.data$Activity))) # -0.4 is needed to put the rectangle in the middle of the y-axi
-}
 geom_aggregated_states <- function(data = NULL, Show.Outliers = FALSE, min_time_pure = 1000, states = NA, base_size = 22, labels = "1", expand_value = 0.05) {
   if (is.null(data)) stop("data is NULL when given to geom_aggregated_states")
   if (is.na(states)) stop("states is NA when given to geom_aggregated_states")

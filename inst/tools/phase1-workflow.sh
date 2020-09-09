@@ -100,7 +100,7 @@ if [ -x "$(command -v pmtool)" ] && [ -f "platform_file.rec" ]; then
   # Running pmtool with default-normal configuration
   pmtool -p platform_file.rec tasks.rec -d fast -a dmdas --threads --no-header -w -s pmtool_states.out > pmtool.out 2> /dev/null
 
-  # Cleaning pmtools bounds.
+  # Cleaning pmtool bounds.
   echo "Alg,Bound,Time" > $PMTOOLOUT
   cat pmtool.out | awk '{ print $(4), $(3), $(5)}' | sed '/^[[:space:]]*$/d' | sed -e 's/[[:space:]]/,/g' | sed 's/True/TRUE/g' | sed 's/False/FALSE/g' >> $PMTOOLOUT
 

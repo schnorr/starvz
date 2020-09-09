@@ -206,7 +206,7 @@ panel_st_agg_static <- function(data = NULL, runtime = FALSE,
       xmin = .data$Start,
       xmax = .data$End,
       ymin = .data$Position + .data$TaskPosition,
-      ymax = .data$Position + (.data$TaskPosition + .data$TaskHeight), color = .data$Task
+      ymax = .data$Position + (.data$TaskPosition + .data$TaskHeight)
     ), alpha = .5)
 
   if (!runtime) {

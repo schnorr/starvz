@@ -36,7 +36,7 @@ panel_kiteration(
 A ggplot object
 }
 \description{
-Plot iteraionts Y over Time X
+Plot iterations Y over Time X
 }
 \examples{
 panel_kiteration(data = starvz_sample_lu)

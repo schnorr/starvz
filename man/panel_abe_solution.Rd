@@ -4,11 +4,15 @@
 \alias{panel_abe_solution}
 \title{Create a plot with the solution computed by ABE}
 \usage{
-panel_abe_solution(data)
+panel_abe_solution(data = NULL, base_size = data$config$base_size)
 }
 \arguments{
-\item{data}{starvz_data with trace data
-#' @return A ggplot object}
+\item{data}{starvz_data with trace data}
+
+\item{base_size}{base_size base font size}
+}
+\value{
+A ggplot object
 }
 \description{
 Plot per-node and per-tasktype repartion among resource types

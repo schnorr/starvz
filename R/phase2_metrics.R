@@ -6,7 +6,7 @@ abe_cpu_cuda <- function(dfl, debug = FALSE) {
   return(tibble(Result = ret[[1]]$objval))
 }
 
-abe_cpu_cuda_details <- function(dfl, debug = FALSE) {
+abe_cpu_cuda_details <- function(dfl, Colors = NULL, debug = FALSE) {
   node <- dfl %>%
     slice(1) %>%
     pull(.data$Node)
@@ -19,7 +19,7 @@ abe_cpu_cuda_details <- function(dfl, debug = FALSE) {
     unnest(.data$Types, .drop = FALSE) %>%
     unnest(.data$Values, .drop = FALSE) %>%
     mutate(
-      Count = result[[1]]$solution[1:nrow(.data)],
+      Count = result[[1]]$solution[1:n()],
       Estimation = TRUE
     ) %>%
     rename(
@@ -36,13 +36,8 @@ abe_cpu_cuda_details <- function(dfl, debug = FALSE) {
     mutate(Estimation = FALSE) %>%
     bind_rows(ret) -> ret
 
-  # Get unique colors
-  dfl %>%
-    select(.data$Value, .data$Color) %>%
-    unique() -> dfcolor
-
   ret %>%
-    left_join(dfcolor, by = c("Value" = "Value")) -> ret
+    left_join(Colors, by = c("Value" = "Value")) -> ret
 
   return(ret)
 }
@@ -215,9 +210,9 @@ hl_per_node_ABE_details <- function(data = NULL) {
 
   data$Application %>%
     filter(grepl("CPU|CUDA", .data$ResourceId)) %>%
-    select(.data$Node, .data$Resource, .data$ResourceType, .data$Duration, .data$Value, .data$Color, .data$Position, .data$Height) %>%
+    select(.data$Node, .data$Resource, .data$ResourceType, .data$Duration, .data$Value, .data$Position, .data$Height) %>%
     group_by(.data$Node) %>%
-    do(abe_cpu_cuda_details(.data)) %>%
+    do(abe_cpu_cuda_details(.data, Colors = data$Colors)) %>%
     ungroup()
 }
 hl_global_cpb <- function(data = NULL) {

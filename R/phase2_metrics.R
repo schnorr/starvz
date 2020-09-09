@@ -522,6 +522,29 @@ geom_abe_internal <- function(pernodeABEdf = NULL,
   }
 }
 
+#' Create a plot with the solution computed by ABE
+#'
+#' Plot per-node and per-tasktype repartion among resource types
+#'
+#' @param data starvz_data with trace data
+#' #' @return A ggplot object
+#' @include starvz_data.R
+#' @examples
+#' \donttest{
+#' panel_abe_solution(data = starvz_sample_lu)
+#' }
+#' @export
+panel_abe_solution <- function(data){
+    sol <- hl_per_node_ABE_details(data)
+    nnodes <- length(unique(sol$Node))
+    ggplot(data = sol, aes(x = ResourceType, y = Count, fill = Value)) +
+        geom_bar(data = sol %>% filter(.data$Estimation == FALSE), position = "stack", stat = "identity", alpha = .6) +
+        geom_point(data = sol %>% filter(.data$Estimation == TRUE), shape = 21, color = "black", size = 2, stroke = 1, alpha = .7) +
+        facet_wrap(Node~Value, scales = "free", nrow = nnodes) +
+        scale_fill_manual(values = starvz:::extract_colors(data$Application, data$Colors)) +
+        theme_bw()
+}
+
 # Nesi Implementation of ABE
 # Resources extra info is the time per task type per resource type with:
 # ResourceType, codelet, mean

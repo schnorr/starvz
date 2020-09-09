@@ -443,7 +443,7 @@ aggregate_trace <- function(df_native, states, excludeIds, min_time_pure) {
   df_aggregate <- df_aggregate %>%
     group_by(.data$ResourceId, .data$Chunk) %>%
     mutate(aggregated = ifelse((abs(.data$Activity - 1) <= 0.00001) & .data$Number == 1, FALSE, TRUE))
-  df_aggregate
+  df_aggregate %>% ungroup()
 }
 
 geom_aggregated_states <- function(data = NULL, Show.Outliers = FALSE, min_time_pure = 1000, states = NA, base_size = 22, labels = "1", expand_value = 0.05) {

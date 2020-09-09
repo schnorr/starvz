@@ -210,9 +210,8 @@ panel_atree <- function(data = NULL, step = data$config$atree$step, legend = dat
   # 1. Add the atree structure representation first
   atreeplot <- panel_atree_structure(data) +
     default_theme(data$config$base_size, data$config$expand) +
-    ylab("Elimination\nTree [nodes]") +
-    scale_y_continuous(breaks = NULL, labels = NULL)
-
+    ylab("Elimination Tree\n[Submission Order]")
+    
   # Add the computation, initialization, and communication over the tree structure plot
   # 2. Add computations
   # 2.1 Add the not pruned computation representation

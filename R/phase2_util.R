@@ -132,3 +132,29 @@ panel_title <- function(data) {
     ) +
     annotate("text", x = .5, y = .5, label = data$Origin, size = 5)
 }
+
+#' Create the diagnostig plot for the regression model
+#'
+#' Use the starvz Application data to observe how the regression model used 
+#' in the task anomaly classification fits the data.
+#'
+#' @param data starvz_data with trace data
+#' @return A ggplot object
+#' @include starvz_data.R
+#' @examples
+#' panel_model_gflops(data = starvz_sample_data)
+#' @export
+panel_model_gflops <- function(data) {
+  data$Application %>%
+    filter(Value %in% c("geqrt", "gemqrt", "tpqrt", "tpmqrt")) %>%
+    ggplot(aes(x=GFlop, y=Duration, color=Outlier)) +
+      theme_bw(base_size=16) +
+      geom_point(alpha=.2) +
+      labs(y="Duration (ms)", x="GFlops") +
+      facet_grid(ResourceType~Value, scales="free") +
+      scale_color_brewer(palette="Set1") +
+      theme(legend.position="top") +
+      labs(color = "Anomaly") +
+      # ~ 0 forces the model to pass through origin
+      geom_smooth(method="lm", formula="y ~ 0 + I(x^(2/3))", color="green", fill="blue")
+}

@@ -538,7 +538,7 @@ panel_abe_solution <- function(data){
     sol <- hl_per_node_ABE_details(data)
     nnodes <- length(unique(sol$Node))
     colors <- extract_colors(data$Application, data$Colors)
-    ggplot(data = sol, aes(x = ResourceType, y = Count, fill = Value)) +
+    ggplot(data = sol, aes(x = .data$ResourceType, y = .data$Count, fill = .data$Value)) +
         geom_bar(data = sol %>% filter(.data$Estimation == FALSE), position = "stack", stat = "identity", alpha = .6) +
         geom_point(data = sol %>% filter(.data$Estimation == TRUE), shape = 21, color = "black", size = 2, stroke = 1, alpha = .7) +
         facet_wrap(Node~Value, scales = "free", nrow = nnodes) +

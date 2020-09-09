@@ -126,6 +126,7 @@ panel_st_agg_dynamic <- function(data = NULL,
 #' @param runtime if this is runtime data
 #' @param x_start X-axis start value
 #' @param x_end X-axis end value
+#' @param outliers print outliers on top
 #' @param step time-step
 #' @return A ggplot object
 #' @include starvz_data.R
@@ -137,6 +138,7 @@ panel_st_agg_dynamic <- function(data = NULL,
 panel_st_agg_static <- function(data = NULL, runtime = FALSE,
                                 x_start = data$config$limits$start,
                                 x_end = data$config$limits$end,
+                                outliers = data$config$st$outliers,
                                 step = data$config$st$aggregation$step) {
   if (is.null(data)) {
     return(NULL)
@@ -209,7 +211,7 @@ panel_st_agg_static <- function(data = NULL, runtime = FALSE,
       ymax = .data$Position + (.data$TaskPosition + .data$TaskHeight)
     ), alpha = .5)
 
-  if (!runtime) {
+  if (!runtime && outliers) {
     # Print outliers on top
     gow <- gow + geom_rect(
       data = (dfw %>% filter(.data$Outlier == TRUE)),

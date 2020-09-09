@@ -9,6 +9,7 @@ panel_st_agg_static(
   runtime = FALSE,
   x_start = data$config$limits$start,
   x_end = data$config$limits$end,
+  outliers = data$config$st$outliers,
   step = data$config$st$aggregation$step
 )
 }
@@ -20,6 +21,8 @@ panel_st_agg_static(
 \item{x_start}{X-axis start value}
 
 \item{x_end}{X-axis end value}
+
+\item{outliers}{print outliers on top}
 
 \item{step}{time-step}
 }

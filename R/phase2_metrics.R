@@ -530,6 +530,9 @@ geom_abe_internal <- function(pernodeABEdf = NULL,
 #' }
 #' @export
 panel_abe_solution <- function(data){
+    starvz_check_data(data, tables = list("Colors" = c("Value", "Color", "Use"),
+                                          "Application" = c("ResourceId", "Node", "Resource", "ResourceType", "Duration", "Value", "Position", "Height")))
+
     sol <- hl_per_node_ABE_details(data)
     nnodes <- length(unique(sol$Node))
     colors <- extract_colors(data$Application, data$Colors)

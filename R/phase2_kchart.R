@@ -1,7 +1,7 @@
 
 #' Create a special chart for applications with iterations
 #'
-#' Plot iteraionts Y over Time X
+#' Plot iterations Y over Time X
 #'
 #' @param data starvz_data with trace data
 #' @param legend enable/disable legends

@@ -462,7 +462,7 @@ geom_cpb_internal <- function(dfw = NULL, value = NULL, desc = NULL, bsize = 22)
         label = paste0(desc, " ", round(value, 0)),
         angle = 90,
         color = "black",
-        size = bsize / 4
+        size = bsize / 5
       )
     )
     return(ret)

@@ -440,7 +440,7 @@ geom_cpb_internal <- function(dfw = NULL, value = NULL, desc = NULL, bsize = 22)
           x = value,
           xend = value,
           y = minPos,
-          yend = maxPos
+          yend = maxPos + corr / 1.25
         ),
         aes(
           x = .data$x,

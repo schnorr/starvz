@@ -81,7 +81,7 @@ yconf <- function(dfw = NULL, option = "ALL") {
       group_by(.data$Node, .data$ResourceType) %>%
       arrange(.data$Node, .data$ResourceId, .data$ResourceType) %>%
       ungroup()
-  } else { # First and Last
+  } else { # First and Last ("FIRST_LAST") or anything else
     dfw %>%
       select(.data$Node, .data$ResourceId, .data$ResourceType, .data$Position, .data$Height) %>%
       distinct() %>%

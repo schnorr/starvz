@@ -5,7 +5,8 @@ read_worker_csv <- function(where = ".",
                             app_states_fun = NULL,
                             outlier_fun = NULL,
                             state_filter = 0,
-                            whichApplication = NULL) {
+                            whichApplication = NULL,
+                            config = NULL) {
   # Check obligatory parameters
   if (is.null(whichApplication)) stop("whichApplication is NULL, it should be provided")
   if (is.null(app_states_fun)) stop("app_states_fun should be provided to read_state_csv")
@@ -173,6 +174,18 @@ read_worker_csv <- function(where = ".",
         Use = TRUE
       ) %>%
       unique()
+    # If config is present try to use it for colors
+    if(!is.null(config)){
+      tasks_colors <- lapply(config$app_tasks, data.frame, stringsAsFactors = FALSE)
+      config_colors <- bind_rows(tasks_colors, .id = "Value")
+      if(config_colors %>% nrow() > 0){
+         dfcolors <- dfcolors %>%
+                     left_join(config_colors, by="Value") %>%
+                     mutate(Color = ifelse(is.na(.data$color), .data$Color, .data$color)) %>%
+                     mutate(Use = ifelse(is.na(.data$use), .data$Use, .data$use)) %>%
+                     select(.data$Value, .data$Color, .data$Use)
+      }
+    }
   } else {
     partial_join <- function(x, y, by_x, pattern_y) {
       idx_x <- sapply(y[[pattern_y]], grep, x[[by_x]])

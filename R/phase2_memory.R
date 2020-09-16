@@ -10,6 +10,8 @@
 #' @param x_start X-axis start value
 #' @param x_end X-axis end value
 #' @param combined shows links
+#' @param show_state_total Show the percentage of selected state
+#' @param show_transfer_total Show total transfer amount
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
@@ -21,7 +23,9 @@ panel_memory_state <- function(data = NULL,
                                base_size = data$config$base_size,
                                expand_x = data$config$expand,
                                x_start = data$config$limits$start,
-                               x_end = data$config$limits$end) {
+                               x_end = data$config$limits$end,
+                               show_state_total = data$config$memory$state$total,
+                               show_transfer_total = data$config$memory$transfer$total) {
   starvz_check_data(data, tables = list("Events_memory" = c("Type", "Container", "Handle")))
 
   if (is.null(legend) || !is.logical(legend)) {
@@ -60,13 +64,14 @@ panel_memory_state <- function(data = NULL,
     default_theme(base_size, expand_x)
 
   # Add states and outliers if requested
-  gow <- gow + geom_events(data, dfwapp, combined = combined, tstart = x_start, tend = x_end)
+  gow <- gow + geom_events(data, dfwapp, combined = combined, tstart = x_start, tend = x_end,
+                           show_total = show_state_total)
   if (combined) {
     gow <- gow + geom_links(data, dfwapp,
       combined = TRUE, tstart = x_start, tend = x_end,
       arrow_active = data$config$memory$transfers$arrow,
       border_active = data$config$memory$transfers$border,
-      total_active = data$config$memory$transfers$total
+      total_active = show_transfer_total
     )
   }
 
@@ -86,14 +91,18 @@ panel_memory_state <- function(data = NULL,
 
 geom_events <- function(main_data = NULL, data = NULL,
                         combined = FALSE, tstart = NULL,
-                        tend = NULL) {
+                        tend = NULL, show_total=FALSE) {
   if (is.null(data)) stop("data is NULL when given to geom_events")
 
   starvz_log("Starting geom_events")
 
   dfw <- data
 
-  dfl <- main_data$Link
+  dfl <- main_data$Link %>% filter(.data$Type %in% c("MPI communication",
+                              "Intra-node data Fetch",
+                              "Intra-node data TaskPreFetch", "Intra-node data PreFetch")) %>%
+        mutate(Origin = str_replace(.data$Origin, "mpict", "MEMMANAGER0")) %>%
+        mutate(Dest = str_replace(.data$Dest, "mpict", "MEMMANAGER0"))
 
   col_pos_1 <- data.frame(Container = unique(dfl$Dest)) %>%
     arrange(.data$Container) %>%
@@ -173,7 +182,7 @@ geom_events <- function(main_data = NULL, data = NULL,
     legend.spacing.x = unit(2, "mm")
   )
 
-  if (main_data$config$memory$state$total) {
+  if (show_total) {
     select <- main_data$config$memory$state$select
     ms <- dfw %>%
       filter(.data$Type == select, .data$Start < tend, .data$End > tstart) %>%
@@ -214,7 +223,9 @@ geom_links <- function(data = NULL, dfw = NULL, combined = FALSE,
   # Get the start info on states because link dont have nodes & Position
   # Consider that MPI comm are between RAMs (TODO: This is not true for direct inter-nodes GPU transfers)
 
-  dfl <- data$Link %>%
+  dfl <- data$Link %>% filter(.data$Type %in% c("MPI communication",
+                              "Intra-node data Fetch",
+                              "Intra-node data TaskPreFetch", "Intra-node data PreFetch")) %>%
         mutate(Origin = str_replace(.data$Origin, "mpict", "MEMMANAGER0")) %>%
         mutate(Dest = str_replace(.data$Dest, "mpict", "MEMMANAGER0"))
 
@@ -286,14 +297,15 @@ geom_links <- function(data = NULL, dfw = NULL, combined = FALSE,
   if (border_active) {
     ret[[length(ret) + 1]] <- geom_segment(
       data = dfl,
-      aes(x = .data$Start, xend = .data$End, y = .data$O_Position, yend = .data$D_Position), arrow = arrow_g, alpha = 0.5, size = 1.5, color = "black"
+      aes(x = .data$Start, xend = .data$End, y = .data$O_Position, yend = .data$D_Position),
+           arrow = arrow_g, alpha = 0.5, size = 1.5, color = "black", show.legend = FALSE
     )
   }
 
   ret[[length(ret) + 1]] <- geom_segment(data = dfl, aes(
     x = .data$Start, xend = .data$End,
     y = .data$O_Position, yend = .data$D_Position, color = .data$Origin
-  ), arrow = arrow_g, alpha = 1.0)
+  ), arrow = arrow_g, alpha = 1.0, show.legend = FALSE)
   selected_dfl <- dfl %>%
     filter(.data$End > tstart) %>%
     filter(.data$Start < tend)
@@ -562,11 +574,13 @@ pre_handle_gantt <- function(data, name_func = NULL) {
   data$Events_memory %>%
     filter(.data$Type == "DriverCopy Start") %>%
     select(.data$Handle, .data$Info, .data$Container) %>%
-    mutate(Info = as.integer(.data$Info)) -> links_handles
+    mutate(Info = as.integer(as.character(.data$Info))) -> links_handles
 
   links <- data$Link %>%
     filter(.data$Type == "Intra-node data Fetch" |
-      .data$Type == "Intra-node data PreFetch") %>%
+      .data$Type == "Intra-node data PreFetch" |
+      .data$Type == "Intra-node data TaskPreFetch"
+    ) %>%
     select(-.data$Container, -.data$Size) %>%
     mutate(Con = as.integer(substring(.data$Key, 5))) %>%
     select(-.data$Key)
@@ -629,6 +643,8 @@ pre_handle_gantt <- function(data, name_func = NULL) {
 #' @param lines vertical lines
 #' @param lHandle select handles
 #' @param name_func function to give names to handles
+#' @param x_start X-axis start value
+#' @param x_end X-axis end value
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
@@ -636,9 +652,19 @@ pre_handle_gantt <- function(data, name_func = NULL) {
 #' panel_handles(data = starvz_sample_lu)
 #' }
 #' @export
-panel_handles <- function(data, JobId = NA, lines = NA, lHandle = NA, name_func = NULL) {
+panel_handles <- function(data, JobId = NA, lines = NA, lHandle = NA, name_func = NULL,
+  x_start = data$config$limits$start,
+  x_end = data$config$limits$end) {
   if (is.null(data$handle_gantt_data)) {
     data$handle_gantt_data <- pre_handle_gantt(data, name_func = name_func)
+  }
+
+  if (is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start))) {
+    x_start <- NA
+  }
+
+  if (is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end))) {
+    x_end <- NA
   }
 
   if (is.na(JobId) && is.na(lHandle)) {
@@ -663,7 +689,7 @@ panel_handles <- function(data, JobId = NA, lines = NA, lHandle = NA, name_func 
     final_links_data <- data$handle_gantt_data$final_links %>% filter(.data$Value %in% selected_handles)
   }
 
-  events_colors <- brewer.pal(n = 6, name = "Dark2")
+  events_colors <- brewer.pal(n = 7, name = "Dark2")
 
   extra <- c(
     "Owner" = "darksalmon",
@@ -677,13 +703,14 @@ panel_handles <- function(data, JobId = NA, lines = NA, lHandle = NA, name_func 
     .$Color %>%
     setNames(lc %>% .$Value) -> fc
 
-  fills <- append(fc, extra)
+  fills <- append(extra, fc)
 
   colors <- c(
     "Allocation Request" = events_colors[[1]],
     "Transfer Request" = events_colors[[2]],
     "Intra-node data Fetch" = events_colors[[3]],
     "Intra-node data PreFetch" = events_colors[[4]],
+    "Intra-node data TaskPreFetch" = events_colors[[7]],
     "MPI communication" = events_colors[[5]],
     "Last Job on same Worker" = events_colors[[6]]
   )
@@ -738,6 +765,7 @@ panel_handles <- function(data, JobId = NA, lines = NA, lHandle = NA, name_func 
         "Transfer Request",
         "Intra-node data Fetch",
         "Intra-node data PreFetch",
+        "Intra-node data TaskPreFetch",
         "MPI communication"
       ),
       limits = c(
@@ -745,19 +773,20 @@ panel_handles <- function(data, JobId = NA, lines = NA, lHandle = NA, name_func 
         "Transfer Request",
         "Intra-node data Fetch",
         "Intra-node data PreFetch",
+        "Intra-node data TaskPreFetch",
         "MPI communication"
       ),
       guide = guide_legend(
-        nrow = 5, title.position = "top", order = 0,
+        nrow = 6, title.position = "top", order = 0,
         override.aes =
           list(
-            arrow = NA, linetype = 0, shape = c(19, 19, 15, 15, 15),
+            arrow = NA, linetype = 0, shape = c(19, 19, 15, 15, 15, 15),
             yintercept = NA
           )
       )
     ) +
     scale_shape_manual(
-      name = "Event Type", labels = c("Fetch", "Prefetch", "Idle Fetch"), values = c(19, 21, 23),
+      name = "Event Type", labels = c("Fetch", "Prefetch", "TaskPreFetch", "Idle Fetch"), values = c(19, 21, 22, 23),
       guide = guide_legend(nrow = 3, title.position = "top")
     ) +
     # Arrow Border
@@ -834,6 +863,10 @@ panel_handles <- function(data, JobId = NA, lines = NA, lHandle = NA, name_func 
   # 		  fontface="bold",
   # 	  alpha=0.8)
   # }
+
+  p <- p + coord_cartesian(
+    xlim = c(x_start, x_end)
+  )
   return(p)
 }
 

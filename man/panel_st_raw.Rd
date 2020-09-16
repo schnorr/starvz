@@ -41,7 +41,7 @@ panel_st_raw(
 
 \item{selected_nodes}{select only some nodes in some plots}
 
-\item{labels}{control resources labels: [ALL, 1CPU_per_NODE, 1GPU_per_NODE]}
+\item{labels}{control resources labels: [ALL, 1CPU_per_NODE, 1GPU_per_NODE, FIRST_LAST]}
 
 \item{alpha}{alpha value for non-anomalous tasks}
 

@@ -14,6 +14,7 @@ NULL
 #' @param state_filter Type of filder
 #' @param whichApplication Name of Application
 #' @param input.parquet Use or not of parquet files
+#' @param config StarVZ config structure, this function uses only the app_tasks
 #' @return ggplot object with all starvz plots
 #' @family phase1 functions
 #'
@@ -23,7 +24,9 @@ NULL
 #' starvz_phase1(directory = example_folder)
 #' }
 #' @export
-starvz_phase1 <- function(directory = ".", app_states_fun = lu_colors, state_filter = 0, whichApplication = "", input.parquet = "1") {
+starvz_phase1 <- function(directory = ".", app_states_fun = lu_colors,
+                          state_filter = 0, whichApplication = "", input.parquet = "1",
+                          config = NULL) {
   # Start of reading procedure
   if (is.null(app_states_fun)) stop("app_states_fun is obligatory for reading")
 
@@ -45,7 +48,8 @@ starvz_phase1 <- function(directory = ".", app_states_fun = lu_colors, state_fil
     app_states_fun = app_states_fun,
     outlier_fun = outlier_definition,
     state_filter = state_filter,
-    whichApplication = whichApplication
+    whichApplication = whichApplication,
+    config = config
   )
   Worker$Application <- Worker$Application %>%
     hl_y_coordinates(dfhie = dfhie) %>%

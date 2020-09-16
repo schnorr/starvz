@@ -44,7 +44,7 @@ fi
 STARVZ_EXEC_PHASE_1=1
 STARVZ_EXEC_PHASE_2=1
 STARVZ_TRACE_FOLDER=""
-STARVZ_APPLICATION=""
+STARVZ_APPLICATION="-"
 STARVZ_CONFIG_FILE="$STARVZ_HOME/etc/default.yaml"
 
 while true; do
@@ -104,6 +104,7 @@ while true; do
                 *)
                         # Make it absolute
                         STARVZ_TRACE_FOLDER=$(cd $1; pwd)
+                        STARVZ_CONFIG_FILE="$STARVZ_TRACE_FOLDER/config.yaml"
                         shift 1
                         ;;
         esac
@@ -115,9 +116,14 @@ if [ ! -r "$STARVZ_TRACE_FOLDER" ]; then
         exit 1
 fi
 
+# If config file dont exist fall to default
+if [ ! -r "$STARVZ_CONFIG_FILE" ]; then
+        STARVZ_CONFIG_FILE="$STARVZ_HOME/etc/default.yaml"
+fi
+
 pushd $STARVZ_HOME/tools/
   if [ "$STARVZ_EXEC_PHASE_1" -eq 1 ]; then
-    ./phase1-workflow.sh $STARVZ_TRACE_FOLDER $STARVZ_APPLICATION
+    ./phase1-workflow.sh $STARVZ_TRACE_FOLDER $STARVZ_APPLICATION $STARVZ_CONFIG_FILE
   fi
   if [ "$STARVZ_EXEC_PHASE_2" -eq 1 ]; then
     ./phase2-workflow.R $STARVZ_TRACE_FOLDER $STARVZ_CONFIG_FILE

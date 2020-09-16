@@ -93,7 +93,7 @@ if [ -x "$(command -v pmtool)" ] && [ -f "platform_file.rec" ]; then
       recdel -t timing -e "Model = '$i'" platform_file.rec
     done
   fi
-  
+
   # This command should be executed with the cluster starpu.
   #starpu_perfmodel_recdump tasks.rec -o platform_file.rec
 

@@ -4,7 +4,15 @@
 \alias{panel_handles}
 \title{Create a space time visualization of data handles}
 \usage{
-panel_handles(data, JobId = NA, lines = NA, lHandle = NA, name_func = NULL)
+panel_handles(
+  data,
+  JobId = NA,
+  lines = NA,
+  lHandle = NA,
+  name_func = NULL,
+  x_start = data$config$limits$start,
+  x_end = data$config$limits$end
+)
 }
 \arguments{
 \item{data}{starvz_data with trace data}
@@ -16,6 +24,10 @@ panel_handles(data, JobId = NA, lines = NA, lHandle = NA, name_func = NULL)
 \item{lHandle}{select handles}
 
 \item{name_func}{function to give names to handles}
+
+\item{x_start}{X-axis start value}
+
+\item{x_end}{X-axis end value}
 }
 \value{
 A ggplot object

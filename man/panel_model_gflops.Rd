@@ -15,7 +15,7 @@ panel_model_gflops(data, freeScales = TRUE)
 A ggplot object
 }
 \description{
-Use the starvz Application data to observe how the regression model used 
+Use the starvz Application data to observe how the regression model used
 in the task anomaly classification fits the data.
 }
 \examples{

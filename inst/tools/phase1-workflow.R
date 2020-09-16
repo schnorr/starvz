@@ -9,14 +9,15 @@ usage <- function ()
     stop("Usage: ", basename(commandArgs()[4]), "
          <directory> [application](optional) [use parquet](optional)\n
           where <directory> contains CSV files of the workflow;\n
-          where [application](optional) is either cholesky or qrmumps.
-          where [use parquet](optional) is a flag (1 to activate) to use parquet", call.=FALSE)
+          where [application](optional) is the pre configured application.
+          where [config](optional) is config file location", call.=FALSE)
 }
 
 # Get the arguments to this script
 args = commandArgs(trailingOnly=TRUE)
 
 input.parquet = 1
+input.config = NULL
 
 if (length(args) < 1) {
     usage();
@@ -26,7 +27,11 @@ if (length(args) < 1) {
    input.application = args[[2]];
 }else{
    input.application = args[[2]];
-   input.parquet = args[[3]];
+   input.config = args[[3]];
+}
+
+if(input.application=="-"){
+  input.application = "";
 }
 
 input.directory = args[[1]];
@@ -59,8 +64,15 @@ if (input.application == "cholesky"){
 
 starvz_set_log(TRUE)
 
+config = NULL
+
+if(!is.null(input.config)){
+  config <- starvz_read_config(input.config)
+}
+
 data <- starvz_phase1(directory = input.directory,
                              app_states_fun = states.fun,
                              state_filter = states.filter,
                              whichApplication = input.application,
-                             input.parquet = input.parquet);
+                             input.parquet = input.parquet,
+                             config = config);

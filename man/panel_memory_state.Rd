@@ -11,7 +11,9 @@ panel_memory_state(
   base_size = data$config$base_size,
   expand_x = data$config$expand,
   x_start = data$config$limits$start,
-  x_end = data$config$limits$end
+  x_end = data$config$limits$end,
+  show_state_total = data$config$memory$state$total,
+  show_transfer_total = data$config$memory$transfer$total
 )
 }
 \arguments{
@@ -28,6 +30,10 @@ panel_memory_state(
 \item{x_start}{X-axis start value}
 
 \item{x_end}{X-axis end value}
+
+\item{show_state_total}{Show the percentage of selected state}
+
+\item{show_transfer_total}{Show total transfer amount}
 }
 \value{
 A ggplot object

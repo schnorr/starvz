@@ -81,7 +81,7 @@ yconf <- function(dfw = NULL, option = "ALL") {
       group_by(.data$Node, .data$ResourceType) %>%
       arrange(.data$Node, .data$ResourceId, .data$ResourceType) %>%
       ungroup()
-  } else { # First and Last
+  } else { # First and Last ("FIRST_LAST") or anything else
     dfw %>%
       select(.data$Node, .data$ResourceId, .data$ResourceType, .data$Position, .data$Height) %>%
       distinct() %>%
@@ -135,7 +135,7 @@ panel_title <- function(data) {
 
 #' Create the diagnostig plot for the regression model
 #'
-#' Use the starvz Application data to observe how the regression model used 
+#' Use the starvz Application data to observe how the regression model used
 #' in the task anomaly classification fits the data.
 #'
 #' @param data starvz_data with trace data

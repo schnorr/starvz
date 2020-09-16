@@ -9,7 +9,8 @@ starvz_phase1(
   app_states_fun = lu_colors,
   state_filter = 0,
   whichApplication = "",
-  input.parquet = "1"
+  input.parquet = "1",
+  config = NULL
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ starvz_phase1(
 \item{whichApplication}{Name of Application}
 
 \item{input.parquet}{Use or not of parquet files}
+
+\item{config}{StarVZ config structure, this function uses only the app_tasks}
 }
 \value{
 ggplot object with all starvz plots

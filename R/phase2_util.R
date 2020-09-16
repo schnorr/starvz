@@ -139,22 +139,33 @@ panel_title <- function(data) {
 #' in the task anomaly classification fits the data.
 #'
 #' @param data starvz_data with trace data
+#' @param freeScales free X,Y scales for each task and resource type combination
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
+#' \dontrun{
 #' panel_model_gflops(data = starvz_sample_data)
+#' }
 #' @export
-panel_model_gflops <- function(data) {
-  data$Application %>%
-    filter(Value %in% c("geqrt", "gemqrt", "tpqrt", "tpmqrt")) %>%
-    ggplot(aes(x=GFlop, y=Duration, color=Outlier)) +
+panel_model_gflops <- function(data, freeScales=TRUE) {
+  
+  model_panel <- data$Application %>%
+    filter(.data$Value %in% c("geqrt", "gemqrt", "tpqrt", "tpmqrt")) %>%
+    ggplot(aes(x=.data$GFlop, y=.data$Duration, color=.data$Outlier)) +
       theme_bw(base_size=16) +
-      geom_point(alpha=.2) +
+      geom_point(alpha=.35) +
       labs(y="Duration (ms)", x="GFlops") +
-      facet_grid(ResourceType~Value, scales="free") +
       scale_color_brewer(palette="Set1") +
       theme(legend.position="top") +
       labs(color = "Anomaly") +
       # ~ 0 forces the model to pass through origin
       geom_smooth(method="lm", formula="y ~ 0 + I(x^(2/3))", color="green", fill="blue")
+
+    if (freeScales) {
+      model_panel <- model_panel + facet_wrap(.data$ResourceType~.data$Value, scales="free", ncol=4)
+    } else {
+      model_panel <- model_panel + facet_grid(.data$ResourceType~.data$Value, scales="free")
+    }
+
+    return(model_panel)
 }

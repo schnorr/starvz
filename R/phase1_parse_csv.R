@@ -478,7 +478,10 @@ read_other_state_csv <- function(where = ".", ZERO = 0) {
       Type = as.factor(.data$Type)
     )
 
-  if ((dfw %>% nrow()) == 0) starvz_warn("After reading Other States, number of rows is zero.")
+  if ((dfw %>% nrow()) == 0) {
+      starvz_warn("After reading Other States, number of rows is zero.")
+      return(NULL)
+  }
 
   # Create three new columns (Node, Resource, ResourceType) - This is StarPU-specific
   # But first, check if this is a multi-node trace (if there is a _, it is a multi-node trace)

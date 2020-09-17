@@ -828,23 +828,25 @@ tasks_csv_parser <- function(where = ".", ZERO = 0) {
         EndTime = .data$EndTime - ZERO
       )
 
-    # Tasks have multiple handles, get them in a different structure
-    handles_dep <- pm %>%
-      select(.data$JobId) %>%
-      mutate(
-        Handles = strsplit(pm$Handles, " "),
-        Modes = strsplit(pm$Modes, " "),
-        Sizes = lapply(strsplit(pm$Sizes, " "), as.integer)
-      )
-    # unnest the lists
-    task_handles <- unnest(handles_dep, cols = c(.data$Handles, .data$Modes, .data$Sizes)) %>%
-      mutate(
-        Handles = as.factor(.data$Handles),
-        Modes = as.factor(.data$Modes)
-      )
-
-    # We will save the task_handle structre, we can remove these columns
-    pm <- pm %>% select(-.data$Handles, -.data$Modes, -.data$Sizes)
+    if ("Handles" %in% names(pm)) {
+      # Tasks have multiple handles, get them in a different structure
+      handles_dep <- pm %>%
+        select(.data$JobId) %>%
+        mutate(
+          Handles = strsplit(pm$Handles, " "),
+          Modes = strsplit(pm$Modes, " "),
+          Sizes = lapply(strsplit(pm$Sizes, " "), as.integer)
+        )
+      # unnest the lists
+      task_handles <- unnest(handles_dep, cols = c(.data$Handles, .data$Modes, .data$Sizes)) %>%
+        mutate(
+          Handles = as.factor(.data$Handles),
+          Modes = as.factor(.data$Modes)
+        )
+        
+      # We will save the task_handle structre, we can remove these columns
+      pm <- pm %>% select(-.data$Handles, -.data$Modes, -.data$Sizes)
+    }
   } else {
     starvz_log(paste("File", entities.csv, "do not exist."))
     return(NULL)

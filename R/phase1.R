@@ -533,12 +533,12 @@ gaps <- function(data) {
     data.b %>%
       left_join(dfl, by = c("JobId" = "JobId")) %>%
       left_join(dfw, by = c("Dependent" = "JobId")) %>%
-      mutate(Value.x = as.character(Value.x)) -> data.b.dag
+      mutate(Value.x = as.character(.data$Value.x)) -> data.b.dag
     data.f %>%
       left_join(dfw, by = c("JobId" = "JobId")) %>%
       left_join(dfl, by = c("Dependent" = "JobId")) %>%
-      mutate(Value.y = as.character(Value.y),
-             Node.y = as.character(Node.y)) -> data.f.dag
+      mutate(Value.y = as.character(.data$Value.y),
+             Node.y = as.character(.data$Node.y)) -> data.f.dag
   }
   data.z %>%
     left_join(dfw, by = c("JobId" = "JobId")) %>%

@@ -117,8 +117,11 @@ fi
 if [ -x "$(command -v rec2csv)" ]; then
   echo "Convert Rec files"
   date "+%a %d %b %Y %H:%M:%S %Z"
-  DATACSV="rec.data_handles.csv.gz"
-  rec2csv -S Handle data.rec | sed 's/"//g' | gzip -c > $DATACSV
+  DATAFILE="data.rec"
+  if [ -f "$DATAFILE" ] && [ -s "$DATAFILE" ]; then
+    DATACSV="rec.data_handles.csv.gz"
+    rec2csv -S Handle $DATAFILE | sed 's/"//g' | gzip -c > $DATACSV
+  fi
 
   TASKSCSV="rec.tasks.csv.gz"
   rec2csv tasks.rec | sed 's/"//g' | gzip -c > $TASKSCSV

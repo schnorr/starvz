@@ -115,12 +115,20 @@ outlier_definition <- function(x) {
 #' Use the directory of traces name to create a plot title
 #'
 #' @param data starvz_data with trace data
+#' @param title title text, if NULL it will fallback to data$Origin then to "Null Title"
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
 #' panel_title(data = starvz_sample_lu)
 #' @export
-panel_title <- function(data) {
+panel_title <- function(data, title=data$config$title$text) {
+  if(is.null(title)){
+    if(is.null(data$Origin)){
+      title <- "Null Title"
+    }else{
+      title <- data$Origin
+    }
+  }
   ggplot() +
     xlim(0, 1) +
     ylim(0, 1) +
@@ -131,7 +139,7 @@ panel_title <- function(data) {
       axis.line = element_blank(),
       axis.text = element_blank()
     ) +
-    annotate("text", x = .5, y = .5, label = data$Origin, size = 5)
+    annotate("text", x = .5, y = .5, label = title, size = 5)
 }
 
 #' Create the diagnostig plot for the regression model
@@ -149,7 +157,7 @@ panel_title <- function(data) {
 #' }
 #' @export
 panel_model_gflops <- function(data, freeScales=TRUE) {
-  
+
   model_panel <- data$Application %>%
     filter(.data$Value %in% c("geqrt", "gemqrt", "tpqrt", "tpmqrt")) %>%
     ggplot(aes(x=.data$GFlop, y=.data$Duration, color=.data$Outlier)) +

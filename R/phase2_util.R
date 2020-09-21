@@ -124,6 +124,7 @@ panel_title <- function(data) {
   ggplot() +
     xlim(0, 1) +
     ylim(0, 1) +
+    theme_void() +
     theme(
       axis.ticks = element_blank(),
       axis.title = element_blank(),

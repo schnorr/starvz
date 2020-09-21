@@ -14,7 +14,7 @@ NULL
 #' @param state_filter Type of filder
 #' @param whichApplication Name of Application
 #' @param input.parquet Use or not of parquet files
-#' @param config StarVZ config structure, this function uses only the app_tasks
+#' @param config_file StarVZ config structure, this function uses only the app_tasks
 #' @return ggplot object with all starvz plots
 #' @family phase1 functions
 #'

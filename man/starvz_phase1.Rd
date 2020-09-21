@@ -10,7 +10,7 @@ starvz_phase1(
   state_filter = 0,
   whichApplication = "",
   input.parquet = "1",
-  config = NULL
+  config_file = file.path(directory, "config.yaml")
 )
 }
 \arguments{
@@ -24,7 +24,7 @@ starvz_phase1(
 
 \item{input.parquet}{Use or not of parquet files}
 
-\item{config}{StarVZ config structure, this function uses only the app_tasks}
+\item{config_file}{StarVZ config structure, this function uses only the app_tasks}
 }
 \value{
 ggplot object with all starvz plots

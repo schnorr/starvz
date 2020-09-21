@@ -67,7 +67,7 @@ starvz_set_log(TRUE)
 config = NULL
 
 if(!is.null(input.config)){
-  config <- starvz_read_config(input.config)
+  config <- input.config
 }
 
 data <- starvz_phase1(directory = input.directory,

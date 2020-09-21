@@ -337,7 +337,7 @@ calculate_resource_idleness <- function(dfw = NULL, max_only = TRUE) {
 geom_idleness <- function(data = NULL) {
   if (is.null(data$Application)) stop("data provided for geom_idleness is NULL")
 
-  dfidle <- calculate_resource_idleness(data$Application, !data$config$st$idleness_all)
+  dfidle <- calculate_resource_idleness(data$Application %>% filter(.data$Start >= 0), !data$config$st$idleness_all)
 
   bsize <- data$config$base_size
   expand <- data$config$expand

@@ -124,6 +124,12 @@ fi
 pushd $STARVZ_HOME/tools/
   if [ "$STARVZ_EXEC_PHASE_1" -eq 1 ]; then
     ./phase1-workflow.sh $STARVZ_TRACE_FOLDER $STARVZ_APPLICATION $STARVZ_CONFIG_FILE
+    p1e=$?
+    if [ $p1e -ne 0 ]
+    then
+        echo "Phase 1 Failed (exit status: $p1e) stopping"
+        exit 1
+    fi
   fi
   if [ "$STARVZ_EXEC_PHASE_2" -eq 1 ]; then
     ./phase2-workflow.R $STARVZ_TRACE_FOLDER $STARVZ_CONFIG_FILE

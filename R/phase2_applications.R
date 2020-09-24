@@ -6,7 +6,7 @@ starpu_states <- function() {
 }
 
 all_starpu_states <- function() {
-  c("Callback", "FetchingInput", "Idle", "Initializing", "Overhead", "PushingOutput", "Scheduling", "Submitting task", "Progressing", "Sleeping", "Submiting task", "Waiting all tasks", "Building task", "Deinitializing", "execute_on_all_wrapper", "Executing")
+  c("Callback", "FetchingInput", "Idle", "Initializing", "Overhead", "PushingOutput", "Scheduling", "Submitting task", "Progressing", "Sleeping", "Submiting task", "Waiting all tasks", "Building task", "Deinitializing", "execute_on_all_wrapper", "Executing", "unknown")
 }
 
 cholesky_states <- function() {

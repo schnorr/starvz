@@ -93,7 +93,7 @@ k_chart <- function (dfw = NULL, middle_lines = NULL, per_node = FALSE)
         temp1 %>%
             mutate(Number.Tasks = n()) %>%
             arrange(Start) %>%
-            slice(unique(Number.Tasks*percentage)) %>%
+            slice(unique(as.integer(Number.Tasks*percentage))) %>%
             ungroup %>%
             mutate(Middle = Start + (End-Start)/2) -> temp1
         if(per_node) {

@@ -59,4 +59,16 @@ test_that("starvz_plot works", {
  pl <-  panel_memory_snap(starvz_sample_lu, 100, 10)
  expect_equal(class(pl),c("gg", "ggplot"))
 
+ pl <- NULL
+ pl <-  panel_memory_heatmap(starvz_sample_lu)
+ expect_equal(class(pl),c("gg", "ggplot"))
+
+ pl <- NULL
+ pl <-  panel_dist2d(starvz_sample_lu)
+ expect_equal(class(pl),c("gg", "ggplot"))
+
+ pl <- NULL
+ pl <-  panel_node_events(starvz_sample_lu)
+ expect_equal(class(pl),c("gg", "ggplot"))
+
 })

@@ -4,10 +4,12 @@
 \alias{panel_title}
 \title{Create the title of StarVZ plot}
 \usage{
-panel_title(data)
+panel_title(data, title = data$config$title$text)
 }
 \arguments{
 \item{data}{starvz_data with trace data}
+
+\item{title}{title text, if NULL it will fallback to data$Origin then to "Null Title"}
 }
 \value{
 A ggplot object

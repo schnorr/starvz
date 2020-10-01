@@ -294,8 +294,8 @@ panel_atree <- function(data = NULL, step = data$config$atree$step, legend = dat
         legend.justification = "left",
         legend.box.just = "left",
         legend.direction = "horizontal",
-        legend.text = element_text(size = 12, colour = "black"),
-        legend.title = element_text(size = 14, "Computational Load %")
+        legend.text = element_text(size = rel(0.8), colour = "black"),
+        legend.title = element_text(size = rel(0.8), "Computational Load %")
       )
   } else {
     atreeplot <- atreeplot + theme(legend.position = "none")

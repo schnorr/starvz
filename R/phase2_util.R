@@ -139,7 +139,7 @@ panel_title <- function(data, title=data$config$title$text) {
       axis.line = element_blank(),
       axis.text = element_blank()
     ) +
-    annotate("text", x = .5, y = .5, label = title, size = 5)
+    annotate("text", x = .5, y = .5, label = title, size = rel(8))
 }
 
 #' Create the diagnostig plot for the regression model

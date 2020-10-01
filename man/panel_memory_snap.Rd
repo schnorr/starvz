@@ -4,7 +4,17 @@
 \alias{panel_memory_snap}
 \title{Create a snapshot of memory}
 \usage{
-panel_memory_snap(data, selected_time, step, tasks_size = 30)
+panel_memory_snap(
+  data,
+  selected_time,
+  step,
+  legend = data$config$memory_snap$legend,
+  base_size = data$config$base_size,
+  expand_x = data$config$expand,
+  x_start = data$config$limits$start,
+  x_end = data$config$limits$end,
+  tasks_size = 30
+)
 }
 \arguments{
 \item{data}{starvz_data with trace data}
@@ -12,6 +22,16 @@ panel_memory_snap(data, selected_time, step, tasks_size = 30)
 \item{selected_time}{time}
 
 \item{step}{for discreate events}
+
+\item{legend}{enable/disable legends}
+
+\item{base_size}{base_size base font size}
+
+\item{expand_x}{expand size for scale_x_continuous padding}
+
+\item{x_start}{X-axis start value}
+
+\item{x_end}{X-axis end value}
 
 \item{tasks_size}{size of tasks in the visualization}
 }

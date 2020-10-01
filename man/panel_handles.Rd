@@ -10,6 +10,9 @@ panel_handles(
   lines = NA,
   lHandle = NA,
   name_func = NULL,
+  legend = data$config$handles$legend,
+  base_size = data$config$base_size,
+  expand_x = data$config$expand,
   x_start = data$config$limits$start,
   x_end = data$config$limits$end
 )
@@ -24,6 +27,12 @@ panel_handles(
 \item{lHandle}{select handles}
 
 \item{name_func}{function to give names to handles}
+
+\item{legend}{enable/disable legends}
+
+\item{base_size}{base_size base font size}
+
+\item{expand_x}{expand size for scale_x_continuous padding}
 
 \item{x_start}{X-axis start value}
 

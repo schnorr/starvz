@@ -643,6 +643,9 @@ pre_handle_gantt <- function(data, name_func = NULL) {
 #' @param lines vertical lines
 #' @param lHandle select handles
 #' @param name_func function to give names to handles
+#' @param legend enable/disable legends
+#' @param base_size base_size base font size
+#' @param expand_x expand size for scale_x_continuous padding
 #' @param x_start X-axis start value
 #' @param x_end X-axis end value
 #' @return A ggplot object
@@ -653,8 +656,20 @@ pre_handle_gantt <- function(data, name_func = NULL) {
 #' }
 #' @export
 panel_handles <- function(data, JobId = NA, lines = NA, lHandle = NA, name_func = NULL,
+  legend = data$config$handles$legend,
+  base_size = data$config$base_size,
+  expand_x = data$config$expand,
   x_start = data$config$limits$start,
   x_end = data$config$limits$end) {
+
+  if (is.null(legend) || !is.logical(legend)) {
+    legend <- TRUE
+  }
+
+  if (is.null(expand_x) || !is.numeric(expand_x)) {
+    expand_x <- 0.05
+  }
+
   if (is.null(data$handle_gantt_data)) {
     data$handle_gantt_data <- pre_handle_gantt(data, name_func = name_func)
   }
@@ -694,7 +709,8 @@ panel_handles <- function(data, JobId = NA, lines = NA, lHandle = NA, name_func 
   extra <- c(
     "Owner" = "darksalmon",
     "Shared" = "steelblue1",
-    " " = "white"
+    " " = "white",
+    "  " = "white"
   )
 
   data$Colors %>% select(.data$Value, .data$Color) -> lc
@@ -715,10 +731,10 @@ panel_handles <- function(data, JobId = NA, lines = NA, lHandle = NA, name_func 
     "Last Job on same Worker" = events_colors[[6]]
   )
 
-  arrow_g <- arrow(length = unit(0.1, "cm"))
+  arrow_g <- arrow(length = unit(rel(0.3), "cm"))
 
   p <- ggplot(data = final_st_data) +
-    theme_bw(base_size = 16) +
+    default_theme(base_size, expand_x) +
     geom_point(
       data = final_events_data,
       aes(
@@ -746,7 +762,7 @@ panel_handles <- function(data, JobId = NA, lines = NA, lHandle = NA, name_func 
       drop = FALSE,
       limits = names(fills),
       guide = guide_legend(
-        nrow = 3, title.position = "top", order = 1,
+        nrow = 4, title.position = "top", order = 1,
         override.aes =
           list(shape = NA, colour = NA)
       )
@@ -801,7 +817,7 @@ panel_handles <- function(data, JobId = NA, lines = NA, lHandle = NA, name_func 
       arrow = arrow_g,
       colour = "black",
       alpha = 0.8,
-      size = 1.2
+      size = rel(1.4)
     ) +
     geom_segment(
       data = final_links_data,
@@ -813,7 +829,7 @@ panel_handles <- function(data, JobId = NA, lines = NA, lHandle = NA, name_func 
         colour = .data$Transfer
       ),
       arrow = arrow_g,
-      size = 0.6, show.legend = FALSE
+      size = rel(1), show.legend = FALSE
     ) +
     geom_segment(
       data = final_links_data,
@@ -824,11 +840,11 @@ panel_handles <- function(data, JobId = NA, lines = NA, lHandle = NA, name_func 
         yend = .data$dest_y + 0.4,
         colour = .data$Transfer
       ),
-      size = 0.6
+      size = rel(1)
     ) +
     scale_y_continuous(
       breaks = data$handle_gantt_data$position$y1 + 0.4,
-      labels = data$handle_gantt_data$position$Container
+      labels = lapply(data$handle_gantt_data$position$Container, function(x) gsub("MEMMANAGER", "MM", x))
     ) +
     # geom_segment(data=handle_end_m,
     #             aes(x = End, y = MemoryNode+1, xend = End, yend = MemoryNode+1.8), color = "red") +
@@ -843,9 +859,8 @@ panel_handles <- function(data, JobId = NA, lines = NA, lHandle = NA, name_func 
     # scale_colour_identity() +
     theme(
       strip.text.y = element_text(angle = 0),
-      legend.box.margin = margin(-10, -10, -16, -10),
-      legend.background = element_rect(fill = "transparent"),
-      legend.position = "top"
+      legend.box.margin = margin(-10, -10, -rel(1.0), -10),
+      legend.background = element_rect(fill = "transparent")
     ) +
     labs(x = "Time [ms]", y = "Memory Manager")
 
@@ -867,6 +882,13 @@ panel_handles <- function(data, JobId = NA, lines = NA, lHandle = NA, name_func 
   p <- p + coord_cartesian(
     xlim = c(x_start, x_end)
   )
+
+  if (!legend) {
+    p <- p + theme(legend.position = "none")
+  } else {
+    p <- p + theme(legend.position = "top")
+  }
+
   return(p)
 }
 
@@ -907,6 +929,11 @@ pre_snap <- function(data, f_data) {
 #' @param selected_time time
 #' @param step for discreate events
 #' @param tasks_size size of tasks in the visualization
+#' @param legend enable/disable legends
+#' @param base_size base_size base font size
+#' @param expand_x expand size for scale_x_continuous padding
+#' @param x_start X-axis start value
+#' @param x_end X-axis end value
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
@@ -914,7 +941,30 @@ pre_snap <- function(data, f_data) {
 #' panel_memory_snap(data = starvz_sample_lu, 100, 10)
 #' }
 #' @export
-panel_memory_snap <- function(data, selected_time, step, tasks_size = 30) {
+panel_memory_snap <- function(data, selected_time, step,
+   legend = data$config$memory_snap$legend,
+   base_size = data$config$base_size,
+   expand_x = data$config$expand,
+   x_start = data$config$limits$start,
+   x_end = data$config$limits$end,
+   tasks_size = 30) {
+
+   if (is.null(legend) || !is.logical(legend)) {
+     legend <- TRUE
+   }
+
+   if (is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start))) {
+     x_start <- NA
+   }
+
+   if (is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end))) {
+     x_end <- NA
+   }
+
+   if (is.null(expand_x) || !is.numeric(expand_x)) {
+     expand_x <- 0.05
+   }
+
   if (is.null(data$handle_states)) {
     data$handle_states <- handles_presence_states(data)
   }
@@ -938,15 +988,18 @@ panel_memory_snap <- function(data, selected_time, step, tasks_size = 30) {
 
   data$pre_snap[[1]] %>%
     filter(.data$Start < selected_time, .data$End > selected_time) %>%
-    right_join(data$pre_snap[[2]], by = c("Value" = "Handle", "Container" = "Container")) -> d_presence
+    right_join(data$pre_snap[[2]], by = c("Value" = "Handle", "Container" = "Container")) %>%
+    mutate(Container = gsub("MEMMANAGER", "MM", .data$Container)) -> d_presence
 
   task_presence <- data$pre_snap[[3]] %>%
     filter(.data$Start <= selected_time, .data$End >= selected_time) %>%
-    inner_join(data$pre_snap[[2]], by = c("Handles" = "Handle", "Container" = "Container"))
+    inner_join(data$pre_snap[[2]], by = c("Handles" = "Handle", "Container" = "Container")) %>%
+    mutate(Container = gsub("MEMMANAGER", "MM", .data$Container))
 
   task_presence_alpha <- data$pre_snap[[3]] %>%
     filter(.data$Start > selected_time - step, .data$End <= selected_time) %>%
-    inner_join(data$pre_snap[[2]], by = c("Handles" = "Handle", "Container" = "Container"))
+    inner_join(data$pre_snap[[2]], by = c("Handles" = "Handle", "Container" = "Container")) %>%
+    mutate(Container = gsub("MEMMANAGER", "MM", .data$Container))
 
   max_x <- data$pre_snap[[2]] %>%
     arrange(-.data$X) %>%
@@ -983,7 +1036,7 @@ panel_memory_snap <- function(data, selected_time, step, tasks_size = 30) {
     scale_shape_manual(
       values = c("R" = 21, "W" = 22, "RW" = 22), drop = FALSE,
       limits = c("R", "RW"),
-      guide = guide_legend(title.position = "top")
+      guide = guide_legend(title.position = "top", nrow=2)
     ) +
     scale_fill_manual(
       name = "State", values = fills, drop = FALSE,
@@ -997,17 +1050,26 @@ panel_memory_snap <- function(data, selected_time, step, tasks_size = 30) {
     scale_x_continuous(limits = c(-0.6, max_x + 0.6), expand = c(0, 0)) +
     facet_wrap(~Container) +
     labs(x = "Block X Coordinate", y = "Block Y Coordinate") +
-    theme_bw(base_size = 16) +
+    default_theme(base_size, expand_x) +
     theme(
-      legend.position = "top",
       plot.margin = unit(c(0, 10, 0, 0), "mm"),
-      legend.box.margin = margin(-5, 0, -16, 0),
-      strip.text.x = element_text(margin = margin(.1, 0, .1, 0, "cm")),
+      legend.box.margin = margin(-5, 0, -rel(1), 0),
+      #strip.text.x = element_text(margin = margin(.1, 0, .1, 0, "cm")),
       legend.background = element_rect(fill = "transparent"),
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank(),
       panel.spacing = unit(1, "mm")
     )
+
+    p <- p + coord_cartesian(
+      xlim = c(x_start, x_end)
+    )
+
+    if (!legend) {
+      p <- p + theme(legend.position = "none")
+    } else {
+      p <- p + theme(legend.position = "top")
+    }
 
   return(p)
 }
@@ -1068,7 +1130,8 @@ panel_memory_heatmap <- function(data,
   select(.data$Handle, .data$X, .data$Y) -> hand
   d_data %>% group_by(.data$Value, .data$Container) %>% summarize(sum=sum(.data$Duration), n=n()) %>%
     inner_join(hand, by=c("Value" = "Handle")) -> d_presence
-  d_presence %>% ungroup %>% group_by(.data$Value) %>% mutate(per=.data$sum/sum(.data$sum)) -> d_percent
+  d_presence %>% ungroup %>% group_by(.data$Value) %>% mutate(per=.data$sum/sum(.data$sum)) %>%
+  mutate(Container = gsub("MEMMANAGER", "MM", .data$Container)) -> d_percent
 
   max_x <- data[[2]] %>% arrange(-.data$X) %>% slice(1) %>% .$X %>% unlist()
 

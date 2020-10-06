@@ -1,6 +1,6 @@
 #' @include starvz_data.R
 
-geom_mpistates <- function(dfw = NULL, label = "1", expand = 0.05) {
+geom_mpistates <- function(dfw = NULL, label = "1", expand = 0.05, Y = NULL) {
   if (is.null(dfw)) stop("dfw is NULL when given to geom_mpistates")
 
   if (nrow(dfw) == 0) stop("there is no data on MPI states")
@@ -25,7 +25,7 @@ geom_mpistates <- function(dfw = NULL, label = "1", expand = 0.05) {
   ret[[length(ret) + 1]] <- ylab("MPI\nThread")
 
   # Y axis breaks and their labels
-  yconfm <- yconf(dfw, label)
+  yconfm <- yconf(dfw, label, Y)
   ret[[length(ret) + 1]] <- scale_y_continuous(breaks = yconfm$Position + (yconfm$Height / 3), labels = yconfm$ResourceId, expand = c(expand, 0))
 
   # Add states
@@ -88,7 +88,7 @@ panel_mpistate <- function(data = NULL,
   gow <- ggplot() +
     default_theme(base_size, expand_x) +
     # Add states and outliers if requested
-    geom_mpistates(data$Comm_state, data$config$mpistate$label, expand_x) +
+    geom_mpistates(data$Comm_state, data$config$mpistate$label, expand_x, Y=data$Y) +
     coord_cartesian(
       xlim = c(x_start, x_end),
       ylim = c(0, y_end)

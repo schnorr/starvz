@@ -188,7 +188,7 @@ panel_st_agg_static <- function(data = NULL, runtime = FALSE,
   total_time <- tend - tstart
 
   # yconf
-  yconfm <- yconf(dfw, data$config$st$labels)
+  yconfm <- yconf(dfw, data$config$st$labels, data$Y)
 
   starvz_log("Plotting Agg")
 
@@ -484,7 +484,7 @@ geom_aggregated_states <- function(data = NULL, Show.Outliers = FALSE, min_time_
   ret[[length(ret) + 1]] <- default_theme(base_size, expand_value)
 
   # Y axis breaks and their labels
-  yconfm <- yconf(dfw, labels)
+  yconfm <- yconf(dfw, labels, data$Y)
   ret[[length(ret) + 1]] <- scale_y_continuous(
     breaks = yconfm$Position + (yconfm$Height / 3), labels = yconfm$ResourceId,
     expand = c(expand_value, 0)

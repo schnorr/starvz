@@ -370,7 +370,7 @@ panel_utilheatmap <- function(data, legend = data$config$utilheatmap$legend,
     mutate(Height = 1, Position = factor(.data$Position, levels = lvl)) %>%
     mutate(Position = as.integer(.data$Position)) -> to_plot
 
-  yconfv <- yconf(to_plot %>% ungroup(), data$config$utilheatmap$labels)
+  yconfv <- yconf(to_plot %>% ungroup(), data$config$utilheatmap$labels, data$Y)
 
   to_plot %>%
     mutate(Time = .data$Step * agg_step + agg_step / 2) %>%

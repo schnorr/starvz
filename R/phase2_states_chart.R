@@ -147,7 +147,7 @@ panel_st_raw <- function(data = NULL, ST.Outliers = data$config$st$outliers, bas
       labels = labels,
       expand = expand_y,
       rect_outline = data$config$st$rect_outline,
-      alpha_value = alpha
+      alpha_value = alpha, Y=data$Y
     )
   } else {
     gow <- gow + geom_states(App,
@@ -155,7 +155,7 @@ panel_st_raw <- function(data = NULL, ST.Outliers = data$config$st$outliers, bas
       labels = labels,
       expand = expand_y,
       rect_outline = data$config$st$rect_outline,
-      alpha_value = alpha
+      alpha_value = alpha, Y=data$Y
     )
   }
 
@@ -208,7 +208,8 @@ geom_states <- function(dfw = NULL, Show.Outliers = FALSE, StarPU = FALSE, Color
                         labels = "1",
                         expand = 0.05,
                         rect_outline = FALSE,
-                        alpha_value = 0.5) {
+                        alpha_value = 0.5,
+                        Y = NULL) {
   if (is.null(dfw)) stop("data is NULL when given to geom_states")
   if (is.null(Colors)) stop("data is NULL when given to geom_states")
 
@@ -222,7 +223,7 @@ geom_states <- function(dfw = NULL, Show.Outliers = FALSE, StarPU = FALSE, Color
   }
 
   # Y axis breaks and their labels
-  yconfm <- yconf(dfw, labels)
+  yconfm <- yconf(dfw, labels, Y)
   ret[[length(ret) + 1]] <- scale_y_continuous(
     breaks = yconfm$Position + (yconfm$Height / 3), labels = yconfm$ResourceId,
     expand = c(expand, 0)

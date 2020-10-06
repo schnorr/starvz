@@ -24,7 +24,7 @@ extract_colors <- function(dfw = NULL, colors = NULL) {
     setNames(dfw %>% select(.data$Value) %>% unique() %>% .$Value)
 }
 
-yconf <- function(dfw = NULL, option = "ALL") {
+yconf <- function(dfw = NULL, option = "ALL", Y=NULL, show_mpi=TRUE) {
   if (is.null(dfw)) {
     return(NULL)
   }
@@ -37,7 +37,7 @@ yconf <- function(dfw = NULL, option = "ALL") {
     )) -> dfw
   if (option == "1CPU_per_NODE") { # First
     # One CPU per node
-    dfw %>%
+    y_conf <- dfw %>%
       select(.data$Node, .data$ResourceId, .data$ResourceType, .data$Position, .data$Height) %>%
       distinct() %>%
       group_by(.data$Node) %>%
@@ -46,7 +46,7 @@ yconf <- function(dfw = NULL, option = "ALL") {
       ungroup()
   } else if (option == "1GPU_per_NODE") { # Last
     # One GPU per node
-    dfw %>%
+    y_conf <- dfw %>%
       select(.data$Node, .data$ResourceId, .data$ResourceType, .data$Position, .data$Height) %>%
       distinct() %>%
       group_by(.data$Node) %>%
@@ -54,7 +54,7 @@ yconf <- function(dfw = NULL, option = "ALL") {
       slice(n()) %>%
       ungroup()
   } else if (option == "NODES_only") { # First
-    dfw %>%
+    y_conf <- dfw %>%
       select(.data$Node, .data$ResourceId, .data$ResourceType, .data$Position, .data$Height) %>%
       distinct() %>%
       group_by(.data$Node) %>%
@@ -63,7 +63,7 @@ yconf <- function(dfw = NULL, option = "ALL") {
       mutate(ResourceId = .data$Node) %>%
       ungroup()
   } else if (option == "NODES_1_in_10") { # First
-    dfw %>%
+    y_conf <- dfw %>%
       select(.data$Node, .data$ResourceId, .data$ResourceType, .data$Position, .data$Height) %>%
       distinct() %>%
       group_by(.data$Node) %>%
@@ -75,14 +75,14 @@ yconf <- function(dfw = NULL, option = "ALL") {
       arrange(.data$Node) %>%
       slice(seq(1, n(), 10))
   } else if (option == "ALL") {
-    dfw %>%
+    y_conf <- dfw %>%
       select(.data$Node, .data$ResourceId, .data$ResourceType, .data$Position, .data$Height) %>%
       distinct() %>%
       group_by(.data$Node, .data$ResourceType) %>%
       arrange(.data$Node, .data$ResourceId, .data$ResourceType) %>%
       ungroup()
   } else { # First and Last ("FIRST_LAST") or anything else
-    dfw %>%
+    y_conf <- dfw %>%
       select(.data$Node, .data$ResourceId, .data$ResourceType, .data$Position, .data$Height) %>%
       distinct() %>%
       group_by(.data$Node, .data$ResourceType) %>%
@@ -90,6 +90,21 @@ yconf <- function(dfw = NULL, option = "ALL") {
       slice(c(1, n())) %>%
       ungroup()
   }
+  if(!is.null(Y) & show_mpi==TRUE){
+      y_conf <- y_conf %>%
+          mutate(ResourceId = as.character(ResourceId),
+                 ResourceType = as.character(ResourceType))
+      Y %>% filter(Type=="Communication Thread State") %>%
+            mutate(ResourceId = Parent) %>%
+            separate(Parent, c("Node", "ResourceType")) %>%
+            mutate(Node = as.integer(Node),
+                   ResourceId = as.character(ResourceId)) %>%
+            select(.data$Node, .data$ResourceId, .data$ResourceType, .data$Position, .data$Height) %>%
+      bind_rows(y_conf) %>%
+      mutate(ResourceId = as.factor(ResourceId),
+             ResourceType = as.factor(ResourceType)) -> y_conf
+  }
+  return(y_conf)
 }
 
 userYLimit <- function(obj, configuration, xlimits) {

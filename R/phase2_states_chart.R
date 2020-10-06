@@ -314,6 +314,23 @@ geom_path_highlight <- function(paths = NULL) {
   return(ret)
 }
 
+#' Create a space-time visualization with node aggregation.
+#'
+#' Use any state trace data to plot the task computations by Node
+#' over the execution time with Gantt Chart. This function aggregate
+#' states within the same resource type.
+#'
+#' @param data starvz_data with trace data
+#' @param x_start X-axis start value
+#' @param x_end X-axis end value
+#' @param step time-step
+#' @return A ggplot object
+#' @include starvz_data.R
+#' @examples
+#' \donttest{
+#' panel_st_agg_node(data = starvz_sample_lu)
+#' }
+#' @export
 panel_st_agg_node <- function(data,
                               x_start = data$config$limits$start,
                               x_end = data$config$limits$end,

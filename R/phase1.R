@@ -30,14 +30,6 @@ starvz_phase1 <- function(directory = ".", app_states_fun = lu_colors,
   # Start of reading procedure
   if (is.null(app_states_fun)) stop("app_states_fun is obligatory for reading")
 
-  file_can_be_read <- function(filename) {
-    if ((file.exists(filename)) & (file.size(filename) > 0)) {
-      return(TRUE)
-    } else {
-      return(FALSE)
-    }
-  }
-  
   config <- starvz_read_config(config_file)
 
   # Read entities.csv and register the hierarchy (with Y coordinates)

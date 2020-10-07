@@ -234,7 +234,8 @@ panel_atree <- function(data = NULL, step = data$config$atree$step, legend = dat
       filter(grepl("init_", .data$Value)) %>%
       unique() %>%
       select(-.data$Position, -.data$Height) %>%
-      left_join(data$Atree, by = "ANode")
+      left_join(data$Atree, by = "ANode") %>%
+      filter(!is.na(Position))
 
     atreeplot <- atreeplot +
       atree_geom_rect(dfw_init, "#4DAF4A", yminOffset = 0, ymaxOffset = 1, alpha = 0.7)

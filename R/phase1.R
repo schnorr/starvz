@@ -473,8 +473,9 @@ gaps.f_forward <- function(data) {
         filter(!is.na(.data$DepChain)) %>%
         rename(Member = .data$JobId) %>%
         select(.data$DepChain, .data$Member) -> chain.o
-      if (nrow(chain.o) > 0)
+      if (nrow(chain.o) > 0) {
         return(f2(full.o, chain.o))
+      }
     }
     return(full.o)
   }
@@ -531,8 +532,10 @@ gaps <- function(data) {
     data.f %>%
       left_join(dfw, by = c("JobId" = "JobId")) %>%
       left_join(dfl, by = c("Dependent" = "JobId")) %>%
-      mutate(Value.y = as.character(.data$Value.y),
-             Node.y = as.character(.data$Node.y)) -> data.f.dag
+      mutate(
+        Value.y = as.character(.data$Value.y),
+        Node.y = as.character(.data$Node.y)
+      ) -> data.f.dag
   }
   data.z %>%
     left_join(dfw, by = c("JobId" = "JobId")) %>%

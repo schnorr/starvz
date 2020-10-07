@@ -56,7 +56,7 @@ geom_mpistates <- function(dfw = NULL, label = "1", expand = 0.05, Y = NULL) {
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
-#' panel_mpistate(data=starvz_sample_lu)
+#' panel_mpistate(data = starvz_sample_lu)
 #' @export
 panel_mpistate <- function(data = NULL,
                            legend = data$config$mpibandwidth$legend,
@@ -88,7 +88,7 @@ panel_mpistate <- function(data = NULL,
   gow <- ggplot() +
     default_theme(base_size, expand_x) +
     # Add states and outliers if requested
-    geom_mpistates(data$Comm_state, data$config$mpistate$label, expand_x, Y=data$Y) +
+    geom_mpistates(data$Comm_state, data$config$mpistate$label, expand_x, Y = data$Y) +
     coord_cartesian(
       xlim = c(x_start, x_end),
       ylim = c(0, y_end)
@@ -144,7 +144,7 @@ concurrent_mpi <- function(data = NULL, out = FALSE) {
     ungroup() %>%
     mutate(Type = "MPI Concurrent") %>%
     rename(ResourceId = {{ col_case }}) %>%
-    separate(.data$ResourceId, into = c("Node", "Resource"), remove = FALSE, extra="drop", fill="right") %>%
+    separate(.data$ResourceId, into = c("Node", "Resource"), remove = FALSE, extra = "drop", fill = "right") %>%
     mutate(Node = as.factor(.data$Node)) %>%
     mutate(ResourceType = as.factor(gsub("[[:digit:]]+", "", .data$Resource))) %>%
     select(.data$Start, .data$End, .data$Duration, .data$Node, .data$ResourceId, .data$ResourceType, .data$Type, .data$Value)

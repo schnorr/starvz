@@ -138,8 +138,8 @@ panel_atree_structure <- function(data = NULL) {
 #' @return A ggplot object
 #' @examples
 #' \dontrun{
-#' panel_atree(starvz_sample_lu, step=10)
-#' panel_atree(starvz_sample_lu, step=20, communication=FALSE, initialization=FALSE)
+#' panel_atree(starvz_sample_lu, step = 10)
+#' panel_atree(starvz_sample_lu, step = 20, communication = FALSE, initialization = FALSE)
 #' }
 #' @export
 panel_atree <- function(data = NULL, step = data$config$atree$step, legend = data$config$atree$legend, zoom = FALSE,
@@ -209,7 +209,7 @@ panel_atree <- function(data = NULL, step = data$config$atree$step, legend = dat
   atreeplot <- panel_atree_structure(data) +
     default_theme(data$config$base_size, data$config$expand) +
     ylab("Elimination Tree\n[Submission Order]")
-    
+
   # Add the computation, initialization, and communication over the tree structure plot
   # 2. Add computations
   # 2.1 Add the not pruned computation representation
@@ -224,9 +224,11 @@ panel_atree <- function(data = NULL, step = data$config$atree$step, legend = dat
   }
   # 2.3 Add the color to represent resource utilization
   atreeplot <- atreeplot +
-    scale_fill_gradient2(name = "Computational Load %", limits = c(0, 100), breaks = c(0, 50, 100),
-      midpoint = 50, low = "blue", mid = "yellow", high = "red")
-    
+    scale_fill_gradient2(
+      name = "Computational Load %", limits = c(0, 100), breaks = c(0, 50, 100),
+      midpoint = 50, low = "blue", mid = "yellow", high = "red"
+    )
+
   # 3. Add initialization tasks representation
   if (initialization) {
     # filter initialization tasks
@@ -317,7 +319,7 @@ panel_atree <- function(data = NULL, step = data$config$atree$step, legend = dat
 #' @return A ggplot object
 #' @examples
 #' \dontrun{
-#' panel_utiltreenode(data=starvz_sample_lu, step=100)
+#' panel_utiltreenode(data = starvz_sample_lu, step = 100)
 #' }
 #' @export
 panel_utiltreenode <- function(data = NULL,
@@ -445,7 +447,7 @@ panel_utiltreenode <- function(data = NULL,
 #' @return A ggplot object
 #' @examples
 #' \dontrun{
-#' panel_utiltreedepth(starvz_sample_lu, step=100, legend=TRUE)
+#' panel_utiltreedepth(starvz_sample_lu, step = 100, legend = TRUE)
 #' }
 #' @export
 panel_utiltreedepth <- function(data,
@@ -523,7 +525,7 @@ nodememuse_check <- function(data) {
 #' @param legend enable/disable plot legends
 #' @examples
 #' \dontrun{
-#' panel_nodememuse(starvz_sample_lu, step=100)
+#' panel_nodememuse(starvz_sample_lu, step = 100)
 #' }
 #' @export
 panel_nodememuse <- function(data = NULL,
@@ -624,7 +626,7 @@ panel_nodememuse <- function(data = NULL,
 #' @return A ggplot object
 #' @examples
 #' \dontrun{
-#' panel_activenodes(data=starvz_sample_lu, step=100)
+#' panel_activenodes(data = starvz_sample_lu, step = 100)
 #' }
 #' @export
 panel_activenodes <- function(data = NULL,

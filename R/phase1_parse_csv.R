@@ -73,15 +73,14 @@ read_worker_csv <- function(where = ".",
       mutate(Value = gsub("_perf.*", "", .data$Value)) %>%
       mutate(Value = gsub("qrm_", "", .data$Value)) %>%
       mutate(Value = case_when(
-                                grepl("geqrt", Value) ~ "geqrt",
-                                grepl("gemqrt", Value) ~ "gemqrt",
-                                grepl("tpqrt", Value) ~ "tpqrt",
-                                grepl("tpmqrt", Value) ~ "tpmqrt",
-                                grepl("tpqrt", Value) ~ "tpqrt",
-                                grepl("block_extadd", Value) ~ "block_copy",
-                                TRUE ~ Value
-                              )
-            )
+        grepl("geqrt", Value) ~ "geqrt",
+        grepl("gemqrt", Value) ~ "gemqrt",
+        grepl("tpqrt", Value) ~ "tpqrt",
+        grepl("tpmqrt", Value) ~ "tpmqrt",
+        grepl("tpqrt", Value) ~ "tpqrt",
+        grepl("block_extadd", Value) ~ "block_copy",
+        TRUE ~ Value
+      ))
   }
 
   # Split application and starpu behavior
@@ -118,7 +117,7 @@ read_worker_csv <- function(where = ".",
     starvz_log("This is multi-node trace")
     # This is the case for multi-node trace
     dfw <- dfw %>%
-      separate(.data$ResourceId, into = c("Node", "Resource"), remove = FALSE, extra="drop", fill="right") %>%
+      separate(.data$ResourceId, into = c("Node", "Resource"), remove = FALSE, extra = "drop", fill = "right") %>%
       mutate(Node = as.factor(.data$Node)) %>%
       mutate(ResourceType = as.factor(gsub("[[:digit:]]+", "", .data$Resource))) %>%
       mutate(Resource = as.factor(.data$Resource))
@@ -175,15 +174,15 @@ read_worker_csv <- function(where = ".",
       ) %>%
       unique()
     # If config is present try to use it for colors
-    if(!is.null(config)){
+    if (!is.null(config)) {
       tasks_colors <- lapply(config$app_tasks, data.frame, stringsAsFactors = FALSE)
       config_colors <- bind_rows(tasks_colors, .id = "Value")
-      if(config_colors %>% nrow() > 0){
-         dfcolors <- dfcolors %>%
-                     left_join(config_colors, by="Value") %>%
-                     mutate(Color = ifelse(is.na(.data$color), .data$Color, .data$color)) %>%
-                     mutate(Use = ifelse(is.na(.data$use), .data$Use, .data$use)) %>%
-                     select(.data$Value, .data$Color, .data$Use)
+      if (config_colors %>% nrow() > 0) {
+        dfcolors <- dfcolors %>%
+          left_join(config_colors, by = "Value") %>%
+          mutate(Color = ifelse(is.na(.data$color), .data$Color, .data$color)) %>%
+          mutate(Use = ifelse(is.na(.data$use), .data$Use, .data$use)) %>%
+          select(.data$Value, .data$Color, .data$Use)
       }
     }
   } else {
@@ -364,7 +363,7 @@ read_memory_state_csv <- function(where = ".", ZERO = 0) {
   if (grepl("CUDA|CPU", unlist(strsplit(firstResourceId, "_"))[2])) {
     # This is the case for multi-node trace
     dfw <- dfw %>%
-      separate(.data$ResourceId, into = c("Node", "Resource"), remove = FALSE, extra="drop", fill="right") %>%
+      separate(.data$ResourceId, into = c("Node", "Resource"), remove = FALSE, extra = "drop", fill = "right") %>%
       mutate(Node = as.factor(.data$Node)) %>%
       mutate(ResourceType = as.factor(gsub("[[:digit:]]+", "", .data$Resource)))
   } else {
@@ -429,7 +428,7 @@ read_comm_state_csv <- function(where = ".", ZERO = 0) {
   if (grepl("mpict", unlist(strsplit(firstResourceId, "_"))[2])) {
     # This is the case for multi-node trace
     dfw <- dfw %>%
-      separate(.data$ResourceId, into = c("Node", "Resource"), remove = FALSE, extra="drop", fill="right") %>%
+      separate(.data$ResourceId, into = c("Node", "Resource"), remove = FALSE, extra = "drop", fill = "right") %>%
       mutate(Node = as.factor(.data$Node)) %>%
       mutate(ResourceType = as.factor(gsub("[[:digit:]]+", "", .data$Resource)))
   } else {
@@ -479,8 +478,8 @@ read_other_state_csv <- function(where = ".", ZERO = 0) {
     )
 
   if ((dfw %>% nrow()) == 0) {
-      starvz_log("After reading Other States, number of rows is zero.")
-      return(NULL)
+    starvz_log("After reading Other States, number of rows is zero.")
+    return(NULL)
   }
 
   # Create three new columns (Node, Resource, ResourceType) - This is StarPU-specific
@@ -495,7 +494,7 @@ read_other_state_csv <- function(where = ".", ZERO = 0) {
   if (grepl("CUDA|CPU", unlist(strsplit(firstResourceId, "_"))[2])) {
     # This is the case for multi-node trace
     dfw <- dfw %>%
-      separate(.data$ResourceId, into = c("Node", "Resource"), remove = FALSE, extra="drop", fill="right") %>%
+      separate(.data$ResourceId, into = c("Node", "Resource"), remove = FALSE, extra = "drop", fill = "right") %>%
       mutate(Node = as.factor(.data$Node)) %>%
       mutate(ResourceType = as.factor(gsub("[[:digit:]]+", "", .data$Resource)))
   } else {
@@ -538,7 +537,7 @@ read_vars_set_new_zero <- function(where = ".", ZERO = 0) {
     mutate(Start = .data$Start - ZERO, End = .data$End - ZERO) %>%
     # create three new columns (Node, Resource, ResourceType)
     # This is StarPU-specific
-    separate(.data$ResourceId, into = c("Node", "Resource"), remove = FALSE, extra="drop", fill="right") %>%
+    separate(.data$ResourceId, into = c("Node", "Resource"), remove = FALSE, extra = "drop", fill = "right") %>%
     mutate(Node = as.factor(.data$Node)) %>%
     mutate(ResourceType = as.factor(gsub("[[:digit:]]+", "", .data$Resource))) %>%
     # abbreviate names so they are smaller
@@ -657,7 +656,7 @@ pmtool_states_csv_parser <- function(where = ".", whichApplication = NULL, Y = N
     names(pm)[names(pm) == "duration"] <- "Duration"
     names(pm)[names(pm) == "worker"] <- "ResourceId"
 
-    pm <- separate(data = pm, col = .data$JobId, into = c("JobId", "Tag"), sep = "\\:", extra="drop", fill="right")
+    pm <- separate(data = pm, col = .data$JobId, into = c("JobId", "Tag"), sep = "\\:", extra = "drop", fill = "right")
 
     fileName <- paste0(where, "/platform_file.rec")
     conn <- file(fileName, open = "r")
@@ -998,7 +997,7 @@ read_dag <- function(where = ".", Application = NULL, dfl = NULL) {
       select(-.data$Container, -.data$Origin) %>%
       # 2. Dest becomes ResourceId for these MPI tasks
       rename(ResourceId = .data$Dest) %>%
-      separate(.data$ResourceId, into = c("Node", "Resource"), remove = FALSE, extra="drop", fill="right") %>%
+      separate(.data$ResourceId, into = c("Node", "Resource"), remove = FALSE, extra = "drop", fill = "right") %>%
       mutate(Node = as.factor(.data$Node)) %>%
       mutate(ResourceType = as.factor(gsub("[[:digit:]]+", "", .data$Resource)))
     dfdag <- dfdags %>% bind_rows(dfdagl)

@@ -532,23 +532,26 @@ geom_abe_internal <- function(pernodeABEdf = NULL,
 #' @export
 panel_abe_solution <- function(data = NULL,
                                base_size = data$config$base_size) {
+  starvz_check_data(data, tables = list(
+    "Colors" = c("Value", "Color", "Use"),
+    "Application" = c("ResourceId", "Node", "Resource", "ResourceType", "Duration", "Value", "Position", "Height")
+  ))
 
-    starvz_check_data(data, tables = list("Colors" = c("Value", "Color", "Use"),
-                                          "Application" = c("ResourceId", "Node", "Resource", "ResourceType", "Duration", "Value", "Position", "Height")))
+  sol <- hl_per_node_ABE_details(data)
+  nnodes <- length(unique(sol$Node))
+  colors <- extract_colors(data$Application, data$Colors)
 
-    sol <- hl_per_node_ABE_details(data)
-    nnodes <- length(unique(sol$Node))
-    colors <- extract_colors(data$Application, data$Colors)
-
-    ggplot(data = sol, aes(x = .data$ResourceType, y = .data$Count, fill = .data$Value)) +
-        geom_bar(data = sol %>% filter(.data$Estimation == FALSE), position = "stack", stat = "identity", alpha = .6) +
-        geom_point(data = sol %>% filter(.data$Estimation == TRUE), shape = 21, color = "black", size = 2, stroke = 1, alpha = .7) +
-        facet_wrap(Node~Value, scales = "free", nrow = nnodes) +
-        scale_fill_manual(values = colors) +
-        theme_bw(base_size = base_size) +
-        theme(plot.margin = unit(c(0, 0, 0, 0), "cm"),
-              panel.grid = element_blank(),
-              legend.position = "none")
+  ggplot(data = sol, aes(x = .data$ResourceType, y = .data$Count, fill = .data$Value)) +
+    geom_bar(data = sol %>% filter(.data$Estimation == FALSE), position = "stack", stat = "identity", alpha = .6) +
+    geom_point(data = sol %>% filter(.data$Estimation == TRUE), shape = 21, color = "black", size = 2, stroke = 1, alpha = .7) +
+    facet_wrap(Node ~ Value, scales = "free", nrow = nnodes) +
+    scale_fill_manual(values = colors) +
+    theme_bw(base_size = base_size) +
+    theme(
+      plot.margin = unit(c(0, 0, 0, 0), "cm"),
+      panel.grid = element_blank(),
+      legend.position = "none"
+    )
 }
 
 # Nesi Implementation of ABE

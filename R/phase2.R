@@ -178,11 +178,10 @@ starvz_compute_plot_heights <- function(plist, config) {
 #' @return The ggplot plot
 #' @examples
 #' \donttest{
-#' starvz_assemble(starvz_plot_list(starvz_sample_lu), config=starvz_sample_lu$config)
+#' starvz_assemble(starvz_plot_list(starvz_sample_lu), config = starvz_sample_lu$config)
 #' }
 #' @export
 starvz_assemble <- function(..., config = NULL, remove_Y_info = TRUE, remove_legends = TRUE) {
-
   defaut_config <- starvz_default_config()
   config <- modifyList(defaut_config, config)
 
@@ -608,7 +607,7 @@ starvz_plot <- function(data = NULL, name = NULL, save = FALSE, guided = data$co
 
     if (!is.null(data$config$selected_nodes)) {
       data$Y %>%
-        separate(.data$Parent, into = c("Node"), remove = FALSE, extra="drop", fill="right") %>%
+        separate(.data$Parent, into = c("Node"), remove = FALSE, extra = "drop", fill = "right") %>%
         filter(.data$Node %in% data$config$selected_nodes) %>%
         arrange(.data$Position) %>%
         mutate(New = cumsum(lag(.data$Height, default = 0))) %>%

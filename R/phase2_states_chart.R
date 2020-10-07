@@ -119,7 +119,7 @@ panel_st_raw <- function(data = NULL, ST.Outliers = data$config$st$outliers, bas
   # Select Nodes
   if (!is.null(selected_nodes)) {
     data$Y %>%
-      separate(.data$Parent, into = c("Node"), remove = FALSE, extra="drop", fill="right") %>%
+      separate(.data$Parent, into = c("Node"), remove = FALSE, extra = "drop", fill = "right") %>%
       filter(.data$Node %in% selected_nodes) %>%
       arrange(.data$Position) %>%
       mutate(New = cumsum(lag(.data$Height, default = 0))) %>%
@@ -147,7 +147,7 @@ panel_st_raw <- function(data = NULL, ST.Outliers = data$config$st$outliers, bas
       labels = labels,
       expand = expand_y,
       rect_outline = data$config$st$rect_outline,
-      alpha_value = alpha, Y=data$Y
+      alpha_value = alpha, Y = data$Y
     )
   } else {
     gow <- gow + geom_states(App,
@@ -155,7 +155,7 @@ panel_st_raw <- function(data = NULL, ST.Outliers = data$config$st$outliers, bas
       labels = labels,
       expand = expand_y,
       rect_outline = data$config$st$rect_outline,
-      alpha_value = alpha, Y=data$Y
+      alpha_value = alpha, Y = data$Y
     )
   }
 

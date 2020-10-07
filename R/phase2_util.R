@@ -24,7 +24,7 @@ extract_colors <- function(dfw = NULL, colors = NULL) {
     setNames(dfw %>% select(.data$Value) %>% unique() %>% .$Value)
 }
 
-yconf <- function(dfw = NULL, option = "ALL", Y=NULL, show_mpi=TRUE) {
+yconf <- function(dfw = NULL, option = "ALL", Y = NULL, show_mpi = TRUE) {
   if (is.null(dfw)) {
     return(NULL)
   }
@@ -90,19 +90,26 @@ yconf <- function(dfw = NULL, option = "ALL", Y=NULL, show_mpi=TRUE) {
       slice(c(1, n())) %>%
       ungroup()
   }
-  if(!is.null(Y) & show_mpi==TRUE){
-      y_conf <- y_conf %>%
-          mutate(ResourceId = as.character(.data$ResourceId),
-                 ResourceType = as.character(.data$ResourceType))
-      Y %>% filter(.data$Type=="Communication Thread State") %>%
-            mutate(ResourceId = .data$Parent) %>%
-            separate(.data$Parent, c("Node", "ResourceType"), extra="drop", fill="right") %>%
-            mutate(Node = as.integer(.data$Node),
-                   ResourceId = as.character(.data$ResourceId)) %>%
-            select(.data$Node, .data$ResourceId, .data$ResourceType, .data$Position, .data$Height) %>%
+  if (!is.null(Y) & show_mpi == TRUE) {
+    y_conf <- y_conf %>%
+      mutate(
+        ResourceId = as.character(.data$ResourceId),
+        ResourceType = as.character(.data$ResourceType)
+      )
+    Y %>%
+      filter(.data$Type == "Communication Thread State") %>%
+      mutate(ResourceId = .data$Parent) %>%
+      separate(.data$Parent, c("Node", "ResourceType"), extra = "drop", fill = "right") %>%
+      mutate(
+        Node = as.integer(.data$Node),
+        ResourceId = as.character(.data$ResourceId)
+      ) %>%
+      select(.data$Node, .data$ResourceId, .data$ResourceType, .data$Position, .data$Height) %>%
       bind_rows(y_conf) %>%
-      mutate(ResourceId = as.factor(.data$ResourceId),
-             ResourceType = as.factor(.data$ResourceType)) -> y_conf
+      mutate(
+        ResourceId = as.factor(.data$ResourceId),
+        ResourceType = as.factor(.data$ResourceType)
+      ) -> y_conf
   }
   return(y_conf)
 }
@@ -136,11 +143,11 @@ outlier_definition <- function(x) {
 #' @examples
 #' panel_title(data = starvz_sample_lu)
 #' @export
-panel_title <- function(data, title=data$config$title$text) {
-  if(is.null(title)){
-    if(is.null(data$Origin)){
+panel_title <- function(data, title = data$config$title$text) {
+  if (is.null(title)) {
+    if (is.null(data$Origin)) {
       title <- "Null Title"
-    }else{
+    } else {
       title <- data$Origin
     }
   }
@@ -171,26 +178,27 @@ panel_title <- function(data, title=data$config$title$text) {
 #' panel_model_gflops(data = starvz_sample_data)
 #' }
 #' @export
-panel_model_gflops <- function(data, freeScales=TRUE) {
-
+panel_model_gflops <- function(data, freeScales = TRUE) {
   model_panel <- data$Application %>%
     filter(.data$Value %in% c("geqrt", "gemqrt", "tpqrt", "tpmqrt")) %>%
-    ggplot(aes(x=.data$GFlop, y=.data$Duration, color=.data$Outlier)) +
-      theme_bw(base_size=data$config$base_size) +
-      geom_point(alpha=.5) +
-      labs(y="Duration (ms)", x="GFlops") +
-      scale_color_brewer(palette="Set1") +
-      theme(legend.position="top",
-            strip.text.x = element_text(size = rel(1))) +
-      labs(color = "Anomaly") +
-      # ~ 0 forces the model to pass through origin
-      geom_smooth(method="lm", formula="y ~ 0 + I(x^(2/3))", color="green", fill="blue")
+    ggplot(aes(x = .data$GFlop, y = .data$Duration, color = .data$Outlier)) +
+    theme_bw(base_size = data$config$base_size) +
+    geom_point(alpha = .5) +
+    labs(y = "Duration (ms)", x = "GFlops") +
+    scale_color_brewer(palette = "Set1") +
+    theme(
+      legend.position = "top",
+      strip.text.x = element_text(size = rel(1))
+    ) +
+    labs(color = "Anomaly") +
+    # ~ 0 forces the model to pass through origin
+    geom_smooth(method = "lm", formula = "y ~ 0 + I(x^(2/3))", color = "green", fill = "blue")
 
-    if (freeScales) {
-      model_panel <- model_panel + facet_wrap(.data$ResourceType~.data$Value, scales="free", ncol=4)
-    } else {
-      model_panel <- model_panel + facet_grid(.data$ResourceType~.data$Value, scales="free")
-    }
+  if (freeScales) {
+    model_panel <- model_panel + facet_wrap(.data$ResourceType ~ .data$Value, scales = "free", ncol = 4)
+  } else {
+    model_panel <- model_panel + facet_grid(.data$ResourceType ~ .data$Value, scales = "free")
+  }
 
-    return(model_panel)
+  return(model_panel)
 }

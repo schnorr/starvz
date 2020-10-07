@@ -1044,7 +1044,7 @@ read_links <- function(where = ".", ZERO = 0) {
 
   # Check if number of lines is greater than zero
   if ((dfl %>% nrow()) == 0) {
-    starvz_warn("After attempt to read links, number of rows is zero")
+    starvz_log("After attempt to read links, number of rows is zero")
     return(NULL)
   }
 

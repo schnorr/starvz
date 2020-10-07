@@ -13,7 +13,9 @@ cache: packages
 
 jobs:
   allow_failures:
-    - os: windows
+    - os:
+      - windows
+      - osx
   include:
   - r: release
     name: "Linux CRAN build"

@@ -608,7 +608,7 @@ starvz_plot <- function(data = NULL, name = NULL, save = FALSE, guided = data$co
 
     if (!is.null(data$config$selected_nodes)) {
       data$Y %>%
-        separate(.data$Parent, into = c("Node"), remove = FALSE) %>%
+        separate(.data$Parent, into = c("Node"), remove = FALSE, extra="drop", fill="right") %>%
         filter(.data$Node %in% data$config$selected_nodes) %>%
         arrange(.data$Position) %>%
         mutate(New = cumsum(lag(.data$Height, default = 0))) %>%

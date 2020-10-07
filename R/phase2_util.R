@@ -92,17 +92,17 @@ yconf <- function(dfw = NULL, option = "ALL", Y=NULL, show_mpi=TRUE) {
   }
   if(!is.null(Y) & show_mpi==TRUE){
       y_conf <- y_conf %>%
-          mutate(ResourceId = as.character(ResourceId),
-                 ResourceType = as.character(ResourceType))
-      Y %>% filter(Type=="Communication Thread State") %>%
-            mutate(ResourceId = Parent) %>%
-            separate(Parent, c("Node", "ResourceType"), extra="drop", fill="right") %>%
-            mutate(Node = as.integer(Node),
-                   ResourceId = as.character(ResourceId)) %>%
+          mutate(ResourceId = as.character(.data$ResourceId),
+                 ResourceType = as.character(.data$ResourceType))
+      Y %>% filter(.data$Type=="Communication Thread State") %>%
+            mutate(ResourceId = .data$Parent) %>%
+            separate(.data$Parent, c("Node", "ResourceType"), extra="drop", fill="right") %>%
+            mutate(Node = as.integer(.data$Node),
+                   ResourceId = as.character(.data$ResourceId)) %>%
             select(.data$Node, .data$ResourceId, .data$ResourceType, .data$Position, .data$Height) %>%
       bind_rows(y_conf) %>%
-      mutate(ResourceId = as.factor(ResourceId),
-             ResourceType = as.factor(ResourceType)) -> y_conf
+      mutate(ResourceId = as.factor(.data$ResourceId),
+             ResourceType = as.factor(.data$ResourceType)) -> y_conf
   }
   return(y_conf)
 }

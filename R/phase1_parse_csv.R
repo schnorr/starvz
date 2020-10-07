@@ -257,13 +257,13 @@ read_worker_csv <- function(where = ".",
       # Step 2: identify outliers rows
       df.pre.outliers %>%
         select(-.data$Residual) %>%
-        unnest(.data$outliers) %>%
+        unnest(cols = c(.data$outliers)) %>%
         mutate(Row = as.integer(.data$Row), Outlier = TRUE) %>%
         ungroup() -> df.pos.outliers
 
       # Step 3: unnest all data and tag create the Outiler field according to the Row value
       df.pre.outliers %>%
-        unnest(.data$data, .data$Residual) %>%
+        unnest(cols = c(.data$data, .data$Residual)) %>%
         # this must be identical to the grouping used in the step 1
         group_by(.data$Value, .data$ResourceType) %>%
         mutate(Row = 1:n()) %>%

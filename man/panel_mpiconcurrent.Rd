@@ -43,5 +43,5 @@ Use the Variable traces to create a line chart panel with MPI concurrent
 per node, aggregated by a configurable time step
 }
 \examples{
-panel_mpiconcurrent(data=starvz_sample_lu)
+panel_mpiconcurrent(data = starvz_sample_lu)
 }

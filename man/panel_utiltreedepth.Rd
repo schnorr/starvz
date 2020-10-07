@@ -32,6 +32,6 @@ total resource utilization, painted by tree depth level using geom_ribbon
 }
 \examples{
 \dontrun{
-panel_utiltreedepth(starvz_sample_lu, step=100, legend=TRUE)
+panel_utiltreedepth(starvz_sample_lu, step = 100, legend = TRUE)
 }
 }

@@ -44,6 +44,6 @@ per resource, aggregated by a configurable time step
 }
 \examples{
 \donttest{
-panel_gflops(data=starvz_sample_lu)
+panel_gflops(data = starvz_sample_lu)
 }
 }

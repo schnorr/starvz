@@ -43,5 +43,5 @@ Use the Variable traces to create a line chart panel with MPI bandwidth
 per node, aggregated by a configurable time step
 }
 \examples{
-panel_mpibandwidth(data=starvz_sample_lu)
+panel_mpibandwidth(data = starvz_sample_lu)
 }

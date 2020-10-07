@@ -30,6 +30,6 @@ colors are reused between nodes, not tied to a specific tree node.
 }
 \examples{
 \dontrun{
-panel_utiltreenode(data=starvz_sample_lu, step=100)
+panel_utiltreenode(data = starvz_sample_lu, step = 100)
 }
 }

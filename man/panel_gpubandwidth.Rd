@@ -46,5 +46,5 @@ Use the Variable traces to create a line chart panel with GPU bandwidth
 per resource, aggregated by a configurable time step
 }
 \examples{
-panel_gpubandwidth(data=starvz_sample_lu)
+panel_gpubandwidth(data = starvz_sample_lu)
 }

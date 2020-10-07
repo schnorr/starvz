@@ -32,6 +32,6 @@ active nodes along the application execution time
 }
 \examples{
 \dontrun{
-panel_nodememuse(starvz_sample_lu, step=100)
+panel_nodememuse(starvz_sample_lu, step = 100)
 }
 }

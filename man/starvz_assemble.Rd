@@ -28,6 +28,6 @@ Take a panel list, or a list of list of panels and assemble it
 }
 \examples{
 \donttest{
-starvz_assemble(starvz_plot_list(starvz_sample_lu), config=starvz_sample_lu$config)
+starvz_assemble(starvz_plot_list(starvz_sample_lu), config = starvz_sample_lu$config)
 }
 }

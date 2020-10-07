@@ -39,5 +39,5 @@ A ggplot object
 Create a space-time view of MPI controlers
 }
 \examples{
-panel_mpistate(data=starvz_sample_lu)
+panel_mpistate(data = starvz_sample_lu)
 }

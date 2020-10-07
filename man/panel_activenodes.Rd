@@ -35,6 +35,6 @@ along the application execution time
 }
 \examples{
 \dontrun{
-panel_activenodes(data=starvz_sample_lu, step=100)
+panel_activenodes(data = starvz_sample_lu, step = 100)
 }
 }

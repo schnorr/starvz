@@ -1046,10 +1046,9 @@ panel_memory_snap <- function(data, selected_time, step,
       )
     ) +
     scale_y_reverse(limits = c(max_x + 0.6, -0.6), expand = c(0, 0)) +
-    scale_x_continuous(limits = c(-0.6, max_x + 0.6), expand = c(0, 0)) +
     facet_wrap(~Container) +
     labs(x = "Block X Coordinate", y = "Block Y Coordinate") +
-    default_theme(base_size, expand_x, skip_x=TRUE) +
+    default_theme(base_size, expand_x) +
     theme(
       plot.margin = unit(c(0, 10, 0, 0), "mm"),
       legend.box.margin = margin(-5, 0, -rel(1), 0),

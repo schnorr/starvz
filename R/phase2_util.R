@@ -180,7 +180,8 @@ panel_model_gflops <- function(data, freeScales=TRUE) {
       geom_point(alpha=.5) +
       labs(y="Duration (ms)", x="GFlops") +
       scale_color_brewer(palette="Set1") +
-      theme(legend.position="top") +
+      theme(legend.position="top",
+            strip.text.x = element_text(size = rel(1))) +
       labs(color = "Anomaly") +
       # ~ 0 forces the model to pass through origin
       geom_smooth(method="lm", formula="y ~ 0 + I(x^(2/3))", color="green", fill="blue")

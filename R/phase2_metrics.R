@@ -16,8 +16,8 @@ abe_cpu_cuda_details <- function(dfl, Colors = NULL, debug = FALSE) {
   lpresult %>% pull(.data$Result) -> result
   lpresult %>%
     select(.data$Types, .data$Values) %>%
-    unnest(.data$Types, .drop = FALSE) %>%
-    unnest(.data$Values, .drop = FALSE) %>%
+    unnest(.data$Types) %>%
+    unnest(.data$Values) %>%
     mutate(
       Count = result[[1]]$solution[1:n()],
       Estimation = TRUE

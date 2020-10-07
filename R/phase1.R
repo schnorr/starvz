@@ -254,7 +254,7 @@ hl_y_paje_tree <- function(where = ".") {
     dfe <- read_feather(entities.feather)
   } else if (file.exists(entities.csv)) {
     starvz_log(paste("Reading ", entities.csv))
-    dfe <- read_csv(entities.csv,
+    dfe <- starvz_suppressWarnings(read_csv(entities.csv,
       trim_ws = TRUE,
       col_types = cols(
         Parent = col_character(),
@@ -262,7 +262,7 @@ hl_y_paje_tree <- function(where = ".") {
         Type = col_character(),
         Nature = col_character()
       )
-    )
+    ))
   } else {
     starvz_log(paste("Files", entities.feather, "or", entities.csv, "do not exist."))
     return(NULL)
@@ -473,9 +473,9 @@ gaps.f_forward <- function(data) {
         filter(!is.na(.data$DepChain)) %>%
         rename(Member = .data$JobId) %>%
         select(.data$DepChain, .data$Member) -> chain.o
-      if (nrow(chain.o) > 0) 
-        return(f2(full.o, chain.o))        
-    } 
+      if (nrow(chain.o) > 0)
+        return(f2(full.o, chain.o))
+    }
     return(full.o)
   }
   return(f2(data$DAG, seedchain))

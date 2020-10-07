@@ -96,7 +96,7 @@ yconf <- function(dfw = NULL, option = "ALL", Y=NULL, show_mpi=TRUE) {
                  ResourceType = as.character(ResourceType))
       Y %>% filter(Type=="Communication Thread State") %>%
             mutate(ResourceId = Parent) %>%
-            separate(Parent, c("Node", "ResourceType")) %>%
+            separate(Parent, c("Node", "ResourceType"), extra="drop", fill="right") %>%
             mutate(Node = as.integer(Node),
                    ResourceId = as.character(ResourceId)) %>%
             select(.data$Node, .data$ResourceId, .data$ResourceType, .data$Position, .data$Height) %>%

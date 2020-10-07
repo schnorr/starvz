@@ -45,6 +45,14 @@ starvz_set_log <- function(state) {
   pkg.env$log <- state
 }
 
+starvz_suppressWarnings <- function(exp){
+	if (pkg.env$log) {
+		exp
+	}else{
+		suppressWarnings(exp)
+	}
+}
+
 starvz_log <- function(msg) {
   if (pkg.env$log) {
     cat(paste0(format(Sys.time(), "%X"), " ", msg, "\n"))

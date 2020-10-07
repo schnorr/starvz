@@ -464,7 +464,7 @@ geom_aggregated_states <- function(data = NULL, Show.Outliers = FALSE, min_time_
   # Prepare Y coordinates for left_join
   data$Y %>%
     rename(ResourceId = .data$Parent) %>%
-    separate(.data$ResourceId, into = c("Node", "Resource"), remove = FALSE) %>%
+    separate(.data$ResourceId, into = c("Node", "Resource"), remove = FALSE, extra="drop", fill="right") %>%
     mutate(Node = as.factor(.data$Node)) %>%
     mutate(ResourceType = as.factor(gsub("[[:digit:]]+", "", .data$Resource))) -> ydf
 

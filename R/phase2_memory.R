@@ -849,11 +849,10 @@ panel_handles <- function(data, JobId = NA, lines = NA, lHandle = NA, name_func 
     # geom_segment(data=handle_end_m,
     #             aes(x = End, y = MemoryNode+1, xend = End, yend = MemoryNode+1.8), color = "red") +
     facet_wrap(.data$Value ~ ., strip.position = "top", ncol = 1) +
-    scale_x_continuous(
-      expand = c(0, 0),
+    #scale_x_continuous(
       # breaks = c(5000, 5185, 5486, 5600, 5676, 5900),
-      labels = function(x) format(x, big.mark = "", scientific = FALSE)
-    ) +
+    #  labels = function(x) format(x, big.mark = "", scientific = FALSE)
+    #) +
     # coord_cartesian(xlim=c(5000, 6000)) +
     # scale_color_manual(values=c("red"="red", "blue"="blue")) +
     # scale_colour_identity() +
@@ -862,7 +861,7 @@ panel_handles <- function(data, JobId = NA, lines = NA, lHandle = NA, name_func 
       legend.box.margin = margin(-10, -10, -rel(1.0), -10),
       legend.background = element_rect(fill = "transparent")
     ) +
-    labs(x = "Time [ms]", y = "Memory Manager")
+    ylab("Memory Manager")
 
 
   if (!is.na(lines)) {
@@ -894,7 +893,7 @@ panel_handles <- function(data, JobId = NA, lines = NA, lHandle = NA, name_func 
 
 pre_snap <- function(data, f_data) {
   data$Data_handles %>%
-    separate(.data$Coordinates, c("Y", "X")) %>%
+    separate(.data$Coordinates, c("Y", "X"), extra="drop", fill="right") %>%
     mutate(X = as.numeric(.data$X), Y = as.numeric(.data$Y)) -> new_handles
 
 
@@ -1050,7 +1049,7 @@ panel_memory_snap <- function(data, selected_time, step,
     scale_x_continuous(limits = c(-0.6, max_x + 0.6), expand = c(0, 0)) +
     facet_wrap(~Container) +
     labs(x = "Block X Coordinate", y = "Block Y Coordinate") +
-    default_theme(base_size, expand_x) +
+    default_theme(base_size, expand_x, skip_x=TRUE) +
     theme(
       plot.margin = unit(c(0, 10, 0, 0), "mm"),
       legend.box.margin = margin(-5, 0, -rel(1), 0),
@@ -1125,7 +1124,7 @@ panel_memory_heatmap <- function(data,
 
   data$handle_states %>% mutate(Duration=.data$End-.data$Start) -> d_data
 
-  data$Data_handles %>% separate(.data$Coordinates, c("Y", "X")) %>%
+  data$Data_handles %>% separate(.data$Coordinates, c("Y", "X"), extra="drop", fill="right") %>%
   mutate(across(c(.data$X, .data$Y), as.integer)) %>%
   select(.data$Handle, .data$X, .data$Y) -> hand
   d_data %>% group_by(.data$Value, .data$Container) %>% summarize(sum=sum(.data$Duration), n=n()) %>%
@@ -1136,7 +1135,7 @@ panel_memory_heatmap <- function(data,
   max_x <- data[[2]] %>% arrange(-.data$X) %>% slice(1) %>% .$X %>% unlist()
 
   panel <- ggplot(d_percent, aes(.data$Y, .data$X)) +
-      default_theme(base_size, expand) +
+      default_theme(base_size, expand, skip_x=TRUE) +
       geom_tile(aes(fill = .data$per),
                 colour = "white") +
 
@@ -1203,10 +1202,10 @@ panel_dist2d <- function(data,
   panel <- data$Data_handle %>% select(.data$MPIOwner, .data$Coordinates) %>%
       unique() %>%
       mutate(MPIOwner = factor(.data$MPIOwner)) %>%
-      separate(.data$Coordinates, c("Y", "X")) %>%
+      separate(.data$Coordinates, c("Y", "X"), extra="drop", fill="right") %>%
       mutate(X=as.numeric(.data$X), Y=as.numeric(.data$Y)) %>%
       ggplot(aes(x=.data$X, y=.data$Y, fill=.data$MPIOwner)) +
-      default_theme(base_size, expand) +
+      default_theme(base_size, expand, skip_x=TRUE) +
       geom_tile(alpha=0.8) +
       geom_text(aes(label=factor(.data$MPIOwner)), size=2) +
       scale_y_reverse(expand=c(0.01,0.01)) +

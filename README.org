@@ -161,9 +161,9 @@ library(starvz)
 ** Team and Contact
 
 - [[http://www.inf.ufrgs.br/~schnorr][Lucas Mello Schnorr (schnorr@inf.ufrgs.br)]]
-- Vinicius Garcia (vgpinto@inf.ufrgs.br)
-- Lucas Nesi (lucas.nesi@inf.ufrgs.br)
-- Marcelo Miletto (mcmiletto@inf.ufrgs.br)
+- Vinicius Garcia Pinto (vinicius.pinto@inf.ufrgs.br)
+- Lucas Leando Nesi (lucas.nesi@inf.ufrgs.br)
+- Marcelo Cogo Miletto (mcmiletto@inf.ufrgs.br)
 
 ** Getting help
 

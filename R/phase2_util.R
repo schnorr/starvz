@@ -171,6 +171,7 @@ panel_title <- function(data, title = data$config$title$text) {
 #'
 #' @param data starvz_data with trace data
 #' @param freeScales free X,Y scales for each task and resource type combination
+#' @param linear use the linear model Duration ~ GFlop
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
@@ -178,21 +179,30 @@ panel_title <- function(data, title = data$config$title$text) {
 #' panel_model_gflops(data = starvz_sample_data)
 #' }
 #' @export
-panel_model_gflops <- function(data, freeScales = TRUE) {
+panel_model_gflops <- function(data, freeScales = TRUE, linear=TRUE) {
   model_panel <- data$Application %>%
     filter(.data$Value %in% c("geqrt", "gemqrt", "tpqrt", "tpmqrt")) %>%
     ggplot(aes(x = .data$GFlop, y = .data$Duration, color = .data$Outlier)) +
     theme_bw(base_size = data$config$base_size) +
     geom_point(alpha = .5) +
     labs(y = "Duration (ms)", x = "GFlops") +
-    scale_color_brewer(palette = "Set1") +
+    scale_color_manual(values = c("black", "orange")) +
     theme(
       legend.position = "top",
-      strip.text.x = element_text(size = rel(1))
+      strip.text.x = element_text(size = rel(1)),
+      axis.text.x = element_text(angle = 45, vjust = 0.5)
     ) +
-    labs(color = "Anomaly") +
-    # ~ 0 forces the model to pass through origin
-    geom_smooth(method = "lm", formula = "y ~ 0 + I(x^(2/3))", color = "green", fill = "blue")
+    labs(color = "Anomaly")
+
+  if(linear){
+    model_panel <- model_panel + 
+      geom_smooth(method = "lm", formula = "y ~ x", color = "green", fill = "blue") +
+      ggtitle("Using model: Duration ~ GFlop")
+  } else {
+    model_panel <- model_panel + 
+      geom_smooth(method = "lm", formula = "y ~ I(x^(2/3))", color = "green", fill = "blue") +
+      ggtitle("Using model: Duration ~ GFlop^2/3")
+  }
 
   if (freeScales) {
     model_panel <- model_panel + facet_wrap(.data$ResourceType ~ .data$Value, scales = "free", ncol = 4)

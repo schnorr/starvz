@@ -29,8 +29,7 @@ starvz_write_parquet <- function(data, directory = ".") {
       starvz_log(filename)
       if (!is.null(data[[x]])) {
         if (is.data.frame(data[[x]])) {
-          properties <- ParquetWriterProperties$create(data[[x]], compression = "gzip")
-          write_parquet(data[[x]], filename, properties = properties)
+          write_parquet(data[[x]], filename, compression = "gzip")
         } else {
           starvz_log(paste(filename, "must be a data frame."))
         }

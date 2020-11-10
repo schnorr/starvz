@@ -4,12 +4,14 @@
 \alias{panel_model_gflops}
 \title{Create the diagnostig plot for the regression model}
 \usage{
-panel_model_gflops(data, freeScales = TRUE)
+panel_model_gflops(data, freeScales = TRUE, model_type = "WLR")
 }
 \arguments{
 \item{data}{starvz_data with trace data}
 
 \item{freeScales}{free X,Y scales for each task and resource type combination}
+
+\item{model_type}{Choose the regression model type to use}
 }
 \value{
 A ggplot object

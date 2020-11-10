@@ -214,76 +214,17 @@ read_worker_csv <- function(where = ".",
       mutate(Outlier = ifelse(.data$Duration > outlier_fun(.data$Duration), TRUE, FALSE)) %>%
       ungroup()
   } else if (whichApplication == "qrmumps") {
+    starvz_log("Using Regression models to detect task duration anomalies")
+    
+    # Step 0: Define the linear models for outlier classification
+    model_LR <- function(df)  { lm(Duration ~ GFlop, data = df) }
+    model_WLR <- function(df) { lm(Duration ~ GFlop, data = df, weights=1/df$GFlop) }
+    model_NLR <- function(df) { lm(Duration ~ I(GFlop**(2/3)), data = df) }
 
-    # Step 0: Define the linear models for outlier classification and select one based on ib
-    task_model_ib_other <- function(df) {
-      model <- lm(Duration ~ I(GFlop**(2 / 3)), data = df)
-    }
-    task_model_ib_1 <- function(df) {
-      model <- lm(Duration ~ GFlop, data = df)
-    }
-
-    conf <- file.path(where, "conf.txt")
-
-    if (file.exists(conf)) {
-      ib <- as.integer(gsub("\\D", "", c(grep("qrm_ib", readLines(conf), value = TRUE))))
-    } else {
-      stop(paste("File conf.txt do not exist!"))
-    }
-
-    if (ib != 1) {
-      starvz_log("Attempt to detect anomalies for QRMumps using Duration ~ GFlops**(2/3)")
-      task_model <- task_model_ib_other
-    } else {
-      starvz_log("Attempt to detect anomalies for QRMumps using Duration ~ GFlops")
-      task_model <- task_model_ib_1
-    }
-    # Step 1: apply the model to each task, considering the ResourceType
-    Application %>%
-      filter(grepl("qrt", .data$Value)) %>%
-      unique() %>%
-      group_by(.data$ResourceType, .data$Value) %>%
-      nest() %>%
-      mutate(model = map(.data$data, task_model)) %>%
-      mutate(Residual = map(.data$model, resid)) %>%
-      mutate(outliers = map(.data$model, function(m) {
-        tibble(Row = names(outlierTest(m, n.max = Inf)$rstudent))
-      })) -> df.pre.outliers
-
-    # Step 1.1: Check if any anomaly was detected
-    if (df.pre.outliers %>% nrow() > 0) {
-
-      # Step 2: identify outliers rows
-      df.pre.outliers %>%
-        select(-.data$Residual) %>%
-        unnest(cols = c(.data$outliers)) %>%
-        mutate(Row = as.integer(.data$Row), Outlier = TRUE) %>%
-        ungroup() -> df.pos.outliers
-
-      # Step 3: unnest all data and tag create the Outiler field according to the Row value
-      df.pre.outliers %>%
-        unnest(cols = c(.data$data, .data$Residual)) %>%
-        # this must be identical to the grouping used in the step 1
-        group_by(.data$Value, .data$ResourceType) %>%
-        mutate(Row = 1:n()) %>%
-        ungroup() %>%
-        # the left join must be by exactly the same as the grouping + Row
-        left_join(df.pos.outliers, by = c("Value", "Row", "ResourceType")) %>%
-        mutate(Outlier = ifelse(is.na(.data$Outlier), FALSE, .data$Outlier)) %>%
-        # remove outliers that are below the regression line
-        mutate(Outlier = ifelse(.data$Outlier & .data$Residual < 0, FALSE, .data$Outlier)) %>%
-        select(-.data$Row) %>%
-        ungroup() -> df.outliers
-
-      # Step 4: regroup the Outlier data to the original Application
-      Application <- Application %>%
-        left_join(df.outliers %>%
-          select(.data$JobId, .data$Outlier), by = c("JobId"))
-    } else {
-      starvz_log("No anomalies were detected.")
-      Application <- Application %>%
-        mutate(Outlier = FALSE)
-    }
+    Application <- regression_based_outlier_detection(Application, model_WLR, "");
+    Application <- regression_based_outlier_detection(Application, model_LR,  "_LR");
+    Application <- regression_based_outlier_detection(Application, model_NLR, "_NLR");
+    
   } else {
     starvz_log("No outlier detection; use standard model")
     Application <- Application %>%

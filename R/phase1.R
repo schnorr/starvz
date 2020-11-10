@@ -546,3 +546,63 @@ gaps <- function(data) {
 outlier_definition <- function(x) {
   (quantile(x)["75%"] + (quantile(x)["75%"] - quantile(x)["25%"]) * 1.5)
 }
+
+#' @importFrom rlang quo_name
+#' @importFrom rlang :=
+regression_based_outlier_detection <- function(Application, task_model, column_name) {
+
+    column_name = paste0("Outlier", column_name)
+
+    # Step 1: apply the model to each task, considering the ResourceType
+    Application %>%
+      filter(grepl("qrt", .data$Value)) %>%
+      # cannot have zero gflops
+      filter(.data$GFlop > 0) %>%
+      unique() %>%
+      group_by(.data$ResourceType, .data$Value) %>%
+      nest() %>%
+      mutate(model = map(.data$data, task_model)) %>%
+      mutate(Residual = map(.data$model, resid)) %>%
+      mutate(outliers = map(.data$model, function(m) {
+        tibble(Row = names(outlierTest(m, n.max = Inf)$rstudent))
+      })) -> df.pre.outliers
+
+    # Step 1.1: Check if any anomaly was detected
+    if (df.pre.outliers %>% nrow() > 0) {
+
+      # Step 2: identify outliers rows
+      df.pre.outliers %>%
+        select(-.data$Residual) %>%
+        unnest(cols = c(.data$outliers)) %>%
+        mutate(!!quo_name(column_name) := TRUE, Row = as.integer(.data$Row)) %>%
+        ungroup() -> df.pos.outliers
+
+      # Step 3: unnest all data and tag create the Outiler field according to the Row value
+      df.pre.outliers %>%
+        unnest(cols = c(.data$data, .data$Residual)) %>%
+        # this must be identical to the grouping used in the step 1
+        group_by(.data$Value, .data$ResourceType) %>%
+        mutate(Row = 1:n()) %>%
+        ungroup() %>%
+        # the left join must be by exactly the same as the grouping + Row
+        left_join(df.pos.outliers, by = c("Value", "Row", "ResourceType")) %>%
+        # same as mutate(Outlier = ifelse(is.na(Outlier), FALSE, Outlier))
+        mutate(!!quo_name(column_name) := ifelse(is.na(!! sym(column_name)), FALSE, !! sym(column_name))) %>%
+        # remove outliers that are below the regression line
+        mutate(!!quo_name(column_name) := ifelse(.data$Residual < 0, FALSE, !! sym(column_name))) %>%
+        select(-.data$Row) %>%
+        ungroup() -> df.outliers
+
+      # Step 4: regroup the Outlier data to the original Application
+      Application <- Application %>%
+        left_join(df.outliers %>%
+          select(.data$JobId, !! quo_name(column_name)), by = c("JobId"))
+
+    } else {
+      starvz_log("No anomalies were detected.")
+      Application <- Application %>%
+        mutate(column_name = FALSE)
+    }
+
+    return(Application)
+}

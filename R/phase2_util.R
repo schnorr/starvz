@@ -222,5 +222,3 @@ panel_model_gflops <- function(data, freeScales = TRUE, model_type="WLR") {
 
   return(model_panel)
 }
-
-}

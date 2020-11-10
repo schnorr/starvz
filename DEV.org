@@ -17,7 +17,7 @@
 
 ** Check package
 #+begin_src R
-devtools::check("R_package/")
+devtools::check(".")
 #+end_src
 
 ** Test Units

@@ -220,10 +220,12 @@ read_worker_csv <- function(where = ".",
     model_LR <- function(df)  { lm(Duration ~ GFlop, data = df) }
     model_WLR <- function(df) { lm(Duration ~ GFlop, data = df, weights=1/df$GFlop) }
     model_NLR <- function(df) { lm(Duration ~ I(GFlop**(2/3)), data = df) }
+    model_LR_log <- function(df) { lm(log(Duration) ~ log(GFlop), data = df) }
 
     Application <- regression_based_outlier_detection(Application, model_WLR, "");
     Application <- regression_based_outlier_detection(Application, model_LR,  "_LR");
     Application <- regression_based_outlier_detection(Application, model_NLR, "_NLR");
+    Application <- regression_based_outlier_detection(Application, model_NLR, "_LR_LOG");
     
   } else {
     starvz_log("No outlier detection; use standard model")

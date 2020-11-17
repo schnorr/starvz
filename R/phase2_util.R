@@ -185,7 +185,6 @@ panel_model_gflops <- function(data, freeScales = TRUE, model_type="WLR") {
     filter(GFlop > 0) %>%
     ggplot(aes(x = .data$GFlop, y = .data$Duration, color = .data$Outlier)) +
     theme_bw(base_size = data$config$base_size) +
-    geom_point(alpha = .5) +
     labs(y = "Duration (ms)", x = "GFlops") +
     scale_color_manual(values = c("black", "orange")) +
     theme(
@@ -196,18 +195,69 @@ panel_model_gflops <- function(data, freeScales = TRUE, model_type="WLR") {
     labs(color = "Anomaly")
 
   if(model_type == "LR"){
+
     model_panel <- model_panel + 
+      geom_point(alpha = .5) +
       geom_smooth(method = "lm", formula = "y ~ x", color = "green", fill = "blue") +
       ggtitle("Using LR model: Duration ~ GFlop")
-  } else if(model_type == "WLR") {
+  
+  } else if(model_type == "LOG_LOG") {
+
+    model_LR_log <- function(df) { lm(logDuration ~ logGFlop, data = df) }
+    
+    # fit log models over data
+    model_data <- data$Application %>%
+      filter(.data$Value %in% c("geqrt", "gemqrt", "tpqrt", "tpmqrt")) %>%
+      filter(.data$GFlop > 0) %>%
+      unique() %>%
+      mutate(logDuration = log(Duration), logGFlop = log(GFlop)) %>%
+      group_by(.data$ResourceType, .data$Value) %>%
+      nest() %>%
+      mutate(model_log = map(.data$data, model_LR_log)) %>%
+      ungroup() %>%
+      mutate(explogGFlop = map(.data$model_log, function(x){ exp(x$model$logGFlop)})) %>%
+      mutate(predictValue = map(.data$model_log, function(x){ exp(predict(x)) } )) %>%
+      select(-.data$model_log) %>%
+      unnest(cols = c(.data$data, .data$explogGFlop, .data$predictValue))
+  
+    # for WLR comparison
     gflops <- data$Application %>% 
       filter(grepl("qrt", .data$Value)) %>% 
       filter(GFlop > 0) %>% .$GFlop
+  
+    model_panel <- model_data %>%
+      ggplot(aes(x = .data$GFlop, y = .data$Duration, color = .data$Outlier)) +
+      theme_bw(base_size = data$config$base_size) +
+      labs(y = "Duration (ms)", x = "GFlops") +
+      scale_color_manual(values = c("black", "orange")) +
+      theme(
+        legend.position = "top",
+        strip.text.x = element_text(size = rel(1)),
+        axis.text.x = element_text(angle = 45, vjust = 0.5)
+      ) +
+      geom_point(aes(x=GFlop, y=Duration), alpha = .5) +
+      geom_smooth(method = "lm", formula="y ~ x", color = "red", linetype="dashed", se = FALSE) +
+      geom_smooth(method = "lm", formula = "y ~ I(x^(2/3))", color = "#eb34de", linetype="dashed",  se=FALSE) +
+      geom_smooth(method = "lm", formula="y ~ x", color = "#34ebeb", se = FALSE, linetype="dashed", mapping = aes(weight = 1/gflops)) +
+      geom_line(aes(x = .data$explogGFlop, y = .data$predictValue), color = "green") +
+      # adjust log model to the normal data
+      labs(y = "Duration (ms)", x = "GFlops", subtitle="LR (red) | NLR 2/3 (pink) | WLR (cyan) | log-log(green)") +
+      labs(color = "Anomaly") +
+      ggtitle("Using transformed LR model: log(Duration) ~ log(GFlop)")
+ 
+  } else if(model_type == "WLR") {
+
+    gflops <- data$Application %>% 
+      filter(grepl("qrt", .data$Value)) %>% 
+      filter(GFlop > 0) %>% .$GFlop
+  
     model_panel <- model_panel +
+      geom_point(alpha = .5) +
       geom_smooth(method = "lm", formula="y ~ x", color = "green", fill= "blue",
           mapping = aes(weight = 1/gflops)
         ) +
         ggtitle("Using WLR model: Duration ~ GFlop, weight=1/GFlop")
+  
   } else {
     model_panel <- model_panel + 
       geom_smooth(method = "lm", formula = "y ~ I(x^(2/3))", color = "green", fill = "blue") +

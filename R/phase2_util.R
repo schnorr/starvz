@@ -218,12 +218,14 @@ panel_model_gflops <- function(data, freeScales = TRUE, model_type="WLR") {
       mutate(explogGFlop = map(.data$model_log, function(x){ exp(x$model$logGFlop)})) %>%
       mutate(predictValue = map(.data$model_log, function(x){ exp(predict(x)) } )) %>%
       select(-.data$model_log) %>%
-      unnest(cols = c(.data$data, .data$explogGFlop, .data$predictValue))
+      unnest(cols = c(.data$data, .data$explogGFlop, .data$predictValue)) %>%
+      arrange(.data$GFlop)
   
     # for WLR comparison
     gflops <- data$Application %>% 
       filter(grepl("qrt", .data$Value)) %>% 
-      filter(GFlop > 0) %>% .$GFlop
+      arrange(.data$GFlop) %>%
+      filter(.data$GFlop > 0) %>% .$GFlop
   
     model_panel <- model_data %>%
       ggplot(aes(x = .data$GFlop, y = .data$Duration, color = .data$Outlier)) +
@@ -235,10 +237,12 @@ panel_model_gflops <- function(data, freeScales = TRUE, model_type="WLR") {
         strip.text.x = element_text(size = rel(1)),
         axis.text.x = element_text(angle = 45, vjust = 0.5)
       ) +
-      geom_point(aes(x=GFlop, y=Duration), alpha = .5) +
+      geom_point(alpha = .5) +
       geom_smooth(method = "lm", formula="y ~ x", color = "red", linetype="dashed", se = FALSE) +
       geom_smooth(method = "lm", formula = "y ~ I(x^(2/3))", color = "#eb34de", linetype="dashed",  se=FALSE) +
-      geom_smooth(method = "lm", formula="y ~ x", color = "#34ebeb", se = FALSE, linetype="dashed", mapping = aes(weight = 1/gflops)) +
+      geom_smooth(method = "lm", formula="y ~ x", color = "#34ebeb", linetype="dashed", fill= "blue",
+          mapping = aes(weight = 1/gflops)
+        ) +
       geom_line(aes(x = .data$explogGFlop, y = .data$predictValue), color = "green") +
       # adjust log model to the normal data
       labs(y = "Duration (ms)", x = "GFlops", subtitle="LR (red) | NLR 2/3 (pink) | WLR (cyan) | log-log(green)") +

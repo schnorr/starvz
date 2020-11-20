@@ -276,3 +276,138 @@ panel_model_gflops <- function(data, freeScales = TRUE, model_type="WLR") {
 
   return(model_panel)
 }
+
+#' Plot resource utilization using tasks as color
+#' 
+#' Use data Application to create a panel of the total resource utilization 
+#' that helps to observe the time related resource utilization by task
+#'
+#' @param data starvz_data with trace data
+#' @param step size in milliseconds for the time aggregation step
+#' @param legend enable/disable plot legends
+#' @param x_start X-axis start value
+#' @param x_end X-axis end value
+#' @return A ggplot object
+#' @include starvz_data.R
+#' @examples
+#' \dontrun{
+#' panel_resource_usage_task(data = starvz_sample_data)
+#' }
+#' @export
+panel_resource_usage_task <- function(data = NULL,
+                                      step = NULL,
+                                      legend = FALSE,
+                                      x_start = data$config$limits$start,
+                                      x_end = data$config$limits$end) 
+{
+  starvz_check_data(data, tables = list("Application" = c("Value")))
+
+  if (is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start))) {
+    x_start <- NA
+  }
+
+  if (is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end))) {
+    x_end <- NA
+  }
+
+  if (is.null(step) || !is.numeric(step)) {
+    if (is.null(data$config$global_agg_step)) {
+      step <- 100
+    } else {
+      step <- data$config$global_agg_step
+    }
+  }
+
+  df1 <- get_resource_utilization(Application = data$Application, step = step)
+
+  # join data frames
+  df2 <- df1 %>%
+    ungroup() %>%
+    group_by(.data$Slice) %>% unique()
+
+  # must expand data frame to make geom_area work properly
+  df_plot <- df2 %>%
+    filter(!is.na(.data$Task)) %>%
+    expand(.data$Slice, .data$Task) %>%
+    left_join(df2 %>% filter(.data$Value != 0), by = c("Task", "Slice")) %>%
+    mutate(Value1 = ifelse(is.na(.data$Value1), 0, .data$Value1))
+
+  df_plot <- df_plot %>%
+    ungroup() %>%
+    # expand all time slices with the possible colors (for geom_ribbon)
+    expand(.data$Slice, .data$Task) %>%
+    left_join(df_plot, by = c("Slice", "Task")) %>%
+    group_by(.data$Task) %>%
+    # mutate(Value1 = ifelse(is.na(.data$Value1), 0, .data$Value1)) %>%
+    mutate(Value1 = na.locf(.data$Value1)) %>%
+    arrange(.data$Slice, .data$Task) %>%
+    group_by(.data$Slice) %>%
+    filter(!is.na(.data$Task)) %>%
+    # define Ymin and Ymax for geom ribbon
+    mutate(Usage = sum(.data$Value1)) %>%
+    mutate(Ymin = lag(.data$Value1), Ymin = ifelse(is.na(.data$Ymin), 0, .data$Ymin)) %>%
+    mutate(Ymin = cumsum(.data$Ymin), Ymax = .data$Ymin + .data$Value1) %>%
+    # remove Ending nodes at the middle of a Slice to keep their res. utilization
+    ungroup() %>%
+    mutate(Slc = .data$Slice %% step) %>%
+    filter(.data$Slc == 0 | .data$Slice == max(.data$Slice))
+
+  # plot data
+  df_plot %>%
+    ggplot() +
+    geom_ribbon(aes(ymin = .data$Ymin, ymax = .data$Ymax, x = .data$Slice, fill = as.factor(.data$Task))) +
+    default_theme(data$config$base_size, data$config$expand) +
+    scale_fill_manual(values = extract_colors(data$Application, data$Colors)) +
+    ylab("Usage %\nTask") +
+    ylim(0, 100) -> panel
+  
+    if(!legend) {
+     panel <- panel + theme(legend.position = "none")
+    }
+  
+  return(panel)
+}
+
+# Calculate the computational resource utilization by task
+get_resource_utilization <- function( Application = NULL, step = 100) 
+{
+  # Arrange data
+  df_filter <- Application %>%
+    select(.data$ANode, .data$Start, .data$End, .data$Value, .data$JobId) %>%
+    unique() %>%
+    rename(Task = .data$Value) %>%
+    arrange(.data$Start)
+
+  # Get number of workers for resource utilization
+  NWorkers <- Application %>%
+    filter(grepl("CPU", .data$ResourceType) | grepl("CUDA", .data$ResourceType)) %>%
+    select(.data$ResourceId) %>%
+    unique() %>%
+    nrow()
+
+  # Compute the parallelism
+  data_node_parallelism <- df_filter %>%
+    gather(.data$Start, .data$End, key = "Event", value = "Time") %>%
+    arrange(.data$Time) %>%
+    # group by task type
+    group_by(.data$Task) %>%
+    mutate(Value = ifelse(.data$Event == "Start", 1, -1)) %>%
+    mutate(parallelism = cumsum(.data$Value)) %>%
+    ungroup()
+
+  # Do the time aggregation of resource utilization by ANode
+  data_node_plot <- data_node_parallelism %>%
+    select(.data$Task, .data$Time, .data$parallelism) %>%
+    arrange(.data$Time) %>%
+    mutate(End = lead(.data$Time)) %>%
+    mutate(Duration = .data$End - .data$Time) %>%
+    rename(Start = .data$Time, Value = .data$parallelism) %>%
+    na.omit() %>%
+    group_by(.data$Task) %>%
+    do(remyTimeIntegrationPrepNoDivision(., myStep = step)) %>%
+    # This give us the total worker usage grouped by Task in a time slice
+    mutate(Value1 = .data$Value / (step * NWorkers) * 100) %>%
+    ungroup()
+
+  return(data_node_plot)
+}

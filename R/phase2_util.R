@@ -182,7 +182,7 @@ panel_title <- function(data, title = data$config$title$text) {
 panel_model_gflops <- function(data, freeScales = TRUE, model_type="WLR") {
   model_panel <- data$Application %>%
     filter(.data$Value %in% c("geqrt", "gemqrt", "tpqrt", "tpmqrt")) %>%
-    filter(GFlop > 0) %>%
+    filter(.data$GFlop > 0) %>%
     ggplot(aes(x = .data$GFlop, y = .data$Duration, color = .data$Outlier)) +
     theme_bw(base_size = data$config$base_size) +
     labs(y = "Duration (ms)", x = "GFlops") +
@@ -210,7 +210,7 @@ panel_model_gflops <- function(data, freeScales = TRUE, model_type="WLR") {
       filter(.data$Value %in% c("geqrt", "gemqrt", "tpqrt", "tpmqrt")) %>%
       filter(.data$GFlop > 0) %>%
       unique() %>%
-      mutate(logDuration = log(Duration), logGFlop = log(GFlop)) %>%
+      mutate(logDuration = log(.data$Duration), logGFlop = log(.data$GFlop)) %>%
       group_by(.data$ResourceType, .data$Value) %>%
       nest() %>%
       mutate(model_log = map(.data$data, model_LR_log)) %>%

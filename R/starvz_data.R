@@ -6,7 +6,7 @@
 #' @importFrom grDevices colorRampPalette
 #' @importFrom methods is
 #' @importFrom utils head tail modifyList
-#' @importFrom stats na.omit complete.cases setNames sd quantile lm resid
+#' @importFrom stats na.omit complete.cases setNames sd quantile lm resid predict
 #' @importFrom magrittr %>% set_colnames
 #' @importFrom rlang .data
 #' @importFrom tibble rowid_to_column as.tibble enframe
@@ -22,6 +22,7 @@
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom zoo na.locf
 #' @importFrom car outlierTest
+#' @importFrom flexmix stepFlexmix FLXMRglm getModel
 NULL
 
 # Ignore .

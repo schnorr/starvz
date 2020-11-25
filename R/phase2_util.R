@@ -274,7 +274,7 @@ panel_model_gflops <- function(data, freeScales = TRUE, model_type="WLR") {
 
     gflops <- data$Application %>% 
       filter(grepl("qrt", .data$Value)) %>% 
-      filter(GFlop > 0) %>% .$GFlop
+      filter(.data$GFlop > 0) %>% .$GFlop
   
     model_panel <- model_panel +
       geom_point(alpha = .5) +
@@ -287,7 +287,7 @@ panel_model_gflops <- function(data, freeScales = TRUE, model_type="WLR") {
     model_LR_log <- function(df) { lm(logDuration ~ logGFlop, data = df) }
     
     # fit log models over data, need to use exp(predict)
-    model_data <- data2$Application %>%
+    model_data <- data$Application %>%
       filter(.data$Value %in% c("geqrt", "gemqrt", "tpqrt", "tpmqrt")) %>%
       filter(.data$GFlop > 0) %>%
       unique() %>%

@@ -550,7 +550,7 @@ outlier_definition <- function(x) {
 #' @importFrom rlang quo_name
 #' @importFrom rlang :=
 regression_based_outlier_detection <- function(Application, task_model, column_name) {
-
+    
     column_name = paste0("Outlier", column_name)
 
     # Step 1: apply the model to each task, considering the ResourceType
@@ -559,7 +559,7 @@ regression_based_outlier_detection <- function(Application, task_model, column_n
       # cannot have zero gflops
       filter(.data$GFlop > 0) %>%
       unique() %>%
-      group_by(.data$ResourceType, .data$Value) %>%
+      group_by(.data$ResourceType, .data$Value, .data$Cluster) %>%
       nest() %>%
       mutate(model = map(.data$data, task_model)) %>%
       mutate(Residual = map(.data$model, resid)) %>%
@@ -581,7 +581,7 @@ regression_based_outlier_detection <- function(Application, task_model, column_n
       df.pre.outliers %>%
         unnest(cols = c(.data$data, .data$Residual)) %>%
         # this must be identical to the grouping used in the step 1
-        group_by(.data$Value, .data$ResourceType) %>%
+        group_by(.data$Value, .data$ResourceType, .data$Cluster) %>%
         mutate(Row = 1:n()) %>%
         ungroup() %>%
         # the left join must be by exactly the same as the grouping + Row
@@ -601,7 +601,7 @@ regression_based_outlier_detection <- function(Application, task_model, column_n
     } else {
       starvz_log("No anomalies were detected.")
       Application <- Application %>%
-        mutate(column_name = FALSE)
+        mutate(!!quo_name(column_name) := FALSE)
     }
 
     return(Application)

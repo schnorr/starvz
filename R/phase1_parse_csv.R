@@ -221,19 +221,46 @@ read_worker_csv <- function(where = ".",
     model_WLR <- function(df) { lm(Duration ~ GFlop, data = df, weights=1/df$GFlop) }
     model_NLR <- function(df) { lm(Duration ~ I(GFlop**(2/3)), data = df) }
     model_LR_log <- function(df) { lm(log(Duration) ~ log(GFlop), data = df) }
+    # configure the flexmix model
+    model_flexmix_log <- function(df) { 
+      stepFlexmix(Duration ~ GFlop, data = df, k = 1:2, 
+        model = FLXMRglm(log(Duration) ~ log(GFlop)), 
+        control = list(verbose = 10, nrep=30)) 
+    }
 
+    # set dummy variable for Cluster
+    Application <- Application %>% mutate(Cluster = 1)
     Application <- regression_based_outlier_detection(Application, model_WLR, "");
     Application <- regression_based_outlier_detection(Application, model_LR,  "_LR");
     Application <- regression_based_outlier_detection(Application, model_NLR, "_NLR");
-    Application <- regression_based_outlier_detection(Application, model_NLR, "_LR_LOG");
-    
+
+    # need to create the clusters before calling the function, let's do the clustering for all
+    # types of tasks for now, replacing the dummy Cluster variable
+    Application <- Application %>% select(-.data$Cluster)
+    Application <- Application %>% 
+      filter(grepl("qrt", .data$Value)) %>%
+      filter(.data$GFlop > 0) %>%
+      group_by(.data$ResourceType, .data$Value) %>%
+      nest() %>%
+      mutate(flexmix_model = map(.data$data, model_flexmix_log)) %>%
+      mutate(Cluster = map(.data$flexmix_model, function(m){
+          # pick the best fitted model according to BIC metric
+          getModel(m, which="BIC")@cluster
+        })) %>%
+      select(-.data$flexmix_model) %>%
+      unnest(cols = c(.data$Cluster, .data$data)) %>%
+      ungroup() %>%
+      select(.data$JobId, .data$Cluster) %>%
+      full_join(Application, by="JobId")
+    Application <- regression_based_outlier_detection(Application, model_LR, "_FLEXMIX");
+
   } else {
-    starvz_log("No outlier detection; use standard model")
+    starvz_log("Outlier detection using standard model")
     Application <- Application %>%
       group_by(.data$Value, .data$ResourceType) %>%
       mutate(Outlier = ifelse(.data$Duration > outlier_fun(.data$Duration), TRUE, FALSE)) %>%
       ungroup()
-  }
+  } 
 
   # Define the global ZERO (to be used with other trace date)
   ZERO <- Application %>%

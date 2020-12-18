@@ -975,3 +975,133 @@ define_colors <- function(data) {
     set_color_available(ANode)
   }
 }
+
+
+
+#' Combine two atree plots to compare two different executions
+#'
+#' Use starvz_data Application and Atree to create a plot that shows the
+#' total resource utilization, painted by tree node using geom_ribbon. The
+#' colors are reused between nodes, not tied to a specific tree node.
+#'
+#' @param data1 starvz_data with trace data
+#' @param data2 starvz_data with trace data
+#' @param step size in milliseconds for the time aggregation step
+#' @param x_start X-axis start value
+#' @param x_end X-axis end value
+#' @return A ggplot object
+#' @examples
+#' \dontrun{
+#' panel_compare_tree(data1, data2, step = 100)
+#' }
+#' @export
+panel_compare_tree <- function( data1 = NULL, 
+                                data2 = NULL, 
+                                step = data1$config$utiltreenode$step,
+                                x_start = data1$config$limits$start,
+                                x_end = data1$config$limits$end )
+{
+  starvz_check_data(data1, tables = list("Atree" = c("ANode")))
+  starvz_check_data(data2, tables = list("Atree" = c("ANode")))
+
+  if (is.null(step) || !is.numeric(step)) {
+    if (is.null(data1$config$global_agg_step)) {
+      step <- 100
+    } else {
+      step <- data1$config$global_agg_step
+    }
+  }
+
+  if (is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start))) {
+    x_start <- NA
+  }
+
+  if (is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end))) {
+    x_end <- NA
+  }
+
+  # for data1
+  data_utilization_node1 <- resource_utilization_tree_node(data1$Application, data1$Atree, step = step, group_pruned = TRUE) %>%
+    unique() %>%
+    filter(.data$Value != 0) %>%
+    select(.data$ANode, .data$Slice, .data$Value1) %>%
+    ungroup() %>%
+    rename(NodeUsage = .data$Value1) %>%
+    left_join(data1$Atree, by = "ANode")
+
+
+  # Resize for not pruned nodes, first and last computational tasks
+  data_tree_utilization_not_pruned1 <- data_utilization_node1 %>%
+    inner_join(data1$Application %>%
+      filter( grepl("qrt", .data$Value) | grepl("do_sub", .data$Value) ) %>%
+      select(.data$ANode, .data$End, .data$Start) %>%
+      group_by(.data$ANode) %>%
+      mutate(Start = min(.data$Start), End = max(.data$End)) %>%
+      select(.data$ANode, .data$Start, .data$End) %>%
+      unique(),
+    by = "ANode"
+    ) %>%
+    mutate(Start = ifelse(.data$Start >= .data$Slice, .data$Start, .data$Slice)) %>%
+    mutate(End = ifelse(.data$Slice + step >= .data$End, .data$End, .data$Slice + step))
+  
+
+
+  ################################################################
+  ################################################################
+  # FOR DATA 2
+  ################################################################
+  ################################################################
+
+  data_utilization_node2 <- resource_utilization_tree_node(data2$Application, data2$Atree, step = step, group_pruned = TRUE) %>%
+    unique() %>%
+    filter(.data$Value != 0) %>%
+    select(.data$ANode, .data$Slice, .data$Value1) %>%
+    ungroup() %>%
+    rename(NodeUsage = .data$Value1) %>%
+    left_join(data2$Atree, by = "ANode")
+
+  # Resize for not pruned nodes, first and last computational tasks
+  data_tree_utilization_not_pruned2 <- data_utilization_node2 %>%
+    inner_join(data2$Application %>%
+      filter(grepl("qrt", .data$Value) | grepl("do_sub", .data$Value) ) %>%
+      select(.data$ANode, .data$End, .data$Start) %>%
+      group_by(.data$ANode) %>%
+      mutate(Start = min(.data$Start), End = max(.data$End)) %>%
+      select(.data$ANode, .data$Start, .data$End) %>%
+      unique(),
+    by = "ANode"
+    ) %>%
+    mutate(Start = ifelse(.data$Start >= .data$Slice, .data$Start, .data$Slice)) %>%
+    mutate(End = ifelse(.data$Slice + step >= .data$End, .data$End, .data$Slice + step))
+
+
+  # Calculate the diff
+  data_diff <- data_tree_utilization_not_pruned1 %>%
+    mutate(Execution = "NodeUsage.x") %>%
+    bind_rows(data_tree_utilization_not_pruned2 %>%
+        mutate(Execution = "NodeUsage.y")
+    ) %>%
+    spread(.data$Execution, .data$NodeUsage) %>%
+    mutate(NodeUsage.x = ifelse(is.na(.data$NodeUsage.x), -100, .data$NodeUsage.x),
+           NodeUsage.y = ifelse(is.na(.data$NodeUsage.y), -100, .data$NodeUsage.y) ) %>%
+    mutate(NodeUsage = .data$NodeUsage.x - .data$NodeUsage.y)
+
+
+  atreeplot <- panel_atree_structure(data1) +
+    default_theme(data1$config$base_size, data1$config$expand) +
+    ylab("Elimination Tree\n[Submission Order]")
+
+  atreeplot <- atreeplot +
+    atree_geom_rect_gradient(data_diff, yminOffset = 0, ymaxOffset = 1)
+
+
+  myPalette <- colorRampPalette(c(
+      rev(brewer.pal(9, "Greens")[3:9]), brewer.pal(9, "Reds")[3:9],
+      "white",
+      rev(brewer.pal(9, "Blues")[3:9]), brewer.pal(9, "Oranges")[3:9]
+    ))
+  palette_colors <- scale_fill_gradientn(colours = myPalette(50), limits=c(-200, 200))
+
+  atreeplot <- atreeplot + palette_colors
+  return(atreeplot)
+}

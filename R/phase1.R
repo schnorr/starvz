@@ -549,12 +549,12 @@ outlier_definition <- function(x) {
 
 #' @importFrom rlang quo_name
 #' @importFrom rlang :=
-regression_based_outlier_detection <- function(Application, task_model, column_name) {
+bonferroni_regression_based_outlier_detection <- function(Application, task_model, column_name) {
     
     column_name = paste0("Outlier", column_name)
 
     # Step 1: apply the model to each task, considering the ResourceType
-    Application %>%
+    df.pre.outliers <- Application %>%
       filter(grepl("qrt", .data$Value)) %>%
       # cannot have zero gflops
       filter(.data$GFlop > 0) %>%
@@ -565,7 +565,7 @@ regression_based_outlier_detection <- function(Application, task_model, column_n
       mutate(Residual = map(.data$model, resid)) %>%
       mutate(outliers = map(.data$model, function(m) {
         tibble(Row = names(outlierTest(m, n.max = Inf)$rstudent))
-      })) -> df.pre.outliers
+      }))
 
     # Step 1.1: Check if any anomaly was detected
     if (df.pre.outliers %>% nrow() > 0) {
@@ -605,4 +605,80 @@ regression_based_outlier_detection <- function(Application, task_model, column_n
     }
 
     return(Application)
+}
+
+#' @importFrom rlang quo_name
+#' @importFrom rlang :=
+regression_based_outlier_detection <- function(Application, task_model, column_name, level=0.95) {
+    
+  column_name = paste0("Outlier", column_name)
+
+  # Step 1: apply the model to each task, considering the ResourceType
+  df.model.outliers <- Application %>%
+    filter(grepl("qrt", .data$Value)) %>%
+    # cannot have zero gflops
+    filter(.data$GFlop > 0) %>%
+    unique() %>%
+    group_by(.data$ResourceType, .data$Value, .data$Cluster) %>%
+    nest() %>%
+    mutate(model = map(.data$data, task_model)) %>%
+    mutate( Prediction = map(.data$model, function(model) {
+        data_predict <- suppressWarnings(predict(model, interval = "prediction", level=level))
+        data_predict %>% tibble(fit=exp(.[,1]), lwr=exp(.[,2]), upr=exp(.[,3])) %>% 
+          select(.data$fit, .data$upr, .data$lwr)
+    })) %>%
+    unnest(c(.data$data, .data$Prediction)) %>%
+    # Test if the Duration is bigger than the upper prediction interval value for that cluster
+    mutate(DummyOutlier = ifelse(.data$Duration > .data$upr, TRUE, FALSE)) %>%
+    ungroup()
+
+    # Step 2: regroup the Outlier data to the original Application, and thats it
+  Application <- Application %>%
+    left_join(df.model.outliers %>%
+      select(.data$JobId, .data$DummyOutlier, .data$fit, .data$lwr, .data$upr), by = c("JobId")) %>%
+    mutate(DummyOutlier = ifelse(is.na(.data$DummyOutlier), FALSE, .data$DummyOutlier))
+
+  # Step 3: consider the tasks that seems strange for both models, assuming that we have more than 1 cluster
+  # Now we can check if there are any tasks in the "anomalous area" ex: it 
+  # is out of both models prediction interval, being smaller than the max(lwr) and higher than the min(upr)
+  if(grepl("FLEXMIX", column_name)) {
+    anomalous.region.tasks <- Application %>%
+      filter((.data$Duration < .data$lwr) & !.data$DummyOutlier) %>%
+      select(.data$Value, .data$GFlop, .data$ResourceType, .data$Duration, .data$JobId, .data$DummyOutlier)
+
+    # get the models per task type, resource type and cluster
+    models <- df.model.outliers %>% 
+      select(.data$model, .data$Value, .data$ResourceType, .data$Cluster) %>%
+      unique()
+
+    # predict the upr value for these tasks using both models
+    region.outliers <- anomalous.region.tasks %>% 
+      left_join(models, by=c("Value", "ResourceType")) %>%
+      spread(.data$Cluster, .data$model) %>%
+      rename(Cluster1_model = .data$`1`, Cluster2_model = .data$`2`) %>%
+      mutate(upr1 = map2(.data$Cluster1_model, .data$GFlop, function(m, gflop) {
+          data_predict <- suppressWarnings(predict(m, interval = "prediction", newdata=tibble(GFlop = gflop), level=level))
+          data_predict %>% tibble(upr1=exp(.[,3])) %>% 
+            select(.data$upr1)
+      })) %>%
+      mutate(upr2 = map2(.data$Cluster2_model, .data$GFlop, function(m, gflop) {
+          data_predict <- suppressWarnings(predict(m, interval = "prediction", newdata=tibble(GFlop = gflop), level=level))
+          data_predict %>% tibble(upr2=exp(.[,3])) %>% 
+            select(.data$upr2)
+      })) %>%
+      unnest(cols=c(.data$upr1, .data$upr2)) %>%
+      # if the task duration is higher than at least one upr value it is an anomalous task 
+      mutate(DummyOutlier = ifelse(.data$Duration > .data$upr1 | .data$Duration > .data$upr2, TRUE, FALSE))
+
+    # Step 4: regroup the Outlier data to the original Application, and thats it
+    Application <- Application %>%
+      mutate(DummyOutlier = ifelse(.data$JobId %in% c(region.outliers %>% filter(.data$DummyOutlier) %>% .$JobId), TRUE, .data$DummyOutlier))
+  } else {
+    Application <- Application %>% select(-.data$fit, -.data$lwr, -.data$upr)
+  }
+
+  Application <- Application %>% 
+    rename(!! quo_name(column_name) := .data$DummyOutlier)
+
+  return(Application)
 }

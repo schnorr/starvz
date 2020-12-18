@@ -10,10 +10,10 @@
 #' @importFrom magrittr %>% set_colnames
 #' @importFrom rlang .data
 #' @importFrom tibble rowid_to_column as.tibble enframe
-#' @importFrom tidyr pivot_longer pivot_wider complete separate gather nest unnest expand replace_na
+#' @importFrom tidyr pivot_longer pivot_wider complete separate gather nest unnest expand replace_na spread
 #' @importFrom readr read_csv cols col_integer col_character col_double col_logical
 #' @importFrom stringr str_replace str_replace_all str_to_title
-#' @importFrom purrr list_modify map
+#' @importFrom purrr list_modify map map2
 #' @importFrom patchwork wrap_plots
 #' @importFrom arrow arrow_available read_feather read_parquet write_feather write_parquet codec_is_available ParquetWriterProperties
 #' @importFrom lpSolve lp

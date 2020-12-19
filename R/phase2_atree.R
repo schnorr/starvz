@@ -1082,25 +1082,34 @@ panel_compare_tree <- function( data1 = NULL,
         mutate(Execution = "NodeUsage.y")
     ) %>%
     spread(.data$Execution, .data$NodeUsage) %>%
-    mutate(NodeUsage.x = ifelse(is.na(.data$NodeUsage.x), -100, .data$NodeUsage.x),
-           NodeUsage.y = ifelse(is.na(.data$NodeUsage.y), -100, .data$NodeUsage.y) ) %>%
+    mutate(NodeUsage.x = ifelse(is.na(.data$NodeUsage.x), 0, .data$NodeUsage.x),
+           NodeUsage.y = ifelse(is.na(.data$NodeUsage.y), 0, .data$NodeUsage.y) ) %>%
+    mutate(color = ifelse(NodeUsage.x == 0 | NodeUsage.y == 0, "Exclusive execution", "Concurrent execution")) %>%
     mutate(NodeUsage = .data$NodeUsage.x - .data$NodeUsage.y)
 
 
-  atreeplot <- panel_atree_structure(data1) +
+  atreeplot <- panel_atree_structure(data2) +
     default_theme(data1$config$base_size, data1$config$expand) +
     ylab("Elimination Tree\n[Submission Order]")
 
   atreeplot <- atreeplot +
-    atree_geom_rect_gradient(data_diff, yminOffset = 0, ymaxOffset = 1)
-
+    geom_rect(data=data_diff,
+      aes(
+        fill = .data$NodeUsage,
+        xmin = .data$Start,
+        xmax = .data$End,
+        ymin = .data$Position,
+        ymax = .data$Position + .data$Height,
+        linetype = color
+      ),
+      color = "black"
+    ) +
+    scale_linetype_manual(values = c("blank", "solid"))
 
   myPalette <- colorRampPalette(c(
-      rev(brewer.pal(9, "Greens")[3:9]), brewer.pal(9, "Reds")[3:9],
-      "white",
-      rev(brewer.pal(9, "Blues")[3:9]), brewer.pal(9, "Oranges")[3:9]
+      rev(brewer.pal(9, "Greens")[2:9]), "white", brewer.pal(9, "Reds")[2:9]
     ))
-  palette_colors <- scale_fill_gradientn(colours = myPalette(50), limits=c(-200, 200))
+  palette_colors <- scale_fill_gradientn(colours = myPalette(20), limits=c(-100, 100))
 
   atreeplot <- atreeplot + palette_colors
   return(atreeplot)

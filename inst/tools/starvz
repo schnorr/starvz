@@ -88,8 +88,7 @@ while true; do
                         shift 2
                         ;;
                 --save|-s)
-                        STARVZ_TRACE_FOLDER=$(pwd)
-                        STARVZ_SAVE_FILE=$STARVZ_TRACE_FOLDER/$2
+                        STARVZ_SAVE_FILE=$2
                         shift 2
                         ;;
                 --config|-c)

@@ -636,12 +636,13 @@ regression_based_outlier_detection <- function(Application, task_model, column_n
   Application <- Application %>%
     left_join(df.model.outliers %>%
       select(.data$JobId, .data$DummyOutlier, .data$fit, .data$lwr, .data$upr), by = c("JobId")) %>%
-    mutate(DummyOutlier = ifelse(is.na(.data$DummyOutlier), FALSE, .data$DummyOutlier))
+      mutate(DummyOutlier = ifelse(is.na(.data$DummyOutlier), FALSE, .data$DummyOutlier))
 
   # Step 3: consider the tasks that seems strange for both models, assuming that we have more than 1 cluster
   # Now we can check if there are any tasks in the "anomalous area" ex: it 
   # is out of both models prediction interval, being smaller than the max(lwr) and higher than the min(upr)
   if(grepl("FLEXMIX", column_name)) {
+
     anomalous.region.tasks <- Application %>%
       filter((.data$Duration < .data$lwr) & !.data$DummyOutlier) %>%
       select(.data$Value, .data$GFlop, .data$ResourceType, .data$Duration, .data$JobId, .data$DummyOutlier)
@@ -662,9 +663,16 @@ regression_based_outlier_detection <- function(Application, task_model, column_n
             select(.data$upr1)
       })) %>%
       mutate(upr2 = map2(.data$Cluster2_model, .data$GFlop, function(m, gflop) {
-          data_predict <- suppressWarnings(predict(m, interval = "prediction", newdata=tibble(GFlop = gflop), level=level))
-          data_predict %>% tibble(upr2=exp(.[,3])) %>% 
-            select(.data$upr2)
+          # check if Flexmix has choosen the 2 clusters model for that task
+          if(!is.null(m)) {
+            data_predict <- suppressWarnings(predict(m, interval = "prediction", newdata=tibble(GFlop = gflop), level=level)) %>% 
+              tibble(upr2=exp(.[,3])) %>%
+              select(.data$upr2)
+          } else {
+            data_predict <- tibble(GFlop = gflop, upr2=0) %>%
+              select(.data$upr2)
+          }
+          data_predict
       })) %>%
       unnest(cols=c(.data$upr1, .data$upr2)) %>%
       # if the task duration is higher than at least one upr value it is an anomalous task 

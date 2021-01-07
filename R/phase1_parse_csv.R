@@ -230,10 +230,10 @@ read_worker_csv <- function(where = ".",
 
     # set dummy variable for Cluster
     Application <- Application %>% mutate(Cluster = 1)
-    Application <- regression_based_outlier_detection(Application, model_WLR, "_WLR");
-    Application <- regression_based_outlier_detection(Application, model_LR,  "_LR");
-    Application <- regression_based_outlier_detection(Application, model_NLR, "_NLR");
-    Application <- regression_based_outlier_detection(Application, model_LR_log, "_LR_LOG");
+    Application <- regression_based_outlier_detection(Application, model_WLR, "_WLR", level=0.95);
+    Application <- regression_based_outlier_detection(Application, model_LR,  "_LR", level=0.95);
+    Application <- regression_based_outlier_detection(Application, model_NLR, "_NLR", level=0.95);
+    Application <- regression_based_outlier_detection(Application, model_LR_log, "_LR_LOG", level=0.95);
 
 
     # need to create the clusters before calling the function, let's do the clustering for all
@@ -249,16 +249,15 @@ read_worker_csv <- function(where = ".",
           # pick the best fitted model according to BIC metric
           getModel(m, which="BIC")@cluster
         })) %>%
-
       select(-.data$flexmix_model) %>%
       unnest(cols = c(.data$Cluster, .data$data)) %>%
       ungroup() %>%
       select(.data$JobId, .data$Cluster) %>%
       full_join(Application, by="JobId")
-    Application <- regression_based_outlier_detection(Application, model_LR_log, "_FLEXMIX");
+    Application <- regression_based_outlier_detection(Application, model_LR_log, "_FLEXMIX", level=0.95);
 
-    # Use the Outlier_LR (log~log) as the default Outlier classification
-    Application <- Application %>% rename(Outlier = .data$Outlier_LR)
+    # Use the Outlier_LR_LOG (log~log) as the default Outlier classification
+    Application <- Application %>% rename(Outlier = .data$Outlier_LR_LOG)
 
   } else {
     starvz_log("Outlier detection using standard model")

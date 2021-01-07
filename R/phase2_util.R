@@ -185,7 +185,7 @@ panel_model_gflops <- function(data, freeScales = TRUE, model_type="LOG_LOG") {
   model_panel <- data$Application %>%
     filter(.data$Value %in% c("geqrt", "gemqrt", "tpqrt", "tpmqrt")) %>%
     filter(.data$GFlop > 0) %>%
-    ggplot(aes(x = .data$GFlop, y = .data$Duration, color = .data$Outlier)) +
+    ggplot(aes(x = .data$GFlop, y = .data$Duration)) +
     theme_bw(base_size = data$config$base_size) +
     labs(y = "Duration (ms)", x = "GFlops") +
     scale_color_manual(values = c("black", "orange")) +
@@ -208,10 +208,31 @@ panel_model_gflops <- function(data, freeScales = TRUE, model_type="LOG_LOG") {
       ggtitle("Using LR model: Duration ~ GFlop")
   # log-log transformed linear regression
   } else if(model_type == "LOG_LOG") {
+
+    task_model <- model_LR_log <- function(df) { lm(log(Duration) ~ log(GFlop), data = df) }
+    # Step 1: apply the model to each task, considering the ResourceType
+    model_fit <- data$Application %>%
+      filter(grepl("qrt", .data$Value)) %>%
+      # cannot have zero gflops
+      filter(.data$GFlop > 0) %>%
+      unique() %>%
+      group_by(.data$ResourceType, .data$Value) %>%
+      nest() %>%
+      mutate(model = map(.data$data, task_model)) %>%
+      mutate( Prediction = map(.data$model, function(model) {
+          data_predict <- suppressWarnings(predict(model, interval = "prediction", level=0.95))
+          data_predict %>% tibble(fit_LR=exp(.[,1]), lwr_LR=exp(.[,2]), upr_LR=exp(.[,3])) %>% 
+            select(.data$fit_LR, .data$upr_LR, .data$lwr_LR)
+      })) %>%
+      unnest(c(.data$data, .data$Prediction)) %>%
+      ungroup() %>%
+      select(.data$fit_LR, .data$lwr_LR, .data$upr_LR, .data$JobId)
+
     # fit log models over data
     model_data <- data$Application %>%
       filter(.data$Value %in% c("geqrt", "gemqrt", "tpqrt", "tpmqrt")) %>%
       filter(.data$GFlop > 0) %>%
+      left_join(model_fit, by=("JobId")) %>%
       unique() %>%
       group_by(.data$ResourceType, .data$Value) %>%
       nest() %>%
@@ -222,7 +243,7 @@ panel_model_gflops <- function(data, freeScales = TRUE, model_type="LOG_LOG") {
       arrange(.data$GFlop)
   
     model_panel <- model_data %>%
-      ggplot(aes(x = .data$GFlop, y = .data$Duration, color = .data$Outlier)) +
+      ggplot(aes(x = .data$GFlop, y = .data$Duration, group=.data$Value)) +
       theme_bw(base_size = data$config$base_size) +
       scale_color_manual(values = c("black", "orange")) +
       theme(
@@ -230,14 +251,15 @@ panel_model_gflops <- function(data, freeScales = TRUE, model_type="LOG_LOG") {
         strip.text.x = element_text(size = rel(1)),
         axis.text.x = element_text(angle = 45, vjust = 0.5)
       ) +
-      geom_point(alpha = .5) +
-      geom_line(aes(x=.data$GFlop, y=.data$fit), color="green", size=.8) +
-      geom_line(aes(x=.data$GFlop, y=.data$lwr), color="red", size=.8) +
-      geom_line(aes(x=.data$GFlop, y=.data$upr), color="red", size=.8) +
+      # Outlier_LR_LOG is renamed as the default Outlier
+      geom_point(aes(color=.data$Outlier), alpha = .5) +
+      geom_line(aes(x=.data$GFlop, y=.data$fit_LR), color="green", size=.8) +
+      geom_line(aes(x=.data$GFlop, y=.data$lwr_LR), color="red", size=.8) +
+      geom_line(aes(x=.data$GFlop, y=.data$upr_LR), color="red", size=.8) +
       labs(y = "Duration (ms)", x = "GFlops", color = "Anomaly") +
       ggtitle("Using LOG~LOG transformed LR model: log(Duration) ~ log(GFlop)")
 
-  # finite mixture of LR log~log models
+  # finite mixture of LR log~log models 
   } else if(model_type == "FLEXMIX") {
     # fit log models over raw data
     model_data <- data$Application %>%
@@ -256,7 +278,7 @@ panel_model_gflops <- function(data, freeScales = TRUE, model_type="LOG_LOG") {
 
     model_panel <- model_data %>%
       ggplot(aes(x = .data$GFlop, y = .data$Duration, group=.data$Cluster, shape=as.factor(.data$Cluster), 
-        color = as.factor(.data$Outlier))) +
+        color = as.factor(.data$Outlier_FLEXMIX))) +
       theme_bw(base_size = data$config$base_size) +
       scale_color_manual(values = c("black", "orange")) +
       scale_shape_manual(values = c(15, 19)) +
@@ -270,7 +292,7 @@ panel_model_gflops <- function(data, freeScales = TRUE, model_type="LOG_LOG") {
       geom_line(aes(x=.data$GFlop, y=.data$fit), color="green", size=.8) +
       geom_line(aes(x=.data$GFlop, y=.data$lwr, linetype=as.factor(.data$Cluster)), color="red", size=.8) +
       geom_line(aes(x=.data$GFlop, y=.data$upr, linetype=as.factor(.data$Cluster)), color="red", size=.8) +
-      labs(y = "Duration (ms)", x = "GFlops", color="Anomaly", linetype="Cluster") +
+      labs(y = "Duration (ms)", x = "GFlops", color="Anomaly", linetype="Cluster", shape="Cluster") +
       ggtitle("Using multiple LOG models (flexmix): log(Duration) ~ log(GFlop)")
   # Weighted linear regression 1/GFlop
   } else if(model_type == "WLR") {
@@ -280,68 +302,16 @@ panel_model_gflops <- function(data, freeScales = TRUE, model_type="LOG_LOG") {
       filter(.data$GFlop > 0) %>% .$GFlop
   
     model_panel <- model_panel +
-      geom_point(alpha = .5) +
+      geom_point(aes(color = .data$Outlier_WLR), alpha = .5) +
       geom_smooth(method = "lm", formula="y ~ x", color = "green", fill= "blue",
           mapping = aes(weight = 1/gflops)
         ) +
         ggtitle("Using WLR model: Duration ~ GFlop, weight=1/GFlop")
   # plot all models together for comparison purposes
-  } else if( model_type == "ALL") {
-
-    # fit log models over data, need to use exp(predict)
-    model_data <- data$Application %>%
-      filter(.data$Value %in% c("geqrt", "gemqrt", "tpqrt", "tpmqrt")) %>%
-      filter(.data$GFlop > 0) %>%
-      unique() %>%
-      group_by(.data$ResourceType, .data$Value) %>%
-      nest() %>%
-      mutate(model_log = map(.data$data, model_LR_log)) %>%
-      ungroup() %>%
-      mutate(predictValue = map(.data$model_log, function(x){ exp(predict(x)) } )) %>%
-      select(-.data$model_log) %>%
-      unnest(cols = c(.data$data, .data$predictValue)) %>%
-      # now group by cluster to consider flexmix models
-      group_by(.data$ResourceType, .data$Value, .data$Cluster) %>%
-      nest() %>%
-      mutate(model_log = map(.data$data, model_LR_log)) %>%
-      ungroup() %>%
-      mutate(predictValue_flexmix = map(.data$model_log, function(x){ exp(predict(x)) } )) %>%
-      select(-.data$model_log) %>%
-      unnest(cols = c(.data$data, .data$predictValue_flexmix)) %>%
-      arrange(.data$GFlop)
-  
-    # for WLR comparison
-    gflops <- data$Application %>% 
-      filter(grepl("qrt", .data$Value)) %>% 
-      arrange(.data$GFlop) %>%
-      filter(.data$GFlop > 0) %>% .$GFlop
-  
-    model_panel <- model_data %>%
-      ggplot(aes(x = .data$GFlop, y = .data$Duration, color = .data$Outlier, shape = as.factor(.data$Cluster))) +
-      theme_bw(base_size = data$config$base_size) +
-      labs(y = "Duration (ms)", x = "GFlops") +
-      scale_color_manual(values = c("black", "orange")) +
-      theme(
-        legend.position = "top",
-        strip.text.x = element_text(size = rel(1)),
-        axis.text.x = element_text(angle = 45, vjust = 0.5)
-      ) +
-      geom_point(alpha = .5) +
-      geom_smooth(method = "lm", formula="y ~ x", color = "red", linetype="dashed", se = FALSE) +
-      geom_smooth(method = "lm", formula = "y ~ I(x^(2/3))", color = "#eb34de", linetype="dashed",  se=FALSE) +
-      geom_smooth(method = "lm", formula="y ~ x", color = "#34ebeb", linetype="dashed", fill= "blue",
-          mapping = aes(weight = 1/gflops)
-        ) +
-      geom_line(aes(x = .data$GFlop, y = .data$predictValue), color = "green") +
-      geom_line(aes(x = .data$GFlop, y = .data$predictValue_flexmix, linetype=as.factor(.data$Cluster)), color="orange") +
-      # adjust log model to the normal data
-      labs(y = "Duration (ms)", x = "GFlops", subtitle="LR (red) | NLR 2/3 (pink) | WLR (cyan) | log-log(green) | flexmix(orange)") +
-      labs(color="Anomaly", linetype="Cluster", shape="Cluster") +
-      ggtitle("Plotting all models: LR, NLR(GFlop^2/3), WLR, LR(log~log), FLEXMIX(log~log)")
   } else {
     model_panel <- model_panel + 
       geom_point(alpha = .5) +
-      ggtitle(" Yoou should specify a valid model_type ['LR', 'LOG_LOG', 'FLEXMIX', 'WLR', 'ALL'] ")
+      ggtitle(" Yoou should specify a valid model_type ['LR', 'LOG_LOG', 'FLEXMIX', 'WLR'] ")
   }
 
   # Controls the scales by using facet grid or facet wrap

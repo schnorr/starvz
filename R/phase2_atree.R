@@ -965,14 +965,17 @@ atree_geom_anomalies <- function(data) {
       aes(
         x = .data$Start,
         y = .data$Position + .data$Height / 2,
-        colour = .data$Value,
-        alpha = .7
-      )
+        color = .data$Value,
+      ),
+      size = 0.5,
+      shape = 1
     ),
-    scale_colour_manual(values = c(
+    scale_color_manual(values = c(
       "geqrt" = "#FF7F00", "gemqrt" = "#377EB8", "tpqrt" = "#F781BF", "tpmqrt" = "#A65628",
       "lapack_geqrt" = "#FF7F00", "lapack_gemqrt" = "#377EB8", "lapack_tpqrt" = "#F781BF", "lapack_tpmqrt" = "#A65628"
-    ))
+      )
+    ),
+    scale_shape_manual(values = c("19"))
   )
 }
 

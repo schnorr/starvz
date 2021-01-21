@@ -6,8 +6,8 @@
 \usage{
 panel_resource_usage_task(
   data = NULL,
-  step = data$config$utiltreenode$step,
-  legend = data$config$utiltask$legend,
+  step = NULL,
+  legend = FALSE,
   x_start = data$config$limits$start,
   x_end = data$config$limits$end
 )
@@ -27,7 +27,7 @@ panel_resource_usage_task(
 A ggplot object
 }
 \description{
-Use data Application to create a panel of the total resource utilization 
+Use data Application to create a panel of the total resource utilization
 that helps to observe the time related resource utilization by task
 }
 \examples{

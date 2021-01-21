@@ -9,7 +9,7 @@ panel_kiteration(
   middle_lines = data$config$kiteration$middlelines,
   base_size = data$config$base_size,
   expand_x = data$config$expand,
-  legend = data$config$ready$legend,
+  legend = data$config$kiteration$legend,
   x_start = data$config$limits$start,
   x_end = data$config$limits$end,
   per_node = data$config$kiteration$pernode

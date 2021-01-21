@@ -1,5 +1,6 @@
 starvz\.Rproj
 \.gitignore
+\.github
 \.travis\.yml
 codecov\.yml
 DEV\.org

@@ -45,6 +45,7 @@ Imports: methods,
     RColorBrewer,
     zoo,
     car,
+    flexmix,
     arrow (>= 0.17.0)
 License: GPL-3
 Encoding: UTF-8

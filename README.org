@@ -26,8 +26,8 @@
 #+html: <a href="https://cran.r-project.org/web/packages/starvz/index.html">
 #+html:   <img src="https://www.r-pkg.org/badges/version/starvz" />
 #+html: </a>
-#+html: <a href="https://travis-ci.org/schnorr/starvz">
-#+html:   <img src="https://travis-ci.org/schnorr/starvz.svg?branch=master" />
+#+html: <a href="https://github.com/schnorr/starvz/actions">
+#+html:   <img src="https://github.com/schnorr/starvz/workflows/R-CMD-check/badge.svg" />
 #+html: </a>
 #+html: <a href="https://www.tidyverse.org/lifecycle/#maturing">
 #+html:   <img src="https://img.shields.io/badge/lifecycle-maturing-blue.svg" />
@@ -86,7 +86,7 @@ $STARVZ_TOOLS/phase2-workflow.R $EXP_FOLDER $STARVZ_TOOLS/../etc/default.yaml
 #+end_src
 
 The tools will be available after instalation inside the package
-folder subdirectory =tools/=. 
+folder subdirectory =tools/=.
 
 This can be retrived by:
 

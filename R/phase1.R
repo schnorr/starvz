@@ -635,7 +635,7 @@ regression_based_outlier_detection <- function(Application, task_model, column_n
       df.model.outliers <- df.model.outliers %>%
         mutate( Prediction = map(.data$model, function(model) {
             data_predict <- suppressWarnings(predict(model, interval = "prediction", level=level))
-            data_predict %>% tibble(fit=.[,1], lwr=exp.[,2], upr=exp.[,3]) %>% 
+            data_predict %>% tibble(fit=.[,1], lwr=.[,2], upr=.[,3]) %>% 
               select(.data$fit, .data$upr, .data$lwr)
         }))      
     }

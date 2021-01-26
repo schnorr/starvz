@@ -153,7 +153,7 @@ panel_atree <- function(data = NULL, step = data$config$atree$step, legend = dat
                         communication = data$config$atree$communication$active,
                         anomalies = data$config$atree$anomalies$active,
                         performance_metric="time",
-                        level = 0) 
+                        level = 0)
 {
   starvz_check_data(data, tables = list("Atree" = c("ANode")))
 
@@ -245,8 +245,8 @@ panel_atree <- function(data = NULL, step = data$config$atree$step, legend = dat
 
     atreeplot <- atreeplot +
       scale_fill_gradient2(
-        name = "GFlops", limits = c(minGFlop, maxGFlop), breaks = c(minGFlop, midGFlop, maxGFlop), 
-        midpoint=midGFlop, low = "blue", mid = "yellow", high = "red"
+        name = "GFlops", limits = c(minGFlop, maxGFlop), breaks = c(minGFlop, midGFlop, maxGFlop),
+        midpoint = midGFlop, low = "blue", mid = "yellow", high = "red"
       ) +
       theme(legend.title = element_text(size = rel(0.8), "GFlops"))
   }
@@ -668,7 +668,7 @@ panel_activenodes <- function(data = NULL,
                               aggregation = data$config$activenodes$aggregation$active,
                               x_start = data$config$limits$start,
                               x_end = data$config$limits$end,
-                              legend = data$config$activenodes$legend) 
+                              legend = data$config$activenodes$legend)
 {
   starvz_check_data(data, tables = list("Atree" = c("ANode")))
 
@@ -759,11 +759,11 @@ panel_activenodes <- function(data = NULL,
 #' @param step size in milliseconds for the time aggregation step
 #' @param group_pruned aggregate computations of the same parent pruned nodes
 #' @param performance_metric Performance metric to save in Value1 [Time, GFlops]
-resource_utilization_tree_node <- function(Application = NULL, 
+resource_utilization_tree_node <- function(Application = NULL,
                                            Atree = NULL,
-                                           step = 100, 
+                                           step = 100,
                                            group_pruned = FALSE,
-                                           performance_metric = "Time") 
+                                           performance_metric = "Time")
 {
   # Prepare and filter data
   df_filter <- Application %>%
@@ -796,7 +796,6 @@ resource_utilization_tree_node <- function(Application = NULL,
   }
 
   if(tolower(performance_metric) == "time") {
-    
     # Compute the node parallelism
     data_node_parallelism <- df_filter %>%
       gather(.data$Start, .data$End, key = "Event", value = "Time") %>%
@@ -825,25 +824,25 @@ resource_utilization_tree_node <- function(Application = NULL,
     data_node_plot <- getSlices(Application, step=step) %>%
       tibble(Slice=.) %>%
       group_by(.data$Slice) %>%
-      mutate( nest(Application %>% 
+      mutate( nest(Application %>%
                 filter(grepl("qrt", .data$Value) | grepl("subtree", .data$Value)) %>%
                 select(.data$Start, .data$End, .data$ANode, .data$Duration, .data$GFlop), data = everything())
-      ) %>% 
+      ) %>%
       # filter task by slice and calculate GFlops contribution to that slice
       mutate(SliceData = map2(.data$data, .data$Slice, function(x, y) {
             SliceStart = .data$Slice
             SliceEnd = .data$Slice + step
-              x %>% 
-                filter((.data$End >= SliceStart & .data$End <= SliceEnd) | 
+              x %>%
+                filter((.data$End >= SliceStart & .data$End <= SliceEnd) |
                        (.data$Start >= SliceStart & .data$Start <= SliceEnd) |
                        (.data$Start <= SliceStart & .data$End >= SliceEnd)
                 ) %>%
                 mutate(GFlopMultiplier = case_when(
                     # 1 - task is completely inside the slice:                 | s---e  |
-                    .data$Start >= SliceStart & .data$End <= SliceEnd ~ 1,  
+                    .data$Start >= SliceStart & .data$End <= SliceEnd ~ 1,
                     # 2 - task start before the slice and ends inside it:  s---|----e   |
                     .data$Start <= SliceStart & .data$End <= SliceEnd ~ 1 - (SliceStart - .data$Start)/.data$Duration,
-                    # 3 - task start in the slice and ends after it:           |  s-----|--e 
+                    # 3 - task start in the slice and ends after it:           |  s-----|--e
                     .data$Start >= SliceStart & .data$End >= SliceEnd ~ 1 - (.data$End - SliceEnd)/.data$Duration,
                     # 4 - task starts before the slice and ends afeter it: s---|--------|--e
                     .data$Start <= SliceStart & .data$End >= SliceEnd ~ 1 - ((.data$End - SliceEnd)+(SliceStart - .data$Start))/.data$Duration
@@ -1146,7 +1145,7 @@ get_tree_flops <- function(data, step) {
 #' panel_compare_tree(data1, data2, step = 100)
 #' }
 #' @export
-panel_compare_tree <- function(data1 = NULL,
+panel_compare_tree <- function( data1 = NULL,
                                 data2 = NULL,
                                 step = data1$config$utiltreenode$step,
                                 x_start = data1$config$limits$start,

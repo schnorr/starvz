@@ -10,7 +10,7 @@ if (length(args) < 2) {
 directory = args[[1]];
 config_file = args[[2]];
 
-name = paste0(directory, "/starvz.png");
+name = paste0(directory, "/starvz.pdf");
 if (length(args)==3) {
 	name = args[[3]];
 }

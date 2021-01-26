@@ -27,7 +27,7 @@ panel_resource_usage_task(
 A ggplot object
 }
 \description{
-Use data Application to create a panel of the total resource utilization 
+Use data Application to create a panel of the total resource utilization
 that helps to observe the time related resource utilization by task
 }
 \examples{

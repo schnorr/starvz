@@ -47,7 +47,7 @@ STARVZ_EXEC_PHASE_2=1
 STARVZ_TRACE_FOLDER=""
 STARVZ_APPLICATION="-"
 STARVZ_CONFIG_FILE="$STARVZ_HOME/etc/default.yaml"
-STARVZ_SAVE_FILE="starvz.pdf"
+STARVZ_SAVE_FILE=""
 
 while true; do
         case "$1" in

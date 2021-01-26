@@ -62,6 +62,7 @@ yconf <- function(dfw = NULL, option = "ALL", Y = NULL, show_mpi = TRUE) {
       slice(1) %>%
       mutate(ResourceId = .data$Node) %>%
       ungroup()
+    show_mpi <- FALSE
   } else if (option == "NODES_1_in_10") { # First
     y_conf <- dfw %>%
       select(.data$Node, .data$ResourceId, .data$ResourceType, .data$Position, .data$Height) %>%
@@ -180,7 +181,7 @@ panel_title <- function(data, title = data$config$title$text) {
 #' }
 #' @export
 panel_model_gflops <- function(data, freeScales = TRUE, model_type="LOG_LOG") {
-  
+
   # create the base ggplot object that is enhanced according to the model_type
   model_panel <- data$Application %>%
     filter(.data$Value %in% c("geqrt", "gemqrt", "tpqrt", "tpmqrt")) %>%
@@ -198,11 +199,11 @@ panel_model_gflops <- function(data, freeScales = TRUE, model_type="LOG_LOG") {
 
   # define de log-log LR model to later use
   model_LR_log <- function(df) { lm(log(Duration) ~ log(GFlop), data = df) }
-    
 
-  # Linear Regression model_type with Duration ~ GFlop 
+
+  # Linear Regression model_type with Duration ~ GFlop
   if(model_type == "LR"){
-    model_panel <- model_panel + 
+    model_panel <- model_panel +
       geom_point(alpha = .5) +
       geom_smooth(method = "lm", formula = "y ~ x", color = "green", fill = "blue") +
       ggtitle("Using LR model: Duration ~ GFlop")
@@ -221,7 +222,7 @@ panel_model_gflops <- function(data, freeScales = TRUE, model_type="LOG_LOG") {
       mutate(model = map(.data$data, task_model)) %>%
       mutate( Prediction = map(.data$model, function(model) {
           data_predict <- suppressWarnings(predict(model, interval = "prediction", level=0.95))
-          data_predict %>% tibble(fit_LR=exp(.[,1]), lwr_LR=exp(.[,2]), upr_LR=exp(.[,3])) %>% 
+          data_predict %>% tibble(fit_LR=exp(.[,1]), lwr_LR=exp(.[,2]), upr_LR=exp(.[,3])) %>%
             select(.data$fit_LR, .data$upr_LR, .data$lwr_LR)
       })) %>%
       unnest(c(.data$data, .data$Prediction)) %>%
@@ -241,7 +242,7 @@ panel_model_gflops <- function(data, freeScales = TRUE, model_type="LOG_LOG") {
       select(-.data$model_log) %>%
       unnest(cols = c(.data$data)) %>%
       arrange(.data$GFlop)
-  
+
     model_panel <- model_data %>%
       ggplot(aes(x = .data$GFlop, y = .data$Duration, group=.data$Value)) +
       theme_bw(base_size = data$config$base_size) +
@@ -259,7 +260,7 @@ panel_model_gflops <- function(data, freeScales = TRUE, model_type="LOG_LOG") {
       labs(y = "Duration (ms)", x = "GFlops", color = "Anomaly") +
       ggtitle("Using LOG~LOG transformed LR model: log(Duration) ~ log(GFlop)")
 
-  # finite mixture of LR log~log models 
+  # finite mixture of LR log~log models
   } else if(model_type == "FLEXMIX") {
     # fit log models over raw data
     model_data <- data$Application %>%
@@ -277,7 +278,7 @@ panel_model_gflops <- function(data, freeScales = TRUE, model_type="LOG_LOG") {
       arrange(.data$predictValue)
 
     model_panel <- model_data %>%
-      ggplot(aes(x = .data$GFlop, y = .data$Duration, group=.data$Cluster, shape=as.factor(.data$Cluster), 
+      ggplot(aes(x = .data$GFlop, y = .data$Duration, group=.data$Cluster, shape=as.factor(.data$Cluster),
         color = as.factor(.data$Outlier_FLEXMIX))) +
       theme_bw(base_size = data$config$base_size) +
       scale_color_manual(values = c("black", "orange")) +
@@ -297,10 +298,10 @@ panel_model_gflops <- function(data, freeScales = TRUE, model_type="LOG_LOG") {
   # Weighted linear regression 1/GFlop
   } else if(model_type == "WLR") {
 
-    gflops <- data$Application %>% 
-      filter(grepl("qrt", .data$Value)) %>% 
+    gflops <- data$Application %>%
+      filter(grepl("qrt", .data$Value)) %>%
       filter(.data$GFlop > 0) %>% .$GFlop
-  
+
     model_panel <- model_panel +
       geom_point(aes(color = .data$Outlier_WLR), alpha = .5) +
       geom_smooth(method = "lm", formula="y ~ x", color = "green", fill= "blue",
@@ -314,7 +315,7 @@ panel_model_gflops <- function(data, freeScales = TRUE, model_type="LOG_LOG") {
         ggtitle("Using NLR model: Duration ~ GFlop**2/3")    
   # plot all models together for comparison purposes
   } else {
-    model_panel <- model_panel + 
+    model_panel <- model_panel +
       geom_point(alpha = .5) +
       ggtitle(" Yoou should specify a valid model_type ['LR', 'LOG_LOG', 'NLR', 'FLEXMIX', 'WLR'] ")
   }
@@ -330,8 +331,8 @@ panel_model_gflops <- function(data, freeScales = TRUE, model_type="LOG_LOG") {
 }
 
 #' Plot resource utilization using tasks as color
-#' 
-#' Use data Application to create a panel of the total resource utilization 
+#'
+#' Use data Application to create a panel of the total resource utilization
 #' that helps to observe the time related resource utilization by task
 #'
 #' @param data starvz_data with trace data
@@ -350,7 +351,7 @@ panel_resource_usage_task <- function(data = NULL,
                                       step = NULL,
                                       legend = FALSE,
                                       x_start = data$config$limits$start,
-                                      x_end = data$config$limits$end) 
+                                      x_end = data$config$limits$end)
 {
   starvz_check_data(data, tables = list("Application" = c("Value")))
 
@@ -412,16 +413,16 @@ panel_resource_usage_task <- function(data = NULL,
     scale_fill_manual(values = extract_colors(data$Application, data$Colors)) +
     ylab("Usage %\nTask") +
     ylim(0, 100) -> panel
-  
+
     if(!legend) {
      panel <- panel + theme(legend.position = "none")
     }
-  
+
   return(panel)
 }
 
 # Calculate the computational resource utilization by task
-get_resource_utilization <- function( Application = NULL, step = 100) 
+get_resource_utilization <- function( Application = NULL, step = 100)
 {
   # Arrange data
   df_filter <- Application %>%

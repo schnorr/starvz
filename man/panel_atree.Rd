@@ -15,7 +15,9 @@ panel_atree(
   x_start = data$config$limits$start,
   x_end = data$config$limits$end,
   communication = data$config$atree$communication$active,
-  anomalies = data$config$atree$anomalies$active
+  anomalies = data$config$atree$anomalies$active,
+  performance_metric = "time",
+  level = 0
 )
 }
 \arguments{
@@ -40,6 +42,10 @@ panel_atree(
 \item{communication}{enable/disable communication tasks representation}
 
 \item{anomalies}{enable/disable anomalies tasks representation}
+
+\item{performance_metric}{which metric to represent ["time", "gflops"]}
+
+\item{level}{draw a dashed line to divide the tree at the level h}
 }
 \value{
 A ggplot object

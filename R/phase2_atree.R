@@ -246,7 +246,7 @@ panel_atree <- function(data = NULL, step = data$config$atree$step, legend = dat
     atreeplot <- atreeplot +
       scale_fill_gradient2(
         name = "GFlops", limits = c(minGFlop, maxGFlop), breaks = c(minGFlop, midGFlop, maxGFlop), 
-        midpoint=midGFlop, low = "blue", mid = "yellow", high = "red", 
+        midpoint=midGFlop, low = "blue", mid = "yellow", high = "red"
       ) +
       theme(legend.title = element_text(size = rel(0.8), "GFlops"))
   }
@@ -990,7 +990,7 @@ atree_geom_rect_gradient <- function(data, yminOffset, ymaxOffset) {
         xmin = .data$Start,
         xmax = .data$End,
         ymin = .data$Position + yminOffset,
-        ymax = .data$Position + ymaxOffset
+        ymax = .data$Position + ymaxOffset,
       )
     )
   )
@@ -1070,7 +1070,61 @@ define_colors <- function(data) {
   }
 }
 
+get_tree_utilization <- function(data, step, performance_metric) {
 
+  data_utilization_node <- resource_utilization_tree_node(data$Application,
+      data$Atree, step = step, group_pruned = TRUE, performance_metric=performance_metric) %>%
+    unique() %>%
+    filter(.data$Value1 != 0) %>%
+    select(.data$ANode, .data$Slice, .data$Value1) %>%
+    ungroup() %>%
+    rename(NodeUsage = .data$Value1) %>%
+    left_join(data$Atree, by = "ANode")
+
+  # Resize for not pruned nodes, first and last computational tasks
+  # data_tree_utilization <- data_gflops_node  %>%
+  data_tree_utilization <- data_utilization_node %>%
+      inner_join(data$Application %>%
+      filter( grepl("qrt", .data$Value) | grepl("do_sub", .data$Value) ) %>%
+      select(.data$ANode, .data$End, .data$Start) %>%
+      group_by(.data$ANode) %>%
+      mutate(Start = min(.data$Start), End = max(.data$End)) %>%
+      select(.data$ANode, .data$Start, .data$End) %>%
+      unique(),
+    by = "ANode"
+    ) %>%
+    mutate(Start = ifelse(.data$Start >= .data$Slice, .data$Start, .data$Slice)) %>%
+    mutate(End = ifelse(.data$Slice + step >= .data$End, .data$End, .data$Slice + step))
+
+    return(data_tree_utilization)
+}
+
+get_tree_flops <- function(data, step) {
+
+  data_utilization_node <- resource_utilization_tree_node(data$Application, data$Atree, step = step, group_pruned = TRUE) %>%
+    unique() %>%
+    filter(.data$Value != 0) %>%
+    select(.data$ANode, .data$Slice, .data$Value1) %>%
+    ungroup() %>%
+    rename(NodeUsage = .data$Value1) %>%
+    left_join(data$Atree, by = "ANode")
+
+  # Resize for not pruned nodes, first and last computational tasks
+  data_tree_utilization <- data_utilization_node %>%
+    inner_join(data$Application %>%
+      filter( grepl("qrt", .data$Value) | grepl("do_sub", .data$Value) ) %>%
+      select(.data$ANode, .data$End, .data$Start) %>%
+      group_by(.data$ANode) %>%
+      mutate(Start = min(.data$Start), End = max(.data$End)) %>%
+      select(.data$ANode, .data$Start, .data$End) %>%
+      unique(),
+    by = "ANode"
+    ) %>%
+    mutate(Start = ifelse(.data$Start >= .data$Slice, .data$Start, .data$Slice)) %>%
+    mutate(End = ifelse(.data$Slice + step >= .data$End, .data$End, .data$Slice + step))
+
+    return(data_tree_utilization)
+}
 
 #' Combine two atree plots to compare two different executions
 #'
@@ -1083,17 +1137,23 @@ define_colors <- function(data) {
 #' @param step size in milliseconds for the time aggregation step
 #' @param x_start X-axis start value
 #' @param x_end X-axis end value
+#' @param performance_metric which metric to represent ["time", "gflops"]
+#' @param add_diff_line add the computed gflops difference line
+#' @param add_end_line add smaller end time vertical line
 #' @return A ggplot object
 #' @examples
 #' \dontrun{
 #' panel_compare_tree(data1, data2, step = 100)
 #' }
 #' @export
-panel_compare_tree <- function( data1 = NULL, 
-                                data2 = NULL, 
+panel_compare_tree <- function(data1 = NULL,
+                                data2 = NULL,
                                 step = data1$config$utiltreenode$step,
                                 x_start = data1$config$limits$start,
-                                x_end = data1$config$limits$end )
+                                x_end = data1$config$limits$end,
+                                performance_metric="Time",
+                                add_diff_line=FALSE,
+                                add_end_line=FALSE)
 {
   starvz_check_data(data1, tables = list("Atree" = c("ANode")))
   starvz_check_data(data2, tables = list("Atree" = c("ANode")))
@@ -1114,97 +1174,122 @@ panel_compare_tree <- function( data1 = NULL,
     x_end <- NA
   }
 
-  # for data1
-  data_utilization_node1 <- resource_utilization_tree_node(data1$Application, data1$Atree, step = step, group_pruned = TRUE) %>%
-    unique() %>%
-    filter(.data$Value != 0) %>%
-    select(.data$ANode, .data$Slice, .data$Value1) %>%
-    ungroup() %>%
-    rename(NodeUsage = .data$Value1) %>%
-    left_join(data1$Atree, by = "ANode")
+  # check wich one is the slower execution
+  end1 <- data1$Application %>% pull(.data$End) %>% max()
+  end2 <- data2$Application %>% pull(.data$End) %>% max()
+  if(end1 >= end2){
+    slower <- data1
+    faster <- data2
+    end_cut <- end2
+    x_end = end1
+  } else {
+    faster <- data1
+    slower <- data2
+    end_cut <- end1
+    x_end = end2
+  }
 
-
-  # Resize for not pruned nodes, first and last computational tasks
-  data_tree_utilization_not_pruned1 <- data_utilization_node1 %>%
-    inner_join(data1$Application %>%
-      filter( grepl("qrt", .data$Value) | grepl("do_sub", .data$Value) ) %>%
-      select(.data$ANode, .data$End, .data$Start) %>%
-      group_by(.data$ANode) %>%
-      mutate(Start = min(.data$Start), End = max(.data$End)) %>%
-      select(.data$ANode, .data$Start, .data$End) %>%
-      unique(),
-    by = "ANode"
-    ) %>%
-    mutate(Start = ifelse(.data$Start >= .data$Slice, .data$Start, .data$Slice)) %>%
-    mutate(End = ifelse(.data$Slice + step >= .data$End, .data$End, .data$Slice + step))
-  
-
-
-  ################################################################
-  ################################################################
-  # FOR DATA 2
-  ################################################################
-  ################################################################
-
-  data_utilization_node2 <- resource_utilization_tree_node(data2$Application, data2$Atree, step = step, group_pruned = TRUE) %>%
-    unique() %>%
-    filter(.data$Value != 0) %>%
-    select(.data$ANode, .data$Slice, .data$Value1) %>%
-    ungroup() %>%
-    rename(NodeUsage = .data$Value1) %>%
-    left_join(data2$Atree, by = "ANode")
-
-  # Resize for not pruned nodes, first and last computational tasks
-  data_tree_utilization_not_pruned2 <- data_utilization_node2 %>%
-    inner_join(data2$Application %>%
-      filter(grepl("qrt", .data$Value) | grepl("do_sub", .data$Value) ) %>%
-      select(.data$ANode, .data$End, .data$Start) %>%
-      group_by(.data$ANode) %>%
-      mutate(Start = min(.data$Start), End = max(.data$End)) %>%
-      select(.data$ANode, .data$Start, .data$End) %>%
-      unique(),
-    by = "ANode"
-    ) %>%
-    mutate(Start = ifelse(.data$Start >= .data$Slice, .data$Start, .data$Slice)) %>%
-    mutate(End = ifelse(.data$Slice + step >= .data$End, .data$End, .data$Slice + step))
-
+  data_tree_utilization1 <- get_tree_utilization(faster, step, performance_metric)
+  data_tree_utilization2 <- get_tree_utilization(slower, step, performance_metric)
 
   # Calculate the diff
-  data_diff <- data_tree_utilization_not_pruned1 %>%
+  data_diff <- data_tree_utilization1 %>%
     mutate(Execution = "NodeUsage.x") %>%
-    bind_rows(data_tree_utilization_not_pruned2 %>%
+    bind_rows(data_tree_utilization2 %>%
         mutate(Execution = "NodeUsage.y")
     ) %>%
+    select(-.data$Start, -.data$End) %>%
     spread(.data$Execution, .data$NodeUsage) %>%
     mutate(NodeUsage.x = ifelse(is.na(.data$NodeUsage.x), 0, .data$NodeUsage.x),
            NodeUsage.y = ifelse(is.na(.data$NodeUsage.y), 0, .data$NodeUsage.y) ) %>%
-    mutate(color = ifelse(NodeUsage.x == 0 | NodeUsage.y == 0, "Exclusive execution", "Concurrent execution")) %>%
+    mutate(color = ifelse(.data$NodeUsage.x == 0 | .data$NodeUsage.y == 0, "Exclusive execution", "Concurrent execution")) %>%
     mutate(NodeUsage = .data$NodeUsage.x - .data$NodeUsage.y)
 
+  # add cumulative performance metric line
+  if(add_diff_line) {
+    data_diff_line <- data_tree_utilization1 %>%
+      mutate(Execution = "NodeUsage.x") %>%
+      bind_rows(data_tree_utilization2 %>%
+          mutate(Execution = "NodeUsage.y")
+      ) %>%
+      spread(.data$Execution, .data$NodeUsage) %>%
+      mutate(NodeUsage.x = ifelse(is.na(.data$NodeUsage.x), 0, .data$NodeUsage.x),
+         NodeUsage.y = ifelse(is.na(.data$NodeUsage.y), 0, .data$NodeUsage.y) ) %>%
+      group_by(.data$Slice, .groups='keep') %>%
+      summarize(NodeUsage.x = sum(.data$NodeUsage.x), NodeUsage.y=sum(.data$NodeUsage.y)) %>%
+      ungroup() %>%
+      mutate(Usage.x=cumsum(.data$NodeUsage.x), Usage.y=cumsum(.data$NodeUsage.y)) %>%
+      mutate(diff = .data$Usage.x - .data$Usage.y) %>%
+      mutate(signal = ifelse(.data$diff >= 0, "positive", "negative"))
 
-  atreeplot <- panel_atree_structure(data2) +
-    default_theme(data1$config$base_size, data1$config$expand) +
+    data_diff_line %>%
+      arrange(.data$signal) %>%
+      ggplot(aes(x=.data$Slice, y=.data$diff, color=.data$signal)) +
+      geom_line(aes(group=.data$.groups)) +
+      scale_color_manual(values=c("blue", "red")) +
+      labs(y=paste0(performance_metric, "\n difference")) +
+      default_theme(slower$config$base_size, slower$config$expand) +
+      theme(legend.position = "none") -> lineplot
+  }
+
+  atreeplot <- panel_atree_structure(slower) +
+    default_theme(slower$config$base_size, slower$config$expand) +
     ylab("Elimination Tree\n[Submission Order]")
 
   atreeplot <- atreeplot +
     geom_rect(data=data_diff,
       aes(
         fill = .data$NodeUsage,
-        xmin = .data$Start,
-        xmax = .data$End,
+        xmin = .data$Slice,
+        xmax = .data$Slice + step,
         ymin = .data$Position,
         ymax = .data$Position + .data$Height,
-        linetype = color
+        linetype = .data$color
       ),
-      color = "black"
+      color = "#807d7c",
+      size=0.5
     ) +
     scale_linetype_manual(values = c("blank", "solid"))
 
-  myPalette <- colorRampPalette(c(
-      rev(brewer.pal(9, "Greens")[2:9]), "white", brewer.pal(9, "Reds")[2:9]
-    ))
-  palette_colors <- scale_fill_gradientn(colours = myPalette(20), limits=c(-100, 100))
+  myPalette <- colorRampPalette(c(rev(brewer.pal(9, "Reds")[2:9]), brewer.pal(9, "Greens")[2:9]))
 
-  atreeplot <- atreeplot + palette_colors
+  if(tolower(performance_metric) == "time") {
+    palette_colors <- scale_fill_gradientn(colours = myPalette(20), limits=c(-100, 100))
+    atreeplot <- atreeplot + palette_colors
+  } else if (tolower(performance_metric) == "gflops") {
+    minGFlop = round(min(data_diff$NodeUsage),1)
+    maxGFlop = round(max(data_diff$NodeUsage),1)
+    atreeplot <- atreeplot + scale_fill_gradient2(
+        name = paste0("GFlops difference per time slice (", step, "ms)"),
+        low = "red", mid = "grey", high = "blue",
+        limits = c(minGFlop, maxGFlop),
+        midpoint = 0,
+        breaks = c(minGFlop, 0, maxGFlop)) +
+      theme(legend.title = element_text(size = rel(0.8))) +
+      guides(fill = guide_colorbar(barwidth = 15, barheight = 1, nbin=30, title.position = "right", title.vjust=1), linetype="none")
+    # palette_colors <- scale_fill_gradientn(colours = myPalette(20))
+  }
+
+  tzScale <- list(
+    coord_cartesian(
+      xlim = c(x_start, x_end)
+    )
+  )
+  atreeplot <- atreeplot + tzScale
+
+  # add vetical computation ending line for faster case
+  if(add_end_line){
+    atreeplot <- atreeplot + geom_vline(aes(xintercept=c(end_cut)))
+
+    if(add_diff_line) {
+      lineplot <- lineplot + geom_vline(aes(xintercept=c(end_cut)))
+      lineplot <- lineplot + tzScale
+    }
+  }
+  # add the line to the plot
+  if(add_diff_line){
+    atreeplot <- (atreeplot + theme(axis.title.x=element_blank(), axis.text.x=element_blank())) / lineplot + patchwork::plot_layout(heights=c(1, 0.25))
+  }
+
   return(atreeplot)
 }

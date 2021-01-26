@@ -6,8 +6,8 @@
 \usage{
 panel_resource_usage_task(
   data = NULL,
-  step = data$config$utiltreenode$step,
-  legend = data$config$utiltask$legend,
+  step = NULL,
+  legend = FALSE,
   x_start = data$config$limits$start,
   x_end = data$config$limits$end
 )

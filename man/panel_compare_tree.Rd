@@ -9,7 +9,10 @@ panel_compare_tree(
   data2 = NULL,
   step = data1$config$utiltreenode$step,
   x_start = data1$config$limits$start,
-  x_end = data1$config$limits$end
+  x_end = data1$config$limits$end,
+  performance_metric = "Time",
+  add_diff_line = FALSE,
+  add_end_line = FALSE
 )
 }
 \arguments{
@@ -22,6 +25,12 @@ panel_compare_tree(
 \item{x_start}{X-axis start value}
 
 \item{x_end}{X-axis end value}
+
+\item{performance_metric}{which metric to represent ["time", "gflops"]}
+
+\item{add_diff_line}{add the computed gflops difference line}
+
+\item{add_end_line}{add smaller end time vertical line}
 }
 \value{
 A ggplot object

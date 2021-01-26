@@ -235,7 +235,6 @@ read_worker_csv <- function(where = ".",
     Application <- regression_based_outlier_detection(Application, model_NLR, "_NLR", level=0.95);
     Application <- regression_based_outlier_detection(Application, model_LR_log, "_LR_LOG", level=0.95);
 
-
     # need to create the clusters before calling the function, let's do the clustering for all
     # types of tasks for now, replacing the dummy Cluster variable
     Application <- Application %>% select(-.data$Cluster)

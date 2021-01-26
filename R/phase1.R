@@ -621,18 +621,32 @@ regression_based_outlier_detection <- function(Application, task_model, column_n
     unique() %>%
     group_by(.data$ResourceType, .data$Value, .data$Cluster) %>%
     nest() %>%
-    mutate(model = map(.data$data, task_model)) %>%
-    mutate( Prediction = map(.data$model, function(model) {
-        data_predict <- suppressWarnings(predict(model, interval = "prediction", level=level))
-        data_predict %>% tibble(fit=exp(.[,1]), lwr=exp(.[,2]), upr=exp(.[,3])) %>% 
-          select(.data$fit, .data$upr, .data$lwr)
-    })) %>%
+    mutate(model = map(.data$data, task_model))
+
+    # check if we need to transform log value with the exponential function after prediction
+    if(grepl(column_name, "LOG") | grepl(column_name, "FLEXMIX")) {
+      df.model.outliers <- df.model.outliers %>%
+        mutate( Prediction = map(.data$model, function(model) {
+            data_predict <- suppressWarnings(predict(model, interval = "prediction", level=level))
+            data_predict %>% tibble(fit=exp(.[,1]), lwr=exp(.[,2]), upr=exp(.[,3])) %>% 
+              select(.data$fit, .data$upr, .data$lwr)
+        }))
+    } else {
+      df.model.outliers <- df.model.outliers %>%
+        mutate( Prediction = map(.data$model, function(model) {
+            data_predict <- suppressWarnings(predict(model, interval = "prediction", level=level))
+            data_predict %>% tibble(fit=.[,1], lwr=exp.[,2], upr=exp.[,3]) %>% 
+              select(.data$fit, .data$upr, .data$lwr)
+        }))      
+    }
+    
+  df.model.outliers <- df.model.outliers
     unnest(c(.data$data, .data$Prediction)) %>%
     # Test if the Duration is bigger than the upper prediction interval value for that cluster
     mutate(DummyOutlier = ifelse(.data$Duration > .data$upr, TRUE, FALSE)) %>%
     ungroup()
 
-    # Step 2: regroup the Outlier data to the original Application, and thats it
+  # Step 2: regroup the Outlier data to the original Application, and thats it
   Application <- Application %>%
     left_join(df.model.outliers %>%
       select(.data$JobId, .data$DummyOutlier, .data$fit, .data$lwr, .data$upr), by = c("JobId")) %>%

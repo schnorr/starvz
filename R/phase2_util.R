@@ -307,11 +307,16 @@ panel_model_gflops <- function(data, freeScales = TRUE, model_type="LOG_LOG") {
           mapping = aes(weight = 1/gflops)
         ) +
         ggtitle("Using WLR model: Duration ~ GFlop, weight=1/GFlop")
+  } else if(model_type == "NLR"){
+    model_panel <- model_panel +
+      geom_point(aes(color = .data$Outlier_NLR), alpha = .5) +
+      geom_smooth(method = "lm", formula="y ~ I(x**(2/3))", color = "green", fill= "blue") +
+        ggtitle("Using NLR model: Duration ~ GFlop**2/3")    
   # plot all models together for comparison purposes
   } else {
     model_panel <- model_panel + 
       geom_point(alpha = .5) +
-      ggtitle(" Yoou should specify a valid model_type ['LR', 'LOG_LOG', 'FLEXMIX', 'WLR'] ")
+      ggtitle(" Yoou should specify a valid model_type ['LR', 'LOG_LOG', 'NLR', 'FLEXMIX', 'WLR'] ")
   }
 
   # Controls the scales by using facet grid or facet wrap

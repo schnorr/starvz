@@ -122,12 +122,12 @@ panel_kiteration <- function(data = NULL,
     guides(fill = guide_legend(override.aes = list(alpha = 1))) +
     scale_y_reverse(breaks = function(x) unique(floor(pretty(seq(0, (max(x) + 1) * 1.1))))) +
     # The start border
-    geom_curve(data = dfborders, aes(group=Group,
+    geom_curve(data = dfborders, aes(group=.data$Group,
       x = .data$Start, xend = .data$StartB,
       y = .data$Iteration + height - height / 2, yend = .data$IterationB + height - height / 2
     ), curvature = 0.1, angle = 20) +
     # The end border
-    geom_curve(data = dfborders, aes(group=Group,
+    geom_curve(data = dfborders, aes(group=.data$Group,
       x = .data$End, xend = .data$EndB,
       y = .data$Iteration - height / 2, yend = .data$IterationB - height / 2
     ), curvature = -0.1, angle = 20) +

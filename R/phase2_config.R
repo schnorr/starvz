@@ -79,6 +79,7 @@ starvz_default_config <- function() {
 
   config$kiteration$active <- FALSE
   config$kiteration$pernode <- FALSE
+  config$kiteration$subite <- FALSE
 
   config$st$active <- TRUE
   config$st$idleness_all <- TRUE

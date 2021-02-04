@@ -11,6 +11,7 @@
 #' @param x_start X-axis start value
 #' @param x_end X-axis end value
 #' @param per_node Create node facets
+#' @param sub_ite Use Subiteration as Y
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
@@ -23,7 +24,8 @@ panel_kiteration <- function(data = NULL,
                              legend = data$config$kiteration$legend,
                              x_start = data$config$limits$start,
                              x_end = data$config$limits$end,
-                             per_node = data$config$kiteration$pernode) {
+                             per_node = data$config$kiteration$pernode,
+                             sub_ite = data$config$kiteration$subite) {
   starvz_check_data(data, tables = list("Application" = c("Iteration")))
 
   dfw <- data$Application
@@ -44,6 +46,10 @@ panel_kiteration <- function(data = NULL,
     x_end <- NA
   }
 
+  if (is.null(sub_ite) || !is.logical(sub_ite)) {
+    sub_ite <- TRUE
+  }
+
   # Prepare for colors
   data$Colors %>%
     select(.data$Value, .data$Color) %>%
@@ -51,11 +57,23 @@ panel_kiteration <- function(data = NULL,
     .$Color -> appColors
   appColors %>% setNames(data$Colors %>% select(.data$Value, .data$Color) %>% unique() %>% .$Value) -> appColors
 
+
+  if(sub_ite){
+    dfw %>%
+    mutate(Group=2 * .data$Iteration) %>%
+    mutate(Iteration=.data$Subiteration) %>%
+    group_by(.data$Group, .data$Iteration) -> temp1
+  }else{
+    dfw %>%
+    mutate(Group=1) %>%
+    group_by(.data$Group, .data$Iteration) -> temp1
+  }
+
   # Prepare for borders
   if (per_node) {
-    dfw %>% group_by(.data$Node, .data$Iteration) -> temp1
+    temp1 %>% group_by(.data$Node, .data$Group, .data$Iteration) -> temp1
   } else {
-    dfw %>% group_by(.data$Iteration) -> temp1
+    temp1 %>% group_by(.data$Group, .data$Iteration) -> temp1
   }
   dfborders <- temp1 %>%
     summarize(Start = min(.data$Start), End = max(.data$End)) %>%
@@ -93,7 +111,7 @@ panel_kiteration <- function(data = NULL,
   # Height of each bar
   height <- 0.8
 
-  goijk <- dfw %>% ggplot() +
+  goijk <- temp1 %>% ggplot() +
     guides(fill = guide_legend(nrow = 1)) +
     scale_fill_manual(values = appColors) +
     theme_bw(base_size = 12) +
@@ -104,12 +122,12 @@ panel_kiteration <- function(data = NULL,
     guides(fill = guide_legend(override.aes = list(alpha = 1))) +
     scale_y_reverse(breaks = function(x) unique(floor(pretty(seq(0, (max(x) + 1) * 1.1))))) +
     # The start border
-    geom_curve(data = dfborders, aes(
+    geom_curve(data = dfborders, aes(group=Group,
       x = .data$Start, xend = .data$StartB,
       y = .data$Iteration + height - height / 2, yend = .data$IterationB + height - height / 2
     ), curvature = 0.1, angle = 20) +
     # The end border
-    geom_curve(data = dfborders, aes(
+    geom_curve(data = dfborders, aes(group=Group,
       x = .data$End, xend = .data$EndB,
       y = .data$Iteration - height / 2, yend = .data$IterationB - height / 2
     ), curvature = -0.1, angle = 20) +

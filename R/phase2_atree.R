@@ -233,10 +233,11 @@ panel_atree <- function(data = NULL, step = data$config$atree$step, legend = dat
     # 2.3 Add the color to represent resource utilization
     atreeplot <- atreeplot +
       scale_fill_gradient2(
-        name = "Computational Load %", limits = c(0, 100), breaks = c(0, 50, 100),
+        name = paste0("computational Load %"),
+        limits = c(0, 100), breaks = c(0, 50, 100),
         midpoint = 50, low = "blue", mid = "yellow", high = "red"
       ) +
-      theme(legend.title = element_text(size = rel(0.8), "Computational Load %"))
+      theme(legend.title = element_text(size = rel(0.8)))
   } else {
 
     minGFlop = round(min(data_utilization_node$NodeUsage),1)
@@ -245,10 +246,10 @@ panel_atree <- function(data = NULL, step = data$config$atree$step, legend = dat
 
     atreeplot <- atreeplot +
       scale_fill_gradient2(
-        name = "GFlops", limits = c(minGFlop, maxGFlop), breaks = c(minGFlop, midGFlop, maxGFlop),
+        name = "GFlops Throughput", limits = c(minGFlop, maxGFlop), breaks = c(minGFlop, midGFlop, maxGFlop),
         midpoint = midGFlop, low = "blue", mid = "yellow", high = "red"
       ) +
-      theme(legend.title = element_text(size = rel(0.8), "GFlops"))
+      theme(legend.title = element_text(size = rel(0.8)))
   }
 
   # 3. Add initialization tasks representation

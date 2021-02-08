@@ -640,8 +640,8 @@ regression_based_outlier_detection <- function(Application, task_model, column_n
         }))      
     }
     
-  df.model.outliers <- df.model.outliers
-    unnest(c(.data$data, .data$Prediction)) %>%
+  df.model.outliers <- df.model.outliers %>%
+    unnest(cols=c(.data$data, .data$Prediction)) %>%
     # Test if the Duration is bigger than the upper prediction interval value for that cluster
     mutate(DummyOutlier = ifelse(.data$Duration > .data$upr, TRUE, FALSE)) %>%
     ungroup()

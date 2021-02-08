@@ -624,7 +624,7 @@ regression_based_outlier_detection <- function(Application, task_model, column_n
     mutate(model = map(.data$data, task_model))
 
     # check if we need to transform log value with the exponential function after prediction
-    if(grepl(column_name, "LOG") | grepl(column_name, "FLEXMIX")) {
+    if(grepl("LOG", column_name) | grepl("FLEXMIX", column_name)) {
       df.model.outliers <- df.model.outliers %>%
         mutate( Prediction = map(.data$model, function(model) {
             data_predict <- suppressWarnings(predict(model, interval = "prediction", level=level))

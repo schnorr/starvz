@@ -233,7 +233,7 @@ panel_atree <- function(data = NULL, step = data$config$atree$step, legend = dat
     # 2.3 Add the color to represent resource utilization
     atreeplot <- atreeplot +
       scale_fill_gradient2(
-        name = paste0("computational Load %"),
+        name = paste0("Computational Load %"),
         limits = c(0, 100), breaks = c(0, 50, 100),
         midpoint = 50, low = "blue", mid = "yellow", high = "red"
       ) +

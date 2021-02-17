@@ -6,13 +6,13 @@
 \usage{
 panel_mpistate(
   data = NULL,
-  legend = data$config$mpibandwidth$legend,
+  legend = data$config$mpistate$legend,
   base_size = data$config$base_size,
   expand_x = data$config$expand,
   x_start = data$config$limits$start,
   x_end = data$config$limits$end,
   y_start = 0,
-  y_end = data$config$mpibandwidth$limit
+  y_end = data$config$mpistate$limit
 )
 }
 \arguments{

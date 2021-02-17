@@ -7,9 +7,9 @@
 \method{summary}{starvz_data}(object, ...)
 }
 \arguments{
-\item{...}{optional}
+\item{object}{A starvz_data}
 
-\item{x}{A starvz_data}
+\item{...}{optional}
 }
 \value{
 Nothing

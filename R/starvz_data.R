@@ -107,13 +107,13 @@ print.starvz_data <- function(x, ...) {
 #' Summary starvz_data
 #'
 #' Summary starvz_data
-#' @param x A starvz_data
+#' @param object A starvz_data
 #' @param ... optional
 #' @return Nothing
 #' @examples
 #' summary(starvz_sample_lu)
 #' @export
-summary.starvz_data <- function(x, ...) {
+summary.starvz_data <- function(object, ...) {
   cat("StarVZ data\n")
   cat("Execution Makespan:")
   cat("Number of Application Tasks:")

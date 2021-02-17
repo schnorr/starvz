@@ -2,11 +2,11 @@
 NULL
 
 starpu_states <- function() {
-  c("Callback", "FetchingInput", "Idle", "Initializing", "Overhead", "PushingOutput", "Scheduling", "Submitting task", "Progressing", "Sleeping", "Submiting task", "Waiting all tasks", "Building task", "Deinitializing", "execute_on_all_wrapper", "unknown")
+  c("Callback", "FetchingInput", "Idle", "Initializing", "Overhead", "PushingOutput", "Scheduling", "Submitting task", "Progressing", "Sleeping", "Submiting task", "Waiting all tasks", "Building task", "Deinitializing", "execute_on_all_wrapper", "HandleRequests", "unknown")
 }
 
 all_starpu_states <- function() {
-  c("Callback", "FetchingInput", "Idle", "Initializing", "Overhead", "PushingOutput", "Scheduling", "Submitting task", "Progressing", "Sleeping", "Submiting task", "Waiting all tasks", "Building task", "Deinitializing", "execute_on_all_wrapper", "Executing", "unknown")
+  c("Callback", "FetchingInput", "Idle", "Initializing", "Overhead", "PushingOutput", "Scheduling", "Submitting task", "Progressing", "Sleeping", "Submiting task", "Waiting all tasks", "Building task", "Deinitializing", "execute_on_all_wrapper", "HandleRequests", "Executing", "unknown")
 }
 
 cholesky_states <- function() {
@@ -69,6 +69,7 @@ starpu_colors <- function() {
   pre_colors[14] <- "#000000"
   pre_colors[15] <- "#000000"
   pre_colors[16] <- "#000000"
+  pre_colors[17] <- "#000000"
   tibble(Value = starpu_states()) %>%
     # Get colors from Set3
     mutate(Color = pre_colors) %>%

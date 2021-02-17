@@ -86,15 +86,58 @@ starvz_data <- function(data = list()) {
   validate_starvz_data(new_starvz_data(data))
 }
 
-summary.starvz_data <- function(x) {
+#' Print starvz_data
+#'
+#' Print starvz_data
+#' @param x A starvz_data
+#' @param ... optional
+#' @return Nothing
+#' @examples
+#' print(starvz_sample_lu)
+#' @export
+print.starvz_data <- function(x, ...) {
   cat("StarVZ data\n")
+  cat("Execution Makespan:")
   cat("Elements:\n")
   cat(paste0("\t", names(x), "\n"))
+  class(x) <- "list"
+  print(x)
 }
 
-print.starvz_data <- function(x) {
-  cat("TODO")
+#' Summary starvz_data
+#'
+#' Summary starvz_data
+#' @param x A starvz_data
+#' @param ... optional
+#' @return Nothing
+#' @examples
+#' summary(starvz_sample_lu)
+#' @export
+summary.starvz_data <- function(x, ...) {
+  cat("StarVZ data\n")
+  cat("Execution Makespan:")
+  cat("Number of Application Tasks:")
+  cat("Types of Application Tasks:")
+  cat("Idleness during Application execution:")
+  cat("Total Number of Resources:")
+  cat("Nodes:")
+  cat("GPU:")
+  cat("CPU:")
 }
+
+#' Plot starvz_data
+#'
+#' Plot starvz_data
+#' @param x A starvz_data
+#' @param ... optional
+#' @return Nothing
+#' @examples
+#' plot(starvz_sample_lu)
+#' @export
+plot.starvz_data <- function(x, ...) {
+  return(starvz_plot(x))
+}
+
 
 #' Check if all required data is available
 #'

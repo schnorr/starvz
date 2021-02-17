@@ -59,13 +59,13 @@ geom_mpistates <- function(dfw = NULL, label = "1", expand = 0.05, Y = NULL) {
 #' panel_mpistate(data = starvz_sample_lu)
 #' @export
 panel_mpistate <- function(data = NULL,
-                           legend = data$config$mpibandwidth$legend,
+                           legend = data$config$mpistate$legend,
                            base_size = data$config$base_size,
                            expand_x = data$config$expand,
                            x_start = data$config$limits$start,
                            x_end = data$config$limits$end,
                            y_start = 0,
-                           y_end = data$config$mpibandwidth$limit) {
+                           y_end = data$config$mpistate$limit) {
   starvz_check_data(data, tables = list("Comm_state" = c("Node")))
 
   if (is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start))) {
@@ -82,6 +82,10 @@ panel_mpistate <- function(data = NULL,
 
   if (is.null(y_end) || (!is.na(y_end) && !is.numeric(y_end))) {
     y_end <- NA
+  }
+
+  if (is.null(legend) || !is.logical(legend)) {
+    legend <- TRUE
   }
 
   # Plot

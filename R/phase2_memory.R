@@ -363,23 +363,36 @@ handles_presence_states <- function(data) {
   fini_end <- unlist(end)
 
   data_state_events %>%
-    group_by(.data$Value, .data$Container) %>%
-    mutate(rep = case_when(
-      .data$Type == "data state owner" ~ 1,
-      .data$Type == "data state invalid" ~ 2,
-      TRUE ~ 5
-    )) %>%
-    mutate(flow = c(1, diff(.data$rep)), t_diff = c(diff(.data$Start), 1)) %>%
-    mutate(need = .data$flow != 0 & .data$t_diff > 0.001) %>%
-    filter(.data$need == TRUE) %>%
-    mutate(flow = c(1, diff(.data$rep))) %>%
-    mutate(need = .data$flow != 0) %>%
-    filter(.data$need == TRUE) %>%
-    mutate(End = lead(.data$Start, default = unlist(fini_end))) %>%
-    filter(.data$Type != "data state invalid") %>%
-    select(-.data$rep, -.data$flow, -.data$t_diff, -.data$need) %>%
-    ungroup() %>%
-    group_by(.data$Value, .data$Container) -> f_data
+  mutate(rep = case_when(
+    .data$Type == "data state owner" ~ 1,
+    .data$Type == "data state invalid" ~ 2,
+    TRUE ~ 5
+  )) %>%
+  group_by(.data$Value, .data$Container) %>%
+  mutate(flow = c(1, diff(.data$rep))) %>%
+
+  mutate(need = .data$flow != 0) %>%
+  filter(.data$need == TRUE) %>%
+
+  mutate(flow = c(1, diff(.data$rep)), t_diff = c(diff(.data$Start), 1)) %>%
+  ungroup() %>%
+
+  mutate(need = .data$flow != 0 & .data$t_diff > 0.001) %>%
+  filter(.data$need == TRUE) %>%
+
+  group_by(.data$Value, .data$Container) %>%
+  mutate(flow = c(1, diff(.data$rep))) %>%
+  ungroup() %>%
+
+  mutate(need = .data$flow != 0) %>%
+  filter(.data$need == TRUE) %>%
+
+  group_by(.data$Value, .data$Container) %>%
+  mutate(End = lead(.data$Start, default = unlist(fini_end))) %>%
+  ungroup() %>%
+  filter(.data$Type != "data state invalid") %>%
+  select(-.data$rep, -.data$flow, -.data$t_diff, -.data$need) %>%
+  group_by(.data$Value, .data$Container) -> f_data
 
   return(f_data)
 }
@@ -993,16 +1006,19 @@ panel_memory_snap <- function(data, selected_time, step,
   fills <- append(fc, extra)
 
   data$pre_snap[[1]] %>%
+    ungroup() %>%
     filter(.data$Start < selected_time, .data$End > selected_time) %>%
     right_join(data$pre_snap[[2]], by = c("Value" = "Handle", "Container" = "Container")) %>%
     mutate(Container = gsub("MEMMANAGER", "MM", .data$Container)) -> d_presence
 
   task_presence <- data$pre_snap[[3]] %>%
+    ungroup() %>%
     filter(.data$Start <= selected_time, .data$End >= selected_time) %>%
     inner_join(data$pre_snap[[2]], by = c("Handles" = "Handle", "Container" = "Container")) %>%
     mutate(Container = gsub("MEMMANAGER", "MM", .data$Container))
 
   task_presence_alpha <- data$pre_snap[[3]] %>%
+    ungroup() %>%
     filter(.data$Start > selected_time - step, .data$End <= selected_time) %>%
     inner_join(data$pre_snap[[2]], by = c("Handles" = "Handle", "Container" = "Container")) %>%
     mutate(Container = gsub("MEMMANAGER", "MM", .data$Container))
@@ -1041,7 +1057,7 @@ panel_memory_snap <- function(data, selected_time, step,
     ) +
     scale_shape_manual(
       values = c("R" = 21, "W" = 22, "RW" = 22), drop = FALSE,
-      limits = c("R", "RW"),
+      limits = c("R", "W", "RW"),
       guide = guide_legend(title.position = "top", nrow = 2)
     ) +
     scale_fill_manual(
@@ -1054,8 +1070,8 @@ panel_memory_snap <- function(data, selected_time, step,
     ) +
     scale_y_reverse(limits = c(max_x + 0.6, -0.6), expand = c(0, 0)) +
     facet_wrap(~Container) +
-    labs(x = "Block X Coordinate", y = "Block Y Coordinate") +
     default_theme(base_size, expand_x) +
+    labs(x = "Block X Coordinate", y = "Block Y Coordinate") +
     theme(
       plot.margin = unit(c(0, 10, 0, 0), "mm"),
       legend.box.margin = margin(-5, 0, -rel(1), 0),
@@ -1079,14 +1095,41 @@ panel_memory_snap <- function(data, selected_time, step,
   return(p)
 }
 
-multiple_snaps <- function(data, start, end, step, path) {
+#' Create multiple snapshot of memory
+#'
+#' Create multiple visualizations of memory
+#' Useful for continuing views
+#'
+#' @param data starvz_data with trace data
+#' @param start start time
+#' @param end end time
+#' @param step between snaps
+#' @param path path to save files
+#' @param scale for ggsave
+#' @param width for ggsave
+#' @param height for ggsave
+#' @return A ggplot object
+#' @include starvz_data.R
+#' @examples
+#' \donttest{
+#' multiple_snaps(data = starvz_sample_lu, 100, 200, 10, ".")
+#' }
+#' @export
+multiple_snaps <- function(data, start, end, step, path, scale=8, width=4, height=3) {
+  if (is.null(data$handle_states)) {
+    data$handle_states <- handles_presence_states(data)
+  }
+
+  if (is.null(data$pre_snap)) {
+    data$pre_snap <- pre_snap(data, data$handle_states)
+  }
   se <- seq(start, end, step)
   se <- c(se, end)
   i <- 1
   for (time in se) {
     p <- panel_memory_snap(data, time, step, tasks_size = 40)
     p <- p + ggtitle(paste0("Time: ", as.character(time)))
-    ggsave(paste0(path, i, ".png"), plot = p, scale = 4, width = 4, height = 3, units = "cm")
+    ggsave(paste0(path, i, ".png"), plot = p, scale = scale, width = width, height = height, units = "cm")
     i <- i + 1
   }
 }

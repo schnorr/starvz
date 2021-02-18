@@ -29,7 +29,7 @@ Options:
   -e, --exclude-tasks TASKLIST      # Exclude tasks from the analysis
 
       --git-version                # Shows the git hash
-      --versions                   # Shows R package installed version
+      --version                    # Shows R package installed version
 
 Report bugs to: <https://github.com/schnorr/starvz/issues>
 StarVZ home page: <https://github.com/schnorr/starvz/>
@@ -46,7 +46,7 @@ STARVZ_EXEC_PHASE_1=1
 STARVZ_EXEC_PHASE_2=1
 STARVZ_TRACE_FOLDER=""
 STARVZ_APPLICATION="-"
-STARVZ_CONFIG_FILE="$STARVZ_HOME/etc/default.yaml"
+STARVZ_CONFIG_FILE=""
 STARVZ_SAVE_FILE=""
 
 while true; do
@@ -110,7 +110,10 @@ while true; do
                 *)
                         # Make it absolute
                         STARVZ_TRACE_FOLDER=$(cd $1; pwd)
-                        STARVZ_CONFIG_FILE="$STARVZ_TRACE_FOLDER/config.yaml"
+                        # if no configuration file was set yet try a config inside trace folder
+                        if [[ -z "$STARVZ_CONFIG_FILE" ]]; then
+                          STARVZ_CONFIG_FILE="$STARVZ_TRACE_FOLDER/config.yaml"
+                        fi
                         shift 1
                         ;;
         esac
@@ -125,6 +128,7 @@ fi
 # If config file dont exist fall to default
 if [ ! -r "$STARVZ_CONFIG_FILE" ]; then
         STARVZ_CONFIG_FILE="$STARVZ_HOME/etc/default.yaml"
+        echo "Warn: Configuration file not found, using default"
 fi
 
 pushd $STARVZ_HOME/tools/

@@ -367,7 +367,7 @@ panel_st_agg_node <- function(data,
     select(.data$Node, .data$ResourceType) %>%
     unique() %>%
     mutate(ResourceType.Height = 1) %>%
-    arrange(-.data$Node) %>%
+    arrange(-.data$Node, desc(.data$ResourceType)) %>%
     mutate(ResourceType.Position = cumsum(lag(.data$ResourceType.Height, default = 0) + space) - space) %>%
     as.data.frame() -> df.node_position
 
@@ -397,9 +397,9 @@ panel_st_agg_node <- function(data,
     mutate(MaxPosition = .data$Node.Position + .data$Node.Height + space.between) -> df.pernodeABE
 
   df.node_position %>%
-    group_by(.data$Node) %>%
-    summarize(Node.Position = min(.data$ResourceType.Position) + sum(.data$ResourceType.Height)) %>%
-    mutate(Label = .data$Node) -> yconf
+    group_by(.data$Node, .data$ResourceType) %>%
+    summarize(Node.Position = min(.data$ResourceType.Position) + sum(.data$ResourceType.Height) - 0.5) %>%
+    mutate(Label = paste(.data$ResourceType, .data$Node)) -> yconf
 
   new_state_plot <- df.spatial_prep %>%
     ggplot() +
@@ -457,7 +457,8 @@ panel_st_agg_node <- function(data,
   }
 
   new_state_plot <- new_state_plot +
-    coord_cartesian(xlim = c(x_start, x_end), ylim = c(0, NA))
+    coord_cartesian(xlim = c(x_start, x_end), ylim = c(0, NA)) +
+    guides(fill=guide_legend(nrow=2))
 
 
   return(new_state_plot)

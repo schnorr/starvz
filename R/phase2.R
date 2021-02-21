@@ -566,7 +566,7 @@ starvz_plot_list <- function(data = NULL) {
 #' starvz_plot(starvz_sample_lu)
 #' }
 #' @export
-starvz_plot <- function(data = NULL, name = NULL, save = FALSE, guided = data$config$guided$active) {
+starvz_plot <- function(data = NULL, name = NULL, save = FALSE, guided = data$config$guided$active, dpi = 120) {
   if (is.null(data)) {
     return(NULL)
   }
@@ -650,7 +650,7 @@ starvz_plot <- function(data = NULL, name = NULL, save = FALSE, guided = data$co
     final_in_height <- final_px_height / total_dpi
     final_in_width <- final_px_width / total_dpi
 
-    ggsave(name, plot = plot, width = final_in_width, height = final_in_height, units = "in", dpi = total_dpi, limitsize = FALSE)
+    ggsave(name, plot = plot, width = final_in_width, height = final_in_height, units = "in", dpi = dpi, limitsize = FALSE)
   }
 
   starvz_log("Ending Starvz plot function")

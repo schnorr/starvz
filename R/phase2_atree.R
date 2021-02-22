@@ -1226,7 +1226,8 @@ panel_compare_tree <- function( data1 = NULL,
       arrange(.data$signal) %>%
       ggplot(aes(x=.data$Slice, y=.data$diff, color=.data$signal)) +
       geom_line(aes(group=.data$.groups)) +
-      scale_color_manual(values=c("blue", "red")) +
+      scale_color_manual(breaks = c("positive", "negative"),
+                         values=c("blue", "red")) +
       labs(y=paste0(performance_metric, "\n difference")) +
       default_theme(slower$config$base_size, slower$config$expand) +
       theme(legend.position = "none") -> lineplot

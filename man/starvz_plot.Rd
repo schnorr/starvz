@@ -8,7 +8,8 @@ starvz_plot(
   data = NULL,
   name = NULL,
   save = FALSE,
-  guided = data$config$guided$active
+  guided = data$config$guided$active,
+  dpi = 120
 )
 }
 \arguments{
@@ -19,6 +20,8 @@ starvz_plot(
 \item{save}{call ggplot to save the image}
 
 \item{guided}{compute ideal figure height}
+
+\item{dpi}{dpi for ggsave}
 }
 \value{
 ggplot object with all starvz plots

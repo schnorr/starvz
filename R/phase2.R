@@ -560,6 +560,7 @@ starvz_plot_list <- function(data = NULL) {
 #' @param save call ggplot to save the image
 #' @param name Path for saved image
 #' @param guided compute ideal figure height
+#' @param dpi dpi for ggsave
 #' @return ggplot object with all starvz plots
 #' @examples
 #' \donttest{

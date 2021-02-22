@@ -144,6 +144,7 @@ starvz_default_config <- function() {
 
   config$ready$active <- FALSE
   config$ready$limit <- NA
+  config$ready$lack_ready$active <- FALSE
 
   config$lackready$active <- FALSE
 

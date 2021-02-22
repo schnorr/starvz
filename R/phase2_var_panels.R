@@ -12,6 +12,7 @@
 #' @param y_start Y-axis start value
 #' @param y_end Y-axis end value
 #' @param step time step for aggregation
+#' @param lack_ready show lack ready area in this panel
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
@@ -24,7 +25,8 @@ panel_ready <- function(data, legend = data$config$ready$legend,
                         x_end = data$config$limits$end,
                         y_start = 0,
                         y_end = data$config$ready$limit,
-                        step = data$config$ready$step) {
+                        step = data$config$ready$step,
+                        lack_ready = data$config$ready$lack_ready$active) {
 
   ## Check for non-valid arguments
   if (is.null(legend) || !is.logical(legend)) {
@@ -65,6 +67,10 @@ panel_ready <- function(data, legend = data$config$ready$legend,
     agg_step <- step
   }
 
+  if (is.null(lack_ready) || !is.logical(lack_ready)) {
+    lack_ready <- FALSE
+  }
+
   panel <- data$Variable %>%
     filter(grepl("sched", .data$ResourceId), grepl("Ready", .data$Type)) %>%
     var_integration_segment_chart(
@@ -77,6 +83,55 @@ panel_ready <- function(data, legend = data$config$ready$legend,
       xlim = c(x_start, x_end),
       ylim = c(0, y_end)
     )
+
+  # add the lack ready tasks area inside the ready tasks panel
+  if(lack_ready) {
+
+    data$Starpu %>%
+      select(.data$Node, .data$Resource) %>%
+      unique() %>%
+      group_by(.data$Node) %>%
+      summarize(N = n()) %>%
+      .$N %>%
+      min() -> minResources
+
+    threshold <- config_value(data$config$lackready$threshold, minResources)
+
+    lack_ready_data <- data$Variable %>%
+      filter(.data$Type == "Ready") %>%
+      group_by(.data$Type, .data$Node, .data$ResourceId, .data$ResourceType) %>%
+      do(remyTimeIntegrationPrep(., myStep = agg_step)) %>%
+      mutate(Start = .data$Slice, End = lead(.data$Slice), Duration = .data$End - .data$Start) %>%
+      ungroup() %>%
+      filter(!is.na(.data$End)) %>%
+      group_by(.data$Type, .data$Node, .data$ResourceType, .data$Start, .data$End, .data$Duration) %>%
+      summarize(Value = sum(.data$Value), N = n()) %>%
+      ungroup() %>%
+      rename(ResourceId = .data$Node) %>%
+      filter(.data$Value < threshold) %>%
+      group_by(.data$Type, .data$Start, .data$End) %>%
+      summarize(Value = n()) %>%
+      ungroup()
+
+
+    # check if there is any lack ready area to add in the plot
+    has_lack_ready <- lack_ready_data %>%
+      filter(.data$Value == 1) %>%
+      nrow() >= 1
+    if(has_lack_ready) {
+      panel <- panel +
+        geom_rect(data=lack_ready_data,
+          aes(fill = .data$Value,
+              xmin = .data$Start,
+              xmax = .data$End,
+              ymin = 0,
+              ymax = threshold), alpha = 0.5) +
+      coord_cartesian(xlim = c(x_start, x_end)) +
+      scale_fill_gradient(low = "lightsalmon", high = "red1") +
+      guides(fill="none")
+    }
+  }
+
   return(panel)
 }
 

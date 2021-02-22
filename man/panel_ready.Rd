@@ -13,7 +13,8 @@ panel_ready(
   x_end = data$config$limits$end,
   y_start = 0,
   y_end = data$config$ready$limit,
-  step = data$config$ready$step
+  step = data$config$ready$step,
+  lack_ready = data$config$ready$lack_ready$active
 )
 }
 \arguments{
@@ -34,6 +35,8 @@ panel_ready(
 \item{y_end}{Y-axis end value}
 
 \item{step}{time step for aggregation}
+
+\item{lack_ready}{show lack ready area in this panel}
 }
 \value{
 A ggplot object

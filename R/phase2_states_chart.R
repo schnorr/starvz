@@ -328,6 +328,7 @@ geom_path_highlight <- function(paths = NULL) {
 #' @param x_start X-axis start value
 #' @param x_end X-axis end value
 #' @param step time-step
+#' @param legend option to activate legend
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples

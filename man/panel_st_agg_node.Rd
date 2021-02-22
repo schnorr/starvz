@@ -8,7 +8,8 @@ panel_st_agg_node(
   data,
   x_start = data$config$limits$start,
   x_end = data$config$limits$end,
-  step = data$config$st$aggregation$step
+  step = data$config$st$aggregation$step,
+  legend = data$config$st$legend
 )
 }
 \arguments{
@@ -19,6 +20,8 @@ panel_st_agg_node(
 \item{x_end}{X-axis end value}
 
 \item{step}{time-step}
+
+\item{legend}{option to activate legend}
 }
 \value{
 A ggplot object

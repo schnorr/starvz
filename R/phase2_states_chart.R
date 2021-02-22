@@ -111,6 +111,10 @@ panel_st_raw <- function(data = NULL, ST.Outliers = data$config$st$outliers, bas
     x_end <- NA
   }
 
+  if (is.null(legend) || !is.logical(legend)) {
+    legend <- TRUE
+  }
+
   # Plot
   gow <- ggplot() +
     default_theme(base_size, expand_x)
@@ -334,7 +338,8 @@ geom_path_highlight <- function(paths = NULL) {
 panel_st_agg_node <- function(data,
                               x_start = data$config$limits$start,
                               x_end = data$config$limits$end,
-                              step = data$config$st$aggregation$step) {
+                              step = data$config$st$aggregation$step,
+                              legend = data$config$st$legend) {
   if (is.null(step) || !is.numeric(step)) {
     if (is.null(data$config$global_agg_step)) {
       agg_step <- 100
@@ -351,6 +356,10 @@ panel_st_agg_node <- function(data,
 
   if (is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end))) {
     x_end <- NA
+  }
+
+  if (is.null(legend) || !is.logical(legend)) {
+    legend <- TRUE
   }
 
   step <- 100
@@ -460,6 +469,9 @@ panel_st_agg_node <- function(data,
     coord_cartesian(xlim = c(x_start, x_end), ylim = c(0, NA)) +
     guides(fill=guide_legend(nrow=2))
 
+  if (!legend) {
+    new_state_plot <- new_state_plot + theme(legend.position = "none")
+  }
 
   return(new_state_plot)
 }

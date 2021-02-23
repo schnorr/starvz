@@ -17,7 +17,8 @@ panel_atree(
   communication = data$config$atree$communication$active,
   anomalies = data$config$atree$anomalies$active,
   performance_metric = "time",
-  level = 0
+  level = 0,
+  end_arrow = "ParentEnd"
 )
 }
 \arguments{
@@ -46,6 +47,8 @@ panel_atree(
 \item{performance_metric}{which metric to represent ["time", "gflops"]}
 
 \item{level}{draw a dashed line to divide the tree at the level h}
+
+\item{end_arrow}{behavior of the end arrow [ParentEnd, ComputationEnd]}
 }
 \value{
 A ggplot object

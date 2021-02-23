@@ -5,6 +5,7 @@
 #' structure plot in a ggplot object and return it
 #'
 #' @param data starvz_data with trace data
+#' @param end_arrow behavior of the end arrow [ParentEnd, ComputationEnd]
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
@@ -12,46 +13,101 @@
 #' panel_atree_structure(starvz_sample_lu)
 #' }
 #' @export
-panel_atree_structure <- function(data = NULL) {
+panel_atree_structure <- function(data = NULL, end_arrow="ParentEnd") {
   if (is.null(data)) stop("input data for geom_atree_plot is NULL")
 
   makespan <- data$Application %>%
     .$End %>%
     max()
 
-  dtree <- data$Atree %>%
-    # Get Start time of the first task belonging to each ANode
-    left_join(data$Application %>%
-      select(.data$ANode, .data$Start, .data$End) %>%
-      group_by(.data$ANode) %>%
-      summarize(
-        Start = min(.data$Start),
-        End = max(.data$End)
-      ),
-    by = "ANode"
-    ) %>%
-    # Get graphical properties of Parent for each ANode
-    left_join(
-      x = .,
-      y = .,
-      by = c("Parent" = "ANode"), suffix = c("", ".Parent")
-    ) %>%
-    select(-.data$Parent.Parent) %>%
-    # Keep only non pruned nodes for tree structure
-    filter(.data$NodeType != "Pruned") %>%
-    # Calculate coordinates for lines connecting child with parent
-    mutate(
-      Edge.X = .data$Start,
-      Edge.Y = .data$Position + .data$Height / 2,
-      Edge.Xend = .data$Start.Parent,
-      Edge.Yend = .data$Position.Parent + .data$Height.Parent / 2
-    ) %>%
-    mutate(
-      Edge.End.X = .data$End,
-      Edge.End.Y = .data$Position + .data$Height / 2,
-      Edge.End.Xend = .data$End.Parent,
-      Edge.End.Yend = .data$Position.Parent + .data$Height.Parent / 2
-    )
+  dtree <- tibble()
+
+  # make child end point to parent end
+  if(tolower(end_arrow) == "parentend") {
+    dtree <- data$Atree %>%
+      # Get Start time of the first task belonging to each ANode
+      left_join(data$Application %>%
+        select(.data$ANode, .data$Start, .data$End) %>%
+        group_by(.data$ANode) %>%
+        summarize(
+          Start = min(.data$Start),
+          End = max(.data$End)
+        ),
+      by = "ANode"
+      ) %>%
+      # Get graphical properties of Parent for each ANode
+      left_join(
+        x = .,
+        y = .,
+        by = c("Parent" = "ANode"), suffix = c("", ".Parent")
+      ) %>%
+      select(-.data$Parent.Parent) %>%
+      # Keep only non pruned nodes for tree structure
+      filter(.data$NodeType != "Pruned") %>%
+      # Calculate coordinates for lines connecting child with parent
+      # Values used in the Start line
+      mutate(
+        Edge.X = .data$Start,
+        Edge.Y = .data$Position + .data$Height / 2,
+        Edge.Xend = .data$Start.Parent,
+        Edge.Yend = .data$Position.Parent + .data$Height.Parent / 2
+      ) %>%
+      # Values used in the End line
+      mutate(
+        Edge.End.X = .data$End,
+        Edge.End.Y = .data$Position + .data$Height / 2,
+        Edge.End.Xend = .data$End.Parent,
+        Edge.End.Yend = .data$Position.Parent + .data$Height.Parent / 2
+      )
+
+  # else child nodes point to the parent Y in the last computational task time X among the children
+  } else {
+    dtree <- data$Atree %>%
+      # Get Start time of the first task belonging to each ANode (keep Start as it is, but consider two end points clean and comptation)
+      left_join(data$Application %>%
+        mutate(EndType = case_when(grepl("clean", .data$Value) ~ "CleanEnd",
+                                   TRUE ~ "ComputationEnd")) %>%
+        select(.data$ANode, .data$Start, .data$End, .data$EndType) %>%
+        group_by(.data$ANode, .data$EndType) %>%
+        mutate(End = max(.data$End)) %>%
+        group_by(.data$ANode) %>%
+        mutate(Start = min(.data$Start)),
+        by = "ANode"
+      ) %>%
+      # Keep only non pruned nodes for tree structure
+      filter(.data$NodeType != "Pruned") %>%
+      ungroup() %>%
+      unique() %>%
+      spread(.data$EndType, .data$End) %>%
+      # Calculate coordinates for lines connecting child with parent
+      # Get graphical properties of Parent for each ANode
+      left_join(
+        x = .,
+        y = .,
+        by = c("Parent" = "ANode"), suffix = c("", ".Parent")
+      ) %>%
+      select(-.data$Parent.Parent) %>%
+      group_by(.data$Parent) %>%
+      mutate(ComputationEnd.Parent = max(.data$ComputationEnd)) %>%
+      ungroup() %>%
+      # Calculate coordinates for lines connecting child with parent
+      # Values used in the Start line (keep the same)
+      mutate(
+        Edge.X = .data$Start,
+        Edge.Y = .data$Position + .data$Height / 2,
+        Edge.Xend = .data$Start.Parent,
+        Edge.Yend = .data$Position.Parent + .data$Height.Parent / 2
+      ) %>%
+      # Values used in the End line
+      mutate(
+        End = .data$CleanEnd, # last moment for node lifetime
+        Edge.End.X = .data$ComputationEnd,
+        Edge.End.Y = .data$Position + .data$Height / 2,
+        Edge.End.Xend = .data$ComputationEnd.Parent,
+        Edge.End.Yend = .data$Position.Parent + .data$Height.Parent / 2
+      )
+  }
+
 
   # data frame for the tree plot structure
   dstruct <- dtree %>%
@@ -95,6 +151,13 @@ panel_atree_structure <- function(data = NULL) {
         yend = .data$Edge.End.Yend
       ), color = "#D95F02"
     ) +
+    # End free memory point
+    geom_point(
+      data = dline,
+      aes(
+        y = .data$Position + .data$Height / 2,
+        x = .data$End,
+      ), color = "black") +
     geom_point(
       data = dstruct,
       aes(
@@ -137,6 +200,7 @@ panel_atree_structure <- function(data = NULL) {
 #' @param anomalies enable/disable anomalies tasks representation
 #' @param performance_metric which metric to represent ["time", "gflops"]
 #' @param level draw a dashed line to divide the tree at the level h
+#' @param end_arrow behavior of the end arrow [ParentEnd, ComputationEnd]
 #' @return A ggplot object
 #' @examples
 #' \dontrun{
@@ -153,7 +217,8 @@ panel_atree <- function(data = NULL, step = data$config$atree$step, legend = dat
                         communication = data$config$atree$communication$active,
                         anomalies = data$config$atree$anomalies$active,
                         performance_metric="time",
-                        level = 0)
+                        level = 0,
+                        end_arrow = "ParentEnd")
 {
   starvz_check_data(data, tables = list("Atree" = c("ANode")))
 
@@ -196,7 +261,7 @@ panel_atree <- function(data = NULL, step = data$config$atree$step, legend = dat
     mutate(End = ifelse(.data$Slice + step >= .data$End, .data$End, .data$Slice + step))
 
   # 1. Add the atree structure representation first
-  atreeplot <- panel_atree_structure(data) +
+  atreeplot <- panel_atree_structure(data, end_arrow=end_arrow) +
     default_theme(data$config$base_size, data$config$expand) +
     ylab("Elimination Tree\n[Submission Order]")
 

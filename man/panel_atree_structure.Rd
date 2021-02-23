@@ -4,10 +4,12 @@
 \alias{panel_atree_structure}
 \title{Create the elimination tree structure plot along time}
 \usage{
-panel_atree_structure(data = NULL)
+panel_atree_structure(data = NULL, end_arrow = "ParentEnd")
 }
 \arguments{
 \item{data}{starvz_data with trace data}
+
+\item{end_arrow}{behavior of the end arrow [ParentEnd, ComputationEnd]}
 }
 \value{
 A ggplot object

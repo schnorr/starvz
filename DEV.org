@@ -64,6 +64,21 @@ usethis::use_data(starvz_sample_lu)
 
 *** R CMD check results
 
+* Ideas
+** Highlight Late Starting Tasks
+*** Description
+Use alpha values to highlight late starting tasks, i.e. tasks that
+have all their dependencies ready but have their execution delayed.
+
+- We can set a fixed threshold to mark a task as late starting, or we
+  can calculate the alpha value based on the waiting time for each
+  task, considering the max waiting time.
+
+*** Motivation
+ This can be useful to highlight critical moments of the application,
+ possibly revealing bad scheduling decisions.
+
+
 * checking CRAN incoming feasibility ... NOTE
 Maintainer: ‘Lucas Leandro Nesi <lucas.nesi@inf.ufrgs.br>’
 

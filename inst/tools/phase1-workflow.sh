@@ -16,9 +16,11 @@ function usage()
     echo "  where <application> is either cholesky or qrmumps";
 }
 
-if [ ! -x "$(command -v starpu_fxt_tool)" ]; then
-    echo "ERROR: Required application starpu_fxt_tool not found"
-    exit 1
+if [ -z "$STARVZ_USE_PAJE_TRACE" ] || [ "$STARVZ_USE_PAJE_TRACE" -ne 1 ]; then
+    if [ ! -x "$(command -v starpu_fxt_tool)" ]; then
+	echo "ERROR: Required application starpu_fxt_tool not found"
+	exit 1
+    fi
 fi
 
 if [ ! -x "$(command -v pj_dump)" ]; then

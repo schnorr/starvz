@@ -27,6 +27,7 @@ Options:
   -k, --keep                        # Keep intermediate files on phase1
   -s, --save                        # Name of the file to save
   -e, --exclude-tasks TASKLIST      # Exclude tasks from the analysis
+  -t, --use-paje-trace              # Use existing paje.trace and friends (tasks.rec, dag.dot) skipping starpu_fxt_tool
 
       --git-version                    # Shows the git hash
       --version                        # Shows R package installed version
@@ -53,6 +54,7 @@ STARVZ_TRACE_FOLDER=""
 STARVZ_APPLICATION="-"
 STARVZ_CONFIG_FILE=""
 STARVZ_SAVE_FILE=""
+STARVZ_USE_PAJE_TRACE=0
 
 while true; do
         case "$1" in
@@ -104,6 +106,10 @@ while true; do
                         export STARVZ_EXCLUDE_TASKS=$2
                         shift 2
                         ;;
+		--use-paje-trace|-t)
+		        export STARVZ_USE_PAJE_TRACE=1
+		        shift 1
+		        ;;
                 --version)
                         VERSION=$(Rscript -e 'message(packageVersion("starvz"))' 2>&1)
                         echo "StarVZ version $VERSION"

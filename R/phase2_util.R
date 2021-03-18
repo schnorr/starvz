@@ -317,7 +317,7 @@ panel_model_gflops <- function(data, freeScales = TRUE, model_type="LOG_LOG") {
   } else {
     model_panel <- model_panel +
       geom_point(alpha = .5) +
-      ggtitle(" Yoou should specify a valid model_type ['LR', 'LOG_LOG', 'NLR', 'FLEXMIX', 'WLR'] ")
+      ggtitle(" You should specify a valid model_type ['LR', 'LOG_LOG', 'NLR', 'FLEXMIX', 'WLR'] ")
   }
 
   # Controls the scales by using facet grid or facet wrap
@@ -463,4 +463,104 @@ get_resource_utilization <- function( Application = NULL, step = 100)
     ungroup()
 
   return(data_node_plot)
+}
+
+#' Plot the total computed GFlops difference over time given two traces
+#'
+#' Use starvz_data Application and the GFlop columns to create a plot that shows
+#' the total computed GFlop difference over time using geom_line. The blue color
+#' represent the faster execution and the red the slower one.
+#'
+#' @param data1 starvz_data with trace data
+#' @param data2 starvz_data with trace data
+#' @param legend enable/disable plot legends
+#' @param x_start X-axis start value
+#' @param x_end X-axis end value
+#' @param add_end_line add smaller end time vertical line
+#' @return A ggplot object
+#' @examples
+#' \dontrun{
+#' panel_gflops_computed_difference(data1, data2)
+#' }
+panel_gflops_computed_difference <- function( data1 = NULL,
+                                              data2 = NULL,
+                                              legend=FALSE,
+                                              x_start = NULL,
+                                              x_end = NULL,
+                                              add_end_line = TRUE )
+{
+  starvz_check_data(data1, tables = list("Application" = c("GFlop")))
+  starvz_check_data(data2, tables = list("Application" = c("GFlop")))
+
+  if (is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start))) {
+    x_start <- NA
+  }
+
+  if (is.null(x_end) || (!is.na(x_end) && !is.numeric(x_end))) {
+    x_end <- NA
+  }
+
+  # check wich one is the slower execution
+  end1 <- data1$Application %>% pull(.data$End) %>% max()
+  end2 <- data2$Application %>% pull(.data$End) %>% max()
+  if(end1 >= end2){
+    slower <- data1
+    faster <- data2
+    end_cut <- end2
+    x_end = end1
+  } else {
+    faster <- data1
+    slower <- data2
+    end_cut <- end1
+    x_end = end2
+  }
+
+  # get the total computation over time
+  # (QRT tasks only work for qrmumps, add new ones for other applications)
+  data_gflop <- faster$Application %>%
+    filter(grepl("qrt", .data$Value)) %>%
+    bind_rows(slower$Application %>%
+        filter(grepl("qrt", .data$Value)) %>%
+        mutate(GFlop = -.data$GFlop)
+    ) %>%
+    arrange(.data$End)
+
+  # calculate the actual difference in the total computed GFlops
+  data_diff_line <- data_gflop %>%
+    mutate(GFlopDiff = cumsum(.data$GFlop)) %>%
+    select(.data$Start, .data$End, .data$GFlopDiff) %>%
+    mutate(signal = ifelse(.data$GFlopDiff >= 0, "Faster", "Slower"))
+
+  lineplot <- data_diff_line %>%
+    mutate(groups=1) %>%
+    ggplot(aes(x=.data$End, y=.data$GFlopDiff, color=.data$signal)) +
+    geom_line(aes(group=.data$groups)) +
+    scale_color_manual(breaks = c("Faster", "Slower"),
+                       values=c("blue", "red")) +
+    labs(y=paste0("GFlops\n difference")) +
+    default_theme(data1$config$base_size, data1$config$expand) +
+    theme(legend.position = "none")
+    # geom_hline(aes(yintercept=c(0)) , linetype="dashed")
+
+    # add legend
+    if(legend) {
+      lineplot <- lineplot +
+        theme(legend.position = "top")
+    }
+
+    # adjust x start and end
+    tXScale <- list(
+      coord_cartesian(
+        xlim = c(x_start, x_end)
+      )
+    )
+
+    lineplot <- lineplot + tXScale
+
+    # add the end line for faster execution
+    if(add_end_line) {
+      lineplot <- lineplot + geom_vline(aes(xintercept=c(end_cut)))
+    }
+
+    return(lineplot)
 }

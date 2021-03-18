@@ -350,7 +350,7 @@ panel_atree <- function(data = NULL, step = data$config$atree$step, legend = dat
     cut_positions <- data$Atree %>%
       filter(.data$Depth == level & .data$Intermediary) %>%
       arrange(-.data$Position) %>% pull(.data$Position)
-      cut_positions <- cut_positions[2:length(cut_positions)]+1
+      cut_positions <- cut_positions[1:length(cut_positions)]+1
 
       atreeplot <- atreeplot +
         geom_hline(aes(yintercept=cut_positions, linetype="dashed"), color="black") +

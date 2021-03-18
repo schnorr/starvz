@@ -1272,30 +1272,8 @@ panel_compare_tree <- function( data1 = NULL,
 
   # add cumulative performance metric line
   if(add_diff_line) {
-    data_diff_line <- data_tree_utilization1 %>%
-      mutate(Execution = "NodeUsage.x") %>%
-      bind_rows(data_tree_utilization2 %>%
-          mutate(Execution = "NodeUsage.y")
-      ) %>%
-      spread(.data$Execution, .data$NodeUsage) %>%
-      mutate(NodeUsage.x = ifelse(is.na(.data$NodeUsage.x), 0, .data$NodeUsage.x),
-         NodeUsage.y = ifelse(is.na(.data$NodeUsage.y), 0, .data$NodeUsage.y) ) %>%
-      group_by(.data$Slice, .groups='keep') %>%
-      summarize(NodeUsage.x = sum(.data$NodeUsage.x), NodeUsage.y=sum(.data$NodeUsage.y)) %>%
-      ungroup() %>%
-      mutate(Usage.x=cumsum(.data$NodeUsage.x), Usage.y=cumsum(.data$NodeUsage.y)) %>%
-      mutate(diff = .data$Usage.x - .data$Usage.y) %>%
-      mutate(signal = ifelse(.data$diff >= 0, "positive", "negative"))
-
-    data_diff_line %>%
-      arrange(.data$signal) %>%
-      ggplot(aes(x=.data$Slice, y=.data$diff, color=.data$signal)) +
-      geom_line(aes(group=.data$.groups)) +
-      scale_color_manual(breaks = c("positive", "negative"),
-                         values=c("blue", "red")) +
-      labs(y=paste0(performance_metric, "\n difference")) +
-      default_theme(slower$config$base_size, slower$config$expand) +
-      theme(legend.position = "none") -> lineplot
+    lineplot <- panel_gflops_diff(data_tree_utilization1, data_tree_utilization2, 
+      slower$config$base_size, slower$config$expand, performance_metric)
   }
 
   atreeplot <- panel_atree_structure(slower) +
@@ -1358,4 +1336,34 @@ panel_compare_tree <- function( data1 = NULL,
   }
 
   return(atreeplot)
+}
+
+# Represent the total computed GFlops difference over time 
+panel_gflops_diff <- function(data_tree_utilization1, data_tree_utilization2, base_size, expand, performance_metric) {
+  data_diff_line <- data_tree_utilization1 %>%
+    mutate(Execution = "NodeUsage.x") %>%
+    bind_rows(data_tree_utilization2 %>%
+        mutate(Execution = "NodeUsage.y")
+    ) %>%
+    spread(.data$Execution, .data$NodeUsage) %>%
+    mutate(NodeUsage.x = ifelse(is.na(.data$NodeUsage.x), 0, .data$NodeUsage.x),
+       NodeUsage.y = ifelse(is.na(.data$NodeUsage.y), 0, .data$NodeUsage.y) ) %>%
+    group_by(.data$Slice, .groups='keep') %>%
+    summarize(NodeUsage.x = sum(.data$NodeUsage.x), NodeUsage.y=sum(.data$NodeUsage.y)) %>%
+    ungroup() %>%
+    mutate(Usage.x=cumsum(.data$NodeUsage.x), Usage.y=cumsum(.data$NodeUsage.y)) %>%
+    mutate(diff = .data$Usage.x - .data$Usage.y) %>%
+    mutate(signal = ifelse(.data$diff >= 0, "positive", "negative"))
+
+  lineplot <- data_diff_line %>%
+    arrange(.data$signal) %>%
+    ggplot(aes(x=.data$Slice, y=.data$diff, color=.data$signal)) +
+    geom_line(aes(group=.data$.groups)) +
+    scale_color_manual(breaks = c("positive", "negative"),
+                       values=c("blue", "red")) +
+    labs(y=paste0(performance_metric, "\n difference")) +
+    default_theme(base_size, expand) +
+    theme(legend.position = "none") 
+
+  return(lineplot)
 }

@@ -482,6 +482,7 @@ get_resource_utilization <- function( Application = NULL, step = 100)
 #' \dontrun{
 #' panel_gflops_computed_difference(data1, data2)
 #' }
+#' @export
 panel_gflops_computed_difference <- function( data1 = NULL,
                                               data2 = NULL,
                                               legend=FALSE,

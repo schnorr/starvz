@@ -1263,16 +1263,20 @@ panel_compare_tree <- function( data1 = NULL,
 
   # Calculate the diff
   data_diff <- data_tree_utilization1 %>%
-    mutate(Execution = "NodeUsage.x") %>%
+    mutate(Execution = "NodeUsage.faster") %>%
     bind_rows(data_tree_utilization2 %>%
-        mutate(Execution = "NodeUsage.y")
+        mutate(Execution = "NodeUsage.slower")
     ) %>%
     select(-.data$Start, -.data$End) %>%
     spread(.data$Execution, .data$NodeUsage) %>%
-    mutate(NodeUsage.x = ifelse(is.na(.data$NodeUsage.x), 0, .data$NodeUsage.x),
-           NodeUsage.y = ifelse(is.na(.data$NodeUsage.y), 0, .data$NodeUsage.y) ) %>%
-    mutate(color = ifelse(.data$NodeUsage.x == 0 | .data$NodeUsage.y == 0, "Exclusive execution", "Concurrent execution")) %>%
-    mutate(NodeUsage = .data$NodeUsage.x - .data$NodeUsage.y)
+    mutate(NodeUsage.faster = ifelse(is.na(.data$NodeUsage.faster), 0, .data$NodeUsage.faster),
+           NodeUsage.slower = ifelse(is.na(.data$NodeUsage.slower), 0, .data$NodeUsage.slower) ) %>%
+    # check when we have ocncurrent or exclusive execution
+    mutate(boxColor = case_when(.data$NodeUsage.faster != 0 & .data$NodeUsage.slower != 0 ~ "Concurrent execution",
+                                .data$NodeUsage.faster != 0 & .data$NodeUsage.slower == 0 ~ "Exclusive faster",
+                                .data$NodeUsage.faster == 0 & .data$NodeUsage.slower != 0 ~ "Exclusive slower")) %>%
+      # ifelse(.data$NodeUsage.faster == 0 | .data$NodeUsage.slower == 0, "Exclusive execution", "Concurrent execution")) %>%
+    mutate(NodeUsage = .data$NodeUsage.faster - .data$NodeUsage.slower)
 
   # add cumulative performance metric line
   if(add_diff_line) {
@@ -1292,12 +1296,17 @@ panel_compare_tree <- function( data1 = NULL,
         xmax = .data$Slice + step,
         ymin = .data$Position,
         ymax = .data$Position + .data$Height,
-        linetype = .data$color
+        color = .data$boxColor,
+        linetype = .data$boxColor
       ),
-      color = "#807d7c",
+      # color = "#807d7c",
       size=0.5
     ) +
-    scale_linetype_manual(values = c("blank", "solid"))
+    scale_linetype_manual(breaks = c("Concurrent execution", "Exclusive faster", "Exclusive slower"),
+                          values = c("blank", "solid", "solid")) +
+    scale_color_manual(breaks = c("Concurrent execution", "Exclusive faster", "Exclusive slower"),
+                       values=c("black", "blue", "red")) +
+    guides(color = FALSE, linetype = FALSE)
 
   myPalette <- colorRampPalette(c(rev(brewer.pal(9, "Reds")[2:9]), brewer.pal(9, "Greens")[2:9]))
 

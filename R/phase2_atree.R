@@ -150,23 +150,27 @@ panel_atree_structure <- function(data = NULL, end_arrow="ParentEnd") {
         xend = .data$Edge.End.Xend,
         yend = .data$Edge.End.Yend
       ), color = "#D95F02"
+    )
+
+    # End free memory point (use for end_arrow="ComputationEnd" only)
+    if(tolower(end_arrow) != "parentend") {
+      atreeplot <- atreeplot + 
+        geom_point(
+          data = dline,
+          aes(
+            y = .data$Position + .data$Height / 2,
+            x = .data$End,
+          ), color = "black")
+    }
+
+    atreeplot <- atreeplot +
+      geom_point(
+        data = dstruct,
+        aes(
+          x = .data$Edge.End.X,
+          y = .data$Edge.End.Y
+        ), color = "#D95F02"
     ) +
-    # End free memory point
-    geom_point(
-      data = dline,
-      aes(
-        y = .data$Position + .data$Height / 2,
-        x = .data$End,
-      ), color = "black") +
-    geom_point(
-      data = dstruct,
-      aes(
-        x = .data$Edge.End.X,
-        y = .data$Edge.End.Y
-      ), color = "#D95F02"
-    ) +
-    # Fix time coordinates
-    # coord_cartesian(xlim = c(0, makespan)) +
     # Horizontal lines
     geom_segment(
       data = dline,

@@ -91,7 +91,7 @@ jobs:
 
       - name: Copy extra test
         if: matrix.config.os == 'ubuntu-20.04' && matrix.config.r == 'release'
-        shell: cp -r extra_data/qr_trace inst/extdata/
+        run: cp -r extra_data/qr_trace inst/extdata/
 
       - name: Test coverage
         if: matrix.config.os == 'ubuntu-20.04' && matrix.config.r == 'release'

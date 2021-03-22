@@ -80,3 +80,16 @@ jobs:
         with:
           name: ${{ runner.os }}-r${{ matrix.config.r }}-results
           path: check
+
+      - name: Install dependencies cov
+        if: ${{ matrix.config.os }} == 'ubuntu-20.04' && ${{ matrix.config.r }} == 'release'
+        run: |
+          install.packages(c("remotes"))
+          remotes::install_deps(dependencies = TRUE)
+          remotes::install_cran("covr")
+        shell: Rscript {0}
+
+      - name: Test coverage
+        if: ${{ matrix.config.os }} == 'ubuntu-20.04' && ${{ matrix.config.r }} == 'release'
+        run: covr::codecov()
+        shell: Rscript {0}

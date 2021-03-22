@@ -1024,8 +1024,11 @@ read_links <- function(where = ".", ZERO = 0) {
     return(NULL)
   }
 
+  all_cols <- c(MPIType="", Priority="", Handle="")
+
   # Read links
   dfl <- dfl %>%
+    add_column(!!!all_cols[!names(all_cols) %in% names(.)]) %>%
     # the new zero because of the long initialization phase
     mutate(Start = .data$Start - ZERO, End = .data$End - ZERO) %>%
     select(-.data$Nature) %>%

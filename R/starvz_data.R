@@ -9,7 +9,7 @@
 #' @importFrom stats na.omit complete.cases setNames sd quantile lm resid predict
 #' @importFrom magrittr %>% set_colnames
 #' @importFrom rlang .data
-#' @importFrom tibble rowid_to_column as.tibble enframe
+#' @importFrom tibble rowid_to_column as.tibble enframe add_column
 #' @importFrom tidyr pivot_longer pivot_wider complete separate gather nest unnest expand replace_na spread
 #' @importFrom readr read_csv cols col_integer col_character col_double col_logical
 #' @importFrom stringr str_replace str_replace_all str_to_title

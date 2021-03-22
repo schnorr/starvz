@@ -186,7 +186,7 @@ echo "Nature, ResourceId, Type, Start, End, Duration, Value" | gzip -c > $PAJEVA
 zgrep -E "^Variable" paje.csv.gz | gzip -c >> $PAJEVARIABLE
 
 PAJELINK=paje.link.csv.gz
-echo "Nature, Container, Type, Start, End, Duration, Size, Origin, Dest, Key, Tag" | gzip -c > $PAJELINK
+echo "Nature, Container, Type, Start, End, Duration, Size, Origin, Dest, Key, Tag, MPIType, Priority, Handle" | gzip -c > $PAJELINK
 zgrep -E "^Link" paje.csv.gz | gzip -c >> $PAJELINK
 
 PAJEEVENT=paje.events.csv.gz

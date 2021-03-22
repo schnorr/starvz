@@ -215,7 +215,7 @@ read_worker_csv <- function(where = ".",
       ungroup()
   } else if (whichApplication == "qrmumps") {
     starvz_log("Using Regression models to detect task duration anomalies")
-    
+
     # Step 0: Define the linear models for outlier classification
     model_LR <- function(df)  { lm(Duration ~ GFlop, data = df) }
     model_WLR <- function(df) { lm(Duration ~ GFlop, data = df, weights=1/df$GFlop) }
@@ -225,7 +225,7 @@ read_worker_csv <- function(where = ".",
     model_flexmix_log <- function(df) {
       stepFlexmix(Duration ~ GFlop, data = df, k = 1:2,
         model = FLXMRglm(log(Duration) ~ log(GFlop)),
-        control = list(nrep=30)) 
+        control = list(nrep=30))
     }
 
     # set dummy variable for Cluster
@@ -238,7 +238,7 @@ read_worker_csv <- function(where = ".",
     # need to create the clusters before calling the function, let's do the clustering for all
     # types of tasks for now, replacing the dummy Cluster variable
     Application <- Application %>% select(-.data$Cluster)
-    Application <- Application %>% 
+    Application <- Application %>%
       filter(grepl("qrt", .data$Value)) %>%
       filter(.data$GFlop > 0) %>%
       group_by(.data$ResourceType, .data$Value) %>%
@@ -264,7 +264,7 @@ read_worker_csv <- function(where = ".",
       group_by(.data$Value, .data$ResourceType) %>%
       mutate(Outlier = ifelse(.data$Duration > outlier_fun(.data$Duration), TRUE, FALSE)) %>%
       ungroup()
-  } 
+  }
 
   # Define the global ZERO (to be used with other trace date)
   ZERO <- Application %>%
@@ -1007,7 +1007,10 @@ read_links <- function(where = ".", ZERO = 0) {
         Origin = col_character(),
         Dest = col_character(),
         Key = col_character(),
-        Tag = col_character()
+        Tag = col_character(),
+        MPIType = col_character(),
+        Priority = col_integer(),
+        Handle = col_character()
       )
     ))
   } else {
@@ -1032,7 +1035,9 @@ read_links <- function(where = ".", ZERO = 0) {
       Origin = as.factor(.data$Origin),
       Dest = as.factor(.data$Dest),
       Key = as.factor(.data$Key),
-      Tag = as.factor(.data$Tag)
+      Tag = as.factor(.data$Tag),
+      MPIType = as.factor(.data$MPIType),
+      Handle = as.factor(.data$Handle)
     )
 
   return(dfl)

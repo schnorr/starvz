@@ -11,3 +11,4 @@ PHASE1\.org
 README\.org
 ^extra_data$
 ^extra_test$
+^\.github$

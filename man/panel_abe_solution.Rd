@@ -4,7 +4,7 @@
 \alias{panel_abe_solution}
 \title{Create a plot with the solution computed by ABE}
 \usage{
-panel_abe_solution(data = NULL, base_size = data$config$base_size)
+panel_abe_solution(data, base_size = data$config$base_size)
 }
 \arguments{
 \item{data}{starvz_data with trace data}

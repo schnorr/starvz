@@ -4,7 +4,8 @@
 \alias{starvz_read}
 \title{Read starvz trace files}
 \usage{
-starvz_read(directory = ".", config_file = NULL, selective = TRUE)
+starvz_read(directory = ".",
+               config_file = NULL, selective = TRUE)
 }
 \arguments{
 \item{directory}{Directory path of trace files}
@@ -18,9 +19,9 @@ in config}
 The starvz_data with all tables
 }
 \description{
-Read the directory of trace files (feather or parquet) and
-the configuration file, and return a starvz_data class used
-in starvz functions
+Read the directory of trace files (feather or parquet) \cr
+and the configuration file, and return a starvz_data
+class used in starvz functions
 }
 \examples{
 starvz_read("folder_to_parquet_files/")

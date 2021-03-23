@@ -4,7 +4,16 @@
 \alias{multiple_snaps}
 \title{Create multiple snapshot of memory}
 \usage{
-multiple_snaps(data, start, end, step, path, scale = 8, width = 4, height = 3)
+multiple_snaps(
+  data = NULL,
+  start = 0,
+  end = 1000,
+  step = 100,
+  path = ".",
+  scale = 8,
+  width = 4,
+  height = 3
+)
 }
 \arguments{
 \item{data}{starvz_data with trace data}
@@ -31,7 +40,7 @@ Create multiple visualizations of memory
 Useful for continuing views
 }
 \examples{
-\donttest{
+\dontrun{
 multiple_snaps(data = starvz_sample_lu, 100, 200, 10, ".")
 }
 }

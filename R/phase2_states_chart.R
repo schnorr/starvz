@@ -38,10 +38,13 @@ panel_st <- function(data, agg = data$config$st$aggregation$active,
 #' @param agg Active or not static aggregation
 #' @return A ggplot object
 #' @include starvz_data.R
+#' @usage panel_st_runtime(data,
+#'              agg = data$config$starpu$aggregation$active)
 #' @examples
 #' panel_st_runtime(data = starvz_sample_lu)
 #' @export
-panel_st_runtime <- function(data, agg = data$config$starpu$aggregation$active) {
+panel_st_runtime <- function(data,
+                             agg = data$config$starpu$aggregation$active) {
   if (agg) {
     panel <- panel_st_agg_static(data, runtime = TRUE, step = data$config$starpu$aggregation$step)
   } else {

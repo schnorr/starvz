@@ -4,7 +4,8 @@
 \alias{starvz_check_data}
 \title{Check if all required data is available}
 \usage{
-starvz_check_data(data = NULL, tables = list(), extra_func = NULL)
+starvz_check_data(data = NULL,
+             tables = list(), extra_func = NULL)
 }
 \arguments{
 \item{data}{starvz_data with trace data}

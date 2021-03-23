@@ -1105,13 +1105,18 @@ panel_memory_snap <- function(data, selected_time, step,
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' multiple_snaps(data = starvz_sample_lu, 100, 200, 10, ".")
 #' }
 #' @export
-multiple_snaps <- function(data,  start, end,
-                           step,path, scale = 8,
-                           width = 4, height = 3) {
+multiple_snaps <- function(data = NULL,
+                           start = 0,
+                           end = 1000,
+                           step = 100,
+                           path = ".",
+                           scale = 8,
+                           width = 4,
+                           height = 3) {
   if (is.null(data$handle_states)) {
     data$handle_states <- handles_presence_states(data)
   }

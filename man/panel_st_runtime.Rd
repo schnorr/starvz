@@ -4,7 +4,8 @@
 \alias{panel_st_runtime}
 \title{Create a space time visualization of the runtime as a Gantt chart}
 \usage{
-panel_st_runtime(data, agg = data$config$starpu$aggregation$active)
+panel_st_runtime(data,
+             agg = data$config$starpu$aggregation$active)
 }
 \arguments{
 \item{data}{starvz_data with trace data}

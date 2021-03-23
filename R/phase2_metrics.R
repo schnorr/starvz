@@ -530,7 +530,7 @@ geom_abe_internal <- function(pernodeABEdf = NULL,
 #' panel_abe_solution(data = starvz_sample_lu)
 #' }
 #' @export
-panel_abe_solution <- function(data = NULL,
+panel_abe_solution <- function(data,
                                base_size = data$config$base_size) {
   starvz_check_data(data, tables = list(
     "Colors" = c("Value", "Color", "Use"),

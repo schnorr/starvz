@@ -175,12 +175,17 @@ panel_title <- function(data, title = data$config$title$text) {
 #' @param model_type Choose the regression model type to use
 #' @return A ggplot object
 #' @include starvz_data.R
+#' @usage panel_model_gflops(data,
+#'          freeScales = TRUE, model_type = "LOG_LOG")
 #' @examples
 #' \dontrun{
 #' panel_model_gflops(data = starvz_sample_sample)
 #' }
 #' @export
-panel_model_gflops <- function(data, freeScales = TRUE, model_type = "LOG_LOG") {
+panel_model_gflops <- function(
+                           data,
+                           freeScales = TRUE,
+                           model_type = "LOG_LOG") {
 
   # create the base ggplot object that is enhanced according to the model_type
   model_panel <- data$Application %>%

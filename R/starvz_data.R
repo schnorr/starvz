@@ -163,12 +163,16 @@ plot.starvz_data <- function(x, ...) {
 #' are columns), if tables is null continue
 #' @param extra_func Extra function to be applied on data to do a last check
 #' @return Logical, TRUE if data pass all tests
+#' @usage starvz_check_data(data = NULL,
+#'              tables = list(), extra_func = NULL)
 #' @include starvz_data.R
 #' @examples
 #' starvz_check_data(starvz_sample_lu,
 #'                   tables = list("Comm_state" = c("Node")))
 #' @export
-starvz_check_data <- function(data = NULL, tables = list(), extra_func = NULL) {
+starvz_check_data <- function(data = NULL,
+                              tables = list(),
+                              extra_func = NULL) {
   caller <- "starvz_check_data:"
   if (sys.nframe() > 1) {
     caller <- paste0("", deparse(sys.calls()[[sys.nframe() - 1]]), ":")
@@ -213,10 +217,14 @@ starvz_check_data <- function(data = NULL, tables = list(), extra_func = NULL) {
 #' library(starvz)
 #' pre_phase1 <- starvz_phase1(system.file("extdata", "lu_trace",
 #'                                         package = "starvz"),
-#'                             lu_colors, state_filter=2, whichApplication="lu")
+#'                             lu_colors,
+#'                             state_filter=2,
+#'                             whichApplication="lu")
 #' starvz_sample_lu <- starvz_read(system.file("extdata",
-#'                                             "lu_trace", package = "starvz"),
-#'                                 system.file("extdata", "config.yaml",
+#'                                             "lu_trace",
+#'                                             package = "starvz"),
+#'                                 system.file("extdata",
+#'                                             "config.yaml",
 #'                                             package = "starvz"),
 #'                                 selective=FALSE)
 #' usethis::use_data(starvz_sample_lu)

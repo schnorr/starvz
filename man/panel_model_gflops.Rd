@@ -4,7 +4,8 @@
 \alias{panel_model_gflops}
 \title{Create the diagnostig plot for the regression model}
 \usage{
-panel_model_gflops(data, freeScales = TRUE, model_type = "LOG_LOG")
+panel_model_gflops(data,
+         freeScales = TRUE, model_type = "LOG_LOG")
 }
 \arguments{
 \item{data}{starvz_data with trace data}

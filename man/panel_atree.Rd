@@ -61,6 +61,7 @@ representations can be controlled in the configuration file.
 \examples{
 \dontrun{
 panel_atree(starvz_sample_lu, step = 10)
-panel_atree(starvz_sample_lu, step = 20, communication = FALSE, initialization = FALSE)
+panel_atree(starvz_sample_lu, step = 20,
+            communication = FALSE, initialization = FALSE)
 }
 }

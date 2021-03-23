@@ -1109,7 +1109,9 @@ panel_memory_snap <- function(data, selected_time, step,
 #' multiple_snaps(data = starvz_sample_lu, 100, 200, 10, ".")
 #' }
 #' @export
-multiple_snaps <- function(data, start, end, step, path, scale = 8, width = 4, height = 3) {
+multiple_snaps <- function(data,  start, end,
+                           step,path, scale = 8,
+                           width = 4, height = 3) {
   if (is.null(data$handle_states)) {
     data$handle_states <- handles_presence_states(data)
   }

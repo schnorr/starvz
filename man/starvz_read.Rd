@@ -24,6 +24,7 @@ in starvz functions
 }
 \examples{
 starvz_read("folder_to_parquet_files/")
-starvz_read(directory = "folder_to_parquet_files/", config_file = "path_to_config.yaml")
+starvz_read(directory = "folder_to_parquet_files/",
+            config_file = "path_to_config.yaml")
 starvz_read() # Read current directory
 }

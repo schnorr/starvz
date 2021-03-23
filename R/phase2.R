@@ -178,7 +178,8 @@ starvz_compute_plot_heights <- function(plist, config) {
 #' @return The ggplot plot
 #' @examples
 #' \donttest{
-#' starvz_assemble(starvz_plot_list(starvz_sample_lu), config = starvz_sample_lu$config)
+#' starvz_assemble(starvz_plot_list(starvz_sample_lu),
+#'                 config = starvz_sample_lu$config)
 #' }
 #' @export
 starvz_assemble <- function(..., config = NULL, remove_Y_info = TRUE, remove_legends = TRUE) {

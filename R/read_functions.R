@@ -94,7 +94,8 @@ starvz_read_some <- function(directory = ".", tables = c("application"), config_
 #' @return The starvz_data with all tables
 #' @examples
 #' starvz_read("folder_to_parquet_files/")
-#' starvz_read(directory = "folder_to_parquet_files/", config_file = "path_to_config.yaml")
+#' starvz_read(directory = "folder_to_parquet_files/",
+#'             config_file = "path_to_config.yaml")
 #' starvz_read() # Read current directory
 #' @export
 starvz_read <- function(directory = ".", config_file = NULL, selective = TRUE) {

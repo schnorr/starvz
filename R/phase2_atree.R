@@ -212,7 +212,8 @@ panel_atree_structure <- function(data = NULL, end_arrow = "ParentEnd") {
 #' @examples
 #' \dontrun{
 #' panel_atree(starvz_sample_lu, step = 10)
-#' panel_atree(starvz_sample_lu, step = 20, communication = FALSE, initialization = FALSE)
+#' panel_atree(starvz_sample_lu, step = 20,
+#'             communication = FALSE, initialization = FALSE)
 #' }
 #' @export
 panel_atree <- function(data = NULL, step = data$config$atree$step, legend = data$config$atree$legend, zoom = FALSE,

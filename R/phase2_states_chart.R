@@ -61,7 +61,7 @@ panel_st_runtime <- function(data, agg = data$config$starpu$aggregation$active) 
 #' @param expand_x expand size for scale_x_continuous padding
 #' @param expand_y expand size for scale_y_continuous padding
 #' @param selected_nodes select only some nodes in some plots
-#' @param labels control resources labels: [ALL, 1CPU_per_NODE, 1GPU_per_NODE, FIRST_LAST]
+#' @param labels labels: [ALL, 1CPU_per_NODE, 1GPU_per_NODE, FIRST_LAST]
 #' @param alpha alpha value for non-anomalous tasks
 #' @param idleness enable/disable idleness percentages in the plot
 #' @param taskdeps enable/disable task deps path highlighting

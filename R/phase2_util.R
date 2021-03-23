@@ -579,6 +579,8 @@ panel_gflops_computed_difference <- function(data1 = NULL,
 }
 
 statistics_makespan <- function(data){
+  if(is.null(data$Application))
+    return(NA)
   data$Application %>%
     select(.data$End) %>%
     pull(.data$End) %>%
@@ -588,48 +590,64 @@ statistics_makespan <- function(data){
 }
 
 statistics_total_tasks <- function(data){
+  if(is.null(data$Application))
+    return(NA)
   data$Application %>%
     nrow() -> total_tasks
   return(total_tasks)
 }
 
 statistics_total_tasks_types <- function(data){
-  data$Application %>% select(Value) %>%
+  if(is.null(data$Application))
+    return(NA)
+  data$Application %>% select(.data$Value) %>%
     distinct() %>% nrow() -> total_tasks_types
   return(total_tasks_types)
 }
 
 statistics_total_nodes <- function(data){
-  data$Application %>% select(Node) %>%
+  if(is.null(data$Application))
+    return(NA)
+  data$Application %>% select(.data$Node) %>%
     distinct() %>% nrow() -> total_nodes
   return(total_nodes)
 }
 
 statistics_total_resources <- function(data){
-  data$Starpu %>% select(ResourceId) %>%
+  if(is.null(data$Starpu))
+    return(NA)
+  data$Starpu %>% select(.data$ResourceId) %>%
     distinct() %>% nrow() -> total_resources
   return(total_resources)
 }
 
 statistics_total_gpus <- function(data){
+  if(is.null(data$Starpu))
+    return(NA)
   data$Starpu %>%
-    filter(ResourceType == "CUDA") %>%
-    select(ResourceId) %>%
+    filter(.data$ResourceType == "CUDA") %>%
+    select(.data$ResourceId) %>%
     distinct() %>% nrow() -> total_gpus
   return(total_gpus)
 }
 
 statistics_total_cpus <- function(data){
+  if(is.null(data$Starpu))
+    return(NA)
   data$Starpu %>%
-    filter(ResourceType == "CPU") %>%
-    select(ResourceId) %>%
+    filter(.data$ResourceType == "CPU") %>%
+    select(.data$ResourceId) %>%
     distinct() %>% nrow() -> total_cpus
   return(total_cpus)
 }
 
 statistics_total_idleness <- function(data){
+  if(is.null(data$Application))
+    return(NA)
+  if(is.null(data$Starpu))
+    return(NA)
   data$Application %>%
-  summarize(active=sum(Duration)) %>% .$active -> total_time_active
+  summarize(active=sum(.data$Duration)) %>% .$active -> total_time_active
 
   total_resources <- statistics_total_resources(data)
 

@@ -22,6 +22,6 @@ in the task anomaly classification fits the data.
 }
 \examples{
 \dontrun{
-panel_model_gflops(data = starvz_sample_data)
+panel_model_gflops(data = starvz_sample_sample)
 }
 }

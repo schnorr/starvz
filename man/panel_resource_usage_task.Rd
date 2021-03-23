@@ -31,7 +31,7 @@ Use data Application to create a panel of the total resource utilization
 that helps to observe the time related resource utilization by task
 }
 \examples{
-\dontrun{
-panel_resource_usage_task(data = starvz_sample_data)
+\donttest{
+panel_resource_usage_task(data = starvz_sample_lu)
 }
 }

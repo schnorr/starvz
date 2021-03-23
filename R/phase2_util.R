@@ -176,8 +176,8 @@ panel_title <- function(data, title = data$config$title$text) {
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
-#' \donttest{
-#' panel_model_gflops(data = starvz_sample_data)
+#' \dontrun{
+#' panel_model_gflops(data = starvz_sample_sample)
 #' }
 #' @export
 panel_model_gflops <- function(data, freeScales = TRUE, model_type = "LOG_LOG") {
@@ -353,7 +353,7 @@ panel_model_gflops <- function(data, freeScales = TRUE, model_type = "LOG_LOG") 
 #' @include starvz_data.R
 #' @examples
 #' \donttest{
-#' panel_resource_usage_task(data = starvz_sample_data)
+#' panel_resource_usage_task(data = starvz_sample_lu)
 #' }
 #' @export
 panel_resource_usage_task <- function(data = NULL,
@@ -385,7 +385,8 @@ panel_resource_usage_task <- function(data = NULL,
   df2 <- df1 %>%
     ungroup() %>%
     group_by(.data$Slice) %>%
-    unique()
+    unique() %>%
+    droplevels()
 
   # must expand data frame to make geom_area work properly
   df_plot <- df2 %>%
@@ -434,7 +435,7 @@ panel_resource_usage_task <- function(data = NULL,
 get_resource_utilization <- function(Application = NULL, step = 100) {
   # Arrange data
   df_filter <- Application %>%
-    select(.data$ANode, .data$Start, .data$End, .data$Value, .data$JobId) %>%
+    select(.data$Start, .data$End, .data$Value, .data$JobId) %>%
     unique() %>%
     rename(Task = .data$Value) %>%
     arrange(.data$Start)
@@ -456,7 +457,7 @@ get_resource_utilization <- function(Application = NULL, step = 100) {
     mutate(parallelism = cumsum(.data$Value)) %>%
     ungroup()
 
-  # Do the time aggregation of resource utilization by ANode
+  # Do the time aggregation of resource utilization
   data_node_plot <- data_node_parallelism %>%
     select(.data$Task, .data$Time, .data$parallelism) %>%
     arrange(.data$Time) %>%

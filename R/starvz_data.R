@@ -97,9 +97,11 @@ starvz_data <- function(data = list()) {
 #' @export
 print.starvz_data <- function(x, ...) {
   cat("StarVZ data\n")
-  cat("Execution Makespan:")
-  cat("Elements:\n")
-  cat(paste0("\t", names(x), "\n"))
+  cat("Execution Makespan: ")
+  cat(statistics_makespan(x))
+  cat("\nElements: ")
+  cat(paste(names(x), collapse=", "))
+  cat("\n")
   class(x) <- "list"
   print(x)
 }
@@ -115,14 +117,23 @@ print.starvz_data <- function(x, ...) {
 #' @export
 summary.starvz_data <- function(object, ...) {
   cat("StarVZ data\n")
-  cat("Execution Makespan:")
-  cat("Number of Application Tasks:")
-  cat("Types of Application Tasks:")
-  cat("Idleness during Application execution:")
-  cat("Total Number of Resources:")
-  cat("Nodes:")
-  cat("GPU:")
-  cat("CPU:")
+  cat("Execution Makespan: ")
+  cat(statistics_makespan(object))
+  cat("\nNumber of Application Tasks: ")
+  cat(statistics_total_tasks(object))
+  cat("\nTypes of Application Tasks: ")
+  cat(statistics_total_tasks_types(object))
+  cat("\nIdleness during Application execution: ")
+  cat(statistics_total_idleness(object))
+  cat(" %\nTotal Number of Resources: ")
+  cat(statistics_total_resources(object))
+  cat("\nNodes: ")
+  cat(statistics_total_nodes(object))
+  cat("\nGPU: ")
+  cat(statistics_total_gpus(object))
+  cat("\nCPU: ")
+  cat(statistics_total_cpus(object))
+  cat("\n")
 }
 
 #' Plot starvz_data

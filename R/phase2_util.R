@@ -577,3 +577,65 @@ panel_gflops_computed_difference <- function(data1 = NULL,
 
   return(lineplot)
 }
+
+statistics_makespan <- function(data){
+  data$Application %>%
+    select(.data$End) %>%
+    pull(.data$End) %>%
+    na.omit() %>%
+    max() -> makespan
+  return(makespan)
+}
+
+statistics_total_tasks <- function(data){
+  data$Application %>%
+    nrow() -> total_tasks
+  return(total_tasks)
+}
+
+statistics_total_tasks_types <- function(data){
+  data$Application %>% select(Value) %>%
+    distinct() %>% nrow() -> total_tasks_types
+  return(total_tasks_types)
+}
+
+statistics_total_nodes <- function(data){
+  data$Application %>% select(Node) %>%
+    distinct() %>% nrow() -> total_nodes
+  return(total_nodes)
+}
+
+statistics_total_resources <- function(data){
+  data$Starpu %>% select(ResourceId) %>%
+    distinct() %>% nrow() -> total_resources
+  return(total_resources)
+}
+
+statistics_total_gpus <- function(data){
+  data$Starpu %>%
+    filter(ResourceType == "CUDA") %>%
+    select(ResourceId) %>%
+    distinct() %>% nrow() -> total_gpus
+  return(total_gpus)
+}
+
+statistics_total_cpus <- function(data){
+  data$Starpu %>%
+    filter(ResourceType == "CPU") %>%
+    select(ResourceId) %>%
+    distinct() %>% nrow() -> total_cpus
+  return(total_cpus)
+}
+
+statistics_total_idleness <- function(data){
+  data$Application %>%
+  summarize(active=sum(Duration)) %>% .$active -> total_time_active
+
+  total_resources <- statistics_total_resources(data)
+
+  makespan <- statistics_makespan(data)
+
+  percent_active <- total_time_active/(total_resources * makespan)
+
+  return(100.0 - percent_active)
+}

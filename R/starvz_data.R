@@ -143,7 +143,9 @@ summary.starvz_data <- function(object, ...) {
 #' @param ... optional
 #' @return Nothing
 #' @examples
+#' \donttest{
 #' plot(starvz_sample_lu)
+#' }
 #' @export
 plot.starvz_data <- function(x, ...) {
   return(starvz_plot(x))

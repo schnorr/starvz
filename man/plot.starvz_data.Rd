@@ -18,5 +18,7 @@ Nothing
 Plot starvz_data
 }
 \examples{
+\donttest{
 plot(starvz_sample_lu)
+}
 }

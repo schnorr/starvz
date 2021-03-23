@@ -372,7 +372,7 @@ starvz_plot_list <- function(data = NULL) {
     nodememuse = geom_blank(),
     summary_nodes = geom_blank(),
     tplot = geom_blank(),
-    verticallines  = geom_blank()
+    verticallines = geom_blank()
   )
 
   # Atree space/time view

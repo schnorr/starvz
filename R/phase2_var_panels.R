@@ -85,8 +85,7 @@ panel_ready <- function(data, legend = data$config$ready$legend,
     )
 
   # add the lack ready tasks area inside the ready tasks panel
-  if(lack_ready) {
-
+  if (lack_ready) {
     data$Starpu %>%
       select(.data$Node, .data$Resource) %>%
       unique() %>%
@@ -118,17 +117,21 @@ panel_ready <- function(data, legend = data$config$ready$legend,
     has_lack_ready <- lack_ready_data %>%
       filter(.data$Value == 1) %>%
       nrow() >= 1
-    if(has_lack_ready) {
+    if (has_lack_ready) {
       panel <- panel +
-        geom_rect(data=lack_ready_data,
-          aes(fill = .data$Value,
-              xmin = .data$Start,
-              xmax = .data$End,
-              ymin = 0,
-              ymax = threshold), alpha = 0.5) +
-      coord_cartesian(xlim = c(x_start, x_end)) +
-      scale_fill_gradient(low = "lightsalmon", high = "red1") +
-      guides(fill="none")
+        geom_rect(
+          data = lack_ready_data,
+          aes(
+            fill = .data$Value,
+            xmin = .data$Start,
+            xmax = .data$End,
+            ymin = 0,
+            ymax = threshold
+          ), alpha = 0.5
+        ) +
+        coord_cartesian(xlim = c(x_start, x_end)) +
+        scale_fill_gradient(low = "lightsalmon", high = "red1") +
+        guides(fill = "none")
     }
   }
 

@@ -363,36 +363,30 @@ handles_presence_states <- function(data) {
   fini_end <- unlist(end)
 
   data_state_events %>%
-  mutate(rep = case_when(
-    .data$Type == "data state owner" ~ 1,
-    .data$Type == "data state invalid" ~ 2,
-    TRUE ~ 5
-  )) %>%
-  group_by(.data$Value, .data$Container) %>%
-  mutate(flow = c(1, diff(.data$rep))) %>%
-
-  mutate(need = .data$flow != 0) %>%
-  filter(.data$need == TRUE) %>%
-
-  mutate(flow = c(1, diff(.data$rep)), t_diff = c(diff(.data$Start), 1)) %>%
-  ungroup() %>%
-
-  mutate(need = .data$flow != 0 & .data$t_diff > 0.001) %>%
-  filter(.data$need == TRUE) %>%
-
-  group_by(.data$Value, .data$Container) %>%
-  mutate(flow = c(1, diff(.data$rep))) %>%
-  ungroup() %>%
-
-  mutate(need = .data$flow != 0) %>%
-  filter(.data$need == TRUE) %>%
-
-  group_by(.data$Value, .data$Container) %>%
-  mutate(End = lead(.data$Start, default = unlist(fini_end))) %>%
-  ungroup() %>%
-  filter(.data$Type != "data state invalid") %>%
-  select(-.data$rep, -.data$flow, -.data$t_diff, -.data$need) %>%
-  group_by(.data$Value, .data$Container) -> f_data
+    mutate(rep = case_when(
+      .data$Type == "data state owner" ~ 1,
+      .data$Type == "data state invalid" ~ 2,
+      TRUE ~ 5
+    )) %>%
+    group_by(.data$Value, .data$Container) %>%
+    mutate(flow = c(1, diff(.data$rep))) %>%
+    mutate(need = .data$flow != 0) %>%
+    filter(.data$need == TRUE) %>%
+    mutate(flow = c(1, diff(.data$rep)), t_diff = c(diff(.data$Start), 1)) %>%
+    ungroup() %>%
+    mutate(need = .data$flow != 0 & .data$t_diff > 0.001) %>%
+    filter(.data$need == TRUE) %>%
+    group_by(.data$Value, .data$Container) %>%
+    mutate(flow = c(1, diff(.data$rep))) %>%
+    ungroup() %>%
+    mutate(need = .data$flow != 0) %>%
+    filter(.data$need == TRUE) %>%
+    group_by(.data$Value, .data$Container) %>%
+    mutate(End = lead(.data$Start, default = unlist(fini_end))) %>%
+    ungroup() %>%
+    filter(.data$Type != "data state invalid") %>%
+    select(-.data$rep, -.data$flow, -.data$t_diff, -.data$need) %>%
+    group_by(.data$Value, .data$Container) -> f_data
 
   return(f_data)
 }
@@ -1115,7 +1109,7 @@ panel_memory_snap <- function(data, selected_time, step,
 #' multiple_snaps(data = starvz_sample_lu, 100, 200, 10, ".")
 #' }
 #' @export
-multiple_snaps <- function(data, start, end, step, path, scale=8, width=4, height=3) {
+multiple_snaps <- function(data, start, end, step, path, scale = 8, width = 4, height = 3) {
   if (is.null(data$handle_states)) {
     data$handle_states <- handles_presence_states(data)
   }

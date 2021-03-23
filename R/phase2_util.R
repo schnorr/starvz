@@ -180,7 +180,7 @@ panel_title <- function(data, title = data$config$title$text) {
 #' panel_model_gflops(data = starvz_sample_data)
 #' }
 #' @export
-panel_model_gflops <- function(data, freeScales = TRUE, model_type="LOG_LOG") {
+panel_model_gflops <- function(data, freeScales = TRUE, model_type = "LOG_LOG") {
 
   # create the base ggplot object that is enhanced according to the model_type
   model_panel <- data$Application %>%
@@ -198,19 +198,22 @@ panel_model_gflops <- function(data, freeScales = TRUE, model_type="LOG_LOG") {
     labs(color = "Anomaly")
 
   # define de log-log LR model to later use
-  model_LR_log <- function(df) { lm(log(Duration) ~ log(GFlop), data = df) }
+  model_LR_log <- function(df) {
+    lm(log(Duration) ~ log(GFlop), data = df)
+  }
 
 
   # Linear Regression model_type with Duration ~ GFlop
-  if(model_type == "LR"){
+  if (model_type == "LR") {
     model_panel <- model_panel +
       geom_point(alpha = .5) +
       geom_smooth(method = "lm", formula = "y ~ x", color = "green", fill = "blue") +
       ggtitle("Using LR model: Duration ~ GFlop")
-  # log-log transformed linear regression
-  } else if(model_type == "LOG_LOG") {
-
-    task_model <- model_LR_log <- function(df) { lm(log(Duration) ~ log(GFlop), data = df) }
+    # log-log transformed linear regression
+  } else if (model_type == "LOG_LOG") {
+    task_model <- model_LR_log <- function(df) {
+      lm(log(Duration) ~ log(GFlop), data = df)
+    }
     # Step 1: apply the model to each task, considering the ResourceType
     model_fit <- data$Application %>%
       filter(grepl("qrt", .data$Value)) %>%
@@ -220,10 +223,11 @@ panel_model_gflops <- function(data, freeScales = TRUE, model_type="LOG_LOG") {
       group_by(.data$ResourceType, .data$Value) %>%
       nest() %>%
       mutate(model = map(.data$data, task_model)) %>%
-      mutate( Prediction = map(.data$model, function(model) {
-          data_predict <- suppressWarnings(predict(model, interval = "prediction", level=0.95))
-          data_predict %>% tibble(fit_LR=exp(.[,1]), lwr_LR=exp(.[,2]), upr_LR=exp(.[,3])) %>%
-            select(.data$fit_LR, .data$upr_LR, .data$lwr_LR)
+      mutate(Prediction = map(.data$model, function(model) {
+        data_predict <- suppressWarnings(predict(model, interval = "prediction", level = 0.95))
+        data_predict %>%
+          tibble(fit_LR = exp(.[, 1]), lwr_LR = exp(.[, 2]), upr_LR = exp(.[, 3])) %>%
+          select(.data$fit_LR, .data$upr_LR, .data$lwr_LR)
       })) %>%
       unnest(c(.data$data, .data$Prediction)) %>%
       ungroup() %>%
@@ -233,7 +237,7 @@ panel_model_gflops <- function(data, freeScales = TRUE, model_type="LOG_LOG") {
     model_data <- data$Application %>%
       filter(.data$Value %in% c("geqrt", "gemqrt", "tpqrt", "tpmqrt")) %>%
       filter(.data$GFlop > 0) %>%
-      left_join(model_fit, by=("JobId")) %>%
+      left_join(model_fit, by = ("JobId")) %>%
       unique() %>%
       group_by(.data$ResourceType, .data$Value) %>%
       nest() %>%
@@ -244,7 +248,7 @@ panel_model_gflops <- function(data, freeScales = TRUE, model_type="LOG_LOG") {
       arrange(.data$GFlop)
 
     model_panel <- model_data %>%
-      ggplot(aes(x = .data$GFlop, y = .data$Duration, group=.data$Value)) +
+      ggplot(aes(x = .data$GFlop, y = .data$Duration, group = .data$Value)) +
       theme_bw(base_size = data$config$base_size) +
       scale_color_manual(values = c("black", "orange")) +
       theme(
@@ -253,15 +257,15 @@ panel_model_gflops <- function(data, freeScales = TRUE, model_type="LOG_LOG") {
         axis.text.x = element_text(angle = 45, vjust = 0.5)
       ) +
       # Outlier_LR_LOG is renamed as the default Outlier
-      geom_point(aes(color=.data$Outlier), alpha = .5) +
-      geom_line(aes(x=.data$GFlop, y=.data$fit_LR), color="green", size=.8) +
-      geom_line(aes(x=.data$GFlop, y=.data$lwr_LR), color="red", size=.8) +
-      geom_line(aes(x=.data$GFlop, y=.data$upr_LR), color="red", size=.8) +
+      geom_point(aes(color = .data$Outlier), alpha = .5) +
+      geom_line(aes(x = .data$GFlop, y = .data$fit_LR), color = "green", size = .8) +
+      geom_line(aes(x = .data$GFlop, y = .data$lwr_LR), color = "red", size = .8) +
+      geom_line(aes(x = .data$GFlop, y = .data$upr_LR), color = "red", size = .8) +
       labs(y = "Duration (ms)", x = "GFlops", color = "Anomaly") +
       ggtitle("Using LOG~LOG transformed LR model: log(Duration) ~ log(GFlop)")
 
-  # finite mixture of LR log~log models
-  } else if(model_type == "FLEXMIX") {
+    # finite mixture of LR log~log models
+  } else if (model_type == "FLEXMIX") {
     # fit log models over raw data
     model_data <- data$Application %>%
       filter(.data$Value %in% c("geqrt", "gemqrt", "tpqrt", "tpmqrt")) %>%
@@ -272,14 +276,18 @@ panel_model_gflops <- function(data, freeScales = TRUE, model_type="LOG_LOG") {
       nest() %>%
       mutate(model_log = map(.data$data, model_LR_log)) %>%
       ungroup() %>%
-      mutate(predictValue = map(.data$model_log, function(x){ exp(predict(x)) } )) %>%
+      mutate(predictValue = map(.data$model_log, function(x) {
+        exp(predict(x))
+      })) %>%
       select(-.data$model_log) %>%
-      unnest(cols=c(.data$data, .data$predictValue)) %>%
+      unnest(cols = c(.data$data, .data$predictValue)) %>%
       arrange(.data$predictValue)
 
     model_panel <- model_data %>%
-      ggplot(aes(x = .data$GFlop, y = .data$Duration, group=.data$Cluster, shape=as.factor(.data$Cluster),
-        color = as.factor(.data$Outlier_FLEXMIX))) +
+      ggplot(aes(
+        x = .data$GFlop, y = .data$Duration, group = .data$Cluster, shape = as.factor(.data$Cluster),
+        color = as.factor(.data$Outlier_FLEXMIX)
+      )) +
       theme_bw(base_size = data$config$base_size) +
       scale_color_manual(values = c("black", "orange")) +
       scale_shape_manual(values = c(15, 19)) +
@@ -290,30 +298,31 @@ panel_model_gflops <- function(data, freeScales = TRUE, model_type="LOG_LOG") {
       ) +
       geom_point(alpha = .5) +
       # adjust log model to the normal data
-      geom_line(aes(x=.data$GFlop, y=.data$fit), color="green", size=.8) +
-      geom_line(aes(x=.data$GFlop, y=.data$lwr, linetype=as.factor(.data$Cluster)), color="red", size=.8) +
-      geom_line(aes(x=.data$GFlop, y=.data$upr, linetype=as.factor(.data$Cluster)), color="red", size=.8) +
-      labs(y = "Duration (ms)", x = "GFlops", color="Anomaly", linetype="Cluster", shape="Cluster") +
+      geom_line(aes(x = .data$GFlop, y = .data$fit), color = "green", size = .8) +
+      geom_line(aes(x = .data$GFlop, y = .data$lwr, linetype = as.factor(.data$Cluster)), color = "red", size = .8) +
+      geom_line(aes(x = .data$GFlop, y = .data$upr, linetype = as.factor(.data$Cluster)), color = "red", size = .8) +
+      labs(y = "Duration (ms)", x = "GFlops", color = "Anomaly", linetype = "Cluster", shape = "Cluster") +
       ggtitle("Using multiple LOG models (flexmix): log(Duration) ~ log(GFlop)")
-  # Weighted linear regression 1/GFlop
-  } else if(model_type == "WLR") {
-
+    # Weighted linear regression 1/GFlop
+  } else if (model_type == "WLR") {
     gflops <- data$Application %>%
       filter(grepl("qrt", .data$Value)) %>%
-      filter(.data$GFlop > 0) %>% .$GFlop
+      filter(.data$GFlop > 0) %>%
+      .$GFlop
 
     model_panel <- model_panel +
       geom_point(aes(color = .data$Outlier_WLR), alpha = .5) +
-      geom_smooth(method = "lm", formula="y ~ x", color = "green", fill= "blue",
-          mapping = aes(weight = 1/gflops)
-        ) +
-        ggtitle("Using WLR model: Duration ~ GFlop, weight=1/GFlop")
-  } else if(model_type == "NLR"){
+      geom_smooth(
+        method = "lm", formula = "y ~ x", color = "green", fill = "blue",
+        mapping = aes(weight = 1 / gflops)
+      ) +
+      ggtitle("Using WLR model: Duration ~ GFlop, weight=1/GFlop")
+  } else if (model_type == "NLR") {
     model_panel <- model_panel +
       geom_point(aes(color = .data$Outlier_NLR), alpha = .5) +
-      geom_smooth(method = "lm", formula="y ~ I(x**(2/3))", color = "green", fill= "blue") +
-        ggtitle("Using NLR model: Duration ~ GFlop**2/3")    
-  # plot all models together for comparison purposes
+      geom_smooth(method = "lm", formula = "y ~ I(x**(2/3))", color = "green", fill = "blue") +
+      ggtitle("Using NLR model: Duration ~ GFlop**2/3")
+    # plot all models together for comparison purposes
   } else {
     model_panel <- model_panel +
       geom_point(alpha = .5) +
@@ -351,8 +360,7 @@ panel_resource_usage_task <- function(data = NULL,
                                       step = NULL,
                                       legend = FALSE,
                                       x_start = data$config$limits$start,
-                                      x_end = data$config$limits$end)
-{
+                                      x_end = data$config$limits$end) {
   starvz_check_data(data, tables = list("Application" = c("Value")))
 
   if (is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start))) {
@@ -376,7 +384,8 @@ panel_resource_usage_task <- function(data = NULL,
   # join data frames
   df2 <- df1 %>%
     ungroup() %>%
-    group_by(.data$Slice) %>% unique()
+    group_by(.data$Slice) %>%
+    unique()
 
   # must expand data frame to make geom_area work properly
   df_plot <- df2 %>%
@@ -414,16 +423,15 @@ panel_resource_usage_task <- function(data = NULL,
     ylab("Usage %\nTask") +
     ylim(0, 100) -> panel
 
-    if(!legend) {
-     panel <- panel + theme(legend.position = "none")
-    }
+  if (!legend) {
+    panel <- panel + theme(legend.position = "none")
+  }
 
   return(panel)
 }
 
 # Calculate the computational resource utilization by task
-get_resource_utilization <- function( Application = NULL, step = 100)
-{
+get_resource_utilization <- function(Application = NULL, step = 100) {
   # Arrange data
   df_filter <- Application %>%
     select(.data$ANode, .data$Start, .data$End, .data$Value, .data$JobId) %>%
@@ -483,13 +491,12 @@ get_resource_utilization <- function( Application = NULL, step = 100)
 #' panel_gflops_computed_difference(data1, data2)
 #' }
 #' @export
-panel_gflops_computed_difference <- function( data1 = NULL,
-                                              data2 = NULL,
-                                              legend=FALSE,
-                                              x_start = NULL,
-                                              x_end = NULL,
-                                              add_end_line = TRUE )
-{
+panel_gflops_computed_difference <- function(data1 = NULL,
+                                             data2 = NULL,
+                                             legend = FALSE,
+                                             x_start = NULL,
+                                             x_end = NULL,
+                                             add_end_line = TRUE) {
   starvz_check_data(data1, tables = list("Application" = c("GFlop")))
   starvz_check_data(data2, tables = list("Application" = c("GFlop")))
 
@@ -502,18 +509,22 @@ panel_gflops_computed_difference <- function( data1 = NULL,
   }
 
   # check wich one is the slower execution
-  end1 <- data1$Application %>% pull(.data$End) %>% max()
-  end2 <- data2$Application %>% pull(.data$End) %>% max()
-  if(end1 >= end2){
+  end1 <- data1$Application %>%
+    pull(.data$End) %>%
+    max()
+  end2 <- data2$Application %>%
+    pull(.data$End) %>%
+    max()
+  if (end1 >= end2) {
     slower <- data1
     faster <- data2
     end_cut <- end2
-    x_end = end1
+    x_end <- end1
   } else {
     faster <- data1
     slower <- data2
     end_cut <- end1
-    x_end = end2
+    x_end <- end2
   }
 
   # get the total computation over time
@@ -521,9 +532,8 @@ panel_gflops_computed_difference <- function( data1 = NULL,
   data_gflop <- faster$Application %>%
     filter(grepl("qrt", .data$Value)) %>%
     bind_rows(slower$Application %>%
-        filter(grepl("qrt", .data$Value)) %>%
-        mutate(GFlop = -.data$GFlop)
-    ) %>%
+      filter(grepl("qrt", .data$Value)) %>%
+      mutate(GFlop = -.data$GFlop)) %>%
     arrange(.data$End)
 
   # calculate the actual difference in the total computed GFlops
@@ -533,35 +543,37 @@ panel_gflops_computed_difference <- function( data1 = NULL,
     mutate(signal = ifelse(.data$GFlopDiff >= 0, "Faster", "Slower"))
 
   lineplot <- data_diff_line %>%
-    mutate(groups=1) %>%
-    ggplot(aes(x=.data$End, y=.data$GFlopDiff, color=.data$signal)) +
-    geom_line(aes(group=.data$groups)) +
-    scale_color_manual(breaks = c("Faster", "Slower"),
-                       values=c("blue", "red")) +
-    labs(y=paste0("GFlops\n difference")) +
+    mutate(groups = 1) %>%
+    ggplot(aes(x = .data$End, y = .data$GFlopDiff, color = .data$signal)) +
+    geom_line(aes(group = .data$groups)) +
+    scale_color_manual(
+      breaks = c("Faster", "Slower"),
+      values = c("blue", "red")
+    ) +
+    labs(y = paste0("GFlops\n difference")) +
     default_theme(data1$config$base_size, data1$config$expand) +
     theme(legend.position = "none")
-    # geom_hline(aes(yintercept=c(0)) , linetype="dashed")
+  # geom_hline(aes(yintercept=c(0)) , linetype="dashed")
 
-    # add legend
-    if(legend) {
-      lineplot <- lineplot +
-        theme(legend.position = "top")
-    }
+  # add legend
+  if (legend) {
+    lineplot <- lineplot +
+      theme(legend.position = "top")
+  }
 
-    # adjust x start and end
-    tXScale <- list(
-      coord_cartesian(
-        xlim = c(x_start, x_end)
-      )
+  # adjust x start and end
+  tXScale <- list(
+    coord_cartesian(
+      xlim = c(x_start, x_end)
     )
+  )
 
-    lineplot <- lineplot + tXScale
+  lineplot <- lineplot + tXScale
 
-    # add the end line for faster execution
-    if(add_end_line) {
-      lineplot <- lineplot + geom_vline(aes(xintercept=c(end_cut)))
-    }
+  # add the end line for faster execution
+  if (add_end_line) {
+    lineplot <- lineplot + geom_vline(aes(xintercept = c(end_cut)))
+  }
 
-    return(lineplot)
+  return(lineplot)
 }

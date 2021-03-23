@@ -468,7 +468,7 @@ panel_st_agg_node <- function(data,
 
   new_state_plot <- new_state_plot +
     coord_cartesian(xlim = c(x_start, x_end), ylim = c(0, NA)) +
-    guides(fill=guide_legend(nrow=2))
+    guides(fill = guide_legend(nrow = 2))
 
   if (!legend) {
     new_state_plot <- new_state_plot + theme(legend.position = "none")

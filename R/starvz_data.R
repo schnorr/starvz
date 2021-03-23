@@ -100,7 +100,7 @@ print.starvz_data <- function(x, ...) {
   cat("Execution Makespan: ")
   cat(statistics_makespan(x))
   cat("\nElements: ")
-  cat(paste(names(x), collapse=", "))
+  cat(paste(names(x), collapse = ", "))
   cat("\n")
   class(x) <- "list"
   print(x)

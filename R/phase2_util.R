@@ -176,7 +176,7 @@ panel_title <- function(data, title = data$config$title$text) {
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' panel_model_gflops(data = starvz_sample_data)
 #' }
 #' @export
@@ -352,7 +352,7 @@ panel_model_gflops <- function(data, freeScales = TRUE, model_type = "LOG_LOG") 
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' panel_resource_usage_task(data = starvz_sample_data)
 #' }
 #' @export
@@ -578,9 +578,10 @@ panel_gflops_computed_difference <- function(data1 = NULL,
   return(lineplot)
 }
 
-statistics_makespan <- function(data){
-  if(is.null(data$Application))
+statistics_makespan <- function(data) {
+  if (is.null(data$Application)) {
     return(NA)
+  }
   data$Application %>%
     select(.data$End) %>%
     pull(.data$End) %>%
@@ -589,71 +590,88 @@ statistics_makespan <- function(data){
   return(makespan)
 }
 
-statistics_total_tasks <- function(data){
-  if(is.null(data$Application))
+statistics_total_tasks <- function(data) {
+  if (is.null(data$Application)) {
     return(NA)
+  }
   data$Application %>%
     nrow() -> total_tasks
   return(total_tasks)
 }
 
-statistics_total_tasks_types <- function(data){
-  if(is.null(data$Application))
+statistics_total_tasks_types <- function(data) {
+  if (is.null(data$Application)) {
     return(NA)
-  data$Application %>% select(.data$Value) %>%
-    distinct() %>% nrow() -> total_tasks_types
+  }
+  data$Application %>%
+    select(.data$Value) %>%
+    distinct() %>%
+    nrow() -> total_tasks_types
   return(total_tasks_types)
 }
 
-statistics_total_nodes <- function(data){
-  if(is.null(data$Application))
+statistics_total_nodes <- function(data) {
+  if (is.null(data$Application)) {
     return(NA)
-  data$Application %>% select(.data$Node) %>%
-    distinct() %>% nrow() -> total_nodes
+  }
+  data$Application %>%
+    select(.data$Node) %>%
+    distinct() %>%
+    nrow() -> total_nodes
   return(total_nodes)
 }
 
-statistics_total_resources <- function(data){
-  if(is.null(data$Starpu))
+statistics_total_resources <- function(data) {
+  if (is.null(data$Starpu)) {
     return(NA)
-  data$Starpu %>% select(.data$ResourceId) %>%
-    distinct() %>% nrow() -> total_resources
+  }
+  data$Starpu %>%
+    select(.data$ResourceId) %>%
+    distinct() %>%
+    nrow() -> total_resources
   return(total_resources)
 }
 
-statistics_total_gpus <- function(data){
-  if(is.null(data$Starpu))
+statistics_total_gpus <- function(data) {
+  if (is.null(data$Starpu)) {
     return(NA)
+  }
   data$Starpu %>%
     filter(.data$ResourceType == "CUDA") %>%
     select(.data$ResourceId) %>%
-    distinct() %>% nrow() -> total_gpus
+    distinct() %>%
+    nrow() -> total_gpus
   return(total_gpus)
 }
 
-statistics_total_cpus <- function(data){
-  if(is.null(data$Starpu))
+statistics_total_cpus <- function(data) {
+  if (is.null(data$Starpu)) {
     return(NA)
+  }
   data$Starpu %>%
     filter(.data$ResourceType == "CPU") %>%
     select(.data$ResourceId) %>%
-    distinct() %>% nrow() -> total_cpus
+    distinct() %>%
+    nrow() -> total_cpus
   return(total_cpus)
 }
 
-statistics_total_idleness <- function(data){
-  if(is.null(data$Application))
+statistics_total_idleness <- function(data) {
+  if (is.null(data$Application)) {
     return(NA)
-  if(is.null(data$Starpu))
+  }
+  if (is.null(data$Starpu)) {
     return(NA)
+  }
   data$Application %>%
-  summarize(active=sum(.data$Duration)) %>% .$active -> total_time_active
+    summarize(active = sum(.data$Duration)) %>%
+    .$active -> total_time_active
 
   total_resources <- statistics_total_resources(data)
 
   makespan <- statistics_makespan(data)
 
-  percent_active <- total_time_active/(total_resources * makespan)
+  percent_active <- total_time_active / (total_resources * makespan)
 
   return(100.0 - percent_active)
 }

@@ -53,16 +53,6 @@ starvz_sample_lu <- starvz_read(system.file("extdata", "lu_trace", package = "st
 usethis::use_data(starvz_sample_lu)
 #+end_src
 
-** Message to CRAN for Submission on 25/08/2020
-*** Test environments
-- local ubuntu 20.04 install, R 3.6.3
-- Travis-CI (https://travis-ci.org/github/schnorr/starvz/builds/721041088):
-  - Linux: R 4.0.0
-  - Windows: R 4.0.2
-  - OS X: 4.0.2
-- Win-Builder (devel, release and oldrelease)
-
-*** R CMD check results
 
 * Ideas
 ** Highlight Late Starting Tasks
@@ -78,6 +68,31 @@ have all their dependencies ready but have their execution delayed.
  This can be useful to highlight critical moments of the application,
  possibly revealing bad scheduling decisions.
 
+* CRAN SUB
+** Message to CRAN for Submission on 23/03/2021
+*** New Version
+- Updating the package to version 0.5.0
+
+*** Test environments
+- local ubuntu 20.04 install, R 4.0.4
+- Github Actions (https://github.com/schnorr/starvz/actions/runs/680469177)
+  - Linux: R 4.0.4 and R Under development (unstable) (2021-03-21 r80102)
+  - Windows: R 4.0.4
+  - OS X: 4.0.4
+
+*** R CMD check results
+Status: OK
+
+** Message to CRAN for Submission on 25/08/2020
+*** Test environments
+- local ubuntu 20.04 install, R 3.6.3
+- Travis-CI (https://travis-ci.org/github/schnorr/starvz/builds/721041088):
+  - Linux: R 4.0.0
+  - Windows: R 4.0.2
+  - OS X: 4.0.2
+- Win-Builder (devel, release and oldrelease)
+
+*** R CMD check results
 
 * checking CRAN incoming feasibility ... NOTE
 Maintainer: ‘Lucas Leandro Nesi <lucas.nesi@inf.ufrgs.br>’

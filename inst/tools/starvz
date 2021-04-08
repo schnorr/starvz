@@ -95,11 +95,11 @@ while true; do
                         shift 2
                         ;;
                 --save|-s)
-                        STARVZ_SAVE_FILE=$2
+                        STARVZ_SAVE_FILE=$(readlink -f $2)
                         shift 2
                         ;;
                 --config|-c)
-                        STARVZ_CONFIG_FILE=$2
+                        STARVZ_CONFIG_FILE=$(readlink -f $2)
                         shift 2
                         ;;
                 --exclude-tasks|-e)

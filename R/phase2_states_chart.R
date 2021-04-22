@@ -231,9 +231,9 @@ geom_states <- function(dfw = NULL, Show.Outliers = FALSE, StarPU = FALSE, Color
 
   # Y axis breaks and their labels
   yconfm <- yconf(dfw, labels, Y)
-  print(yconfm)
+
   ret[[length(ret) + 1]] <- scale_y_continuous(
-    breaks = yconfm$Position + (yconfm$Height / 3), labels = as.character(yconfm$ResourceId),
+    breaks = yconfm$Position + (yconfm$Height / 3), labels = unique(as.character(yconfm$ResourceId)),
     expand = c(expand, 0)
   )
   # Y label

@@ -231,8 +231,9 @@ geom_states <- function(dfw = NULL, Show.Outliers = FALSE, StarPU = FALSE, Color
 
   # Y axis breaks and their labels
   yconfm <- yconf(dfw, labels, Y)
+  print(yconfm)
   ret[[length(ret) + 1]] <- scale_y_continuous(
-    breaks = yconfm$Position + (yconfm$Height / 3), labels = unique(as.character(yconfm$ResourceId)),
+    breaks = yconfm$Position + (yconfm$Height / 3), labels = as.character(yconfm$ResourceId),
     expand = c(expand, 0)
   )
   # Y label
@@ -423,7 +424,7 @@ panel_st_agg_node <- function(data,
       breaks = yconf$Node.Position,
       labels = yconf$Label, expand = c(data$config$expand, 0)
     ) +
-    ylab("Node Ocupation") +
+    ylab("Node Occupation") +
     geom_rect(aes(
       fill = .data$Task,
       xmin = .data$Start,

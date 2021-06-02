@@ -120,7 +120,7 @@ starvz_phase1 <- function(directory = ".", app_states_fun = lu_colors,
   )
 
   starvz_log("Call Gaps.")
-  data$Gaps <- gaps(data)
+  data$Gaps <- NULL #gaps(data)
 
   if (input.parquet == "1") {
     starvz_log("Saving as parquet")

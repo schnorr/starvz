@@ -7,6 +7,8 @@ gaps_backward_deps <- function(data = NULL, tasks = NULL, levels = 1) {
   if (is.null(tasks)) stop("task is NULL when given to gaps_backward_deps")
   if (levels < 1) stop("level lt 1 when given to  gaps_backward_deps")
 
+  if(is.null(data$Gaps)) return NULL;
+
   tibble(Path = tasks) %>%
     unique() %>%
     group_by(.data$Path) %>%

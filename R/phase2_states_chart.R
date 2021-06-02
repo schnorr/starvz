@@ -274,7 +274,7 @@ geom_states <- function(dfw = NULL, Show.Outliers = FALSE, StarPU = FALSE, Color
 }
 
 geom_path_highlight <- function(paths = NULL) {
-  if (is.null(paths)) stop("paths is NULL when given to gaps_backward_deps")
+  if (is.null(paths)) return(list())
   if ((paths %>% nrow()) == 0) {
     return(list())
   }

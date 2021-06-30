@@ -533,7 +533,7 @@ pre_handle_gantt <- function(data, name_func = NULL) {
 
   all_st_m_data <- bind_rows(p_data, jobs_p_data) %>%
     inner_join(data$Data_handle, by = c("Value" = "Handle")) %>%
-    rename(Handle=Value) %>%
+    rename(Handle=.data$Value) %>%
     ungroup() %>%
     name_func() %>%
     select(.data$Container, .data$Start, .data$End, .data$Value, .data$y1, .data$Colour, .data$size, .data$JobId, .data$Modes) %>%
@@ -603,7 +603,7 @@ pre_handle_gantt <- function(data, name_func = NULL) {
     select(-.data$Key)
 
   final_links <- links %>%
-    select(-Handle) %>%
+    select(any_of(c("Handle"))) %>%
     inner_join(links_handles, by = c("Con" = "Info", "Dest" = "Container")) %>%
     inner_join(position, by = c("Origin" = "Container")) %>%
     rename(origin_y = .data$y1) %>%
@@ -616,7 +616,7 @@ pre_handle_gantt <- function(data, name_func = NULL) {
 
   if ("MPI communication" %in% unique(data$Link$Type)) {
     mpi_links <- data$Link %>%
-      select(-Handle) %>%
+      select(any_of(c("Handle"))) %>%
       filter(.data$Type == "MPI communication") %>%
       select(-.data$Container, -.data$Size) %>%
       mutate(Origin = str_replace(.data$Origin, "mpict", "MEMMANAGER0")) %>%

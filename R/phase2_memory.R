@@ -533,6 +533,7 @@ pre_handle_gantt <- function(data, name_func = NULL) {
 
   all_st_m_data <- bind_rows(p_data, jobs_p_data) %>%
     inner_join(data$Data_handle, by = c("Value" = "Handle")) %>%
+    rename(Handle=Value) %>%
     ungroup() %>%
     name_func() %>%
     select(.data$Container, .data$Start, .data$End, .data$Value, .data$y1, .data$Colour, .data$size, .data$JobId, .data$Modes) %>%
@@ -602,6 +603,7 @@ pre_handle_gantt <- function(data, name_func = NULL) {
     select(-.data$Key)
 
   final_links <- links %>%
+    select(-Handle) %>%
     inner_join(links_handles, by = c("Con" = "Info", "Dest" = "Container")) %>%
     inner_join(position, by = c("Origin" = "Container")) %>%
     rename(origin_y = .data$y1) %>%
@@ -614,6 +616,7 @@ pre_handle_gantt <- function(data, name_func = NULL) {
 
   if ("MPI communication" %in% unique(data$Link$Type)) {
     mpi_links <- data$Link %>%
+      select(-Handle) %>%
       filter(.data$Type == "MPI communication") %>%
       select(-.data$Container, -.data$Size) %>%
       mutate(Origin = str_replace(.data$Origin, "mpict", "MEMMANAGER0")) %>%
@@ -1002,7 +1005,7 @@ panel_memory_snap <- function(data, selected_time, step,
   data$pre_snap[[1]] %>%
     ungroup() %>%
     filter(.data$Start < selected_time, .data$End > selected_time) %>%
-    right_join(data$pre_snap[[2]], by = c("Value" = "Handle", "Container" = "Container")) %>%
+    inner_join(data$pre_snap[[2]], by = c("Value" = "Handle", "Container" = "Container")) %>%
     mutate(Container = gsub("MEMMANAGER", "MM", .data$Container)) -> d_presence
 
   task_presence <- data$pre_snap[[3]] %>%

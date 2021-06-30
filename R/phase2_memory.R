@@ -603,7 +603,7 @@ pre_handle_gantt <- function(data, name_func = NULL) {
     select(-.data$Key)
 
   final_links <- links %>%
-    select(any_of(c("Handle"))) %>%
+    select(-any_of(c("Handle"))) %>%
     inner_join(links_handles, by = c("Con" = "Info", "Dest" = "Container")) %>%
     inner_join(position, by = c("Origin" = "Container")) %>%
     rename(origin_y = .data$y1) %>%
@@ -616,7 +616,7 @@ pre_handle_gantt <- function(data, name_func = NULL) {
 
   if ("MPI communication" %in% unique(data$Link$Type)) {
     mpi_links <- data$Link %>%
-      select(any_of(c("Handle"))) %>%
+      select(-any_of(c("Handle"))) %>%
       filter(.data$Type == "MPI communication") %>%
       select(-.data$Container, -.data$Size) %>%
       mutate(Origin = str_replace(.data$Origin, "mpict", "MEMMANAGER0")) %>%

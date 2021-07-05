@@ -133,6 +133,8 @@ panel_st_agg_dynamic <- function(data = NULL,
 #' @param runtime if this is runtime data
 #' @param x_start X-axis start value
 #' @param x_end X-axis end value
+#' @param expand_x expand size for scale_x_continuous padding
+#' @param expand_y expand size for scale_y_continuous padding
 #' @param outliers print outliers on top
 #' @param step time-step
 #' @return A ggplot object
@@ -145,6 +147,8 @@ panel_st_agg_dynamic <- function(data = NULL,
 panel_st_agg_static <- function(data = NULL, runtime = FALSE,
                                 x_start = data$config$limits$start,
                                 x_end = data$config$limits$end,
+                                expand_x = data$config$expand,
+                                expand_y = data$config$st$expand,
                                 outliers = data$config$st$outliers,
                                 step = data$config$st$aggregation$step) {
   if (is.null(data)) {
@@ -201,13 +205,14 @@ panel_st_agg_static <- function(data = NULL, runtime = FALSE,
 
   # Plot
   gow <- dfw_agg %>% ggplot() +
-    default_theme() +
+    default_theme(base_size = data$config$base_size, expand = expand_value_x) +
     # coord_cartesian(xlim=c(tstart, tend)) +
     xlab("Time [ms]") +
     scale_fill_manual(values = extract_colors(dfw, data$Colors)) +
     scale_y_continuous(
       breaks = yconfm$Position,
-      labels = yconfm$ResourceId
+      labels = yconfm$ResourceId,
+      expand = c(expand_value_y, 0)
     ) +
     # Print time-aggregated data
     geom_rect(aes(

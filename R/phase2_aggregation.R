@@ -205,14 +205,14 @@ panel_st_agg_static <- function(data = NULL, runtime = FALSE,
 
   # Plot
   gow <- dfw_agg %>% ggplot() +
-    default_theme(base_size = data$config$base_size, expand = expand_value_x) +
+    default_theme(base_size = data$config$base_size, expand = expand_x) +
     # coord_cartesian(xlim=c(tstart, tend)) +
     xlab("Time [ms]") +
     scale_fill_manual(values = extract_colors(dfw, data$Colors)) +
     scale_y_continuous(
       breaks = yconfm$Position,
       labels = yconfm$ResourceId,
-      expand = c(expand_value_y, 0)
+      expand = c(expand_y, 0)
     ) +
     # Print time-aggregated data
     geom_rect(aes(

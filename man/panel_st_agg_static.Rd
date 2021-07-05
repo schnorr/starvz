@@ -9,6 +9,8 @@ panel_st_agg_static(
   runtime = FALSE,
   x_start = data$config$limits$start,
   x_end = data$config$limits$end,
+  expand_x = data$config$expand,
+  expand_y = data$config$st$expand,
   outliers = data$config$st$outliers,
   step = data$config$st$aggregation$step
 )
@@ -21,6 +23,10 @@ panel_st_agg_static(
 \item{x_start}{X-axis start value}
 
 \item{x_end}{X-axis end value}
+
+\item{expand_x}{expand size for scale_x_continuous padding}
+
+\item{expand_y}{expand size for scale_y_continuous padding}
 
 \item{outliers}{print outliers on top}
 

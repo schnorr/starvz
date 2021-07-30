@@ -542,6 +542,7 @@ starvz_plot_list <- function(data = NULL) {
   }
 
   if (data$config$vertical_lines$active) {
+    starvz_log("Creating vertical lines")
     plot_list$verticallines <- geom_vline(
       xintercept = data$config$vertical_lines$x_list,
       linetype = "longdash",

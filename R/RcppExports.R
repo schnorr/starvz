@@ -2,9 +2,18 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 integrateStepFunc <- function(x, bounds, values) {
-  .Call("_starvz_integrateStepFunc", PACKAGE = "starvz", x, bounds, values)
+    .Call('_starvz_integrateStepFunc', PACKAGE = 'starvz', x, bounds, values)
+}
+
+lastest_task_c <- function(df) {
+    .Call('_starvz_lastest_task_c', PACKAGE = 'starvz', df)
+}
+
+get_last_path <- function(lasttask, selected_tasks) {
+    .Call('_starvz_get_last_path', PACKAGE = 'starvz', lasttask, selected_tasks)
 }
 
 boost_shortest_path <- function(s, df) {
-  .Call("_starvz_boost_shortest_path", PACKAGE = "starvz", s, df)
+    .Call('_starvz_boost_shortest_path', PACKAGE = 'starvz', s, df)
 }
+

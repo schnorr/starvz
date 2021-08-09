@@ -173,11 +173,16 @@ panel_st_raw <- function(data = NULL, ST.Outliers = data$config$st$outliers, bas
 
     # check if task dependencies should be added
     if (taskdeps) {
-      tasksel <- gaps_backward_deps(
-        data = data,
-        tasks = tasklist,
-        levels = levels
-      )
+      if(!is.null(data$Lastest)){
+        tasksel <- lastest(data, tasklist)
+      }else{
+        tasksel <- gaps_backward_deps(
+          data = data,
+          tasks = tasklist,
+          levels = levels
+        )
+      }
+
       if (nrow(tasksel) > 0 & !is.null(selected_nodes)) {
         tasksel <- tasksel %>%
           left_join(new_y, by = c("ResourceId" = "Parent")) %>%

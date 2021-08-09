@@ -120,7 +120,7 @@ starvz_read <- function(directory = ".",
     }
 
     if (config$st$tasks$active) {
-      tables_to_load <- c(tables_to_load, "gaps", "starpu", "application", "link")
+      tables_to_load <- c(tables_to_load, "gaps", "starpu", "application", "link", "lastest")
     }
 
     if (config$st$cpb || config$st$cpb_mpi$active) {

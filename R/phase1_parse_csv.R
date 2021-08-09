@@ -994,6 +994,7 @@ read_dag <- function(where = ".", Application = NULL, dfl = NULL) {
     # Calculate the cost as the inverse of the duration (so boost's CPB code can work)
     mutate(Cost = ifelse(is.na(.data$Duration), 0, -.data$Duration)) %>%
     # Force the result as tibble for performance reasons
+    select(.data$JobId, .data$Dependent, .data$Start, .data$End, .data$Cost, .data$Value) %>%
     as_tibble()
 }
 

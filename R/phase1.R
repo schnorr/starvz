@@ -95,7 +95,7 @@ starvz_phase1 <- function(directory = ".", app_states_fun = lu_colors,
     dfa <- reorder_elimination_tree(dfa, Worker$Application)
   }
 
-  # Read DAG
+  # Read Dag
   dfdag <- read_dag(where = directory, Worker$Application %>% mutate(Application = TRUE), dfl)
 
   dpmts <- pmtool_states_csv_parser(where = directory, whichApplication = whichApplication, Y = dfhie, States = Worker$Application)
@@ -114,13 +114,16 @@ starvz_phase1 <- function(directory = ".", app_states_fun = lu_colors,
     Application = Worker$Application,
     StarPU = Worker$StarPU,
     Colors = Worker$Colors,
-    Link = dfl, DAG = dfdag, Y = dfhie, Atree = dfa,
+    Link = dfl, Dag = dfdag, Y = dfhie, Atree = dfa,
     Pmtool_states = dpmts, entities = entities$dfe,
     Zero = ZERO, Version = Version
   )
 
   starvz_log("Call Gaps.")
   data$Gaps <- NULL #gaps(data)
+
+  starvz_log("Call Latest.")
+  data$Lastest <- compute_all_lastest(data)
 
   if (input.parquet == "1") {
     starvz_log("Saving as parquet")
@@ -415,11 +418,11 @@ dt_to_df_inner <- function(node) {
 
 gaps.f_backward <- function(data) {
   # Create the seed chain
-  if (TRUE %in% grepl("mpicom", data$DAG$JobId)) {
-    data$DAG %>%
+  if (TRUE %in% grepl("mpicom", data$Dag$JobId)) {
+    data$Dag %>%
       filter(grepl("mpicom", .data$JobId)) -> tmpdag
   } else {
-    data$DAG -> tmpdag
+    data$Dag -> tmpdag
   }
   tmpdag %>%
     rename(DepChain = .data$JobId, Member = .data$Dependent) %>%
@@ -444,16 +447,16 @@ gaps.f_backward <- function(data) {
       return(full.o)
     }
   }
-  return(f2(data$DAG, seedchain))
+  return(f2(data$Dag, seedchain))
 }
 
 gaps.f_forward <- function(data) {
   # Create the seed chain
-  if (TRUE %in% grepl("mpicom", data$DAG$Dependent)) {
-    data$DAG %>%
+  if (TRUE %in% grepl("mpicom", data$Dag$Dependent)) {
+    data$Dag %>%
       filter(grepl("mpicom", .data$Dependent)) -> tmpdag
   } else {
-    data$DAG -> tmpdag
+    data$Dag -> tmpdag
   }
   tmpdag %>%
     rename(DepChain = .data$Dependent, Member = .data$JobId) %>%
@@ -479,13 +482,13 @@ gaps.f_forward <- function(data) {
     }
     return(full.o)
   }
-  return(f2(data$DAG, seedchain))
+  return(f2(data$Dag, seedchain))
 }
 
 gaps <- function(data) {
   starvz_log("Starting the gaps calculation.")
 
-  if (is.null(data$DAG)) {
+  if (is.null(data$Dag)) {
     return(NULL)
   }
   if (is.null(data$Application)) {
@@ -508,11 +511,11 @@ gaps <- function(data) {
     select(.data$JobId, .data$Dependent) %>%
     unique() -> data.f
 
-  data$DAG %>%
+  data$Dag %>%
     filter(.data$Application == TRUE) %>%
     select(.data$JobId, .data$Dependent) -> data.z
 
-  # Create the new gaps DAG
+  # Create the new gaps Dag
   dfw <- data$Application %>%
     select(.data$JobId, .data$Value, .data$ResourceId, .data$Node, .data$Start, .data$End)
   if (is.null(data$Link)) {
@@ -543,6 +546,20 @@ gaps <- function(data) {
 
   return(bind_rows(data.z.dag, data.b.dag, data.f.dag))
 }
+
+compute_all_lastest <- function(data){
+  filtered_dag <- data$Dag %>% select(.data$JobId, .data$Dependent, .data$Start, .data$End, .data$Cost, .data$Value) %>%
+                  mutate(JobId = as.character(.data$JobId), Dependent = as.character(.data$Dependent))
+
+  all_levels <- unique(c(filtered_dag$JobId, filtered_dag$Dependent))
+
+  filtered_dag %>%
+  mutate(JobId = factor(.data$JobId, levels=all_levels),
+         Dependent = factor(.data$Dependent, levels=all_levels)) -> filtered_dag
+
+  return(lastest_task_c(filtered_dag) %>% tibble())
+}
+
 outlier_definition <- function(x) {
   (quantile(x)["75%"] + (quantile(x)["75%"] - quantile(x)["25%"]) * 1.5)
 }

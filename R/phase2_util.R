@@ -681,3 +681,26 @@ statistics_total_idleness <- function(data) {
 
   return(100.0 - percent_active)
 }
+
+lastest <- function(data, path){
+	get_last_path(data$Lastest, path) -> deps
+	ret <- NULL
+
+  data$Link %>%
+  filter(.data$Type == "MPI communication") %>%
+  rename(JobId = .data$Key) %>%
+  rename(ResourceId = .data$Dest) %>%
+  select(.data$JobId, .data$Start, .data$End, .data$ResourceId) %>%
+  separate(.data$ResourceId, into = c("Node", "Resource"), remove = FALSE, extra = "drop", fill = "right") %>%
+  left_join((data$Y %>% select(-.data$Type) %>% mutate(Parent = as.character(.data$Parent))), by = c("ResourceId" = "Parent")) %>%
+  select(.data$JobId, .data$Start, .data$End, .data$Position, .data$Height) %>%
+  bind_rows(data$Application %>% select(.data$JobId, .data$Start, .data$End, .data$Position, .data$Height)) -> all_states
+
+	data$Lastest %>% rename(Dependent=.data$Lastest) %>% select(.data$JobId, .data$Dependent) %>% inner_join(all_states, by=c("JobId"="JobId")) -> app_dep
+	for(i in seq(1, length(deps))){
+	   app_dep %>% filter(.data$JobId %in% deps[[i]]) %>%
+	   mutate(Path = path[i]) %>% arrange(.data$End) %>% bind_rows(ret) -> ret
+	}
+
+	return(ret)
+}

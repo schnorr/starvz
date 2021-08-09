@@ -18,6 +18,29 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// lastest_task_c
+DataFrame lastest_task_c(DataFrame df);
+RcppExport SEXP _starvz_lastest_task_c(SEXP dfSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< DataFrame >::type df(dfSEXP);
+    rcpp_result_gen = Rcpp::wrap(lastest_task_c(df));
+    return rcpp_result_gen;
+END_RCPP
+}
+// get_last_path
+List get_last_path(DataFrame lasttask, CharacterVector selected_tasks);
+RcppExport SEXP _starvz_get_last_path(SEXP lasttaskSEXP, SEXP selected_tasksSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< DataFrame >::type lasttask(lasttaskSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type selected_tasks(selected_tasksSEXP);
+    rcpp_result_gen = Rcpp::wrap(get_last_path(lasttask, selected_tasks));
+    return rcpp_result_gen;
+END_RCPP
+}
 // boost_shortest_path
 NumericVector boost_shortest_path(int s, DataFrame df);
 RcppExport SEXP _starvz_boost_shortest_path(SEXP sSEXP, SEXP dfSEXP) {
@@ -33,6 +56,8 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_starvz_integrateStepFunc", (DL_FUNC) &_starvz_integrateStepFunc, 3},
+    {"_starvz_lastest_task_c", (DL_FUNC) &_starvz_lastest_task_c, 1},
+    {"_starvz_get_last_path", (DL_FUNC) &_starvz_get_last_path, 2},
     {"_starvz_boost_shortest_path", (DL_FUNC) &_starvz_boost_shortest_path, 2},
     {NULL, NULL, 0}
 };

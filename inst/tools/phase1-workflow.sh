@@ -174,7 +174,7 @@ echo "Nature, ResourceId, Type, Start, End, Duration, Depth, Value, Size, Params
 if [ -n "$STARVZ_EXCLUDE_TASKS" ]; then
   zgrep -e "Worker State" paje.csv.gz | grep -E -v $(echo $STARVZ_EXCLUDE_TASKS | sed "s/,/|/g" | sed "s/ //g" ) | gzip -c >> $PAJE_WORKER_STATE
 else
-  zgrep -e "Worker State" paje.csv.gz | gzip -c >> $PAJE_WORKER_STATE
+  zgrep -e "Worker State" paje.csv.gz | sed -e 's/\(State\)\(,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*$\)/\1\2,,,,,,,,,,,/g' | gzip -c >> $PAJE_WORKER_STATE
 fi
 
 PAJE_OTHER_STATE=paje.other_state.csv.gz
@@ -187,11 +187,11 @@ zgrep -E "^Variable" paje.csv.gz | gzip -c >> $PAJEVARIABLE
 
 PAJELINK=paje.link.csv.gz
 echo "Nature, Container, Type, Start, End, Duration, Size, Origin, Dest, Key, Tag, MPIType, Priority, Handle" | gzip -c > $PAJELINK
-zgrep -E "^Link" paje.csv.gz | gzip -c >> $PAJELINK
+zgrep -E "^Link" paje.csv.gz | sed -e 's/\(Link\)\(,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*$\)/\1\2,,,/g' | gzip -c >> $PAJELINK
 
 PAJEEVENT=paje.events.csv.gz
 echo "Nature, Container, Type, Start, Value, Handle, Info, Size, Tid, Src" | gzip -c > $PAJEEVENT
-zgrep -E "^Event" paje.csv.gz | gzip -c >> $PAJEEVENT
+zgrep -E "^Event" paje.csv.gz | sed -e 's/\(Event\)\(,[^,]*,[^,]*,[^,]*,[^,]*$\)/\1\2,,,,,/g' | sed -e 's/\(Event\)\(,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*$\)/\1\2,/g' | gzip -c >> $PAJEEVENT
 
 if [ -z "$STARVZ_KEEP" ]; then
   rm -f paje.csv.gz

@@ -16,4 +16,3 @@ get_last_path <- function(lasttask, selected_tasks) {
 boost_shortest_path <- function(s, df) {
     .Call('_starvz_boost_shortest_path', PACKAGE = 'starvz', s, df)
 }
-

@@ -117,7 +117,10 @@ read_worker_csv <- function(where = ".",
     starvz_log("This is multi-node trace")
     # This is the case for multi-node trace
     dfw <- dfw %>%
-      separate(.data$ResourceId, into = c("Node", "Resource"), remove = FALSE, extra = "drop", fill = "right") %>%
+      mutate(ResourceId=as.factor(.data$ResourceId)) %>%
+      separate_res() %>%
+      tibble() %>%
+      mutate(Resource = as.factor(.data$Resource)) %>%
       mutate(Node = as.factor(.data$Node)) %>%
       mutate(ResourceType = as.factor(gsub("[[:digit:]]+", "", .data$Resource))) %>%
       mutate(Resource = as.factor(.data$Resource))
@@ -346,7 +349,10 @@ read_memory_state_csv <- function(where = ".", ZERO = 0) {
   if (grepl("CUDA|CPU", unlist(strsplit(firstResourceId, "_"))[2])) {
     # This is the case for multi-node trace
     dfw <- dfw %>%
-      separate(.data$ResourceId, into = c("Node", "Resource"), remove = FALSE, extra = "drop", fill = "right") %>%
+      mutate(ResourceId=as.factor(.data$ResourceId)) %>%
+      separate_res() %>%
+      tibble() %>%
+      mutate(Resource = as.factor(.data$Resource)) %>%
       mutate(Node = as.factor(.data$Node)) %>%
       mutate(ResourceType = as.factor(gsub("[[:digit:]]+", "", .data$Resource)))
   } else {
@@ -411,7 +417,10 @@ read_comm_state_csv <- function(where = ".", ZERO = 0) {
   if (grepl("mpict", unlist(strsplit(firstResourceId, "_"))[2])) {
     # This is the case for multi-node trace
     dfw <- dfw %>%
-      separate(.data$ResourceId, into = c("Node", "Resource"), remove = FALSE, extra = "drop", fill = "right") %>%
+      mutate(ResourceId=as.factor(.data$ResourceId)) %>%
+      separate_res() %>%
+      tibble() %>%
+      mutate(Resource = as.factor(.data$Resource)) %>%
       mutate(Node = as.factor(.data$Node)) %>%
       mutate(ResourceType = as.factor(gsub("[[:digit:]]+", "", .data$Resource)))
   } else {
@@ -477,7 +486,10 @@ read_other_state_csv <- function(where = ".", ZERO = 0) {
   if (grepl("CUDA|CPU", unlist(strsplit(firstResourceId, "_"))[2])) {
     # This is the case for multi-node trace
     dfw <- dfw %>%
-      separate(.data$ResourceId, into = c("Node", "Resource"), remove = FALSE, extra = "drop", fill = "right") %>%
+      mutate(ResourceId=as.factor(.data$ResourceId)) %>%
+      separate_res() %>%
+      tibble() %>%
+      mutate(Resource = as.factor(.data$Resource)) %>%
       mutate(Node = as.factor(.data$Node)) %>%
       mutate(ResourceType = as.factor(gsub("[[:digit:]]+", "", .data$Resource)))
   } else {
@@ -513,26 +525,31 @@ read_vars_set_new_zero <- function(where = ".", ZERO = 0) {
   } else {
     stop(paste("File", variable.csv, "do not exist"))
   }
-
-  dfv <- dfv %>%
+  dfv %>%
     select(-.data$Nature) %>%
     # the new zero because of the long initialization phase
     mutate(Start = .data$Start - ZERO, End = .data$End - ZERO) %>%
     # create three new columns (Node, Resource, ResourceType)
     # This is StarPU-specific
-    separate(.data$ResourceId, into = c("Node", "Resource"), remove = FALSE, extra = "drop", fill = "right") %>%
+    mutate(ResourceId=as.factor(.data$ResourceId)) %>%
+    separate_res() %>%
+    tibble() %>%
+    mutate(Resource = as.factor(.data$Resource)) %>%
     mutate(Node = as.factor(.data$Node)) %>%
     mutate(ResourceType = as.factor(gsub("[[:digit:]]+", "", .data$Resource))) %>%
     # abbreviate names so they are smaller
     # This does not work fine.
     # mutate(Type = abbreviate(Type, minlength=10));
     # manually rename variables names
-    mutate(
-      Type = gsub("Number of Ready Tasks", "Ready", .data$Type),
-      Type = gsub("Number of Submitted Uncompleted Tasks", "Submitted", .data$Type),
-      Type = gsub("Bandwidth In \\(MB/s)", "B. In (MB/s)", .data$Type),
-      Type = gsub("Bandwidth Out \\(MB/s)", "B. Out (MB/s)", .data$Type)
-    )
+    mutate(Type = as.factor(Type)) -> tmp
+
+    tmp %>% .$Type %>% levels() -> lvl
+    gsub("Number of Ready Tasks", "Ready", lvl) -> lvl
+    gsub("Number of Submitted Uncompleted Tasks", "Submitted", lvl) -> lvl
+    gsub("Bandwidth In \\(MB/s)", "B. In (MB/s)", lvl) -> lvl
+    gsub("Bandwidth Out \\(MB/s)", "B. Out (MB/s)", lvl) -> lvl
+
+    tmp %>% mutate(Type = factor(Type, levels=lvl)) -> dfv
   return(dfv)
 }
 
@@ -980,7 +997,10 @@ read_dag <- function(where = ".", Application = NULL, dfl = NULL) {
       select(-.data$Container, -.data$Origin) %>%
       # 2. Dest becomes ResourceId for these MPI tasks
       rename(ResourceId = .data$Dest) %>%
-      separate(.data$ResourceId, into = c("Node", "Resource"), remove = FALSE, extra = "drop", fill = "right") %>%
+      mutate(ResourceId=as.factor(.data$ResourceId)) %>%
+      separate_res() %>%
+      tibble() %>%
+      mutate(Resource = as.factor(.data$Resource)) %>%
       mutate(Node = as.factor(.data$Node)) %>%
       mutate(ResourceType = as.factor(gsub("[[:digit:]]+", "", .data$Resource)))
     dfdag <- dfdags %>% bind_rows(dfdagl)

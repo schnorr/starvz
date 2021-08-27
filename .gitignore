@@ -4,3 +4,4 @@
 *.png
 *.rec
 *.csv
+inst/tools/starvz_fast_csv_split

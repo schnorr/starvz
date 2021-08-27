@@ -5,6 +5,11 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // integrateStepFunc
 NumericVector integrateStepFunc(NumericVector x, NumericVector bounds, NumericVector values);
 RcppExport SEXP _starvz_integrateStepFunc(SEXP xSEXP, SEXP boundsSEXP, SEXP valuesSEXP) {
@@ -41,6 +46,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// separate_res
+DataFrame separate_res(DataFrame data);
+RcppExport SEXP _starvz_separate_res(SEXP dataSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< DataFrame >::type data(dataSEXP);
+    rcpp_result_gen = Rcpp::wrap(separate_res(data));
+    return rcpp_result_gen;
+END_RCPP
+}
 // boost_shortest_path
 NumericVector boost_shortest_path(int s, DataFrame df);
 RcppExport SEXP _starvz_boost_shortest_path(SEXP sSEXP, SEXP dfSEXP) {
@@ -58,6 +74,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_starvz_integrateStepFunc", (DL_FUNC) &_starvz_integrateStepFunc, 3},
     {"_starvz_lastest_task_c", (DL_FUNC) &_starvz_lastest_task_c, 1},
     {"_starvz_get_last_path", (DL_FUNC) &_starvz_get_last_path, 2},
+    {"_starvz_separate_res", (DL_FUNC) &_starvz_separate_res, 1},
     {"_starvz_boost_shortest_path", (DL_FUNC) &_starvz_boost_shortest_path, 2},
     {NULL, NULL, 0}
 };

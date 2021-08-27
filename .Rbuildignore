@@ -12,3 +12,5 @@ README\.org
 ^extra_data$
 ^extra_test$
 ^\.github$
+inst/tools/starvz_fast_csv_split
+inst/tools/starvz_csv.c

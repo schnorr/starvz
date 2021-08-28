@@ -13,6 +13,11 @@ get_last_path <- function(lasttask, selected_tasks) {
     .Call('_starvz_get_last_path', PACKAGE = 'starvz', lasttask, selected_tasks)
 }
 
+separate_res <- function(data) {
+    .Call('_starvz_separate_res', PACKAGE = 'starvz', data)
+}
+
 boost_shortest_path <- function(s, df) {
     .Call('_starvz_boost_shortest_path', PACKAGE = 'starvz', s, df)
 }
+

@@ -541,7 +541,7 @@ read_vars_set_new_zero <- function(where = ".", ZERO = 0) {
     # This does not work fine.
     # mutate(Type = abbreviate(Type, minlength=10));
     # manually rename variables names
-    mutate(Type = as.factor(Type)) -> tmp
+    mutate(Type = as.factor(.data$Type)) -> tmp
 
     tmp %>% .$Type %>% levels() -> lvl
     gsub("Number of Ready Tasks", "Ready", lvl) -> lvl
@@ -549,7 +549,7 @@ read_vars_set_new_zero <- function(where = ".", ZERO = 0) {
     gsub("Bandwidth In \\(MB/s)", "B. In (MB/s)", lvl) -> lvl
     gsub("Bandwidth Out \\(MB/s)", "B. Out (MB/s)", lvl) -> lvl
 
-    tmp %>% mutate(Type = factor(Type, levels=lvl)) -> dfv
+    tmp %>% mutate(Type = factor(.data$Type, levels=lvl)) -> dfv
   return(dfv)
 }
 

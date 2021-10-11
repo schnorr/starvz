@@ -18,14 +18,19 @@ DataFrame separate_res(DataFrame data){
 
   for(int i=0; i<lvls; i++){
     std::string x = Rcpp::as<std::string>(res_levels[i]);
-    int pos = x.find("_");
-    lvl_Node[i] = std::stoi(x.substr(0, pos));
-    if(pos+1 == (int)x.size()){
-      lvl_Reso[i] = NA_STRING;
-    }else{
-      lvl_Reso[i] = x.substr(pos+1, x.size());
+    size_t pos = x.find("_");
+    // Single Node
+    if(pos == std::string::npos){
+      lvl_Node[i] = 0;
+      lvl_Reso[i] = x;
+    }else{ //Multi-Node
+      lvl_Node[i] = std::stoi(x.substr(0, pos));
+      if(pos+1 == x.size()){
+        lvl_Reso[i] = NA_STRING;
+      }else{
+        lvl_Reso[i] = x.substr(pos+1, x.size());
+      }
     }
-
   }
 
   IntegerVector Node(size);

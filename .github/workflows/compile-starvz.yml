@@ -93,7 +93,4 @@ jobs:
         if: matrix.config.os == 'ubuntu-20.04' && matrix.config.r == 'release'
         run: cp -r extra_data/qr_trace inst/extdata/
 
-      - name: Test coverage
-        if: FALSE && matrix.config.os == 'ubuntu-20.04' && matrix.config.r == 'release'
-        run: covr::codecov()
-        shell: Rscript {0}
+

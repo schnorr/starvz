@@ -166,7 +166,7 @@ fi
 echo "Get states, links and variables in CSV"
 date "+%a %d %b %Y %H:%M:%S %Z"
 
-if [ ! -f starvz_fast_csv_split ] && [ -x "$(command -v gcc)" ]; then
+if [ -f $DIR/starvz_csv.c ] && [ ! -f $DIR/starvz_fast_csv_split ] && [ -x "$(command -v gcc)" ]; then
   gcc -O2 $DIR/starvz_csv.c -o $DIR/starvz_fast_csv_split -lz -fopenmp
 fi
 

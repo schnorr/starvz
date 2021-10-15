@@ -49,7 +49,9 @@ test_that("starvz_plot works", {
   other_data <- starvz_phase1(system.file("extdata", "lu_trace", package = "starvz"), lu_colors, state_filter = 2, whichApplication = "lu")
   other_data <- starvz_read(system.file("extdata", "lu_trace", package = "starvz"), system.file("extdata", "config.yaml", package = "starvz"))
   result <- all.equal(nrow(other_data$Application), nrow(starvz_sample_lu$Application))
-  expect_equal(result, TRUE)
+  if (codec_is_available("gzip")) {
+    expect_equal(result, TRUE)
+  }
 
   pl <- NULL
   pl <- panel_handles(starvz_sample_lu, JobId = "0_1")

@@ -1,6 +1,6 @@
 Package: starvz
 Title: R-Based Visualization Techniques for Task-Based Applications
-Version: 0.5.1
+Version: 0.6.0
 Authors@R: c(
     person("Lucas Mello Schnorr", email = "schnorr@inf.ufrgs.br", role = c("aut", "ths"), comment = c(ORCID = "0000-0003-4828-9942")),
     person("Vinicius Garcia Pinto", email = "vgpinto@inf.ufrgs.br", role = c("aut"), comment = c(ORCID = "0000-0002-6845-9358")),

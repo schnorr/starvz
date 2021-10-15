@@ -6,7 +6,8 @@ NULL
 #' Read starvz configuration yaml files. This function is design to replace
 #' an already existing configuration on starvz data.
 #'
-#' @param file path to file
+#' @param file The path to a file
+#' @param warn Give a warn in case the config file is not found
 #' @return A list containing starvz configuration
 #' @examples
 #' \donttest{
@@ -14,13 +15,13 @@ NULL
 #' config <- starvz_read_config(example_file)
 #' }
 #' @export
-starvz_read_config <- function(file = NULL) {
+starvz_read_config <- function(file = NULL, warn = TRUE) {
   defaut_config <- starvz_default_config()
   if (is.null(file)) {
     starvz_log("Using default config")
     return(defaut_config)
   } else if (!file.exists(file)) {
-    starvz_warn(paste0("Config file dont exist, using default, wd:", getwd(), " file:", file))
+    if(warn) starvz_warn(paste0("StarVZ yaml configuration file [", file, "] doesn't exist, using default"))
     return(defaut_config)
   } else {
     config <- yaml::read_yaml(file)

@@ -21,22 +21,23 @@ starvz_write_feather <- function(data, directory = ".") {
 starvz_write_parquet <- function(data, directory = ".") {
   check_arrow()
   if (!codec_is_available("gzip")) {
-    starvz_warn("Arrow Gzip is not available, try using arrow::install_arrow()")
-  }
-  invisible(data %>% list_modify("Origin" = NULL) %>% names() %>%
-    lapply(function(x) {
-      filename <- paste0(directory, "/", tolower(x), ".parquet")
-      starvz_log(filename)
-      if (!is.null(data[[x]])) {
-        if (is.data.frame(data[[x]])) {
-          write_parquet(data[[x]], filename, compression = "gzip")
+    starvz_warn("R package arrow does not have 'gzip' codec, try using arrow::install_arrow()")
+  }else{
+    invisible(data %>% list_modify("Origin" = NULL) %>% names() %>%
+      lapply(function(x) {
+        filename <- paste0(directory, "/", tolower(x), ".parquet")
+        starvz_log(filename)
+        if (!is.null(data[[x]])) {
+          if (is.data.frame(data[[x]])) {
+            write_parquet(data[[x]], filename, compression = "gzip")
+          } else {
+            starvz_log(paste(filename, "must be a data frame."))
+          }
         } else {
-          starvz_log(paste(filename, "must be a data frame."))
+          starvz_log(paste("Data for", filename, "has not been feathered because is empty."))
         }
-      } else {
-        starvz_log(paste("Data for", filename, "has not been feathered because is empty."))
-      }
-    }))
+      }))
+  }
 }
 
 convert_feather_parquet <- function(directory = ".") {

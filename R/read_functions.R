@@ -32,20 +32,22 @@ the_fast_reader_function <- starvz_read_feather
 
 starvz_read_some_parquet <- function(directory = ".", tables = c("application")) {
   if (!codec_is_available("gzip")) {
-    starvz_warn("Arrow Gzip is not available, try using arrow::install_arrow()")
+    starvz_warn("R package arrow does not have 'gzip' codec, try using arrow::install_arrow()")
+    return(list())
+  }else{
+    l1 <- list(Origin = directory)
+    l2 <- lapply(tables, function(table) {
+      table_file <- file.path(directory, paste0(table, ".parquet"))
+      if (file.exists(table_file)) {
+        read_parquet(table_file)
+      } else {
+        starvz_log(paste("The file:", table_file, " does not exist on that directory. Ignore."))
+        NULL
+      }
+    })
+    names(l2) <- tables %>% str_to_title()
+    c(l1, l2)
   }
-  l1 <- list(Origin = directory)
-  l2 <- lapply(tables, function(table) {
-    table_file <- file.path(directory, paste0(table, ".parquet"))
-    if (file.exists(table_file)) {
-      read_parquet(table_file)
-    } else {
-      starvz_log(paste("The file:", table_file, " does not exist on that directory. Ignore."))
-      NULL
-    }
-  })
-  names(l2) <- tables %>% str_to_title()
-  c(l1, l2)
 }
 
 starvz_read_parquet <- function(directory = ".") {
@@ -71,10 +73,13 @@ starvz_read_some <- function(directory = ".", tables = c("application"), config_
     data <- starvz_read_some_feather(directory, tables = tables)
   }
 
-  if (is.null(config_file)) {
-    config_file <- file.path(directory, "config.yaml")
+  # If no config_file is specified, try to fallback on the config.yaml inside directory
+  # If it is still not available, it will use a default one
+  if (!is.null(config_file)) {
+    data$config <- starvz_read_config(config_file)
+  }else{
+    data$config <- starvz_read_config(file.path(directory, "config.yaml"), warn=FALSE)
   }
-  data$config <- starvz_read_config(config_file)
 
   final_data <- starvz_data(data)
 
@@ -105,11 +110,13 @@ starvz_read <- function(directory = ".",
                         selective = TRUE) {
   check_arrow()
 
-  if (is.null(config_file)) {
-    config_file <- file.path(directory, "config.yaml")
+  # If no config_file is specified, try to fallback on the config.yaml inside directory
+  # If it is still not available, it will use a default one
+  if (!is.null(config_file)) {
+    config <- starvz_read_config(config_file)
+  }else{
+    config <- starvz_read_config(file.path(directory, "config.yaml"), warn=FALSE)
   }
-
-  config <- starvz_read_config(config_file)
 
   if (selective) {
     # Always try to load Version, Colors and Y

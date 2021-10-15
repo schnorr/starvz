@@ -4,10 +4,12 @@
 \alias{starvz_read_config}
 \title{Read config files}
 \usage{
-starvz_read_config(file = NULL)
+starvz_read_config(file = NULL, warn = TRUE)
 }
 \arguments{
-\item{file}{path to file}
+\item{file}{The path to a file}
+
+\item{warn}{Give a warn in case the config file is not found}
 }
 \value{
 A list containing starvz configuration

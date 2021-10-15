@@ -26,11 +26,17 @@ NULL
 #' @export
 starvz_phase1 <- function(directory = ".", app_states_fun = lu_colors,
                           state_filter = 0, whichApplication = "", input.parquet = "1",
-                          config_file = file.path(directory, "config.yaml")) {
+                          config_file = NULL) {
   # Start of reading procedure
   if (is.null(app_states_fun)) stop("app_states_fun is obligatory for reading")
 
-  config <- starvz_read_config(config_file)
+  # If no config_file is specified, try to fallback on the config.yaml inside directory
+  # If it is still not available, it will use a default one
+  if (!is.null(config_file)) {
+    config <- starvz_read_config(config_file)
+  }else{
+    config <- starvz_read_config(file.path(directory, "config.yaml"), warn=FALSE)
+  }
 
   # Read entities.csv and register the hierarchy (with Y coordinates)
   entities <- hl_y_paje_tree(where = directory)

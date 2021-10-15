@@ -149,6 +149,7 @@ isolate_read_write <- function(input.parquet, fun, name, directory, ZERO) {
 
 isolate_read_write_m <- function(input.parquet, fun, directory, ZERO) {
   data <- fun(where = directory, ZERO = ZERO)
+  if(is.null(data))return(NULL)
   if (input.parquet == "1") {
     starvz_log("Saving as parquet")
     starvz_write_parquet(data, directory = directory)

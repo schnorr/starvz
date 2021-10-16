@@ -525,24 +525,43 @@ read_vars_set_new_zero <- function(where = ".", ZERO = 0) {
   } else {
     stop(paste("File", variable.csv, "do not exist"))
   }
+
+  firstResourceId <- dfv %>%
+    .$ResourceId %>%
+    unique() %>%
+    as.character() %>%
+    sort() %>%
+    head(n = 1)
+
   dfv %>%
     select(-.data$Nature) %>%
     # the new zero because of the long initialization phase
-    mutate(Start = .data$Start - ZERO, End = .data$End - ZERO) %>%
+    mutate(Start = .data$Start - ZERO, End = .data$End - ZERO) -> dfv
+
     # create three new columns (Node, Resource, ResourceType)
     # This is StarPU-specific
-    mutate(ResourceId=as.factor(.data$ResourceId)) %>%
-    separate_res() %>%
-    tibble() %>%
-    mutate(Resource = as.factor(.data$Resource)) %>%
-    mutate(Node = as.factor(.data$Node)) %>%
-    mutate(ResourceType = as.factor(gsub("[[:digit:]]+", "", .data$Resource))) %>%
-    # abbreviate names so they are smaller
-    # This does not work fine.
-    # mutate(Type = abbreviate(Type, minlength=10));
-    # manually rename variables names
-    mutate(Type = as.factor(.data$Type)) -> tmp
+    if (grepl("CUDA|CPU", unlist(strsplit(firstResourceId, "_"))[2])) {
+      starvz_log("This is multi-node trace")
+      # This is the case for multi-node trace
+      dfv %>%
+        mutate(ResourceId=as.factor(.data$ResourceId)) %>%
+        separate_res() %>%
+        tibble() %>%
+        mutate(Resource = as.factor(.data$Resource)) %>%
+        mutate(Node = as.factor(.data$Node)) %>%
+        mutate(ResourceType = as.factor(gsub("[[:digit:]]+", "", .data$Resource))) %>%
+        mutate(Type = as.factor(.data$Type)) -> tmp
+    } else {
+      starvz_log("This is a single-node trace...")
+      # This is the case for SINGLE node trace
+      dfv %>%
+        mutate(Node = as.factor(0)) %>%
+        mutate(Resource = .data$ResourceId) %>%
+        mutate(ResourceType = as.factor(gsub("[_[:digit:]]+", "", .data$ResourceId))) %>%
+        mutate(Type = as.factor(.data$Type)) -> tmp
+    }
 
+    # manually rename variables names
     tmp %>% .$Type %>% levels() -> lvl
     gsub("Number of Ready Tasks", "Ready", lvl) -> lvl
     gsub("Number of Submitted Uncompleted Tasks", "Submitted", lvl) -> lvl

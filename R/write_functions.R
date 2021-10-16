@@ -20,6 +20,9 @@ starvz_write_feather <- function(data, directory = ".") {
 
 starvz_write_parquet <- function(data, directory = ".") {
   check_arrow()
+  if(is.null(data)){
+    return(NULL)
+  }
   if (!codec_is_available("gzip")) {
     starvz_warn("R package arrow does not have 'gzip' codec, try using arrow::install_arrow()")
   }else{

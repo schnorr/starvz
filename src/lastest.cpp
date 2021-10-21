@@ -41,7 +41,7 @@ DataFrame lastest_task_c(DataFrame df) {
     if(!IntegerVector::is_na(Dependent[i])){
       graph_Depen[current_job].insert(Dependent[i]);
       graph_next[Dependent[i]].insert(current_job);
-    }else{
+    }else if(graph_Depen[current_job].size()==0){
       //If not say that it depends on the imaginary job 0
       graph_next[0].insert(current_job);
       graph_Depen[current_job].insert(0);

@@ -187,7 +187,7 @@ else
   if [ -n "$STARVZ_EXCLUDE_TASKS" ]; then
     zgrep -e "Worker State" paje.csv.gz | grep -E -v $(echo $STARVZ_EXCLUDE_TASKS | sed "s/,/|/g" | sed "s/ //g" ) | gzip -c >> $PAJE_WORKER_STATE
   else
-    zgrep -e "Worker State" paje.csv.gz | sed -e 's/\(State\)\(,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*$\)/\1\2,,,,,,,,,,,/g' | gzip -c >> $PAJE_WORKER_STATE
+    zgrep -a -e "Worker State" paje.csv.gz | sed -e 's/\(State\)\(,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*$\)/\1\2,,,,,,,,,,,/g' | gzip -c >> $PAJE_WORKER_STATE
   fi
 
   PAJE_OTHER_STATE=paje.other_state.csv.gz

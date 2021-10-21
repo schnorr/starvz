@@ -63,7 +63,7 @@ read_worker_csv <- function(where = ".",
       Y = as.integer(.data$Y),
       Iteration = as.integer(.data$Iteration),
       Subiteration = as.integer(.data$Subiteration)
-    )
+    ) %>% filter(!is.na(ResourceId))
 
   if ((dfw %>% nrow()) == 0) stop("After reading worker states, number of rows is zero.")
 

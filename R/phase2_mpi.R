@@ -15,8 +15,11 @@ geom_mpistates <- function(dfw = NULL, label = "1", expand = 0.05, Y = NULL) {
   dfw <- dfw %>%
     # Establish new position
     left_join(ypos, by = c("ResourceId"))
-
-  mycolors <- c(brewer.pal(8, "Dark2"), "blue")
+  dfw %>%
+    .$Value %>%
+    unique() %>%
+    length() -> n_values
+  mycolors <- rep(brewer.pal(8, "Dark2"), (n_values / 8) + 1)
 
   # Color mapping
   ret[[length(ret) + 1]] <- scale_fill_manual(values = mycolors)

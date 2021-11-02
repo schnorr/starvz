@@ -562,13 +562,12 @@ read_vars_set_new_zero <- function(where = ".", ZERO = 0) {
     }
 
     # manually rename variables names
-    tmp %>% .$Type %>% levels() -> lvl
-    gsub("Number of Ready Tasks", "Ready", lvl) -> lvl
-    gsub("Number of Submitted Uncompleted Tasks", "Submitted", lvl) -> lvl
-    gsub("Bandwidth In \\(MB/s)", "B. In (MB/s)", lvl) -> lvl
-    gsub("Bandwidth Out \\(MB/s)", "B. Out (MB/s)", lvl) -> lvl
-
-    tmp %>% mutate(Type = factor(.data$Type, levels=lvl)) -> dfv
+    tmp %>% mutate(
+      Type = gsub("Number of Ready Tasks", "Ready", .data$Type),
+      Type = gsub("Number of Submitted Uncompleted Tasks", "Submitted", .data$Type),
+      Type = gsub("Bandwidth In \\(MB/s)", "B. In (MB/s)", .data$Type),
+      Type = gsub("Bandwidth Out \\(MB/s)", "B. Out (MB/s)", .data$Type)
+    ) -> dfv
   return(dfv)
 }
 

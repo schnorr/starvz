@@ -745,16 +745,7 @@ data_handles_csv_parser <- function(where = ".", ZERO = 0) {
     starvz_log(paste("Reading ", entities.csv))
     pm <- starvz_suppressWarnings(read_csv(entities.csv,
       trim_ws = TRUE,
-      col_types = cols(
-        Handle = col_character(),
-        HomeNode = col_integer(),
-        MPIRank = col_integer(),
-        Size = col_integer(),
-        Description = col_character(),
-        Coordinates = col_character(),
-        MPIOwner = col_integer(),
-        MPITag = col_double()
-      )
+      show_col_types=FALSE
     ))
   } else {
     starvz_log(paste("File", entities.csv, "do not exist."))
@@ -763,6 +754,9 @@ data_handles_csv_parser <- function(where = ".", ZERO = 0) {
   ret <- pm %>% mutate(Handle = as.factor(.data$Handle))
   if ("Description" %in% colnames(ret)) {
     ret <- ret %>% mutate(Description = as.factor(.data$Description))
+  }
+  if ("Name" %in% colnames(ret)) {
+    ret <- ret %>% mutate(Name = as.factor(.data$Name))
   }
 
   return(ret)

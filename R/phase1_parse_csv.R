@@ -753,7 +753,7 @@ data_handles_csv_parser <- function(where = ".", ZERO = 0) {
         Description = col_character(),
         Coordinates = col_character(),
         MPIOwner = col_integer(),
-        MPITag = col_integer()
+        MPITag = col_numeric()
       )
     ))
   } else {

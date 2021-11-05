@@ -69,6 +69,25 @@ have all their dependencies ready but have their execution delayed.
  possibly revealing bad scheduling decisions.
 
 * CRAN SUB
+** Message to CRAN for Submission on 05/11/2021
+*** New Version
+- We updated the package to version 0.7.0 to correct problems warned
+  by Prof. Brian Ripley related to rio/car/Rcpp packages.
+
+*** Test environments
+- local ubuntu 20.04 install, R 4.1.1
+- Github Actions (https://github.com/schnorr/starvz/runs/4118473594)
+  - Linux: R 4.1.2 and R Under development (unstable) (2021-11-04 r81141)
+  - Windows: R 4.1.2
+  - OS X: 4.1.2
+
+*** R CMD check results
+Status: 1 NOTE
+checking installed package size ... NOTE
+  installed size is  6.1Mb
+  sub-directories of 1Mb or more:
+    libs   4.8Mb
+
 ** Message to CRAN for Submission on 15/10/2021
 *** New Version
 - Updating the package to version 0.6.0

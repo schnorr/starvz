@@ -129,7 +129,7 @@ starvz_phase1 <- function(directory = ".", app_states_fun = lu_colors,
   data$Gaps <- NULL #gaps(data)
 
   starvz_log("Call Latest.")
-  data$Lastest <- compute_all_lastest(data)
+  data$Last <- compute_all_last(data)
 
   if (input.parquet == "1") {
     starvz_log("Saving as parquet")
@@ -554,7 +554,7 @@ gaps <- function(data) {
   return(bind_rows(data.z.dag, data.b.dag, data.f.dag))
 }
 
-compute_all_lastest <- function(data){
+compute_all_last <- function(data){
   filtered_dag <- data$Dag %>% select(.data$JobId, .data$Dependent, .data$Start, .data$End, .data$Cost, .data$Value) %>%
                   mutate(JobId = as.character(.data$JobId), Dependent = as.character(.data$Dependent))
 
@@ -564,5 +564,5 @@ compute_all_lastest <- function(data){
   mutate(JobId = factor(.data$JobId, levels=all_levels),
          Dependent = factor(.data$Dependent, levels=all_levels)) -> filtered_dag
 
-  return(lastest_task_c(filtered_dag) %>% tibble())
+  return(last_task_c(filtered_dag) %>% tibble())
 }

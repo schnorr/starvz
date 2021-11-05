@@ -9,7 +9,7 @@
 using namespace Rcpp;
 
 // [[Rcpp::export]]
-DataFrame lastest_task_c(DataFrame df) {
+DataFrame last_task_c(DataFrame df) {
   //Get information of the DAG table
   IntegerVector jobs = df["JobId"];
   IntegerVector Dependent = df["Dependent"];
@@ -100,7 +100,7 @@ DataFrame lastest_task_c(DataFrame df) {
     graph_next[front].clear();
   }
 
-  //Lets compute the lastest path for all nodes
+  //Lets compute the last path for all nodes
   the_nas.push_back(0); //Start from the commom start-point imaginary task
 
   while(the_nas.size()>0){
@@ -171,7 +171,7 @@ DataFrame lastest_task_c(DataFrame df) {
 
   DataFrame ret = DataFrame::create( Named("JobId") = ret_Jobs,
 				     _["End"] = ret_End,
-				     _["Lastest"] = ret_lastJobId,
+				     _["Last"] = ret_lastJobId,
 				     _["LastEnd"] = ret_last);
 
   return ret;
@@ -181,7 +181,7 @@ DataFrame lastest_task_c(DataFrame df) {
 // [[Rcpp::export]]
 List get_last_path(DataFrame lasttask, CharacterVector selected_tasks){
   IntegerVector jobs = lasttask["JobId"];
-  IntegerVector lastest = lasttask["Lastest"];
+  IntegerVector last = lasttask["Last"];
 
   CharacterVector jobs_levs = jobs.attr("levels");
 
@@ -206,7 +206,7 @@ List get_last_path(DataFrame lasttask, CharacterVector selected_tasks){
     std::list<int> the_lasts;
     while(node!=NA_INTEGER){
         the_lasts.push_back(node);
-        node =  lastest[node];
+        node =  last[node];
         if(node!=NA_INTEGER)node--;
     }
     results[i] = CharacterVector(the_lasts.size());

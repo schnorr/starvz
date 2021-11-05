@@ -5,8 +5,8 @@ integrateStepFunc <- function(x, bounds, values) {
     .Call('_starvz_integrateStepFunc', PACKAGE = 'starvz', x, bounds, values)
 }
 
-lastest_task_c <- function(df) {
-    .Call('_starvz_lastest_task_c', PACKAGE = 'starvz', df)
+last_task_c <- function(df) {
+    .Call('_starvz_last_task_c', PACKAGE = 'starvz', df)
 }
 
 get_last_path <- function(lasttask, selected_tasks) {

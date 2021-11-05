@@ -173,8 +173,8 @@ panel_st_raw <- function(data = NULL, ST.Outliers = data$config$st$outliers, bas
 
     # check if task dependencies should be added
     if (taskdeps) {
-      if(!is.null(data$Lastest)){
-        tasksel <- lastest(data, tasklist)
+      if(!is.null(data$Last)){
+        tasksel <- last(data, tasklist)
       }else{
         tasksel <- gaps_backward_deps(
           data = data,

@@ -682,8 +682,8 @@ statistics_total_idleness <- function(data) {
   return(100.0 - percent_active)
 }
 
-lastest <- function(data, path){
-	get_last_path(data$Lastest, path) -> deps
+last <- function(data, path){
+	get_last_path(data$Last, path) -> deps
 	ret <- NULL
 
   data$Link %>%
@@ -696,7 +696,7 @@ lastest <- function(data, path){
   select(.data$JobId, .data$Start, .data$End, .data$Position, .data$Height) %>%
   bind_rows(data$Application %>% select(.data$JobId, .data$Start, .data$End, .data$Position, .data$Height)) -> all_states
 
-	data$Lastest %>% rename(Dependent=.data$Lastest) %>% select(.data$JobId, .data$Dependent) %>% inner_join(all_states, by=c("JobId"="JobId")) -> app_dep
+	data$Last %>% rename(Dependent=.data$Last) %>% select(.data$JobId, .data$Dependent) %>% inner_join(all_states, by=c("JobId"="JobId")) -> app_dep
 	for(i in seq(1, length(deps))){
 	   app_dep %>% filter(.data$JobId %in% deps[[i]]) %>%
 	   mutate(Path = path[i]) %>% arrange(.data$End) %>% bind_rows(ret) -> ret

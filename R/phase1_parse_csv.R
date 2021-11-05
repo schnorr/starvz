@@ -63,7 +63,7 @@ read_worker_csv <- function(where = ".",
       Y = as.integer(.data$Y),
       Iteration = as.integer(.data$Iteration),
       Subiteration = as.integer(.data$Subiteration)
-    ) %>% filter(!is.na(ResourceId))
+    ) %>% filter(!is.na(.data$ResourceId))
 
   if ((dfw %>% nrow()) == 0) stop("After reading worker states, number of rows is zero.")
 
@@ -232,14 +232,6 @@ read_worker_csv <- function(where = ".",
     model_LR_log <- function(df) {
       lm(log(Duration) ~ log(GFlop), data = df)
     }
-    # configure the flexmix model to clusterize tasks before running the model_LR_log
-    model_flexmix_log <- function(df) {
-      stepFlexmix(Duration ~ GFlop,
-        data = df, k = 1:2,
-        model = FLXMRglm(log(Duration) ~ log(GFlop)),
-        control = list(nrep = 30)
-      )
-    }
 
     # set dummy variable for Cluster
     Application <- Application %>% mutate(Cluster = 1)
@@ -248,25 +240,38 @@ read_worker_csv <- function(where = ".",
     Application <- regression_based_outlier_detection(Application, model_NLR, "_NLR", level = 0.95)
     Application <- regression_based_outlier_detection(Application, model_LR_log, "_LR_LOG", level = 0.95)
 
-    # need to create the clusters before calling the function, let's do the clustering for all
-    # types of tasks for now, replacing the dummy Cluster variable
-    Application <- Application %>% select(-.data$Cluster)
-    Application <- Application %>%
-      filter(grepl("qrt", .data$Value)) %>%
-      filter(.data$GFlop > 0) %>%
-      group_by(.data$ResourceType, .data$Value) %>%
-      nest() %>%
-      mutate(flexmix_model = map(.data$data, model_flexmix_log)) %>%
-      mutate(Cluster = map(.data$flexmix_model, function(m) {
-        # pick the best fitted model according to BIC metric
-        getModel(m, which = "BIC")@cluster
-      })) %>%
-      select(-.data$flexmix_model) %>%
-      unnest(cols = c(.data$Cluster, .data$data)) %>%
-      ungroup() %>%
-      select(.data$JobId, .data$Cluster) %>%
-      full_join(Application, by = "JobId")
-    Application <- regression_based_outlier_detection(Application, model_LR_log, "_FLEXMIX", level = 0.95)
+    if (!requireNamespace("flexmix", quietly = TRUE)) {
+      # configure the flexmix model to clusterize tasks before running the model_LR_log
+      model_flexmix_log <- function(df) {
+        flexmix::stepFlexmix(Duration ~ GFlop,
+          data = df, k = 1:2,
+          model = flexmix::FLXMRglm(log(Duration) ~ log(GFlop)),
+          control = list(nrep = 30)
+        )
+      }
+
+      # need to create the clusters before calling the function, let's do the clustering for all
+      # types of tasks for now, replacing the dummy Cluster variable
+      Application <- Application %>% select(-.data$Cluster)
+      Application <- Application %>%
+        filter(grepl("qrt", .data$Value)) %>%
+        filter(.data$GFlop > 0) %>%
+        group_by(.data$ResourceType, .data$Value) %>%
+        nest() %>%
+        mutate(flexmix_model = map(.data$data, model_flexmix_log)) %>%
+        mutate(Cluster = map(.data$flexmix_model, function(m) {
+          # pick the best fitted model according to BIC metric
+          flexmix::getModel(m, which = "BIC")@cluster
+        })) %>%
+        select(-.data$flexmix_model) %>%
+        unnest(cols = c(.data$Cluster, .data$data)) %>%
+        ungroup() %>%
+        select(.data$JobId, .data$Cluster) %>%
+        full_join(Application, by = "JobId")
+      Application <- regression_based_outlier_detection(Application, model_LR_log, "_FLEXMIX", level = 0.95)
+    }else{
+      starvz_warn("qrmumps can use the suggested package flexmix (that is not installed) to do another outlier classification")
+    }
 
     # Use the Outlier_LR_LOG (log~log) as the default Outlier classification
     Application <- Application %>% rename(Outlier = .data$Outlier_LR_LOG)

@@ -2,6 +2,7 @@
 # For packages that we use a lot of functions:
 #' @import dplyr
 #' @import ggplot2
+#' @import Rcpp
 # For packages that we use a small set of function a lot of times:
 #' @importFrom grDevices colorRampPalette
 #' @importFrom methods is
@@ -21,8 +22,6 @@
 #' @importFrom gtools mixedorder mixedsort
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom zoo na.locf
-#' @importFrom car outlierTest
-#' @importFrom flexmix stepFlexmix FLXMRglm getModel
 NULL
 
 # Ignore .

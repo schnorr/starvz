@@ -98,8 +98,6 @@ starvz_default_config <- function() {
   config$st$tasks$list <- NULL
   config$st$tasks$levels <- 2
   config$st$outliers <- TRUE
-  config$st$cpb <- FALSE
-  config$st$cpb_mpi$active <- FALSE
   config$st$abe$active <- FALSE
   config$st$aggregation$active <- FALSE
   config$st$aggregation$method <- "static"

@@ -55,7 +55,7 @@ default:
 
   st: # Application State Plot over resources
     active: TRUE # Enable
-    cpb: TRUE # Show Critical Path Bound makespan metric
+    cpb: FALSE # Show Critical Path Bound makespan metric
     #height: 4 # Vertical Size in the final visualization
     idleness: FALSE # Show resource idleness %
     expand: 0.01 # Expand for y ggplot

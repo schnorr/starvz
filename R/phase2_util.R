@@ -395,7 +395,7 @@ panel_resource_usage_task <- function(data = NULL,
 
   # must expand data frame to make geom_area work properly
   df_plot <- df2 %>%
-    filter(!is.na(.data$Task)) %>%
+    filter(!is.na(.data$Task)) %>% ungroup() %>%
     expand(.data$Slice, .data$Task) %>%
     left_join(df2 %>% filter(.data$Value != 0), by = c("Task", "Slice")) %>%
     mutate(Value1 = ifelse(is.na(.data$Value1), 0, .data$Value1))

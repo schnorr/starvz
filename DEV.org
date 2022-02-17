@@ -69,6 +69,24 @@ have all their dependencies ready but have their execution delayed.
  possibly revealing bad scheduling decisions.
 
 * CRAN SUB
+** Message to CRAN for Submission on 11/02/2022
+*** New Version
+- We updated the package to version 0.7.1 to correct problems warned
+  by Prof. Brian Ripley related to dependencies updates.
+
+*** Test environments
+- local ubuntu 20.04 install, R 4.1.2
+- Github Actions (https://github.com/schnorr/starvz/actions/runs/1829471512)
+  - Linux: R 4.1.2 and R Under development (unstable) (2022-02-10 r81713)
+  - Windows: R 4.1.2
+  - OS X: 4.1.2
+
+*** R CMD check results
+Status: 1 NOTE
+checking installed package size ... NOTE
+  installed size is  5.9Mb
+  sub-directories of 1Mb or more:
+    libs   4.8Mb
 ** Message to CRAN for Submission on 05/11/2021
 *** New Version
 - We updated the package to version 0.7.0 to correct problems warned

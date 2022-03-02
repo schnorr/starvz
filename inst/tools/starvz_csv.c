@@ -31,11 +31,12 @@ void zerr(int ret)
     }
 }
 
-enum kind{KIND_MEMORY, KIND_COMM, KIND_WORKER, KIND_OTHER, KIND_VAR, KIND_LINK, KIND_EVENT};
+#define TYPES_SIZE 8
+enum kind{KIND_MEMORY, KIND_COMM, KIND_WORKER, KIND_OTHER, KIND_VAR, KIND_LINK, KIND_EVENT, KIND_INCTX};
 
 struct t_out_files{
-  FILE* dest[7];
-  z_stream* strm[7];
+  FILE* dest[TYPES_SIZE];
+  z_stream* strm[TYPES_SIZE];
 };
 
 int write_to_kind(enum kind type, struct t_out_files out_files, unsigned char* to_compress, int size){
@@ -72,7 +73,7 @@ int write_to_kind(enum kind type, struct t_out_files out_files, unsigned char* t
   return Z_OK;
 }
 
-static int expected_commas[7] = {7, 7, 18, 7, 6, 13, 9};
+static int expected_commas[TYPES_SIZE] = {7, 7, 18, 7, 6, 13, 9};
 static int allocs = 0;
 int process_line(char* line, int size, struct t_out_files out_files){
   int pos = 0;
@@ -102,6 +103,8 @@ int process_line(char* line, int size, struct t_out_files out_files){
       select_kind = KIND_COMM;
     }else if(line[comma1]=='W'){
       select_kind = KIND_WORKER;
+    }else if(line[comma1]=='I'){
+      select_kind = KIND_INCTX;
     }
   }
 
@@ -240,11 +243,13 @@ int main(){
   out_files.dest[KIND_VAR] = fopen("paje.variable.csv.gz", "wb");
   out_files.dest[KIND_LINK] = fopen("paje.link.csv.gz", "wb");
   out_files.dest[KIND_EVENT] = fopen("paje.events.csv.gz", "wb");
+  out_files.dest[KIND_INCTX] = fopen("paje.inctx.csv.gz", "wb");
+
 
   int ret;
 
   //Start streams
-  for(int i=0; i<7; i++){
+  for(int i=0; i<TYPES_SIZE; i++){
     out_files.strm[i] = (z_stream*)malloc(sizeof(z_stream));
     out_files.strm[i]->zalloc = Z_NULL;
     out_files.strm[i]->zfree = Z_NULL;
@@ -258,6 +263,7 @@ int main(){
   write_to_kind(KIND_MEMORY, out_files, "Nature, ResourceId, Type, Start, End, Duration, Depth, Value\n", 61);
   write_to_kind(KIND_COMM, out_files, "Nature, ResourceId, Type, Start, End, Duration, Depth, Value\n", 61);
   write_to_kind(KIND_WORKER, out_files, "Nature, ResourceId, Type, Start, End, Duration, Depth, Value, Size, Params, Footprint, Tag, JobId, SubmitOrder, GFlop, X, Y, Iteration, Subiteration\n", 149);
+  write_to_kind(KIND_INCTX, out_files, "Nature, ResourceId, Type, Start, End, Duration, Depth, Value, Size, Params, Footprint, Tag, JobId, SubmitOrder\n", 111);
   write_to_kind(KIND_OTHER, out_files, "Nature, ResourceId, Type, Start, End, Duration, Depth, Value\n", 61);
   write_to_kind(KIND_VAR, out_files, "Nature, ResourceId, Type, Start, End, Duration, Value\n", 54);
   write_to_kind(KIND_LINK, out_files, "Nature, Container, Type, Start, End, Duration, Size, Origin, Dest, Key, Tag, MPIType, Priority, Handle\n", 103);
@@ -273,7 +279,7 @@ int main(){
   //Close everything
   fclose(source);
 
-  for(int i=0; i<7; i++){
+  for(int i=0; i<TYPES_SIZE; i++){
     write_to_kind(i, out_files, " ", 0);//This will force Flush
     (void)deflateEnd(out_files.strm[i]);
     fclose(out_files.dest[i]);

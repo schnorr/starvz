@@ -75,6 +75,15 @@ yconf <- function(dfw = NULL, option = "ALL", Y = NULL, show_mpi = TRUE) {
       mutate(Node = as.integer(as.character(.data$Node))) %>%
       arrange(.data$Node) %>%
       slice(seq(1, n(), 10))
+  } else if (option == "1CPU_1GPU") { # First
+    y_conf <- dfw %>%
+      select(.data$Node, .data$ResourceId, .data$ResourceType, .data$Position, .data$Height) %>%
+      distinct() %>%
+      group_by(.data$Node, .data$ResourceType) %>%
+      arrange(.data$ResourceId, .data$ResourceType) %>%
+      slice(1) %>%
+      ungroup()
+      show_mpi <- FALSE
   } else if (option == "ALL") {
     y_conf <- dfw %>%
       select(.data$Node, .data$ResourceId, .data$ResourceType, .data$Position, .data$Height) %>%

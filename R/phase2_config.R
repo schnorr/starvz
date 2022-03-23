@@ -108,6 +108,7 @@ starvz_default_config <- function() {
   config$st$abe$text <- TRUE
   config$st$abe$label <- TRUE
   config$st$alpha <- 0.5
+  config$st$drop_small <- 0.0
 
   config$summary_nodes$active <- FALSE
   config$summary_nodes$legend <- FALSE

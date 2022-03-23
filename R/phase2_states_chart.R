@@ -78,6 +78,7 @@ panel_st_runtime <- function(data,
 #' @param runtime TODO I think we should create a separated function for it
 #' @param x_start X-axis start value
 #' @param x_end X-axis end value
+#' @param drop_small Drop states smaller then this value
 #' @param legend enable/disable legends
 #' @return A ggplot object
 #' @include starvz_data.R
@@ -93,7 +94,7 @@ panel_st_raw <- function(data = NULL, ST.Outliers = data$config$st$outliers, bas
                          makespan = data$config$st$makespan, abe = data$config$st$abe$active, pmtoolbounds = data$config$pmtool$bounds$active,
                          cpb = data$config$st$cpb, cpb_mpi = data$config$st$cpb_mpi$active, legend = data$config$st$legend,
                          x_start = data$config$limits$start,
-                         x_end = data$config$limits$end, runtime = FALSE) {
+                         x_end = data$config$limits$end, drop_small = data$config$st$drop_small, runtime = FALSE) {
 
   # ST.Outliers = TRUE, base_size=22, expand_x=0.05,
   #  expand_y=0.05, selected_nodes = NULL, labels="ALL", alpha=0.25, idleness=TRUE,
@@ -149,7 +150,7 @@ panel_st_raw <- function(data = NULL, ST.Outliers = data$config$st$outliers, bas
 
   # Add states and outliers if requested
   if (runtime) {
-    gow <- gow + geom_states(data$Starpu,
+    gow <- gow + geom_states(data$Starpu %>% filter(Duration >= drop_small),
       ST.Outliers, runtime, data$Colors,
       labels = labels,
       expand = expand_y,
@@ -157,7 +158,7 @@ panel_st_raw <- function(data = NULL, ST.Outliers = data$config$st$outliers, bas
       alpha_value = alpha, Y = data$Y
     )
   } else {
-    gow <- gow + geom_states(App,
+    gow <- gow + geom_states(App %>% filter(Duration >= drop_small),
       ST.Outliers, runtime, data$Colors,
       labels = labels,
       expand = expand_y,
@@ -236,9 +237,8 @@ geom_states <- function(dfw = NULL, Show.Outliers = FALSE, StarPU = FALSE, Color
 
   # Y axis breaks and their labels
   yconfm <- yconf(dfw, labels, Y)
-
   ret[[length(ret) + 1]] <- scale_y_continuous(
-    breaks = yconfm$Position + (yconfm$Height / 3), labels = unique(as.character(yconfm$ResourceId)),
+    breaks = yconfm$Position + (yconfm$Height / 3), labels = as.character(yconfm$ResourceId),
     expand = c(expand, 0)
   )
   # Y label

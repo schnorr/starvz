@@ -25,6 +25,7 @@ panel_st_raw(
   legend = data$config$st$legend,
   x_start = data$config$limits$start,
   x_end = data$config$limits$end,
+  drop_small = data$config$st$drop_small,
   runtime = FALSE
 )
 }
@@ -68,6 +69,8 @@ panel_st_raw(
 \item{x_start}{X-axis start value}
 
 \item{x_end}{X-axis end value}
+
+\item{drop_small}{Drop states smaller then this value}
 
 \item{runtime}{TODO I think we should create a separated function for it}
 }

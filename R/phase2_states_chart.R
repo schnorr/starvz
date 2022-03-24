@@ -107,6 +107,10 @@ panel_st_raw <- function(data = NULL, ST.Outliers = data$config$st$outliers, bas
     expand_x <- 0.05
   }
 
+  if (is.null(drop_small) || !is.numeric(drop_small)) {
+    drop_small <- 0.0
+  }
+
   if (is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start))) {
     x_start <- NA
   }
@@ -150,7 +154,7 @@ panel_st_raw <- function(data = NULL, ST.Outliers = data$config$st$outliers, bas
 
   # Add states and outliers if requested
   if (runtime) {
-    gow <- gow + geom_states(data$Starpu %>% filter(Duration >= drop_small),
+    gow <- gow + geom_states(data$Starpu %>% filter(.data$Duration >= drop_small),
       ST.Outliers, runtime, data$Colors,
       labels = labels,
       expand = expand_y,
@@ -158,7 +162,7 @@ panel_st_raw <- function(data = NULL, ST.Outliers = data$config$st$outliers, bas
       alpha_value = alpha, Y = data$Y
     )
   } else {
-    gow <- gow + geom_states(App %>% filter(Duration >= drop_small),
+    gow <- gow + geom_states(App %>% filter(.data$Duration >= drop_small),
       ST.Outliers, runtime, data$Colors,
       labels = labels,
       expand = expand_y,

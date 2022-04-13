@@ -39,7 +39,8 @@ read_worker_csv <- function(where = ".",
         X = col_character(),
         Y = col_character(),
         Iteration = col_character(),
-        Subiteration = col_character()
+        Subiteration = col_character(),
+        NumaNodes = col_character()
       )
     ))
   } else {

@@ -73,7 +73,7 @@ int write_to_kind(enum kind type, struct t_out_files out_files, unsigned char* t
   return Z_OK;
 }
 
-static int expected_commas[TYPES_SIZE] = {7, 7, 18, 7, 6, 13, 9};
+static int expected_commas[TYPES_SIZE] = {7, 7, 19, 7, 6, 13, 9};
 static int allocs = 0;
 int process_line(char* line, int size, struct t_out_files out_files){
   int pos = 0;
@@ -262,7 +262,7 @@ int main(){
   //Headers
   write_to_kind(KIND_MEMORY, out_files, "Nature, ResourceId, Type, Start, End, Duration, Depth, Value\n", 61);
   write_to_kind(KIND_COMM, out_files, "Nature, ResourceId, Type, Start, End, Duration, Depth, Value\n", 61);
-  write_to_kind(KIND_WORKER, out_files, "Nature, ResourceId, Type, Start, End, Duration, Depth, Value, Size, Params, Footprint, Tag, JobId, SubmitOrder, GFlop, X, Y, Iteration, Subiteration\n", 149);
+  write_to_kind(KIND_WORKER, out_files, "Nature, ResourceId, Type, Start, End, Duration, Depth, Value, Size, Params, Footprint, Tag, JobId, SubmitOrder, GFlop, X, Y, Iteration, Subiteration, NumaNodes\n", 160);
   write_to_kind(KIND_INCTX, out_files, "Nature, ResourceId, Type, Start, End, Duration, Depth, Value, Size, Params, Footprint, Tag, JobId, SubmitOrder\n", 111);
   write_to_kind(KIND_OTHER, out_files, "Nature, ResourceId, Type, Start, End, Duration, Depth, Value\n", 61);
   write_to_kind(KIND_VAR, out_files, "Nature, ResourceId, Type, Start, End, Duration, Value\n", 54);

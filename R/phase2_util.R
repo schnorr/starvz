@@ -19,9 +19,10 @@ extract_colors <- function(dfw = NULL, colors = NULL) {
   dfw %>%
     select(.data$Value) %>%
     unique() %>%
+    arrange(.data$Value) %>%
     left_join(colors, by = c("Value")) %>%
     .$Color %>%
-    setNames(dfw %>% select(.data$Value) %>% unique() %>% .$Value)
+    setNames(dfw %>% select(.data$Value) %>% unique() %>% arrange(.data$Value) %>% .$Value)
 }
 
 yconf <- function(dfw = NULL, option = "ALL", Y = NULL, show_mpi = TRUE) {

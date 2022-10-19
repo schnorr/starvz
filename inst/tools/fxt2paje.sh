@@ -57,4 +57,4 @@ fi
 echo "Sort paje.trace"
 date "+%a %d %b %Y %H:%M:%S %Z"
 # sort the file
-paje_sort.sh $POTI paje.trace.gz | gzip -c > paje.sorted.trace.gz
+paje_sort.sh $POTI paje.trace.gz | sed 's/""/"x"/g' | gzip -c > paje.sorted.trace.gz

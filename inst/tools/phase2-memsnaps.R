@@ -1,4 +1,4 @@
-#!/usr/bin/Rscript
+#!/usr/bin/env Rscript
 # Call function memsnaps from start to end with informed steps
 
 library(starvz)

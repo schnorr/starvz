@@ -1,4 +1,4 @@
-#!/usr/bin/Rscript
+#!/usr/bin/env Rscript
 # Print the MPI Owner distribution considering a 2D structure of data
 
 library(starvz)

@@ -294,12 +294,12 @@ time_aggregation_prep <- function(dfw = NULL) {
     group_by(.data$ResourceId, .data$Task) %>%
     mutate(Value = 1) %>%
     select(
-      -.data$Duration,
-      -.data$Size, -.data$Depth, -.data$Params, -.data$JobId,
-      -.data$Footprint, -.data$Tag,
-      -.data$GFlop, -.data$X, -.data$Y, -.data$Iteration, -.data$Subiteration,
-      -.data$Resource, -.data$Outlier, -.data$Height,
-      -.data$Position
+      "-Duration",
+      "-Size", "-Depth", "-Params", "-JobId",
+      "-Footprint", "-Tag",
+      "-GFlop", "-X", "-Y", "-Iteration", "-Subiteration",
+      "-Resource", "-Outlier", "-Height",
+      "-Position"
     )
 
   # Define the first zero
@@ -314,7 +314,7 @@ time_aggregation_prep <- function(dfw = NULL) {
   dfw_agg_prep <- dfw_zero_1 %>%
     bind_rows(dfw_zero_N) %>%
     mutate(Start = .data$StartN, End = .data$EndN) %>%
-    select(-.data$StartN, -.data$EndN) %>%
+    select("-StartN", "-EndN") %>%
     bind_rows(dfw_initial) %>%
     ungroup()
 
@@ -354,13 +354,13 @@ time_aggregation_post <- function(dfw = NULL, dfw_agg = NULL, colors = NULL) {
 
   df_ResourceId <- dfw %>%
     select(
-      .data$ResourceId,
-      .data$Node, .data$Resource, .data$ResourceType,
-      .data$Position, .data$Height
+      "ResourceId",
+      "Node", "Resource", "ResourceType",
+      "Position", "Height"
     ) %>%
     unique()
   df_Task <- colors %>%
-    select(.data$Value, .data$Color) %>%
+    select("Value", "Color") %>%
     unique()
 
   dfwagg_full <- dfw_agg %>%
@@ -393,7 +393,7 @@ st_time_aggregation <- function(dfw = NULL, colors = NULL, StarPU.View = FALSE, 
     return(NULL)
   }
 
-  dfw_agg_prep <- time_aggregation_prep(dfw %>% select(-.data$Node, -.data$ResourceType))
+  dfw_agg_prep <- time_aggregation_prep(dfw %>% select("-Node", "-ResourceType"))
   dfw_agg <- time_aggregation_do(dfw_agg_prep %>%
     group_by(.data$ResourceId, .data$Task), step)
   dfwagg_full <- time_aggregation_post(dfw, dfw_agg, colors)
@@ -482,10 +482,10 @@ geom_aggregated_states <- function(data = NULL, Show.Outliers = FALSE, min_time_
 
   # Do the aggregation
   data$Application %>%
-    select(.data$ResourceId, .data$Start, .data$End, .data$Duration, .data$Value, .data$JobId) %>%
+    select("ResourceId", "Start", "End", "Duration", "Value", "JobId") %>%
     aggregate_trace(states, excludeIds, min_time_pure) %>%
     left_join(
-      ydf %>% select(.data$ResourceId, .data$Resource, .data$Node, .data$ResourceType, .data$Height, .data$Position),
+      ydf %>% select("ResourceId", "Resource", "Node", "ResourceType", "Height", "Position"),
       by = c("ResourceId" = "ResourceId")
     ) -> dfw
 

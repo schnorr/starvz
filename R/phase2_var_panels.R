@@ -87,7 +87,7 @@ panel_ready <- function(data, legend = data$config$ready$legend,
   # add the lack ready tasks area inside the ready tasks panel
   if (lack_ready) {
     data$Starpu %>%
-      select(.data$Node, .data$Resource) %>%
+      select("Node", "Resource") %>%
       unique() %>%
       group_by(.data$Node) %>%
       summarize(N = n()) %>%

@@ -1,3 +1,4 @@
+
 #' @include starvz_data.R
 
 starvz_compute_plot_heights <- function(plist, config) {
@@ -307,13 +308,13 @@ starvz_plot_list <- function(data = NULL) {
       mutate(Size = as.integer(.data$Size))
     data$Comm_state <- data$State %>%
       filter(.data$Type == "Communication Thread State") %>%
-      select(-.data$Position, -.data$Height)
+      select("-Position", "-Height")
     data$Memory_state <- data$State %>%
       filter(.data$Type == "Memory Node State") %>%
-      select(-.data$Position)
+      select("-Position")
     data$Colors <- data$State %>%
       filter(.data$Application) %>%
-      select(.data$Value, .data$Color) %>%
+      select("Value", "Color") %>%
       distinct()
   }
 
@@ -596,12 +597,12 @@ starvz_plot <- function(data = NULL, name = NULL, save = FALSE, guided = data$co
       nodes <- length(data$config$selected_nodes)
     } else if (!is.null(data$Tasks)) {
       nodes <- data$Tasks %>%
-        select(.data$MPIRank) %>%
+        select("MPIRank") %>%
         distinct() %>%
         nrow()
     } else if (!is.null(data$Application)) {
       nodes <- data$Application %>%
-        select(.data$Node) %>%
+        select("Node") %>%
         distinct() %>%
         nrow()
     } else {
@@ -609,7 +610,7 @@ starvz_plot <- function(data = NULL, name = NULL, save = FALSE, guided = data$co
     }
 
     types <- data$Application %>%
-      select(.data$ResourceType) %>%
+      select("ResourceType") %>%
       distinct() %>%
       nrow()
 
@@ -619,7 +620,7 @@ starvz_plot <- function(data = NULL, name = NULL, save = FALSE, guided = data$co
         filter(.data$Node %in% data$config$selected_nodes) %>%
         arrange(.data$Position) %>%
         mutate(New = cumsum(lag(.data$Height, default = 0))) %>%
-        select(.data$Parent, .data$New) -> new_y
+        select("Parent", "New") -> new_y
       data$config$guided$starvz_height_resources <- (new_y$New %>% max()) * 15 / 100
     } else {
       data$config$guided$starvz_height_resources <- (data$Y$Position %>% max()) * 15 / 100

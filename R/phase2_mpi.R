@@ -121,14 +121,14 @@ concurrent_mpi <- function(data = NULL, out = FALSE) {
 
   data$Link %>%
     filter(grepl("mpicom", .data$Key)) %>%
-    select(-.data$Container, -.data$Type, -.data$Duration) -> dflink
+    select("-Container", "-Type", "-Duration") -> dflink
 
   dflink %>%
-    select(-.data$End) %>%
+    select("-End") %>%
     rename(Timestamp = .data$Start) %>%
     mutate(Start = TRUE) -> dfstart
   dflink %>%
-    select(-.data$Start) %>%
+    select("-Start") %>%
     rename(Timestamp = .data$End) %>%
     mutate(Start = FALSE) %>%
     bind_rows(dfstart) %>%
@@ -142,7 +142,7 @@ concurrent_mpi <- function(data = NULL, out = FALSE) {
       )
     ))) %>%
     arrange({{ col_case }}, .data$Timestamp) %>%
-    select(-.data$Start) %>%
+    select("-Start") %>%
     rename(Start = .data$Timestamp) %>%
     group_by({{ col_case }}) %>%
     mutate(End = lead(.data$Start)) %>%
@@ -154,5 +154,5 @@ concurrent_mpi <- function(data = NULL, out = FALSE) {
     separate(.data$ResourceId, into = c("Node", "Resource"), remove = FALSE, extra = "drop", fill = "right") %>%
     mutate(Node = as.factor(.data$Node)) %>%
     mutate(ResourceType = as.factor(gsub("[[:digit:]]+", "", .data$Resource))) %>%
-    select(.data$Start, .data$End, .data$Duration, .data$Node, .data$ResourceId, .data$ResourceType, .data$Type, .data$Value)
+    select("Start", "End", "Duration", "Node", "ResourceId", "ResourceType", "Type", "Value")
 }

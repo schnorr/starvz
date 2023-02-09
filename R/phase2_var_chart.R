@@ -6,7 +6,7 @@ var_chart <- function(dfv = NULL, ylabel = NA, base_size = 22, expand = 0.05) {
   }
 
   variable <- dfv %>%
-    select(.data$Type) %>%
+    select("Type") %>%
     .$Type %>%
     unique()
   if (is.na(ylabel)) ylabel <- variable
@@ -20,7 +20,7 @@ var_chart <- function(dfv = NULL, ylabel = NA, base_size = 22, expand = 0.05) {
   k <- dfv %>%
     rename(x = .data$Start, xend = .data$End, y = .data$Value) %>%
     mutate(yend = .data$y) %>%
-    select(-.data$Duration)
+    select("-Duration")
   v <- k %>%
     group_by(.data$ResourceId, .data$Type) %>%
     mutate(xend = .data$x, y = .data$y, yend = lag(.data$y)) %>%
@@ -75,7 +75,7 @@ var_integration_chart <- function(dfv = NULL, ylabel = NA, step = 250, facetting
   }
 
   variable <- dfv %>%
-    select(.data$Type) %>%
+    select("Type") %>%
     .$Type %>%
     unique()
   if (is.na(ylabel)) ylabel <- variable
@@ -112,7 +112,7 @@ var_integration_segment_chart <- function(dfv = NULL, ylabel = NA, step = 250, f
   }
 
   variable <- dfv %>%
-    select(.data$Type) %>%
+    select("Type") %>%
     .$Type %>%
     unique()
   if (is.na(ylabel)) ylabel <- variable

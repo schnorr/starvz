@@ -134,7 +134,7 @@ geom_events <- function(main_data = NULL, data = NULL,
   # Hardcoded here because yconf is specific to Resources Workers
   yconfm <- dfw %>%
     ungroup() %>%
-    select(.data$Container, .data$Position, .data$Height) %>%
+    select("Container", "Position", "Height") %>%
     distinct() %>%
     group_by(.data$Container) %>%
     arrange(.data$Container) %>%
@@ -170,7 +170,7 @@ geom_events <- function(main_data = NULL, data = NULL,
     dx <- dfw %>%
       filter(.data$Type == "Allocating") %>%
       left_join(main_data$Data_handles, by = c("Handle" = "Handle")) %>%
-      select(-.data$Tid, -.data$Src, -.data$Value)
+      select("-Tid", "-Src", "-Value")
     dx$Coordinates <- gsub(" ", "x", dx$Coordinates)
 
     ret[[length(ret) + 1]] <- geom_text(
@@ -268,7 +268,7 @@ geom_links <- function(data = NULL, dfw = NULL, combined = FALSE,
   dfl$Height <- 1
 
   yconfm <- dfl %>%
-    select(.data$Origin, .data$O_Position, .data$Height) %>%
+    select("Origin", "O_Position", "Height") %>%
     distinct() %>%
     group_by(.data$Origin) %>%
     arrange(.data$Origin) %>%
@@ -284,7 +284,7 @@ geom_links <- function(data = NULL, dfw = NULL, combined = FALSE,
 
   if (!combined) {
 
-    # dfw <- dfw %>% select(-Position) %>% left_join(col_pos, by=c("ResourceId" = "ResourceId"));
+    # dfw <- dfw %>% select("-Position") %>% left_join(col_pos, by=c("ResourceId" = "ResourceId"));
     # Hardcoded here because yconf is specific to Resource Workers
 
     ret[[length(ret) + 1]] <- scale_y_continuous(breaks = yconfm$D_Position, labels = yconfm$Dest, expand = c(0.10, 0.5))
@@ -356,7 +356,7 @@ handles_presence_states <- function(data) {
     filter(.data$Type == "data state invalid" |
       .data$Type == "data state owner" |
       .data$Type == "data state shared") %>%
-    select(.data$Container, .data$Start, .data$Type, .data$Value) -> data_state_events
+    select("Container", "Start", "Type", "Value") -> data_state_events
 
   end <- max(data$Starpu$End)
 
@@ -385,7 +385,7 @@ handles_presence_states <- function(data) {
     mutate(End = lead(.data$Start, default = unlist(fini_end))) %>%
     ungroup() %>%
     filter(.data$Type != "data state invalid") %>%
-    select(-.data$rep, -.data$flow, -.data$t_diff, -.data$need) %>%
+    select("-rep", "-flow", "-t_diff", "-need") %>%
     group_by(.data$Value, .data$Container) -> f_data
 
   return(f_data)
@@ -497,7 +497,7 @@ pre_handle_gantt <- function(data, name_func = NULL) {
 
   position <- data$handle_states %>%
     ungroup() %>%
-    select(.data$Container) %>%
+    select("Container") %>%
     distinct() %>%
     arrange(.data$Container) %>%
     mutate(y1 = 1:n())
@@ -505,27 +505,27 @@ pre_handle_gantt <- function(data, name_func = NULL) {
   p_data <- data$handle_states %>%
     mutate(Colour = ifelse(.data$Type == "data state owner", "Owner", "Shared")) %>%
     inner_join(position, by = c("Container" = "Container")) %>%
-    select(.data$Container, .data$Start, .data$End, .data$Value, .data$y1, .data$Colour)
+    select("Container", "Start", "End", "Value", "y1", "Colour")
 
 
   p_data %>%
-    select(.data$Container, .data$Value, .data$y1) %>%
+    select("Container", "Value", "y1") %>%
     distinct() -> pre_p_data
 
   data$Task_handles %>%
     filter(!is.na(.data$JobId)) %>%
     mutate(Modes = as.character(.data$Modes)) %>%
     inner_join(data$Tasks %>% filter(!is.na(.data$JobId)), by = c("JobId" = "JobId")) %>%
-    select(.data$JobId, .data$Handles, .data$MPIRank, .data$MemoryNode, .data$Modes) %>%
+    select("JobId", "Handles", "MPIRank", "MemoryNode", "Modes") %>%
     mutate(sContainer = paste0(.data$MPIRank, "_MEMMANAGER", .data$MemoryNode)) -> job_handles
 
   job_handles %>%
     inner_join(pre_p_data, by = c("Handles" = "Value")) %>%
-    select(.data$Container, .data$sContainer, .data$JobId, .data$Handles, .data$y1, .data$MemoryNode, .data$Modes) %>%
+    select("Container", "sContainer", "JobId", "Handles", "y1", "MemoryNode", "Modes") %>%
     filter(.data$sContainer == .data$Container) %>%
     mutate(JobId = as.character(.data$JobId)) %>%
     inner_join(data$Application, by = c("JobId" = "JobId")) %>%
-    select(.data$Container, .data$JobId, .data$Handles, .data$Start, .data$End, .data$y1, .data$Value, .data$Modes) %>%
+    select("Container", "JobId", "Handles", "Start", "End", "y1", "Value", "Modes") %>%
     rename(Colour = .data$Value) %>%
     rename(Value = .data$Handles) -> jobs_p_data
   p_data$size <- 0.8
@@ -536,7 +536,7 @@ pre_handle_gantt <- function(data, name_func = NULL) {
     rename(Handle=.data$Value) %>%
     ungroup() %>%
     name_func() %>%
-    select(.data$Container, .data$Start, .data$End, .data$Value, .data$y1, .data$Colour, .data$size, .data$JobId, .data$Modes) %>%
+    select("Container", "Start", "End", "Value", "y1", "Colour", "size", "JobId", "Modes") %>%
     group_by(.data$Value, .data$Container) %>%
     mutate(Modes = case_when(
       is.na(.data$Modes) ~ "1",
@@ -553,12 +553,12 @@ pre_handle_gantt <- function(data, name_func = NULL) {
       mutate(P = substring(.data$Tid, 5)) %>%
       mutate(G = substr(.data$Container, 1, nchar(as.character(.data$Container)) - 1)) %>%
       mutate(Container = paste0(.data$G, .data$P)) %>%
-      select(-.data$P, -.data$G) %>%
-      select(-.data$Tid) %>%
+      select("-P", "-G") %>%
+      select("-Tid") %>%
       inner_join(data$Data_handle, by = c("Handle" = "Handle")) %>%
       inner_join(position, by = c("Container" = "Container")) %>%
       name_func() %>%
-      select(.data$Container, .data$Type, .data$Start, .data$Value, .data$Info, .data$y1) %>%
+      select("Container", "Type", "Start", "Value", "Info", "y1") %>%
       filter(.data$Type == "Transfer Request") %>%
       mutate(Pre = as.character(.data$Info)) -> request_events
   } else {
@@ -566,23 +566,23 @@ pre_handle_gantt <- function(data, name_func = NULL) {
   }
 
   data$Task_handles %>%
-    select(.data$Handles) %>%
+    select("Handles") %>%
     distinct() %>%
     .$Handles -> h_used
   data$Events_memory %>%
     filter(.data$Handle %in% h_used) %>%
-    select(-.data$Tid) %>%
+    select("-Tid") %>%
     inner_join(data$Data_handle, by = c("Handle" = "Handle")) %>%
     inner_join(position, by = c("Container" = "Container")) %>%
     name_func() %>%
-    select(.data$Container, .data$Type, .data$Start, .data$Value, .data$Info, .data$y1) %>%
+    select("Container", "Type", "Start", "Value", "Info", "y1") %>%
     filter(.data$Type == "Allocation Request") -> allocation_events
 
   allocation_events %>%
     group_by(.data$Value, .data$Container, .data$Type) %>%
     mutate(Old = lag(.data$Start, default = -5), R = abs(.data$Start - .data$Old)) %>%
     filter(.data$R > 1) %>%
-    select(-.data$Old, -.data$R) -> allocation_events_filtered
+    select("-Old", "-R") -> allocation_events_filtered
 
   allocation_events_filtered$Pre <- "0"
 
@@ -591,16 +591,16 @@ pre_handle_gantt <- function(data, name_func = NULL) {
   # Processing Links (Transfers)
   data$Events_memory %>%
     filter(.data$Type == "DriverCopy Start") %>%
-    select(.data$Handle, .data$Info, .data$Container) %>%
+    select("Handle", "Info", "Container") %>%
     mutate(Info = as.integer(as.character(.data$Info))) -> links_handles
 
   links <- data$Link %>%
     filter(.data$Type == "Intra-node data Fetch" |
       .data$Type == "Intra-node data PreFetch" |
       .data$Type == "Intra-node data TaskPreFetch") %>%
-    select(-.data$Container, -.data$Size) %>%
+    select("Container", "-Size") %>%
     mutate(Con = as.integer(substring(.data$Key, 5))) %>%
-    select(-.data$Key)
+    select("-Key")
 
   final_links <- links %>%
     select(-any_of(c("Handle"))) %>%
@@ -611,14 +611,14 @@ pre_handle_gantt <- function(data, name_func = NULL) {
     rename(dest_y = .data$y1) %>%
     inner_join(data$Data_handle, by = c("Handle" = "Handle")) %>%
     name_func() %>%
-    select(.data$Type, .data$Start, .data$End, .data$Value, .data$origin_y, .data$dest_y) %>%
+    select("Type", "Start", "End", "Value", "origin_y", "dest_y") %>%
     rename(Transfer = .data$Type)
 
   if ("MPI communication" %in% unique(data$Link$Type)) {
     mpi_links <- data$Link %>%
       select(-any_of(c("Handle"))) %>%
       filter(.data$Type == "MPI communication") %>%
-      select(-.data$Container, -.data$Size) %>%
+      select("-Container", "-Size") %>%
       mutate(Origin = str_replace(.data$Origin, "mpict", "MEMMANAGER0")) %>%
       mutate(Dest = str_replace(.data$Dest, "mpict", "MEMMANAGER0")) %>%
       inner_join(position, by = c("Origin" = "Container")) %>%
@@ -628,7 +628,7 @@ pre_handle_gantt <- function(data, name_func = NULL) {
       mutate(Tag = as.numeric(as.character(.data$Tag))) %>%
       inner_join(data$Data_handle, by = c("Tag" = "MPITag")) %>%
       name_func() %>%
-      select(.data$Type, .data$Start, .data$End, .data$Value, .data$origin_y, .data$dest_y) %>%
+      select("Type", "Start", "End", "Value", "origin_y", "dest_y") %>%
       rename(Transfer = .data$Type) %>%
       unique()
 
@@ -731,7 +731,7 @@ panel_handles <- function(data, JobId = NA, lines = NA, lHandle = NA, name_func 
     "  " = "white"
   )
 
-  data$Colors %>% select(.data$Value, .data$Color) -> lc
+  data$Colors %>% select("Value", "Color") -> lc
 
   lc %>%
     .$Color %>%
@@ -915,11 +915,11 @@ pre_snap <- function(data, f_data) {
     mutate(X = as.numeric(.data$X), Y = as.numeric(.data$Y)) -> new_handles
 
 
-  new_handles %>% select(.data$Handle, .data$X, .data$Y) -> hand
+  new_handles %>% select("Handle", "X", "Y") -> hand
 
   f_data %>%
     ungroup() %>%
-    select(.data$Container) %>%
+    select("Container") %>%
     distinct() %>%
     .$Container -> cont
   hand <- hand %>% mutate(Container = list(cont))
@@ -930,10 +930,10 @@ pre_snap <- function(data, f_data) {
   data$Application %>%
     mutate(JobId = .data$JobId) %>%
     inner_join(data$Tasks, by = c("JobId" = "JobId")) %>%
-    select(.data$Start, .data$End, .data$Value, .data$JobId, .data$MemoryNode, .data$MPIRank) %>%
+    select("Start", "End", "Value", "JobId", "MemoryNode", "MPIRank") %>%
     inner_join(data$Task_handles, by = c("JobId" = "JobId")) %>%
     mutate(Container = ifelse(.data$MPIRank >= 0, paste0(.data$MPIRank, "_MEMMANAGER", .data$MemoryNode), paste0("MEMMANAGER", .data$MemoryNode))) %>%
-    select(.data$Handles, .data$Modes, .data$Start, .data$End, .data$Value, .data$JobId, .data$Container) -> tasks
+    select("Handles", "Modes", "Start", "End", "Value", "JobId", "Container") -> tasks
 
   return(list(d_presence, hand, tasks))
 }
@@ -994,7 +994,7 @@ panel_memory_snap <- function(data, selected_time, step,
     "Shared" = "steelblue1"
   )
 
-  data$Colors %>% select(.data$Value, .data$Color) -> lc
+  data$Colors %>% select("Value", "Color") -> lc
 
   lc %>%
     .$Color %>%
@@ -1179,7 +1179,7 @@ panel_memory_heatmap <- function(data,
   data$Data_handles %>%
     separate(.data$Coordinates, c("Y", "X"), extra = "drop", fill = "right") %>%
     mutate(across(c(.data$X, .data$Y), as.integer)) %>%
-    select(.data$Handle, .data$X, .data$Y) -> hand
+    select("Handle", "X", "Y") -> hand
   d_data %>%
     group_by(.data$Value, .data$Container) %>%
     summarize(sum = sum(.data$Duration), n = n()) %>%
@@ -1266,7 +1266,7 @@ panel_dist2d <- function(data,
     length() -> n_nodes
 
   panel <- data$Data_handle %>%
-    select(.data$MPIOwner, .data$Coordinates) %>%
+    select("MPIOwner", "Coordinates") %>%
     unique() %>%
     mutate(MPIOwner = factor(.data$MPIOwner)) %>%
     separate(.data$Coordinates, c("Y", "X"), extra = "drop", fill = "right") %>%

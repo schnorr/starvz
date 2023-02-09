@@ -135,18 +135,18 @@ panel_st_raw <- function(data = NULL, ST.Outliers = data$config$st$outliers, bas
       filter(.data$Node %in% selected_nodes) %>%
       arrange(.data$Position) %>%
       mutate(New = cumsum(lag(.data$Height, default = 0))) %>%
-      select(.data$Parent, .data$New) -> new_y
+      select("Parent", "New") -> new_y
     if (runtime) {
       data$Starpu <- data$Starpu %>%
         left_join(new_y, by = c("ResourceId" = "Parent")) %>%
         mutate(Position = if_else(is.na(.data$New), -3, .data$New)) %>%
-        select(-.data$New)
+        select("-New")
     } else {
       data$Application <- data$Application %>%
         left_join(new_y, by = c("ResourceId" = "Parent")) %>%
         mutate(Position = if_else(is.na(.data$New), -3, .data$New)) %>%
         mutate(Height = if_else(is.na(.data$New), 0, .data$Height)) %>%
-        select(-.data$New)
+        select("-New")
       App <- data$Application %>%
         filter(.data$Position >= 0)
     }
@@ -192,7 +192,7 @@ panel_st_raw <- function(data = NULL, ST.Outliers = data$config$st$outliers, bas
         tasksel <- tasksel %>%
           left_join(new_y, by = c("ResourceId" = "Parent")) %>%
           mutate(Position = if_else(is.na(.data$New), -3, .data$New)) %>%
-          select(-.data$New)
+          select("-New")
       }
 
       gow <- gow + geom_path_highlight(tasksel)
@@ -309,11 +309,11 @@ geom_path_highlight <- function(paths = NULL) {
 
   # collect each JobId coordinates
   paths %>%
-    select(.data$JobId, .data$Start, .data$End, .data$Position, .data$Height) %>%
+    select("JobId", "Start", "End", "Position", "Height") %>%
     unique() -> x1
   # gather coordinates for the lines
   paths %>%
-    select(.data$Path, .data$JobId, .data$Dependent) %>%
+    select("Path", "JobId", "Dependent") %>%
     left_join(x1, by = c("JobId" = "JobId")) %>%
     left_join(x1, by = c("Dependent" = "JobId")) %>%
     na.omit() -> pathlines
@@ -387,7 +387,7 @@ panel_st_agg_node <- function(data,
   space <- space.between
   df.spatial %>%
     mutate(Node = as.integer(as.character(.data$Node))) %>%
-    select(.data$Node, .data$ResourceType) %>%
+    select("Node", "ResourceType") %>%
     unique() %>%
     mutate(ResourceType.Height = 1) %>%
     arrange(-.data$Node, desc(.data$ResourceType)) %>%
@@ -406,9 +406,9 @@ panel_st_agg_node <- function(data,
 
   hl_per_node_ABE(data$Application) %>%
     mutate(Node = as.integer(as.character(.data$Node))) %>%
-    select(-.data$MinPosition, -.data$MaxPosition) %>%
-    left_join(df.node_position %>% select(.data$Node, .data$ResourceType.Position, .data$ResourceType.Height) %>% unique(), by = c("Node")) %>%
-    select(.data$Node, .data$Result, .data$ResourceType.Position, .data$ResourceType.Height) %>%
+    select("-MinPosition", "-MaxPosition") %>%
+    left_join(df.node_position %>% select("Node", "ResourceType.Position", "ResourceType.Height") %>% unique(), by = c("Node")) %>%
+    select("Node", "Result", "ResourceType.Position", "ResourceType.Height") %>%
     arrange(-.data$Node) %>%
     group_by(.data$Node, .data$Result) %>%
     summarize(

@@ -33,7 +33,7 @@ bonferroni_regression_based_outlier_detection <- function(Application, task_mode
 
     # Step 2: identify outliers rows
     df.pre.outliers %>%
-      select(-.data$Residual) %>%
+      select("-Residual") %>%
       unnest(cols = c(.data$outliers)) %>%
       mutate(!!quo_name(column_name) := TRUE, Row = as.integer(.data$Row)) %>%
       ungroup() -> df.pos.outliers
@@ -51,13 +51,13 @@ bonferroni_regression_based_outlier_detection <- function(Application, task_mode
       mutate(!!quo_name(column_name) := ifelse(is.na(!!sym(column_name)), FALSE, !!sym(column_name))) %>%
       # remove outliers that are below the regression line
       mutate(!!quo_name(column_name) := ifelse(.data$Residual < 0, FALSE, !!sym(column_name))) %>%
-      select(-.data$Row) %>%
+      select("-Row") %>%
       ungroup() -> df.outliers
 
     # Step 4: regroup the Outlier data to the original Application
     Application <- Application %>%
       left_join(df.outliers %>%
-        select(.data$JobId, !!quo_name(column_name)), by = c("JobId"))
+        select("JobId", !!quo_name(column_name)), by = c("JobId"))
   } else {
     starvz_log("No anomalies were detected.")
     Application <- Application %>%
@@ -89,7 +89,7 @@ regression_based_outlier_detection <- function(Application, task_model, column_n
         data_predict <- suppressWarnings(predict(model, interval = "prediction", level = level))
         data_predict %>%
           tibble(fit = exp(.[, 1]), lwr = exp(.[, 2]), upr = exp(.[, 3])) %>%
-          select(.data$fit, .data$upr, .data$lwr)
+          select("fit", "upr", "lwr")
       }))
   } else {
     df.model.outliers <- df.model.outliers %>%
@@ -97,7 +97,7 @@ regression_based_outlier_detection <- function(Application, task_model, column_n
         data_predict <- suppressWarnings(predict(model, interval = "prediction", level = level))
         data_predict %>%
           tibble(fit = .[, 1], lwr = .[, 2], upr = .[, 3]) %>%
-          select(.data$fit, .data$upr, .data$lwr)
+          select("fit", "upr", "lwr")
       }))
   }
 
@@ -110,7 +110,7 @@ regression_based_outlier_detection <- function(Application, task_model, column_n
   # Step 2: regroup the Outlier data to the original Application, and thats it
   Application <- Application %>%
     left_join(df.model.outliers %>%
-      select(.data$JobId, .data$DummyOutlier, .data$fit, .data$lwr, .data$upr), by = c("JobId")) %>%
+      select("JobId", "DummyOutlier", "fit", "lwr", "upr"), by = c("JobId")) %>%
     mutate(DummyOutlier = ifelse(is.na(.data$DummyOutlier), FALSE, .data$DummyOutlier))
 
   # Step 3: consider the tasks that seems strange for both models, assuming that we have more than 1 cluster
@@ -119,11 +119,11 @@ regression_based_outlier_detection <- function(Application, task_model, column_n
   if (grepl("FLEXMIX", column_name)) {
     anomalous.region.tasks <- Application %>%
       filter((.data$Duration < .data$lwr) & !.data$DummyOutlier) %>%
-      select(.data$Value, .data$GFlop, .data$ResourceType, .data$Duration, .data$JobId, .data$DummyOutlier)
+      select("Value", "GFlop", "ResourceType", "Duration", "JobId", "DummyOutlier")
 
     # get the models per task type, resource type and cluster
     models <- df.model.outliers %>%
-      select(.data$model, .data$Value, .data$ResourceType, .data$Cluster) %>%
+      select("model", "Value", "ResourceType", "Cluster") %>%
       unique()
 
     # predict the upr value for these tasks using both models
@@ -135,17 +135,17 @@ regression_based_outlier_detection <- function(Application, task_model, column_n
         data_predict <- suppressWarnings(predict(m, interval = "prediction", newdata = tibble(GFlop = gflop), level = level))
         data_predict %>%
           tibble(upr1 = exp(.[, 3])) %>%
-          select(.data$upr1)
+          select("upr1")
       })) %>%
       mutate(upr2 = map2(.data$Cluster2_model, .data$GFlop, function(m, gflop) {
         # check if Flexmix has choosen the 2 clusters model for that task
         if (!is.null(m)) {
           data_predict <- suppressWarnings(predict(m, interval = "prediction", newdata = tibble(GFlop = gflop), level = level)) %>%
             tibble(upr2 = exp(.[, 3])) %>%
-            select(.data$upr2)
+            select("upr2")
         } else {
           data_predict <- tibble(GFlop = gflop, upr2 = 0) %>%
-            select(.data$upr2)
+            select("upr2")
         }
         data_predict
       })) %>%
@@ -157,7 +157,7 @@ regression_based_outlier_detection <- function(Application, task_model, column_n
     Application <- Application %>%
       mutate(DummyOutlier = ifelse(.data$JobId %in% c(region.outliers %>% filter(.data$DummyOutlier) %>% .$JobId), TRUE, .data$DummyOutlier))
   } else {
-    Application <- Application %>% select(-.data$fit, -.data$lwr, -.data$upr)
+    Application <- Application %>% select("-fit", "-lwr", "-upr")
   }
 
   Application <- Application %>%

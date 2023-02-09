@@ -24,7 +24,7 @@ panel_lackready <- function(data = NULL,
   }
 
   data$Starpu %>%
-    select(.data$Node, .data$Resource) %>%
+    select("Node", "Resource") %>%
     unique() %>%
     group_by(.data$Node) %>%
     summarize(N = n()) %>%

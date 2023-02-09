@@ -52,10 +52,10 @@ panel_kiteration <- function(data = NULL,
 
   # Prepare for colors
   data$Colors %>%
-    select(.data$Value, .data$Color) %>%
+    select("Value", "Color") %>%
     unique() %>%
     .$Color -> appColors
-  appColors %>% setNames(data$Colors %>% select(.data$Value, .data$Color) %>% unique() %>% .$Value) -> appColors
+  appColors %>% setNames(data$Colors %>% select("Value", "Color") %>% unique() %>% .$Value) -> appColors
 
 
   if (sub_ite) {
@@ -84,7 +84,7 @@ panel_kiteration <- function(data = NULL,
   # Prepare for middle
   lapply(middle_lines, function(percentage) {
     dfw %>%
-      select(.data$Node, .data$Iteration, .data$Start, .data$End) -> temp1
+      select("Node", "Iteration", "Start", "End") -> temp1
     if (per_node) {
       temp1 %>% group_by(.data$Node, .data$Iteration) -> temp1
     } else {

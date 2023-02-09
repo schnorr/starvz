@@ -43,9 +43,9 @@ gaps_backward_deps_one <- function(data = NULL, task = NULL, levels = 1) {
       # Keep only the destination of the link
       rename(ResourceId = .data$Dest) %>%
       separate(.data$ResourceId, into = c("Node", "Resource"), remove = FALSE, extra = "drop", fill = "right") %>%
-      select(-.data$Origin, -.data$Container) %>%
+      select("-Origin", "-Container") %>%
       # Enrich ResourceId with Height, Position
-      left_join((data$Y %>% select(-.data$Type) %>% mutate(Parent = as.character(.data$Parent))), by = c("ResourceId" = "Parent")) -> retl
+      left_join((data$Y %>% select("-Type") %>% mutate(Parent = as.character(.data$Parent))), by = c("ResourceId" = "Parent")) -> retl
   } else {
     data.frame() -> retl
   }
@@ -79,7 +79,7 @@ gaps_backward_deps_rec <- function(data = NULL, path = NULL, task = NULL, levels
     slice(1) %>%
     ungroup() %>%
     # get only what is useful
-    select(.data$Path, .data$JobId, .data$Dependent) -> dep
+    select("Path", "JobId", "Dependent") -> dep
 
   # check if dep has something
   if (nrow(dep) == 0) {

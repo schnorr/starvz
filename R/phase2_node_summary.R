@@ -46,7 +46,7 @@ panel_node_summary <- function(data, legend = data$config$summary_nodes$legend,
     group_by(.data$Node) %>%
     arrange(-.data$End) %>%
     slice(1) %>%
-    select(.data$Node, .data$End) %>%
+    select("Node", "End") %>%
     ungroup() %>%
     mutate(Node = as.integer(as.character(.data$Node))) -> Makespans
 
@@ -55,7 +55,7 @@ panel_node_summary <- function(data, legend = data$config$summary_nodes$legend,
     rename(Value = .data$End) -> makes
   makes$Value <- makes$Value - Abes$Result
   Abes %>%
-    select(.data$Node, .data$Result) %>%
+    select("Node", "Result") %>%
     mutate(Node = as.integer(as.character(.data$Node))) %>%
     mutate(Metric = "Abe") %>%
     rename(Value = .data$Result) %>%

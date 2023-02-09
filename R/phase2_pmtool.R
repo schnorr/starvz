@@ -113,10 +113,10 @@ panel_pmtool_kiteration <- function(data = NULL,
 
   # Prepare for colors
   data$Colors %>%
-    select(.data$Value, .data$Color) %>%
+    select("Value", "Color") %>%
     unique() %>%
     .$Color -> appColors
-  appColors %>% setNames(data$Colors %>% select(.data$Value, .data$Color) %>% unique() %>% .$Value) -> appColors
+  appColors %>% setNames(data$Colors %>% select("Value", "Color") %>% unique() %>% .$Value) -> appColors
 
   # Prepare for borders
   dfborders <- dfw %>%
@@ -216,7 +216,7 @@ geom_pmtool_bounds <- function(data = NULL) {
 
   dftemp <- data$Application %>%
     filter(grepl("CPU|CUDA", .data$ResourceId)) %>%
-    select(.data$Node, .data$Resource, .data$ResourceType, .data$Duration, .data$Value, .data$Position, .data$Height)
+    select("Node", "Resource", "ResourceType", "Duration", "Value", "Position", "Height")
   # Y position
   minPos <- dftemp %>%
     pull(.data$Position) %>%
@@ -295,7 +295,7 @@ geom_makespan_pmtool <- function(data = NULL) {
     max()
   starvz_log(paste("makespan pm tool is", tend))
   height <- dfw %>%
-    select(.data$Position) %>%
+    select("Position") %>%
     na.omit() %>%
     pull(.data$Position) %>%
     max()

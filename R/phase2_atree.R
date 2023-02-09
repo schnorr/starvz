@@ -41,7 +41,7 @@ panel_atree_structure <- function(data = NULL, end_arrow = "ParentEnd") {
         y = .,
         by = c("Parent" = "ANode"), suffix = c("", ".Parent")
       ) %>%
-      select("-Parent.Parent") %>%
+      select(-"Parent.Parent") %>%
       # Keep only non pruned nodes for tree structure
       filter(.data$NodeType != "Pruned") %>%
       # Calculate coordinates for lines connecting child with parent
@@ -88,7 +88,7 @@ panel_atree_structure <- function(data = NULL, end_arrow = "ParentEnd") {
         y = .,
         by = c("Parent" = "ANode"), suffix = c("", ".Parent")
       ) %>%
-      select("-Parent.Parent") %>%
+      select(-"Parent.Parent") %>%
       group_by(.data$Parent) %>%
       mutate(ComputationEnd.Parent = max(.data$ComputationEnd)) %>%
       ungroup() %>%
@@ -330,7 +330,7 @@ panel_atree <- function(data = NULL, step = data$config$atree$step, legend = dat
     dfw_init <- data$Application %>%
       filter(grepl("init_", .data$Value)) %>%
       unique() %>%
-      select("-Position", "-Height") %>%
+      select(-"Position", -"Height") %>%
       left_join(data$Atree, by = "ANode") %>%
       filter(!is.na(Position))
 
@@ -344,7 +344,7 @@ panel_atree <- function(data = NULL, step = data$config$atree$step, legend = dat
     dfw_comm <- data$Application %>%
       filter(grepl("block_copy", .data$Value) | grepl("block_extadd", .data$Value)) %>%
       unique() %>%
-      select("-Position", "-Height") %>%
+      select(-"Position", -"Height") %>%
       left_join(data$Atree, by = "ANode") %>%
       filter(!is.na(.data$Position))
 
@@ -480,7 +480,7 @@ panel_utiltreenode <- function(data = NULL,
   # must expand data frame to make geom_area work properly
   df_plot <- df2 %>%
     filter(!is.na(.data$Color)) %>%
-    select("-ANode") %>%
+    select(-"ANode") %>%
     expand(.data$Slice, .data$Color) %>%
     left_join(df2 %>% filter(.data$Value != 0), by = c("Slice", "Color")) %>%
     mutate(Value1 = ifelse(is.na(.data$Value1), 0, .data$Value1))
@@ -691,7 +691,7 @@ panel_nodememuse <- function(data = NULL,
       mutate(UsedMemMB = cumsum(.data$MemMB)) %>%
       mutate(Time = .data$Start * 0.9999) %>%
       gather(.data$Start, .data$Time, key = "Start", value = "Time") %>%
-      select("-Start") %>%
+      select(-"Start") %>%
       arrange(.data$Time) %>%
       mutate(UsedMemMB = lag(.data$UsedMemMB))
 
@@ -920,7 +920,7 @@ resource_utilization_tree_node <- function(Application = NULL,
           group_by(.data$ANode) %>%
           summarize(GFlop = sum(.data$GFlop), SliceGFlop = sum(.data$SliceGFlop), .groups = "keep")
       })) %>%
-      select("-data") %>%
+      select(-"data") %>%
       unnest(cols = c(.data$SliceData)) %>%
       mutate(Value1 = .data$SliceGFlop) %>%
       ungroup()
@@ -933,7 +933,7 @@ resource_utilization_tree_node <- function(Application = NULL,
         by = "ANode"
       ) %>%
       mutate(ANode = .data$originalAnode) %>%
-      select("-originalAnode")
+      select(-"originalAnode")
   }
 
   return(data_node_plot)
@@ -990,7 +990,7 @@ resource_utilization_tree_depth <- function(Application = NULL, Atree = NULL, st
     group_by(.data$Slice, .data$Depth) %>%
     mutate(Value1 = sum(.data$Value1)) %>%
     ungroup() %>%
-    select("-ANode", "-Value") %>%
+    select(-"ANode", -"Value") %>%
     unique()
 
   # expand all time slices with the possible colors (for geom_ribbon)
@@ -1014,7 +1014,7 @@ resource_utilization_tree_depth <- function(Application = NULL, Atree = NULL, st
 # Add anomalies representation in the tree structure
 atree_geom_anomalies <- function(data) {
   anomalies_points <- data$Application %>%
-    select("-Position") %>%
+    select(-"Position") %>%
     left_join(data$Atree %>%
       select(
         "ANode",
@@ -1265,7 +1265,7 @@ panel_compare_tree <- function(data1 = NULL,
     mutate(Execution = "NodeUsage.faster") %>%
     bind_rows(data_tree_utilization2 %>%
       mutate(Execution = "NodeUsage.slower")) %>%
-    select("-Start", "-End") %>%
+    select(-"Start", -"End") %>%
     spread(.data$Execution, .data$NodeUsage) %>%
     mutate(
       NodeUsage.faster = ifelse(is.na(.data$NodeUsage.faster), 0, .data$NodeUsage.faster),

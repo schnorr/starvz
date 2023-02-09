@@ -48,7 +48,7 @@ read_worker_csv <- function(where = ".",
   }
 
   # Remove Nature and Type (as it always be Worker Node State)
-  dfw <- dfw %>% select("-Nature", "-Type")
+  dfw <- dfw %>% select(-"Nature", -"Type")
 
   # Convert To Factor
   dfw <- dfw %>%
@@ -139,19 +139,19 @@ read_worker_csv <- function(where = ".",
   # Also BREAK STARPU and Application in two different data frames
   Application <- dfw %>%
     filter(.data$Application == TRUE & !is.na(.data$JobId)) %>%
-    select("-Application")
+    select(-"Application")
   StarPU <- dfw %>%
     filter(.data$Application == FALSE) %>%
     select(
-      "-Params", "-Footprint", "-Application",
-      "-Tag",
-      "-JobId",
-      "-GFlop",
-      "-SubmitOrder",
-      "-X",
-      "-Y",
-      "-Iteration",
-      "-Subiteration"
+      -"Params", -"Footprint", -"Application",
+      -"Tag",
+      -"JobId",
+      -"GFlop",
+      -"SubmitOrder",
+      -"X",
+      -"Y",
+      -"Iteration",
+      -"Subiteration"
     )
 
   # In case application is not specified
@@ -253,7 +253,7 @@ read_worker_csv <- function(where = ".",
 
       # need to create the clusters before calling the function, let's do the clustering for all
       # types of tasks for now, replacing the dummy Cluster variable
-      Application <- Application %>% select("-Cluster")
+      Application <- Application %>% select(-"Cluster")
       Application <- Application %>%
         filter(grepl("qrt", .data$Value)) %>%
         filter(.data$GFlop > 0) %>%
@@ -264,7 +264,7 @@ read_worker_csv <- function(where = ".",
           # pick the best fitted model according to BIC metric
           flexmix::getModel(m, which = "BIC")@cluster
         })) %>%
-        select("-flexmix_model") %>%
+        select(-"flexmix_model") %>%
         unnest(cols = c(.data$Cluster, .data$data)) %>%
         ungroup() %>%
         select("JobId", "Cluster") %>%
@@ -329,7 +329,7 @@ read_memory_state_csv <- function(where = ".", ZERO = 0) {
     starvz_warn(paste("File ", csv_file, " do not exist"))
   }
   # Remove Nature and Type (as it always be Memory Node State)
-  dfw <- dfw %>% select("-Nature", "-Type")
+  dfw <- dfw %>% select(-"Nature", -"Type")
 
   # Convert To Factor
   dfw <- dfw %>%
@@ -397,7 +397,7 @@ read_comm_state_csv <- function(where = ".", ZERO = 0) {
     starvz_warn(paste("File ", csv_file, " do not exist"))
   }
   # Remove Nature and Type (as it always be Comm Node State)
-  dfw <- dfw %>% select("-Nature", "-Type")
+  dfw <- dfw %>% select(-"Nature", -"Type")
 
   # Convert To Factor
   dfw <- dfw %>%
@@ -465,7 +465,7 @@ read_other_state_csv <- function(where = ".", ZERO = 0) {
     starvz_warn(paste("File ", csv_file, " do not exist"))
   }
   # Remove Nature
-  dfw <- dfw %>% select("-Nature")
+  dfw <- dfw %>% select(-"Nature")
 
   # Convert To Factor
   dfw <- dfw %>%
@@ -540,7 +540,7 @@ read_vars_set_new_zero <- function(where = ".", ZERO = 0) {
     head(n = 1)
 
   dfv %>%
-    select("-Nature") %>%
+    select(-"Nature") %>%
     # the new zero because of the long initialization phase
     mutate(Start = .data$Start - ZERO, End = .data$End - ZERO) -> dfv
 
@@ -718,7 +718,7 @@ pmtool_states_csv_parser <- function(where = ".", whichApplication = NULL, Y = N
 
     pm[[3]] <- devices[pm[[3]] + 1]
 
-    pm <- pm %>% left_join((Y %>% select("-Type")), by = c("ResourceId" = "Parent"))
+    pm <- pm %>% left_join((Y %>% select(-"Type")), by = c("ResourceId" = "Parent"))
     # print(States)
     # print(pm)
     pm <- pm %>% left_join((States %>% select("Iteration", "JobId")), by = c("JobId" = "JobId"))
@@ -862,7 +862,7 @@ tasks_csv_parser <- function(where = ".", ZERO = 0) {
         )
 
       # We will save the task_handle structre, we can remove these columns
-      pm <- pm %>% select("-Handles", "-Modes", "-Sizes")
+      pm <- pm %>% select(-"Handles", -"Modes", -"Sizes")
     }
   } else {
     starvz_log(paste("File", entities.csv, "do not exist."))
@@ -1012,7 +1012,7 @@ read_dag <- function(where = ".", Application = NULL, dfl = NULL) {
       full_join(dfl, by = c("JobId" = "Key")) %>%
       # Align columns with state-based tasks
       # 1. Remove columns
-      select("-Container", "-Origin") %>%
+      select(-"Container", -"Origin") %>%
       # 2. Dest becomes ResourceId for these MPI tasks
       rename(ResourceId = .data$Dest) %>%
       mutate(ResourceId=as.factor(.data$ResourceId)) %>%
@@ -1079,7 +1079,7 @@ read_links <- function(where = ".", ZERO = 0) {
     add_column(!!!all_cols[!names(all_cols) %in% names(.)]) %>%
     # the new zero because of the long initialization phase
     mutate(Start = .data$Start - ZERO, End = .data$End - ZERO) %>%
-    select("-Nature") %>%
+    select(-"Nature") %>%
     mutate(
       Container = as.factor(.data$Container),
       Type = as.factor(.data$Type),

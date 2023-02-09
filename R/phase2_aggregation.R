@@ -294,12 +294,12 @@ time_aggregation_prep <- function(dfw = NULL) {
     group_by(.data$ResourceId, .data$Task) %>%
     mutate(Value = 1) %>%
     select(
-      "-Duration",
-      "-Size", "-Depth", "-Params", "-JobId",
-      "-Footprint", "-Tag",
-      "-GFlop", "-X", "-Y", "-Iteration", "-Subiteration",
-      "-Resource", "-Outlier", "-Height",
-      "-Position"
+      -"Duration",
+      -"Size", -"Depth", -"Params", -"JobId",
+      -"Footprint", -"Tag",
+      -"GFlop", -"X", -"Y", -"Iteration", -"Subiteration",
+      -"Resource", -"Outlier", -"Height",
+      -"Position"
     )
 
   # Define the first zero
@@ -314,7 +314,7 @@ time_aggregation_prep <- function(dfw = NULL) {
   dfw_agg_prep <- dfw_zero_1 %>%
     bind_rows(dfw_zero_N) %>%
     mutate(Start = .data$StartN, End = .data$EndN) %>%
-    select("-StartN", "-EndN") %>%
+    select(-"StartN", -"EndN") %>%
     bind_rows(dfw_initial) %>%
     ungroup()
 
@@ -393,7 +393,7 @@ st_time_aggregation <- function(dfw = NULL, colors = NULL, StarPU.View = FALSE, 
     return(NULL)
   }
 
-  dfw_agg_prep <- time_aggregation_prep(dfw %>% select("-Node", "-ResourceType"))
+  dfw_agg_prep <- time_aggregation_prep(dfw %>% select(-"Node", -"ResourceType"))
   dfw_agg <- time_aggregation_do(dfw_agg_prep %>%
     group_by(.data$ResourceId, .data$Task), step)
   dfwagg_full <- time_aggregation_post(dfw, dfw_agg, colors)

@@ -33,7 +33,7 @@ bonferroni_regression_based_outlier_detection <- function(Application, task_mode
 
     # Step 2: identify outliers rows
     df.pre.outliers %>%
-      select("-Residual") %>%
+      select(-"Residual") %>%
       unnest(cols = c(.data$outliers)) %>%
       mutate(!!quo_name(column_name) := TRUE, Row = as.integer(.data$Row)) %>%
       ungroup() -> df.pos.outliers
@@ -51,7 +51,7 @@ bonferroni_regression_based_outlier_detection <- function(Application, task_mode
       mutate(!!quo_name(column_name) := ifelse(is.na(!!sym(column_name)), FALSE, !!sym(column_name))) %>%
       # remove outliers that are below the regression line
       mutate(!!quo_name(column_name) := ifelse(.data$Residual < 0, FALSE, !!sym(column_name))) %>%
-      select("-Row") %>%
+      select(-"Row") %>%
       ungroup() -> df.outliers
 
     # Step 4: regroup the Outlier data to the original Application
@@ -157,7 +157,7 @@ regression_based_outlier_detection <- function(Application, task_model, column_n
     Application <- Application %>%
       mutate(DummyOutlier = ifelse(.data$JobId %in% c(region.outliers %>% filter(.data$DummyOutlier) %>% .$JobId), TRUE, .data$DummyOutlier))
   } else {
-    Application <- Application %>% select("-fit", "-lwr", "-upr")
+    Application <- Application %>% select(-"fit", -"lwr", -"upr")
   }
 
   Application <- Application %>%

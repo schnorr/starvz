@@ -20,7 +20,7 @@ var_chart <- function(dfv = NULL, ylabel = NA, base_size = 22, expand = 0.05) {
   k <- dfv %>%
     rename(x = .data$Start, xend = .data$End, y = .data$Value) %>%
     mutate(yend = .data$y) %>%
-    select("-Duration")
+    select(-"Duration")
   v <- k %>%
     group_by(.data$ResourceId, .data$Type) %>%
     mutate(xend = .data$x, y = .data$y, yend = lag(.data$y)) %>%

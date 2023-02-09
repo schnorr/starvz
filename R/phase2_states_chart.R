@@ -140,13 +140,13 @@ panel_st_raw <- function(data = NULL, ST.Outliers = data$config$st$outliers, bas
       data$Starpu <- data$Starpu %>%
         left_join(new_y, by = c("ResourceId" = "Parent")) %>%
         mutate(Position = if_else(is.na(.data$New), -3, .data$New)) %>%
-        select("-New")
+        select(-"New")
     } else {
       data$Application <- data$Application %>%
         left_join(new_y, by = c("ResourceId" = "Parent")) %>%
         mutate(Position = if_else(is.na(.data$New), -3, .data$New)) %>%
         mutate(Height = if_else(is.na(.data$New), 0, .data$Height)) %>%
-        select("-New")
+        select(-"New")
       App <- data$Application %>%
         filter(.data$Position >= 0)
     }
@@ -192,7 +192,7 @@ panel_st_raw <- function(data = NULL, ST.Outliers = data$config$st$outliers, bas
         tasksel <- tasksel %>%
           left_join(new_y, by = c("ResourceId" = "Parent")) %>%
           mutate(Position = if_else(is.na(.data$New), -3, .data$New)) %>%
-          select("-New")
+          select(-"New")
       }
 
       gow <- gow + geom_path_highlight(tasksel)
@@ -406,7 +406,7 @@ panel_st_agg_node <- function(data,
 
   hl_per_node_ABE(data$Application) %>%
     mutate(Node = as.integer(as.character(.data$Node))) %>%
-    select("-MinPosition", "-MaxPosition") %>%
+    select(-"MinPosition", -"MaxPosition") %>%
     left_join(df.node_position %>% select("Node", "ResourceType.Position", "ResourceType.Height") %>% unique(), by = c("Node")) %>%
     select("Node", "Result", "ResourceType.Position", "ResourceType.Height") %>%
     arrange(-.data$Node) %>%

@@ -137,7 +137,7 @@ abe_cpu_cuda_inner <- function(dfl, debug = FALSE) {
       id_cols = .data$ResourceType, names_from = .data$Value, values_from = .data$Mean,
       names_sort = TRUE, values_fill = 1e10
     ) %>%
-    select("-ResourceType") %>%
+    select(-"ResourceType") %>%
     set_colnames(NULL) %>%
     as.matrix()
   M <- matrix(data = rep(0, ntypes * (nnames - 1)), nrow = ntypes)

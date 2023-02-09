@@ -258,7 +258,7 @@ panel_model_gflops <- function(
       nest() %>%
       mutate(model_log = map(.data$data, model_LR_log)) %>%
       ungroup() %>%
-      select("-model_log") %>%
+      select(-"model_log") %>%
       unnest(cols = c(.data$data)) %>%
       arrange(.data$GFlop)
 
@@ -294,7 +294,7 @@ panel_model_gflops <- function(
       mutate(predictValue = map(.data$model_log, function(x) {
         exp(predict(x))
       })) %>%
-      select("-model_log") %>%
+      select(-"model_log") %>%
       unnest(cols = c(.data$data, .data$predictValue)) %>%
       arrange(.data$predictValue)
 
@@ -702,7 +702,7 @@ last <- function(data, path){
   rename(ResourceId = .data$Dest) %>%
   select("JobId", "Start", "End", "ResourceId") %>%
   separate(.data$ResourceId, into = c("Node", "Resource"), remove = FALSE, extra = "drop", fill = "right") %>%
-  left_join((data$Y %>% select("-Type") %>% mutate(Parent = as.character(.data$Parent))), by = c("ResourceId" = "Parent")) %>%
+  left_join((data$Y %>% select(-"Type") %>% mutate(Parent = as.character(.data$Parent))), by = c("ResourceId" = "Parent")) %>%
   select("JobId", "Start", "End", "Position", "Height") %>%
   bind_rows(data$Application %>% select("JobId", "Start", "End", "Position", "Height")) -> all_states
 

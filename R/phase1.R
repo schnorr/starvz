@@ -53,11 +53,11 @@ starvz_phase1 <- function(directory = ".", app_states_fun = lu_colors,
   )
   Worker$Application <- Worker$Application %>%
     hl_y_coordinates(dfhie = dfhie) %>%
-    select("-Type")
+    select(-"Type")
 
   Worker$StarPU <- Worker$StarPU %>%
     hl_y_coordinates(dfhie = dfhie) %>%
-    select("-Type")
+    select(-"Type")
 
   if (Worker$Application %>% nrow() == 0) stop("After reading states, number of application rows is zero.")
 
@@ -93,7 +93,7 @@ starvz_phase1 <- function(directory = ".", app_states_fun = lu_colors,
   # to hold Y coordinates for the temporal elimination tree plot
   if (!is.null(dfa)) {
     dfap <- dfa %>%
-      select("-Parent", "-Depth") %>%
+      select(-"Parent", -"Depth") %>%
       rename(Height.ANode = .data$Height, Position.ANode = .data$Position)
     Worker$Application <- Worker$Application %>% left_join(dfap, by = "ANode")
     dfap <- NULL
@@ -221,11 +221,11 @@ reorder_elimination_tree <- function(Atree, Application) {
     ungroup() %>%
     arrange(.data$SubmitOrder) %>%
     mutate(Position = 1:n(), Height = 1) %>%
-    select("-SubmitOrder")
+    select(-"SubmitOrder")
 
   Atree <- Atree %>%
     # Replace Position and Height by new ordering
-    select("-Position", "-Height") %>%
+    select(-"Position", -"Height") %>%
     left_join(data_reorder, by = "ANode")
 
   # Define Position for pruned nodes as the same of its Parent
@@ -245,11 +245,11 @@ reorder_elimination_tree <- function(Atree, Application) {
       Position = case_when(.data$NodeType == "Pruned" ~ .data$Position.Parent, TRUE ~ .data$Position),
       Height = case_when(.data$NodeType == "Pruned" ~ .data$Height.Parent, TRUE ~ .data$Height)
     ) %>%
-    select("-Parent", "-Position.Parent", "-Height.Parent")
+    select(-"Parent", -"Position.Parent", -"Height.Parent")
 
   Atree <- Atree %>%
     # Replace Position and Height for pruned nodes
-    select("-Position", "-Height") %>%
+    select(-"Position", -"Height") %>%
     left_join(data_pruned_position, by = "ANode")
 
   return(Atree)
@@ -299,7 +299,7 @@ hl_y_paje_tree <- function(where = ".") {
 
   # print(workertree, "Type", "Nature", "H", "P", limit=200);
   # Convert back to data frame
-  workertreedf <- dt_to_df(workertree) %>% select("-Nature")
+  workertreedf <- dt_to_df(workertree) %>% select(-"Nature")
 
   if ((workertreedf %>% nrow()) == 0) stop("After converting the tree back to DF, number of rows is zero.")
 

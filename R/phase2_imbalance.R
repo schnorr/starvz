@@ -538,7 +538,7 @@ utilization_per_step <- function(data_app, step) {
       TRUE ~ step
     )) %>%
     rename(Step = .data$FullUtil) %>%
-    select("-SStep", "-EStep", "-UtilFirst", "-UtilLast") %>%
+    select(-"SStep", -"EStep", -"UtilFirst", -"UtilLast") %>%
     group_by(.data$ResourceId, .data$Node, .data$ResourceType, .data$Step) %>%
     summarize(Utilization = sum(.data$Util) / step, .groups = "drop") %>%
     complete(.data$ResourceId, Step = 0:(max_time / step), fill = list(Utilization = 0)) %>%
@@ -588,7 +588,7 @@ utilization_per_step_double_hetero <- function(step, df) {
       TRUE ~ step
     )) %>%
     rename(Step = .data$FullUtil) %>%
-    select("-SStep", "-EStep", "-UtilFirst", "-UtilLast") -> temp
+    select(-"SStep", -"EStep", -"UtilFirst", -"UtilLast") -> temp
 
   temp %>%
     group_by(.data$ResourceId, .data$Node, .data$ResourceType, .data$Step) %>%

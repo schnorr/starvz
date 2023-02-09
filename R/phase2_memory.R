@@ -170,7 +170,7 @@ geom_events <- function(main_data = NULL, data = NULL,
     dx <- dfw %>%
       filter(.data$Type == "Allocating") %>%
       left_join(main_data$Data_handles, by = c("Handle" = "Handle")) %>%
-      select("-Tid", "-Src", "-Value")
+      select(-"Tid", -"Src", -"Value")
     dx$Coordinates <- gsub(" ", "x", dx$Coordinates)
 
     ret[[length(ret) + 1]] <- geom_text(
@@ -284,7 +284,7 @@ geom_links <- function(data = NULL, dfw = NULL, combined = FALSE,
 
   if (!combined) {
 
-    # dfw <- dfw %>% select("-Position") %>% left_join(col_pos, by=c("ResourceId" = "ResourceId"));
+    # dfw <- dfw %>% select(-"Position") %>% left_join(col_pos, by=c("ResourceId" = "ResourceId"));
     # Hardcoded here because yconf is specific to Resource Workers
 
     ret[[length(ret) + 1]] <- scale_y_continuous(breaks = yconfm$D_Position, labels = yconfm$Dest, expand = c(0.10, 0.5))
@@ -385,7 +385,7 @@ handles_presence_states <- function(data) {
     mutate(End = lead(.data$Start, default = unlist(fini_end))) %>%
     ungroup() %>%
     filter(.data$Type != "data state invalid") %>%
-    select("-rep", "-flow", "-t_diff", "-need") %>%
+    select(-"rep", -"flow", -"t_diff", -"need") %>%
     group_by(.data$Value, .data$Container) -> f_data
 
   return(f_data)
@@ -553,8 +553,8 @@ pre_handle_gantt <- function(data, name_func = NULL) {
       mutate(P = substring(.data$Tid, 5)) %>%
       mutate(G = substr(.data$Container, 1, nchar(as.character(.data$Container)) - 1)) %>%
       mutate(Container = paste0(.data$G, .data$P)) %>%
-      select("-P", "-G") %>%
-      select("-Tid") %>%
+      select(-"P", -"G") %>%
+      select(-"Tid") %>%
       inner_join(data$Data_handle, by = c("Handle" = "Handle")) %>%
       inner_join(position, by = c("Container" = "Container")) %>%
       name_func() %>%
@@ -571,7 +571,7 @@ pre_handle_gantt <- function(data, name_func = NULL) {
     .$Handles -> h_used
   data$Events_memory %>%
     filter(.data$Handle %in% h_used) %>%
-    select("-Tid") %>%
+    select(-"Tid") %>%
     inner_join(data$Data_handle, by = c("Handle" = "Handle")) %>%
     inner_join(position, by = c("Container" = "Container")) %>%
     name_func() %>%
@@ -582,7 +582,7 @@ pre_handle_gantt <- function(data, name_func = NULL) {
     group_by(.data$Value, .data$Container, .data$Type) %>%
     mutate(Old = lag(.data$Start, default = -5), R = abs(.data$Start - .data$Old)) %>%
     filter(.data$R > 1) %>%
-    select("-Old", "-R") -> allocation_events_filtered
+    select(-"Old", -"R") -> allocation_events_filtered
 
   allocation_events_filtered$Pre <- "0"
 
@@ -598,9 +598,9 @@ pre_handle_gantt <- function(data, name_func = NULL) {
     filter(.data$Type == "Intra-node data Fetch" |
       .data$Type == "Intra-node data PreFetch" |
       .data$Type == "Intra-node data TaskPreFetch") %>%
-    select("Container", "-Size") %>%
+    select("Container", -"Size") %>%
     mutate(Con = as.integer(substring(.data$Key, 5))) %>%
-    select("-Key")
+    select(-"Key")
 
   final_links <- links %>%
     select(-any_of(c("Handle"))) %>%
@@ -618,7 +618,7 @@ pre_handle_gantt <- function(data, name_func = NULL) {
     mpi_links <- data$Link %>%
       select(-any_of(c("Handle"))) %>%
       filter(.data$Type == "MPI communication") %>%
-      select("-Container", "-Size") %>%
+      select(-"Container", -"Size") %>%
       mutate(Origin = str_replace(.data$Origin, "mpict", "MEMMANAGER0")) %>%
       mutate(Dest = str_replace(.data$Dest, "mpict", "MEMMANAGER0")) %>%
       inner_join(position, by = c("Origin" = "Container")) %>%

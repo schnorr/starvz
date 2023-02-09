@@ -308,10 +308,10 @@ starvz_plot_list <- function(data = NULL) {
       mutate(Size = as.integer(.data$Size))
     data$Comm_state <- data$State %>%
       filter(.data$Type == "Communication Thread State") %>%
-      select("-Position", "-Height")
+      select(-"Position", -"Height")
     data$Memory_state <- data$State %>%
       filter(.data$Type == "Memory Node State") %>%
-      select("-Position")
+      select(-"Position")
     data$Colors <- data$State %>%
       filter(.data$Application) %>%
       select("Value", "Color") %>%

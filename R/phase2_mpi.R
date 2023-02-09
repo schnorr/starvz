@@ -121,14 +121,14 @@ concurrent_mpi <- function(data = NULL, out = FALSE) {
 
   data$Link %>%
     filter(grepl("mpicom", .data$Key)) %>%
-    select("-Container", "-Type", "-Duration") -> dflink
+    select(-"Container", -"Type", -"Duration") -> dflink
 
   dflink %>%
-    select("-End") %>%
+    select(-"End") %>%
     rename(Timestamp = .data$Start) %>%
     mutate(Start = TRUE) -> dfstart
   dflink %>%
-    select("-Start") %>%
+    select(-"Start") %>%
     rename(Timestamp = .data$End) %>%
     mutate(Start = FALSE) %>%
     bind_rows(dfstart) %>%
@@ -142,7 +142,7 @@ concurrent_mpi <- function(data = NULL, out = FALSE) {
       )
     ))) %>%
     arrange({{ col_case }}, .data$Timestamp) %>%
-    select("-Start") %>%
+    select(-"Start") %>%
     rename(Start = .data$Timestamp) %>%
     group_by({{ col_case }}) %>%
     mutate(End = lead(.data$Start)) %>%

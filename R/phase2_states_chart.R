@@ -428,7 +428,7 @@ panel_st_agg_node <- function(data,
     ggplot() +
     default_theme(data$config$base_size, data$config$expand) +
     xlab("Time [ms]") +
-    scale_fill_manual(values = extract_colors(df.spatial_prep %>% rename(Value = .data$Task), data$Colors)) +
+    scale_fill_manual(values = extract_colors(df.spatial_prep %>% rename(Value = "Task"), data$Colors)) +
     scale_y_continuous(
       breaks = yconf$Node.Position,
       labels = yconf$Label, expand = c(data$config$expand, 0)

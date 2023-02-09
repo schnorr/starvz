@@ -260,9 +260,9 @@ geom_links <- function(data = NULL, dfw = NULL, combined = FALSE,
 
   dfl <- dfl %>%
     left_join(col_pos, by = c("Origin" = "Container")) %>%
-    rename(O_Position = .data$Position) %>%
+    rename(O_Position = "Position") %>%
     left_join(col_pos, by = c("Dest" = "Container")) %>%
-    rename(D_Position = .data$Position)
+    rename(D_Position = "Position")
   stride <- 0.3
 
   dfl$Height <- 1
@@ -526,14 +526,14 @@ pre_handle_gantt <- function(data, name_func = NULL) {
     mutate(JobId = as.character(.data$JobId)) %>%
     inner_join(data$Application, by = c("JobId" = "JobId")) %>%
     select("Container", "JobId", "Handles", "Start", "End", "y1", "Value", "Modes") %>%
-    rename(Colour = .data$Value) %>%
-    rename(Value = .data$Handles) -> jobs_p_data
+    rename(Colour = "Value") %>%
+    rename(Value = "Handles") -> jobs_p_data
   p_data$size <- 0.8
   jobs_p_data$size <- 0.6
 
   all_st_m_data <- bind_rows(p_data, jobs_p_data) %>%
     inner_join(data$Data_handle, by = c("Value" = "Handle")) %>%
-    rename(Handle=.data$Value) %>%
+    rename(Handle="Value") %>%
     ungroup() %>%
     name_func() %>%
     select("Container", "Start", "End", "Value", "y1", "Colour", "size", "JobId", "Modes") %>%
@@ -606,13 +606,13 @@ pre_handle_gantt <- function(data, name_func = NULL) {
     select(-any_of(c("Handle"))) %>%
     inner_join(links_handles, by = c("Con" = "Info", "Dest" = "Container")) %>%
     inner_join(position, by = c("Origin" = "Container")) %>%
-    rename(origin_y = .data$y1) %>%
+    rename(origin_y = "y1") %>%
     inner_join(position, by = c("Dest" = "Container")) %>%
-    rename(dest_y = .data$y1) %>%
+    rename(dest_y = "y1") %>%
     inner_join(data$Data_handle, by = c("Handle" = "Handle")) %>%
     name_func() %>%
     select("Type", "Start", "End", "Value", "origin_y", "dest_y") %>%
-    rename(Transfer = .data$Type)
+    rename(Transfer = "Type")
 
   if ("MPI communication" %in% unique(data$Link$Type)) {
     mpi_links <- data$Link %>%
@@ -622,14 +622,14 @@ pre_handle_gantt <- function(data, name_func = NULL) {
       mutate(Origin = str_replace(.data$Origin, "mpict", "MEMMANAGER0")) %>%
       mutate(Dest = str_replace(.data$Dest, "mpict", "MEMMANAGER0")) %>%
       inner_join(position, by = c("Origin" = "Container")) %>%
-      rename(origin_y = .data$y1) %>%
+      rename(origin_y = "y1") %>%
       inner_join(position, by = c("Dest" = "Container")) %>%
-      rename(dest_y = .data$y1) %>%
+      rename(dest_y = "y1") %>%
       mutate(Tag = as.numeric(as.character(.data$Tag))) %>%
       inner_join(data$Data_handle, by = c("Tag" = "MPITag")) %>%
       name_func() %>%
       select("Type", "Start", "End", "Value", "origin_y", "dest_y") %>%
-      rename(Transfer = .data$Type) %>%
+      rename(Transfer = "Type") %>%
       unique()
 
     all_links <- bind_rows(mpi_links, final_links)

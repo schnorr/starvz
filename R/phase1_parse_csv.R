@@ -275,7 +275,7 @@ read_worker_csv <- function(where = ".",
     }
 
     # Use the Outlier_LR_LOG (log~log) as the default Outlier classification
-    Application <- Application %>% rename(Outlier = .data$Outlier_LR_LOG)
+    Application <- Application %>% rename(Outlier = "Outlier_LR_LOG")
   } else {
     starvz_log("Outlier detection using standard model")
     Application <- Application %>%
@@ -1014,7 +1014,7 @@ read_dag <- function(where = ".", Application = NULL, dfl = NULL) {
       # 1. Remove columns
       select(-"Container", -"Origin") %>%
       # 2. Dest becomes ResourceId for these MPI tasks
-      rename(ResourceId = .data$Dest) %>%
+      rename(ResourceId = "Dest") %>%
       mutate(ResourceId=as.factor(.data$ResourceId)) %>%
       separate_res() %>%
       tibble() %>%

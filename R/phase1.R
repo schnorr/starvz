@@ -94,7 +94,7 @@ starvz_phase1 <- function(directory = ".", app_states_fun = lu_colors,
   if (!is.null(dfa)) {
     dfap <- dfa %>%
       select(-"Parent", -"Depth") %>%
-      rename(Height.ANode = .data$Height, Position.ANode = .data$Position)
+      rename(Height.ANode = "Height", Position.ANode = "Position")
     Worker$Application <- Worker$Application %>% left_join(dfap, by = "ANode")
     dfap <- NULL
     # Reorder the elimination tree
@@ -432,7 +432,7 @@ gaps.f_backward <- function(data) {
     data$Dag -> tmpdag
   }
   tmpdag %>%
-    rename(DepChain = .data$JobId, Member = .data$Dependent) %>%
+    rename(DepChain = "JobId", Member = "Dependent") %>%
     select("DepChain", "Member") -> seedchain
 
   f2 <- function(dfdag, chain.i) {
@@ -447,7 +447,7 @@ gaps.f_backward <- function(data) {
       # Prepare the new chain
       full.o %>%
         filter(!is.na(.data$DepChain)) %>%
-        rename(Member = .data$Dependent) %>%
+        rename(Member = "Dependent") %>%
         select("DepChain", "Member") -> chain.o
       return(f2(full.o, chain.o))
     } else {
@@ -466,7 +466,7 @@ gaps.f_forward <- function(data) {
     data$Dag -> tmpdag
   }
   tmpdag %>%
-    rename(DepChain = .data$Dependent, Member = .data$JobId) %>%
+    rename(DepChain = "Dependent", Member = "JobId") %>%
     select("DepChain", "Member") -> seedchain
 
   f2 <- function(dfdag, chain.i) {
@@ -481,7 +481,7 @@ gaps.f_forward <- function(data) {
       # Prepare the new chain
       full.o %>%
         filter(!is.na(.data$DepChain)) %>%
-        rename(Member = .data$JobId) %>%
+        rename(Member = "JobId") %>%
         select("DepChain", "Member") -> chain.o
       if (nrow(chain.o) > 0) {
         return(f2(full.o, chain.o))
@@ -506,15 +506,15 @@ gaps <- function(data) {
   gaps.f_backward(data) %>%
     filter(!is.na(.data$DepChain)) %>%
     select("JobId", "DepChain") %>%
-    rename(Dependent = .data$JobId) %>%
-    rename(JobId = .data$DepChain) %>%
+    rename(Dependent = "JobId") %>%
+    rename(JobId = "DepChain") %>%
     select("JobId", "Dependent") %>%
     unique() -> data.b
 
   gaps.f_forward(data) %>%
     filter(!is.na(.data$DepChain)) %>%
     select("JobId", "DepChain") %>%
-    rename(Dependent = .data$DepChain) %>%
+    rename(Dependent = "DepChain") %>%
     select("JobId", "Dependent") %>%
     unique() -> data.f
 
@@ -533,7 +533,7 @@ gaps <- function(data) {
     dfl <- data$Link %>%
       filter(grepl("mpicom", .data$Key)) %>%
       mutate(Value = NA, ResourceId = .data$Origin, Node = NA) %>%
-      rename(JobId = .data$Key) %>%
+      rename(JobId = "Key") %>%
       select("JobId", "Value", "ResourceId", "Node", "Start", "End")
     data.b %>%
       left_join(dfl, by = c("JobId" = "JobId")) %>%

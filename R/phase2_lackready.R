@@ -46,7 +46,7 @@ panel_lackready <- function(data = NULL,
     group_by(.data$Type, .data$Node, .data$ResourceType, .data$Start, .data$End, .data$Duration) %>%
     summarize(Value = sum(.data$Value), N = n()) %>%
     ungroup() %>%
-    rename(ResourceId = .data$Node) %>%
+    rename(ResourceId = "Node") %>%
     filter(.data$Value < threshold) %>%
     group_by(.data$Type, .data$Start, .data$End) %>%
     summarize(Value = n()) %>%

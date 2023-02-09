@@ -52,13 +52,13 @@ panel_node_summary <- function(data, legend = data$config$summary_nodes$legend,
 
   Makespans %>%
     mutate(Metric = "Makespan") %>%
-    rename(Value = .data$End) -> makes
+    rename(Value = "End") -> makes
   makes$Value <- makes$Value - Abes$Result
   Abes %>%
     select("Node", "Result") %>%
     mutate(Node = as.integer(as.character(.data$Node))) %>%
     mutate(Metric = "Abe") %>%
-    rename(Value = .data$Result) %>%
+    rename(Value = "Result") %>%
     bind_rows(makes) %>%
     mutate(Metric = factor(.data$Metric, levels = c("Makespan", "Abe"))) -> all_data
   Nodes <- all_data %>%

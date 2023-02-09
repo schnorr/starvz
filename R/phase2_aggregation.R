@@ -290,7 +290,7 @@ time_aggregation_prep <- function(dfw = NULL) {
   }
 
   dfw_initial <- dfw %>%
-    rename(Task = .data$Value) %>%
+    rename(Task = "Value") %>%
     group_by(.data$ResourceId, .data$Task) %>%
     mutate(Value = 1) %>%
     select(
@@ -475,7 +475,7 @@ geom_aggregated_states <- function(data = NULL, Show.Outliers = FALSE, min_time_
 
   # Prepare Y coordinates for left_join
   data$Y %>%
-    rename(ResourceId = .data$Parent) %>%
+    rename(ResourceId = "Parent") %>%
     separate(.data$ResourceId, into = c("Node", "Resource"), remove = FALSE, extra = "drop", fill = "right") %>%
     mutate(Node = as.factor(.data$Node)) %>%
     mutate(ResourceType = as.factor(gsub("[[:digit:]]+", "", .data$Resource))) -> ydf

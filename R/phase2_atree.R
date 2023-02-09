@@ -251,7 +251,7 @@ panel_atree <- function(data = NULL, step = data$config$atree$step, legend = dat
     filter(.data$Value1 != 0) %>%
     select("ANode", "Slice", "Value1") %>%
     ungroup() %>%
-    rename(NodeUsage = .data$Value1) %>%
+    rename(NodeUsage = "Value1") %>%
     left_join(data$Atree, by = "ANode")
 
   # Resize for not pruned nodes, first and last computational tasks
@@ -670,7 +670,7 @@ panel_nodememuse <- function(data = NULL,
   # Prepare data
   data_mem_utilization <- data$Application %>%
     filter(grepl("front", .data$Value) | grepl("do_subtree", .data$Value)) %>%
-    rename(Task = .data$Value) %>%
+    rename(Task = "Value") %>%
     # we wrote the memory usage in the GFlops field...
     mutate(UsedMemMB = ifelse(grepl("clean", .data$Task), -.data$GFlop * 1024, .data$GFlop * 1024)) %>%
     arrange(.data$Start) %>%
@@ -782,7 +782,7 @@ panel_activenodes <- function(data = NULL,
     ) %>%
     arrange(.data$Start) %>%
     group_by(.data$NodeType) %>%
-    rename(Task = .data$Value) %>%
+    rename(Task = "Value") %>%
     mutate(Value = cumsum(.data$node_count)) %>%
     filter(!is.na(.data$NodeType))
 
@@ -883,7 +883,7 @@ resource_utilization_tree_node <- function(Application = NULL,
       arrange(.data$Time) %>%
       mutate(End = lead(.data$Time)) %>%
       mutate(Duration = .data$End - .data$Time) %>%
-      rename(Start = .data$Time, Value = .data$nodeParallelism) %>%
+      rename(Start = "Time", Value = "nodeParallelism") %>%
       na.omit() %>%
       group_by(.data$ANode) %>%
       do(remyTimeIntegrationPrepNoDivision(., myStep = step)) %>%
@@ -958,11 +958,11 @@ resource_utilization_tree_depth <- function(Application = NULL, Atree = NULL, st
   df_node_parallelism <- df_filter %>%
     select("ANode", "Start", "JobId") %>%
     mutate(Event = "Start") %>%
-    rename(Time = .data$Start) %>%
+    rename(Time = "Start") %>%
     bind_rows(df_filter %>%
       select("ANode", "End", "JobId") %>%
       mutate(Event = "End") %>%
-      rename(Time = .data$End)) %>%
+      rename(Time = "End")) %>%
     arrange(.data$Time) %>%
     group_by(.data$ANode) %>%
     mutate(Value = ifelse(.data$Event == "Start", 1, -1)) %>%
@@ -975,7 +975,7 @@ resource_utilization_tree_depth <- function(Application = NULL, Atree = NULL, st
     arrange(.data$Time) %>%
     mutate(End = lead(.data$Time)) %>%
     mutate(Duration = .data$End - .data$Time) %>%
-    rename(Start = .data$Time, Value = .data$nodeParallelism) %>%
+    rename(Start = "Time", Value = "nodeParallelism") %>%
     na.omit() %>%
     group_by(.data$ANode) %>%
     do(remyTimeIntegrationPrepNoDivision(., myStep = step)) %>%
@@ -1144,7 +1144,7 @@ get_tree_utilization <- function(data, step, performance_metric) {
     filter(.data$Value1 != 0) %>%
     select("ANode", "Slice", "Value1") %>%
     ungroup() %>%
-    rename(NodeUsage = .data$Value1) %>%
+    rename(NodeUsage = "Value1") %>%
     left_join(data$Atree, by = "ANode")
 
   # Resize for not pruned nodes, first and last computational tasks
@@ -1171,7 +1171,7 @@ get_tree_flops <- function(data, step) {
     filter(.data$Value != 0) %>%
     select("ANode", "Slice", "Value1") %>%
     ungroup() %>%
-    rename(NodeUsage = .data$Value1) %>%
+    rename(NodeUsage = "Value1") %>%
     left_join(data$Atree, by = "ANode")
 
   # Resize for not pruned nodes, first and last computational tasks

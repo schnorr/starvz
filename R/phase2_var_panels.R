@@ -106,7 +106,7 @@ panel_ready <- function(data, legend = data$config$ready$legend,
       group_by(.data$Type, .data$Node, .data$ResourceType, .data$Start, .data$End, .data$Duration) %>%
       summarize(Value = sum(.data$Value), N = n()) %>%
       ungroup() %>%
-      rename(ResourceId = .data$Node) %>%
+      rename(ResourceId = "Node") %>%
       filter(.data$Value < threshold) %>%
       group_by(.data$Type, .data$Start, .data$End) %>%
       summarize(Value = n()) %>%
@@ -482,7 +482,7 @@ panel_gpubandwidth <- function(data, legend = data$config$gpubandwidth$legend,
     ms <- bandwidth_data %>%
       group_by(.data$Type, .data$Node, .data$ResourceType, .data$Start, .data$End, .data$Duration) %>%
       summarize(Value = sum(.data$Value), N = n()) %>%
-      rename(ResourceId = .data$Node)
+      rename(ResourceId = "Node")
     y_size <- layer_scales(panel)$y$range$range[2]
     panel <- panel + ms %>% var_chart_text(tstart = x_start, tend = x_end, y_end = y_size)
   }

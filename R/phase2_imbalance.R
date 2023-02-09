@@ -537,7 +537,7 @@ utilization_per_step <- function(data_app, step) {
       (.data$FullUtil == .data$EStep) ~ .data$UtilLast,
       TRUE ~ step
     )) %>%
-    rename(Step = .data$FullUtil) %>%
+    rename(Step = "FullUtil") %>%
     select(-"SStep", -"EStep", -"UtilFirst", -"UtilLast") %>%
     group_by(.data$ResourceId, .data$Node, .data$ResourceType, .data$Step) %>%
     summarize(Utilization = sum(.data$Util) / step, .groups = "drop") %>%
@@ -587,7 +587,7 @@ utilization_per_step_double_hetero <- function(step, df) {
       (.data$FullUtil == .data$EStep) ~ .data$UtilLast,
       TRUE ~ step
     )) %>%
-    rename(Step = .data$FullUtil) %>%
+    rename(Step = "FullUtil") %>%
     select(-"SStep", -"EStep", -"UtilFirst", -"UtilLast") -> temp
 
   temp %>%
@@ -609,7 +609,7 @@ utilization_per_step_double_hetero <- function(step, df) {
     slice(1) %>%
     select("Step", "ResourceType") -> max_res
 
-  tasks_per_slice %>% rename(freq = .data$NTasks) -> ts
+  tasks_per_slice %>% rename(freq = "NTasks") -> ts
   df %>%
     select("ResourceType", "ResourceId") %>%
     distinct() %>%
@@ -621,7 +621,7 @@ utilization_per_step_double_hetero <- function(step, df) {
   temp %>%
     select("Value", "ResourceType", "Duration", "Step") %>%
     ungroup() %>%
-    rename(codelet = .data$Value) %>%
+    rename(codelet = "Value") %>%
     group_by(.data$ResourceType, .data$codelet, .data$Step) %>%
     mutate(Outlier = ifelse(.data$Duration > outlier_definition(.data$Duration), TRUE, FALSE)) %>%
     filter(!.data$Outlier) %>%

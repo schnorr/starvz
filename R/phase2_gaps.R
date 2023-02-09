@@ -41,7 +41,7 @@ gaps_backward_deps_one <- function(data = NULL, task = NULL, levels = 1) {
       left_join(dfl, by = c("JobId" = "Key")) %>%
       # Post-processing
       # Keep only the destination of the link
-      rename(ResourceId = .data$Dest) %>%
+      rename(ResourceId = "Dest") %>%
       separate(.data$ResourceId, into = c("Node", "Resource"), remove = FALSE, extra = "drop", fill = "right") %>%
       select(-"Origin", -"Container") %>%
       # Enrich ResourceId with Height, Position

@@ -452,7 +452,7 @@ get_resource_utilization <- function(Application = NULL, step = 100) {
   df_filter <- Application %>%
     select("Start", "End", "Value", "JobId") %>%
     unique() %>%
-    rename(Task = .data$Value) %>%
+    rename(Task = "Value") %>%
     arrange(.data$Start)
 
   # Get number of workers for resource utilization
@@ -478,7 +478,7 @@ get_resource_utilization <- function(Application = NULL, step = 100) {
     arrange(.data$Time) %>%
     mutate(End = lead(.data$Time)) %>%
     mutate(Duration = .data$End - .data$Time) %>%
-    rename(Start = .data$Time, Value = .data$parallelism) %>%
+    rename(Start = "Time", Value = "parallelism") %>%
     na.omit() %>%
     group_by(.data$Task) %>%
     do(remyTimeIntegrationPrepNoDivision(., myStep = step)) %>%
@@ -698,15 +698,15 @@ last <- function(data, path){
 
   data$Link %>%
   filter(.data$Type == "MPI communication") %>%
-  rename(JobId = .data$Key) %>%
-  rename(ResourceId = .data$Dest) %>%
+  rename(JobId = "Key") %>%
+  rename(ResourceId = "Dest") %>%
   select("JobId", "Start", "End", "ResourceId") %>%
   separate(.data$ResourceId, into = c("Node", "Resource"), remove = FALSE, extra = "drop", fill = "right") %>%
   left_join((data$Y %>% select(-"Type") %>% mutate(Parent = as.character(.data$Parent))), by = c("ResourceId" = "Parent")) %>%
   select("JobId", "Start", "End", "Position", "Height") %>%
   bind_rows(data$Application %>% select("JobId", "Start", "End", "Position", "Height")) -> all_states
 
-	data$Last %>% rename(Dependent=.data$Last) %>% select("JobId", "Dependent") %>% inner_join(all_states, by=c("JobId"="JobId")) -> app_dep
+	data$Last %>% rename(Dependent="Last") %>% select("JobId", "Dependent") %>% inner_join(all_states, by=c("JobId"="JobId")) -> app_dep
 	for(i in seq(1, length(deps))){
 	   app_dep %>% filter(.data$JobId %in% deps[[i]]) %>%
 	   mutate(Path = path[i]) %>% arrange(.data$End) %>% bind_rows(ret) -> ret

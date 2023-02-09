@@ -125,11 +125,11 @@ concurrent_mpi <- function(data = NULL, out = FALSE) {
 
   dflink %>%
     select(-"End") %>%
-    rename(Timestamp = .data$Start) %>%
+    rename(Timestamp = "Start") %>%
     mutate(Start = TRUE) -> dfstart
   dflink %>%
     select(-"Start") %>%
-    rename(Timestamp = .data$End) %>%
+    rename(Timestamp = "End") %>%
     mutate(Start = FALSE) %>%
     bind_rows(dfstart) %>%
     arrange(.data$Timestamp) %>%
@@ -143,7 +143,7 @@ concurrent_mpi <- function(data = NULL, out = FALSE) {
     ))) %>%
     arrange({{ col_case }}, .data$Timestamp) %>%
     select(-"Start") %>%
-    rename(Start = .data$Timestamp) %>%
+    rename(Start = "Timestamp") %>%
     group_by({{ col_case }}) %>%
     mutate(End = lead(.data$Start)) %>%
     na.omit() %>%

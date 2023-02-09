@@ -23,8 +23,8 @@ abe_cpu_cuda_details <- function(dfl, Colors = NULL, debug = FALSE) {
       Estimation = TRUE
     ) %>%
     rename(
-      ResourceType = .data$Types,
-      Value = .data$Values
+      ResourceType = "Types",
+      Value = "Values"
     ) -> ret
 
   # Get the actual counts and merge everything together
@@ -237,17 +237,17 @@ hl_global_cpb <- function(data = NULL) {
     # Merge with identifiers so the JobId gets an unique id
     left_join(identifiers, by = c("JobId" = "JobId")) %>%
     # Rename the new column
-    rename(JobIdIntU = .data$JobIdInt) %>%
+    rename(JobIdIntU = "JobIdInt") %>%
     # Merge with identifiers _again_ so the Dependent gets an unique id
     left_join(identifiers, by = c("Dependent" = "JobId")) %>%
     # Rename the new column _again_
-    rename(DepIntU = .data$JobIdInt) %>%
+    rename(DepIntU = "JobIdInt") %>%
     # Re-ordering
     select("JobId", "JobIdIntU", "Dependent", "DepIntU", "Start", "Cost", "Value") %>%
     # Rename things
     rename(
-      JobIdStr = .data$JobId, DepStr = .data$Dependent,
-      JobId = .data$JobIdIntU, Dependent = .data$DepIntU
+      JobIdStr = "JobId", DepStr = "Dependent",
+      JobId = "JobIdIntU", Dependent = "DepIntU"
     ) %>%
     as_tibble() -> appdagcost
 

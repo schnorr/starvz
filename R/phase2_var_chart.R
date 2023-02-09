@@ -18,7 +18,7 @@ var_chart <- function(dfv = NULL, ylabel = NA, base_size = 22, expand = 0.05) {
   mycolors <- rep(brewer.pal(8, "Dark2"), (n_resources / 8) + 1)
 
   k <- dfv %>%
-    rename(x = .data$Start, xend = .data$End, y = .data$Value) %>%
+    rename(x = "Start", xend = "End", y = "Value") %>%
     mutate(yend = .data$y) %>%
     select(-"Duration")
   v <- k %>%

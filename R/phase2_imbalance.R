@@ -79,7 +79,7 @@ panel_imbalance <- function(data, legend = data$config$imbalance$legend,
       "STD" = metric_imbalance_std(.data$UtilizationTime, agg_step),
       "AVG" = metric_imbalance_norm(.data$UtilizationTime, agg_step)
     ) %>%
-    pivot_longer(-.data$Step, names_to = "metric", values_to = "value") %>%
+    pivot_longer(-"Step", names_to = "metric", values_to = "value") %>%
     mutate(Time = .data$Step * agg_step + agg_step / 2) -> to_plot
 
   to_plot %>% var_imbalance_plot("Imb Metric", agg_step, base_size, expand_x) -> panel
@@ -193,7 +193,7 @@ panel_power_imbalance <- function(data, legend = data$config$power_imbalance$leg
       "STD" = metric_power_imbalance_std(.data$Utilization),
       "AVG" = metric_power_imbalance_norm(.data$Utilization, power)
     ) %>%
-    pivot_longer(-.data$Step, names_to = "metric", values_to = "value") %>%
+    pivot_longer(-"Step", names_to = "metric", values_to = "value") %>%
     mutate(Time = .data$Step * agg_step + agg_step / 2) -> to_plot
 
   to_plot %>% var_imbalance_plot("Imb Metric\nPower", agg_step, base_size, expand_x) -> panel
@@ -281,7 +281,7 @@ panel_hete_imbalance <- function(data, legend = data$config$hete_imbalance$legen
       "STD" = metric_abe_imbalance_std(.data$Utilization),
       "AVG" = metric_abe_imbalance_norm(.data$ABE, agg_step)
     ) %>%
-    pivot_longer(-.data$Step, names_to = "metric", values_to = "value") %>%
+    pivot_longer(-"Step", names_to = "metric", values_to = "value") %>%
     mutate(Time = .data$Step * agg_step + agg_step / 2) -> to_plot
 
   to_plot %>% var_imbalance_plot("Imb Metric\nHete", agg_step, base_size, expand_x) -> panel
@@ -531,7 +531,7 @@ utilization_per_step <- function(data_app, step) {
       UtilLast = .data$End %% step
     ) %>%
     mutate(FullUtil = mapply(function(x, y) seq(x, y, by = 1), .data$SStep, .data$EStep)) %>%
-    unnest(cols = c(.data$FullUtil)) %>%
+    unnest(cols = c("FullUtil")) %>%
     mutate(Util = case_when(
       (.data$FullUtil == .data$SStep) ~ .data$UtilFirst,
       (.data$FullUtil == .data$EStep) ~ .data$UtilLast,
@@ -581,7 +581,7 @@ utilization_per_step_double_hetero <- function(step, df) {
       UtilLast = .data$End %% step
     ) %>%
     mutate(FullUtil = mapply(function(x, y) seq(x, y, by = 1), .data$SStep, .data$EStep)) %>%
-    unnest(cols = c(.data$FullUtil)) %>%
+    unnest(cols = c("FullUtil")) %>%
     mutate(Util = case_when(
       (.data$FullUtil == .data$SStep) ~ .data$UtilFirst,
       (.data$FullUtil == .data$EStep) ~ .data$UtilLast,

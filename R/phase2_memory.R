@@ -923,7 +923,7 @@ pre_snap <- function(data, f_data) {
     distinct() %>%
     .$Container -> cont
   hand <- hand %>% mutate(Container = list(cont))
-  hand %>% unnest(cols = c(.data$Container)) -> hand
+  hand %>% unnest(cols = c("Container")) -> hand
 
   f_data %>% mutate(st = ifelse(.data$Type == "data state owner", "Owner", "Shared")) -> d_presence
 

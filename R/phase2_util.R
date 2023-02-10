@@ -244,7 +244,7 @@ panel_model_gflops <- function(
           tibble(fit_LR = exp(.[, 1]), lwr_LR = exp(.[, 2]), upr_LR = exp(.[, 3])) %>%
           select("fit_LR", "upr_LR", "lwr_LR")
       })) %>%
-      unnest(c(.data$data, .data$Prediction)) %>%
+      unnest(c("data", "Prediction")) %>%
       ungroup() %>%
       select("fit_LR", "lwr_LR", "upr_LR", "JobId")
 
@@ -259,7 +259,7 @@ panel_model_gflops <- function(
       mutate(model_log = map(.data$data, model_LR_log)) %>%
       ungroup() %>%
       select(-"model_log") %>%
-      unnest(cols = c(.data$data)) %>%
+      unnest(cols = c("data")) %>%
       arrange(.data$GFlop)
 
     model_panel <- model_data %>%
@@ -295,7 +295,7 @@ panel_model_gflops <- function(
         exp(predict(x))
       })) %>%
       select(-"model_log") %>%
-      unnest(cols = c(.data$data, .data$predictValue)) %>%
+      unnest(cols = c("data", "predictValue")) %>%
       arrange(.data$predictValue)
 
     model_panel <- model_data %>%

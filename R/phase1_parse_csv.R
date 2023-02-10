@@ -265,7 +265,7 @@ read_worker_csv <- function(where = ".",
           flexmix::getModel(m, which = "BIC")@cluster
         })) %>%
         select(-"flexmix_model") %>%
-        unnest(cols = c(.data$Cluster, .data$data)) %>%
+        unnest(cols = c("Cluster", "data")) %>%
         ungroup() %>%
         select("JobId", "Cluster") %>%
         full_join(Application, by = "JobId")
@@ -855,7 +855,7 @@ tasks_csv_parser <- function(where = ".", ZERO = 0) {
           Sizes = lapply(strsplit(pm$Sizes, " "), as.integer)
         )
       # unnest the lists
-      task_handles <- unnest(handles_dep, cols = c(.data$Handles, .data$Modes, .data$Sizes)) %>%
+      task_handles <- unnest(handles_dep, cols = c("Handles", "Modes", "Sizes")) %>%
         mutate(
           Handles = as.factor(.data$Handles),
           Modes = as.factor(.data$Modes)

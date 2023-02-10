@@ -34,13 +34,13 @@ bonferroni_regression_based_outlier_detection <- function(Application, task_mode
     # Step 2: identify outliers rows
     df.pre.outliers %>%
       select(-"Residual") %>%
-      unnest(cols = c(.data$outliers)) %>%
+      unnest(cols = c("outliers")) %>%
       mutate(!!quo_name(column_name) := TRUE, Row = as.integer(.data$Row)) %>%
       ungroup() -> df.pos.outliers
 
     # Step 3: unnest all data and tag create the Outiler field according to the Row value
     df.pre.outliers %>%
-      unnest(cols = c(.data$data, .data$Residual)) %>%
+      unnest(cols = c("data", "Residual")) %>%
       # this must be identical to the grouping used in the step 1
       group_by(.data$Value, .data$ResourceType, .data$Cluster) %>%
       mutate(Row = 1:n()) %>%
@@ -102,7 +102,7 @@ regression_based_outlier_detection <- function(Application, task_model, column_n
   }
 
   df.model.outliers <- df.model.outliers %>%
-    unnest(cols = c(.data$data, .data$Prediction)) %>%
+    unnest(cols = c("data", "Prediction")) %>%
     # Test if the Duration is bigger than the upper prediction interval value for that cluster
     mutate(DummyOutlier = ifelse(.data$Duration > .data$upr, TRUE, FALSE)) %>%
     ungroup()
@@ -149,7 +149,7 @@ regression_based_outlier_detection <- function(Application, task_model, column_n
         }
         data_predict
       })) %>%
-      unnest(cols = c(.data$upr1, .data$upr2)) %>%
+      unnest(cols = c("upr1", "upr2")) %>%
       # if the task duration is higher than at least one upr value it is an anomalous task
       mutate(DummyOutlier = ifelse(.data$Duration > .data$upr1 | .data$Duration > .data$upr2, TRUE, FALSE))
 

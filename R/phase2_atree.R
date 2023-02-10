@@ -921,7 +921,7 @@ resource_utilization_tree_node <- function(Application = NULL,
           summarize(GFlop = sum(.data$GFlop), SliceGFlop = sum(.data$SliceGFlop), .groups = "keep")
       })) %>%
       select(-"data") %>%
-      unnest(cols = c(.data$SliceData)) %>%
+      unnest(cols = c("SliceData")) %>%
       mutate(Value1 = .data$SliceGFlop) %>%
       ungroup()
   }

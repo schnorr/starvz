@@ -134,7 +134,7 @@ abe_cpu_cuda_inner <- function(dfl, debug = FALSE) {
   m <- df1.num_mean %>%
     arrange(.data$ResourceType, .data$Value) %>%
     pivot_wider(
-      id_cols = .data$ResourceType, names_from = .data$Value, values_from = .data$Mean,
+      id_cols = "ResourceType", names_from = "Value", values_from = "Mean",
       names_sort = TRUE, values_fill = 1e10
     ) %>%
     select(-"ResourceType") %>%

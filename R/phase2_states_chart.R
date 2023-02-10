@@ -295,7 +295,7 @@ geom_path_highlight <- function(paths = NULL) {
   # highlight the tasks involved in the path
   ret[[length(ret) + 1]] <- geom_rect(
     data = paths,
-    size = 1,
+    linewidth = 1,
     aes(
       color = .data$Path,
       xmin = .data$Start,

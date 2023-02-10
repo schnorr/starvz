@@ -161,7 +161,7 @@ geom_events <- function(main_data = NULL, data = NULL,
   # Add states
   ret[[length(ret) + 1]] <- geom_rect(
     data = dfw,
-    aes(fill = .data$Type, xmin = .data$Start, xmax = .data$End, ymin = .data$Position, ymax = .data$Position + (2.0 - 0.2 - .data$Height)), color = "black", linetype = border, size = 0.4, alpha = 0.5
+    aes(fill = .data$Type, xmin = .data$Start, xmax = .data$End, ymin = .data$Position, ymax = .data$Position + (2.0 - 0.2 - .data$Height)), color = "black", linetype = border, linewidth = 0.4, alpha = 0.5
   )
 
 
@@ -306,7 +306,7 @@ geom_links <- function(data = NULL, dfw = NULL, combined = FALSE,
     ret[[length(ret) + 1]] <- geom_segment(
       data = dfl,
       aes(x = .data$Start, xend = .data$End, y = .data$O_Position, yend = .data$D_Position),
-      arrow = arrow_g, alpha = 0.5, size = 1.5, color = "black", show.legend = FALSE
+      arrow = arrow_g, alpha = 0.5, linewidth = 1.5, color = "black", show.legend = FALSE
     )
   }
 

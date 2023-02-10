@@ -448,7 +448,7 @@ geom_cpb_internal <- function(dfw = NULL, value = NULL, desc = NULL, bsize = 22)
           y = .data$y,
           yend = .data$yend
         ),
-        size = 5,
+        linewidth = 5,
         alpha = .7,
         color = "gray"
       ),
@@ -500,7 +500,7 @@ geom_abe_internal <- function(pernodeABEdf = NULL,
           x = .data$Result, xend = .data$Result,
           y = .data$MinPosition, yend = .data$MaxPosition
         ),
-        size = abesize, alpha = .7, color = bar_color
+        linewidth = abesize, alpha = .7, color = bar_color
       )
     )
     if (text) {

@@ -232,7 +232,7 @@ reorder_elimination_tree <- function(Atree, Application) {
   data_pruned_position <- Application %>%
     filter(grepl("qrt", .data$Value) | grepl("do_subtree", .data$Value)) %>%
     mutate(NodeType = case_when(.data$Value == "do_subtree" ~ "Pruned", TRUE ~ "Not Pruned")) %>%
-    select("Position", "Height") %>%
+    select(-"Position", -"Height") %>%
     left_join(Atree, by = "ANode") %>%
     select("ANode", "Parent", "NodeType", "Position", "Height") %>%
     unique() %>%

@@ -598,7 +598,7 @@ pre_handle_gantt <- function(data, name_func = NULL) {
     filter(.data$Type == "Intra-node data Fetch" |
       .data$Type == "Intra-node data PreFetch" |
       .data$Type == "Intra-node data TaskPreFetch") %>%
-    select("Container", -"Size") %>%
+    select(-"Container", -"Size") %>%
     mutate(Con = as.integer(substring(.data$Key, 5))) %>%
     select(-"Key")
 

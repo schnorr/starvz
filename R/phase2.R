@@ -300,7 +300,7 @@ starvz_plot_list <- function(data = NULL) {
   if (is.null(data)) stop("data passed as parameter is null")
 
   if (is.null(data$Version)) {
-    starvz_warn("This is a old StarVZ trace, trying to be retrocompatible")
+    starvz_warn("This is an old StarVZ trace, trying to be retrocompatible")
     data$Application <- data$State %>% filter(.data$Application)
     data$Application <- data$Application %>% mutate(Size = as.integer(.data$Size))
     data$Starpu <- data$State %>%

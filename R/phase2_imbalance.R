@@ -513,7 +513,7 @@ metric_abe_imbalance_std <- function(utilization) {
 }
 
 metric_abe_imbalance_norm <- function(ABE, step) {
-  norm <- ABE / step
+  norm <- min(ABE) / step
   return(norm)
 }
 

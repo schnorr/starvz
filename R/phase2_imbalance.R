@@ -609,7 +609,12 @@ utilization_per_step_double_hetero <- function(step, df) {
     slice(1) %>%
     select("Step", "ResourceType") -> max_res
 
-  tasks_per_slice %>% rename(freq = "NTasks") -> ts
+  tasks_per_slice %>%
+    group_by(Value, Step) %>%
+    summarize(NTasks = sum(NTasks), .groups = "drop") %>%
+    mutate(Node = 0) %>%
+    rename(freq = "NTasks") -> ts
+
   df %>%
     select("ResourceType", "ResourceId") %>%
     distinct() %>%

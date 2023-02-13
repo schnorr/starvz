@@ -130,7 +130,7 @@ starvz_compute_plot_heights <- function(plist, config) {
     P[[length(P) + 1]] <- plist$imb_plot
     H[[length(H) + 1]] <- config_value(data$config$imbalance$height, data$config$guided$starvz_height_var)
   }
-  if (data$config$power_imbalance$active && !all.equal(plist$imb_plot_power, geom_blank())) {
+  if (data$config$power_imbalance$active && !isTRUE(all.equal(plist$imb_plot_power, geom_blank()))) {
     P[[length(P) + 1]] <- plist$imb_plot_power
     H[[length(H) + 1]] <- config_value(data$config$power_imbalance$height, data$config$guided$starvz_height_var)
   }

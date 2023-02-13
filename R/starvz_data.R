@@ -211,6 +211,27 @@ starvz_check_data <- function(data = NULL,
   return(TRUE)
 }
 
+#' Try to convert old StarVZ data to the new type
+#'
+#' Old StarVZ data are usually just a tibble
+#' @param data starvz_data old data
+#' @return starvz_data the data converted
+#' @usage starvz_transform_olddata(data)
+#' @examples
+#' starvz_transform_olddata(starvz_sample_lu)
+#' @export
+starvz_transform_olddata <- function(data){
+  if("State" %in% colnames(data)){
+    data$Application <- data$State %>% filter(.data$Application)
+    data$Starpu <- data$State %>% filter(!.data$Application)
+  }
+  if(!("Config" %in% colnames(data))){
+    data$config <- starvz_default_config()
+  }
+  data <- new_starvz_data(data)
+  return(data)
+}
+
 #' Small StarVZ data of LU Factorization
 #'
 #' A small StarVZ data object obtained from Chameleon+StarPU LU Factorization

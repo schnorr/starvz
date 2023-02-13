@@ -181,7 +181,7 @@ panel_power_imbalance <- function(data, legend = data$config$power_imbalance$leg
       unique() %>%
       nrow()) {
     starvz_warn("Power could not be computed for all resource in imbalance power")
-    return(geom_blank())
+    return(NULL)
   }
 
   utilization_per_step(data$Application, agg_step) %>%

@@ -301,21 +301,7 @@ starvz_plot_list <- function(data = NULL) {
 
   if (is.null(data$Version)) {
     starvz_warn("This is an old StarVZ trace, trying to be retrocompatible")
-    data$Application <- data$State %>% filter(.data$Application)
-    data$Application <- data$Application %>% mutate(Size = as.integer(.data$Size))
-    data$Starpu <- data$State %>%
-      filter(.data$Type == "Worker State", .data$Application == FALSE) %>%
-      mutate(Size = as.integer(.data$Size))
-    data$Comm_state <- data$State %>%
-      filter(.data$Type == "Communication Thread State") %>%
-      select(-"Position", -"Height")
-    data$Memory_state <- data$State %>%
-      filter(.data$Type == "Memory Node State") %>%
-      select(-"Position")
-    data$Colors <- data$State %>%
-      filter(.data$Application) %>%
-      select("Value", "Color") %>%
-      distinct()
+    data <- convert_state(data)
   }
 
   starvz_check_data(data, tables = list("Application" = c("Start", "End")))

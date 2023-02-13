@@ -211,6 +211,27 @@ starvz_check_data <- function(data = NULL,
   return(TRUE)
 }
 
+convert_state <- function(data){
+  data$Application <- data$State %>% filter(.data$Application)
+  data$Application <- data$Application %>% mutate(Size = as.integer(.data$Size))
+  data$Starpu <- data$State %>%
+    filter(.data$Type == "Worker State", .data$Application == FALSE) %>%
+    mutate(Size = as.integer(.data$Size))
+  data$Comm_state <- data$State %>%
+    filter(.data$Type == "Communication Thread State") %>%
+    select(-"Position", -"Height")
+  data$Memory_state <- data$State %>%
+    filter(.data$Type == "Memory Node State") %>%
+    select(-"Position")
+  data$Colors <- data$State %>%
+    filter(.data$Application) %>%
+    select("Value", "Color") %>%
+    distinct()
+  data$State <- NULL
+  data$Version <- "0.7";
+  return(data)
+}
+
 #' Try to convert old StarVZ data to the new type
 #'
 #' Old StarVZ data are usually just a tibble
@@ -221,11 +242,10 @@ starvz_check_data <- function(data = NULL,
 #' starvz_transform_olddata(starvz_sample_lu)
 #' @export
 starvz_transform_olddata <- function(data){
-  if("State" %in% colnames(data)){
-    data$Application <- data$State %>% filter(.data$Application)
-    data$Starpu <- data$State %>% filter(!.data$Application)
+  if("State" %in% names(data)){
+    data <- convert_state(data)
   }
-  if(!("Config" %in% colnames(data))){
+  if(!("Config" %in% names(data))){
     data$config <- starvz_default_config()
   }
   data <- new_starvz_data(data)

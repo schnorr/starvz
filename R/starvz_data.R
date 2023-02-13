@@ -179,7 +179,7 @@ starvz_check_data <- function(data = NULL,
     caller <- paste0("", deparse(sys.calls()[[sys.nframe() - 1]]), ":")
   }
   if (is.null(data)) stop(paste(caller, "data is NULL"), call. = FALSE)
-  if (class(data) != "starvz_data") stop(paste(caller, "data is not starvz_data"), call. = FALSE)
+  if (!inherits(data, "starvz_data")) stop(paste(caller, "data is not starvz_data"), call. = FALSE)
   if (!is.null(tables)) {
     if (!is.list(tables)) {
       stop(paste(caller, "tables is not a list"), call. = FALSE)

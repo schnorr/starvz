@@ -169,7 +169,8 @@ plot.starvz_data <- function(x, ...) {
 #' @include starvz_data.R
 #' @examples
 #' starvz_check_data(starvz_sample_lu,
-#'                   tables = list("Comm_state" = c("Node")))
+#'   tables = list("Comm_state" = c("Node"))
+#' )
 #' @export
 starvz_check_data <- function(data = NULL,
                               tables = list(),
@@ -211,7 +212,7 @@ starvz_check_data <- function(data = NULL,
   return(TRUE)
 }
 
-convert_state <- function(data){
+convert_state <- function(data) {
   data$Application <- data$State %>% filter(.data$Application)
   data$Application <- data$Application %>% mutate(Size = as.integer(.data$Size))
   data$Starpu <- data$State %>%
@@ -228,7 +229,7 @@ convert_state <- function(data){
     select("Value", "Color") %>%
     distinct()
   data$State <- NULL
-  data$Version <- "0.7";
+  data$Version <- "0.7"
   return(data)
 }
 
@@ -241,11 +242,11 @@ convert_state <- function(data){
 #' @examples
 #' starvz_transform_olddata(starvz_sample_lu)
 #' @export
-starvz_transform_olddata <- function(data){
-  if("State" %in% names(data)){
+starvz_transform_olddata <- function(data) {
+  if ("State" %in% names(data)) {
     data <- convert_state(data)
   }
-  if(!("Config" %in% names(data))){
+  if (!("Config" %in% names(data))) {
     data$config <- starvz_default_config()
   }
   data <- new_starvz_data(data)

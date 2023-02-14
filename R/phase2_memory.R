@@ -283,7 +283,6 @@ geom_links <- function(data = NULL, dfw = NULL, combined = FALSE,
   }
 
   if (!combined) {
-
     # dfw <- dfw %>% select(-"Position") %>% left_join(col_pos, by=c("ResourceId" = "ResourceId"));
     # Hardcoded here because yconf is specific to Resource Workers
 
@@ -533,7 +532,7 @@ pre_handle_gantt <- function(data, name_func = NULL) {
 
   all_st_m_data <- bind_rows(p_data, jobs_p_data) %>%
     inner_join(data$Data_handle, by = c("Value" = "Handle")) %>%
-    rename(Handle="Value") %>%
+    rename(Handle = "Value") %>%
     ungroup() %>%
     name_func() %>%
     select("Container", "Start", "End", "Value", "y1", "Colour", "size", "JobId", "Modes") %>%
@@ -763,17 +762,18 @@ panel_handles <- function(data, JobId = NA, lines = NA, lHandle = NA, name_func 
       ),
       size = 2.5, stroke = 1
     ) +
-    geom_rect(aes(
-      xmin = .data$Start,
-      xmax = .data$End,
-      fill = .data$Colour,
-      ymin = .data$y1 + ifelse(is.na(.data$JobId), 0, 0.2),
-      ymax = .data$y1 + .data$size,
-      linetype = .data$Modes,
-      alpha = ifelse(is.na(.data$JobId), "0", "1")
-    ),
-    colour = "black",
-    size = 0.1
+    geom_rect(
+      aes(
+        xmin = .data$Start,
+        xmax = .data$End,
+        fill = .data$Colour,
+        ymin = .data$y1 + ifelse(is.na(.data$JobId), 0, 0.2),
+        ymax = .data$y1 + .data$size,
+        linetype = .data$Modes,
+        alpha = ifelse(is.na(.data$JobId), "0", "1")
+      ),
+      colour = "black",
+      size = 0.1
     ) +
     scale_fill_manual(
       name = "State         Task", values = fills,

@@ -34,7 +34,7 @@ starvz_read_some_parquet <- function(directory = ".", tables = c("application"))
   if (!codec_is_available("gzip")) {
     starvz_warn("R package arrow does not have 'gzip' codec, try using arrow::install_arrow()")
     return(list())
-  }else{
+  } else {
     l1 <- list(Origin = directory)
     l2 <- lapply(tables, function(table) {
       table_file <- file.path(directory, paste0(table, ".parquet"))
@@ -77,8 +77,8 @@ starvz_read_some <- function(directory = ".", tables = c("application"), config_
   # If it is still not available, it will use a default one
   if (!is.null(config_file)) {
     data$config <- starvz_read_config(config_file)
-  }else{
-    data$config <- starvz_read_config(file.path(directory, "config.yaml"), warn=FALSE)
+  } else {
+    data$config <- starvz_read_config(file.path(directory, "config.yaml"), warn = FALSE)
   }
 
   final_data <- starvz_data(data)
@@ -101,8 +101,10 @@ starvz_read_some <- function(directory = ".", tables = c("application"), config_
 #'                config_file = NULL, selective = TRUE)
 #' @examples
 #' starvz_read("folder_to_parquet_files/")
-#' starvz_read(directory = "folder_to_parquet_files/",
-#'             config_file = "path_to_config.yaml")
+#' starvz_read(
+#'   directory = "folder_to_parquet_files/",
+#'   config_file = "path_to_config.yaml"
+#' )
 #' starvz_read() # Read current directory
 #' @export
 starvz_read <- function(directory = ".",
@@ -114,8 +116,8 @@ starvz_read <- function(directory = ".",
   # If it is still not available, it will use a default one
   if (!is.null(config_file)) {
     config <- starvz_read_config(config_file)
-  }else{
-    config <- starvz_read_config(file.path(directory, "config.yaml"), warn=FALSE)
+  } else {
+    config <- starvz_read_config(file.path(directory, "config.yaml"), warn = FALSE)
   }
 
   if (selective) {

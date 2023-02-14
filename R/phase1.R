@@ -34,8 +34,8 @@ starvz_phase1 <- function(directory = ".", app_states_fun = lu_colors,
   # If it is still not available, it will use a default one
   if (!is.null(config_file)) {
     config <- starvz_read_config(config_file)
-  }else{
-    config <- starvz_read_config(file.path(directory, "config.yaml"), warn=FALSE)
+  } else {
+    config <- starvz_read_config(file.path(directory, "config.yaml"), warn = FALSE)
   }
 
   # Read entities.csv and register the hierarchy (with Y coordinates)
@@ -126,7 +126,7 @@ starvz_phase1 <- function(directory = ".", app_states_fun = lu_colors,
   )
 
   starvz_log("Call Gaps.")
-  data$Gaps <- NULL #gaps(data)
+  data$Gaps <- NULL # gaps(data)
 
   starvz_log("Call Latest.")
   data$Last <- compute_all_last(data)
@@ -155,7 +155,9 @@ isolate_read_write <- function(input.parquet, fun, name, directory, ZERO) {
 
 isolate_read_write_m <- function(input.parquet, fun, directory, ZERO) {
   data <- fun(where = directory, ZERO = ZERO)
-  if(is.null(data))return(NULL)
+  if (is.null(data)) {
+    return(NULL)
+  }
   if (input.parquet == "1") {
     starvz_log("Saving as parquet")
     starvz_write_parquet(data, directory = directory)
@@ -208,7 +210,6 @@ atree_to_df <- function(node) {
 }
 
 reorder_elimination_tree <- function(Atree, Application) {
-
   # Reorganize tree Position, consider only not pruned nodes and submission order
   data_reorder <- Application %>%
     filter(grepl("qrt", .data$Value)) %>%
@@ -236,9 +237,10 @@ reorder_elimination_tree <- function(Atree, Application) {
     left_join(Atree, by = "ANode") %>%
     select("ANode", "Parent", "NodeType", "Position", "Height") %>%
     unique() %>%
-    left_join(Atree %>%
-      select("ANode", "Position", "Height"),
-    by = c("Parent" = "ANode"), suffix = c("", ".Parent")
+    left_join(
+      Atree %>%
+        select("ANode", "Position", "Height"),
+      by = c("Parent" = "ANode"), suffix = c("", ".Parent")
     ) %>%
     # pruned child node have the same position as its father
     mutate(
@@ -554,15 +556,18 @@ gaps <- function(data) {
   return(bind_rows(data.z.dag, data.b.dag, data.f.dag))
 }
 
-compute_all_last <- function(data){
-  filtered_dag <- data$Dag %>% select("JobId", "Dependent", "Start", "End", "Cost", "Value") %>%
-                  mutate(JobId = as.character(.data$JobId), Dependent = as.character(.data$Dependent))
+compute_all_last <- function(data) {
+  filtered_dag <- data$Dag %>%
+    select("JobId", "Dependent", "Start", "End", "Cost", "Value") %>%
+    mutate(JobId = as.character(.data$JobId), Dependent = as.character(.data$Dependent))
 
   all_levels <- unique(c(filtered_dag$JobId, filtered_dag$Dependent))
 
   filtered_dag %>%
-  mutate(JobId = factor(.data$JobId, levels=all_levels),
-         Dependent = factor(.data$Dependent, levels=all_levels)) -> filtered_dag
+    mutate(
+      JobId = factor(.data$JobId, levels = all_levels),
+      Dependent = factor(.data$Dependent, levels = all_levels)
+    ) -> filtered_dag
 
   return(last_task_c(filtered_dag) %>% tibble())
 }

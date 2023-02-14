@@ -30,7 +30,6 @@ bonferroni_regression_based_outlier_detection <- function(Application, task_mode
 
   # Step 1.1: Check if any anomaly was detected
   if (df.pre.outliers %>% nrow() > 0) {
-
     # Step 2: identify outliers rows
     df.pre.outliers %>%
       select(-"Residual") %>%

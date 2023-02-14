@@ -64,7 +64,8 @@ read_worker_csv <- function(where = ".",
       Y = as.integer(.data$Y),
       Iteration = as.integer(.data$Iteration),
       Subiteration = as.integer(.data$Subiteration)
-    ) %>% filter(!is.na(.data$ResourceId))
+    ) %>%
+    filter(!is.na(.data$ResourceId))
 
   if ((dfw %>% nrow()) == 0) stop("After reading worker states, number of rows is zero.")
 
@@ -118,7 +119,7 @@ read_worker_csv <- function(where = ".",
     starvz_log("This is multi-node trace")
     # This is the case for multi-node trace
     dfw <- dfw %>%
-      mutate(ResourceId=as.factor(.data$ResourceId)) %>%
+      mutate(ResourceId = as.factor(.data$ResourceId)) %>%
       separate_res() %>%
       tibble() %>%
       mutate(Resource = as.factor(.data$Resource)) %>%
@@ -270,7 +271,7 @@ read_worker_csv <- function(where = ".",
         select("JobId", "Cluster") %>%
         full_join(Application, by = "JobId")
       Application <- regression_based_outlier_detection(Application, model_LR_log, "_FLEXMIX", level = 0.95)
-    }else{
+    } else {
       starvz_warn("qrmumps can use the suggested package flexmix (that is not installed) to do another outlier classification")
     }
 
@@ -355,7 +356,7 @@ read_memory_state_csv <- function(where = ".", ZERO = 0) {
   if (grepl("CUDA|CPU", unlist(strsplit(firstResourceId, "_"))[2])) {
     # This is the case for multi-node trace
     dfw <- dfw %>%
-      mutate(ResourceId=as.factor(.data$ResourceId)) %>%
+      mutate(ResourceId = as.factor(.data$ResourceId)) %>%
       separate_res() %>%
       tibble() %>%
       mutate(Resource = as.factor(.data$Resource)) %>%
@@ -423,7 +424,7 @@ read_comm_state_csv <- function(where = ".", ZERO = 0) {
   if (grepl("mpict", unlist(strsplit(firstResourceId, "_"))[2])) {
     # This is the case for multi-node trace
     dfw <- dfw %>%
-      mutate(ResourceId=as.factor(.data$ResourceId)) %>%
+      mutate(ResourceId = as.factor(.data$ResourceId)) %>%
       separate_res() %>%
       tibble() %>%
       mutate(Resource = as.factor(.data$Resource)) %>%
@@ -492,7 +493,7 @@ read_other_state_csv <- function(where = ".", ZERO = 0) {
   if (grepl("CUDA|CPU", unlist(strsplit(firstResourceId, "_"))[2])) {
     # This is the case for multi-node trace
     dfw <- dfw %>%
-      mutate(ResourceId=as.factor(.data$ResourceId)) %>%
+      mutate(ResourceId = as.factor(.data$ResourceId)) %>%
       separate_res() %>%
       tibble() %>%
       mutate(Resource = as.factor(.data$Resource)) %>%
@@ -544,36 +545,36 @@ read_vars_set_new_zero <- function(where = ".", ZERO = 0) {
     # the new zero because of the long initialization phase
     mutate(Start = .data$Start - ZERO, End = .data$End - ZERO) -> dfv
 
-    # create three new columns (Node, Resource, ResourceType)
-    # This is StarPU-specific
-    if (grepl("CUDA|CPU", unlist(strsplit(firstResourceId, "_"))[2])) {
-      starvz_log("This is multi-node trace")
-      # This is the case for multi-node trace
-      dfv %>%
-        mutate(ResourceId=as.factor(.data$ResourceId)) %>%
-        separate_res() %>%
-        tibble() %>%
-        mutate(Resource = as.factor(.data$Resource)) %>%
-        mutate(Node = as.factor(.data$Node)) %>%
-        mutate(ResourceType = as.factor(gsub("[[:digit:]]+", "", .data$Resource))) %>%
-        mutate(Type = as.factor(.data$Type)) -> tmp
-    } else {
-      starvz_log("This is a single-node trace...")
-      # This is the case for SINGLE node trace
-      dfv %>%
-        mutate(Node = as.factor(0)) %>%
-        mutate(Resource = .data$ResourceId) %>%
-        mutate(ResourceType = as.factor(gsub("[_[:digit:]]+", "", .data$ResourceId))) %>%
-        mutate(Type = as.factor(.data$Type)) -> tmp
-    }
+  # create three new columns (Node, Resource, ResourceType)
+  # This is StarPU-specific
+  if (grepl("CUDA|CPU", unlist(strsplit(firstResourceId, "_"))[2])) {
+    starvz_log("This is multi-node trace")
+    # This is the case for multi-node trace
+    dfv %>%
+      mutate(ResourceId = as.factor(.data$ResourceId)) %>%
+      separate_res() %>%
+      tibble() %>%
+      mutate(Resource = as.factor(.data$Resource)) %>%
+      mutate(Node = as.factor(.data$Node)) %>%
+      mutate(ResourceType = as.factor(gsub("[[:digit:]]+", "", .data$Resource))) %>%
+      mutate(Type = as.factor(.data$Type)) -> tmp
+  } else {
+    starvz_log("This is a single-node trace...")
+    # This is the case for SINGLE node trace
+    dfv %>%
+      mutate(Node = as.factor(0)) %>%
+      mutate(Resource = .data$ResourceId) %>%
+      mutate(ResourceType = as.factor(gsub("[_[:digit:]]+", "", .data$ResourceId))) %>%
+      mutate(Type = as.factor(.data$Type)) -> tmp
+  }
 
-    # manually rename variables names
-    tmp %>% mutate(
-      Type = gsub("Number of Ready Tasks", "Ready", .data$Type),
-      Type = gsub("Number of Submitted Uncompleted Tasks", "Submitted", .data$Type),
-      Type = gsub("Bandwidth In \\(MB/s)", "B. In (MB/s)", .data$Type),
-      Type = gsub("Bandwidth Out \\(MB/s)", "B. Out (MB/s)", .data$Type)
-    ) -> dfv
+  # manually rename variables names
+  tmp %>% mutate(
+    Type = gsub("Number of Ready Tasks", "Ready", .data$Type),
+    Type = gsub("Number of Submitted Uncompleted Tasks", "Submitted", .data$Type),
+    Type = gsub("Bandwidth In \\(MB/s)", "B. In (MB/s)", .data$Type),
+    Type = gsub("Bandwidth Out \\(MB/s)", "B. Out (MB/s)", .data$Type)
+  ) -> dfv
   return(dfv)
 }
 
@@ -751,7 +752,7 @@ data_handles_csv_parser <- function(where = ".", ZERO = 0) {
     starvz_log(paste("Reading ", entities.csv))
     pm <- starvz_suppressWarnings(read_csv(entities.csv,
       trim_ws = TRUE,
-      show_col_types=FALSE
+      show_col_types = FALSE
     ))
   } else {
     starvz_log(paste("File", entities.csv, "do not exist."))
@@ -1015,7 +1016,7 @@ read_dag <- function(where = ".", Application = NULL, dfl = NULL) {
       select(-"Container", -"Origin") %>%
       # 2. Dest becomes ResourceId for these MPI tasks
       rename(ResourceId = "Dest") %>%
-      mutate(ResourceId=as.factor(.data$ResourceId)) %>%
+      mutate(ResourceId = as.factor(.data$ResourceId)) %>%
       separate_res() %>%
       tibble() %>%
       mutate(Resource = as.factor(.data$Resource)) %>%

@@ -95,7 +95,6 @@ panel_st_raw <- function(data = NULL, ST.Outliers = data$config$st$outliers, bas
                          cpb = data$config$st$cpb, cpb_mpi = data$config$st$cpb_mpi$active, legend = data$config$st$legend,
                          x_start = data$config$limits$start,
                          x_end = data$config$limits$end, drop_small = data$config$st$drop_small, runtime = FALSE) {
-
   # ST.Outliers = TRUE, base_size=22, expand_x=0.05,
   #  expand_y=0.05, selected_nodes = NULL, labels="ALL", alpha=0.25, idleness=TRUE,
   #  taskdeps=FALSE, tasklist = NULL,  levels=10, makespan=TRUE, abe=FALSE, pmtoolbounds=FALSE,
@@ -172,15 +171,14 @@ panel_st_raw <- function(data = NULL, ST.Outliers = data$config$st$outliers, bas
   }
 
   if (!runtime) {
-
     # add idleness
     if (idleness) gow <- gow + geom_idleness(data)
 
     # check if task dependencies should be added
     if (taskdeps) {
-      if(!is.null(data$Last)){
+      if (!is.null(data$Last)) {
         tasksel <- last(data, tasklist)
-      }else{
+      } else {
         tasksel <- gaps_backward_deps(
           data = data,
           tasks = tasklist,
@@ -283,7 +281,9 @@ geom_states <- function(dfw = NULL, Show.Outliers = FALSE, StarPU = FALSE, Color
 }
 
 geom_path_highlight <- function(paths = NULL) {
-  if (is.null(paths)) return(list())
+  if (is.null(paths)) {
+    return(list())
+  }
   if ((paths %>% nrow()) == 0) {
     return(list())
   }

@@ -33,7 +33,7 @@ panel_st_agg_dynamic <- function(data = NULL,
   }
 
   if (is.null(expand_y) || !is.numeric(expand_y)) {
-    expand_y<- 0.01
+    expand_y <- 0.01
   }
 
   if (is.null(x_start) || (!is.na(x_start) && !is.numeric(x_start))) {

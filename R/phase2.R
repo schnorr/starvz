@@ -180,7 +180,8 @@ starvz_compute_plot_heights <- function(plist, config) {
 #' @examples
 #' \donttest{
 #' starvz_assemble(starvz_plot_list(starvz_sample_lu),
-#'                 config = starvz_sample_lu$config)
+#'   config = starvz_sample_lu$config
+#' )
 #' }
 #' @export
 starvz_assemble <- function(..., config = NULL, remove_Y_info = TRUE, remove_legends = TRUE) {
@@ -189,7 +190,6 @@ starvz_assemble <- function(..., config = NULL, remove_Y_info = TRUE, remove_leg
 
   plists <- list()
   for (i in list(...)) {
-
     # Check if arguments are a list or a plot
     # is.list is not adequated here
     if (isTRUE(class(i[[1]]) == "list")) {
@@ -536,7 +536,7 @@ starvz_plot_list <- function(data = NULL) {
       colour = data$config$vertical_lines$color_list
     )
     for (name in names(plot_list)) {
-      if(name != "tplot" && is(plot_list[[name]], "ggplot") == TRUE){
+      if (name != "tplot" && is(plot_list[[name]], "ggplot") == TRUE) {
         plot_list[[name]] <- (plot_list[[name]] + verticallines)
       }
     }

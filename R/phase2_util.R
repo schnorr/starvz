@@ -84,7 +84,7 @@ yconf <- function(dfw = NULL, option = "ALL", Y = NULL, show_mpi = TRUE) {
       arrange(.data$ResourceId, .data$ResourceType) %>%
       slice(1) %>%
       ungroup()
-      show_mpi <- FALSE
+    show_mpi <- FALSE
   } else if (option == "ALL") {
     y_conf <- dfw %>%
       select("Node", "ResourceId", "ResourceType", "Position", "Height") %>%
@@ -192,11 +192,9 @@ panel_title <- function(data, title = data$config$title$text) {
 #' panel_model_gflops(data = starvz_sample_sample)
 #' }
 #' @export
-panel_model_gflops <- function(
-                           data,
-                           freeScales = TRUE,
-                           model_type = "LOG_LOG") {
-
+panel_model_gflops <- function(data,
+                               freeScales = TRUE,
+                               model_type = "LOG_LOG") {
   # create the base ggplot object that is enhanced according to the model_type
   model_panel <- data$Application %>%
     filter(.data$Value %in% c("geqrt", "gemqrt", "tpqrt", "tpmqrt")) %>%
@@ -405,7 +403,8 @@ panel_resource_usage_task <- function(data = NULL,
 
   # must expand data frame to make geom_area work properly
   df_plot <- df2 %>%
-    filter(!is.na(.data$Task)) %>% ungroup() %>%
+    filter(!is.na(.data$Task)) %>%
+    ungroup() %>%
     expand(.data$Slice, .data$Task) %>%
     left_join(df2 %>% filter(.data$Value != 0), by = c("Task", "Slice")) %>%
     mutate(Value1 = ifelse(is.na(.data$Value1), 0, .data$Value1))
@@ -692,25 +691,31 @@ statistics_total_idleness <- function(data) {
   return(100.0 - percent_active)
 }
 
-last <- function(data, path){
-	get_last_path(data$Last, path) -> deps
-	ret <- NULL
+last <- function(data, path) {
+  get_last_path(data$Last, path) -> deps
+  ret <- NULL
 
   data$Link %>%
-  filter(.data$Type == "MPI communication") %>%
-  rename(JobId = "Key") %>%
-  rename(ResourceId = "Dest") %>%
-  select("JobId", "Start", "End", "ResourceId") %>%
-  separate(.data$ResourceId, into = c("Node", "Resource"), remove = FALSE, extra = "drop", fill = "right") %>%
-  left_join((data$Y %>% select(-"Type") %>% mutate(Parent = as.character(.data$Parent))), by = c("ResourceId" = "Parent")) %>%
-  select("JobId", "Start", "End", "Position", "Height") %>%
-  bind_rows(data$Application %>% select("JobId", "Start", "End", "Position", "Height")) -> all_states
+    filter(.data$Type == "MPI communication") %>%
+    rename(JobId = "Key") %>%
+    rename(ResourceId = "Dest") %>%
+    select("JobId", "Start", "End", "ResourceId") %>%
+    separate(.data$ResourceId, into = c("Node", "Resource"), remove = FALSE, extra = "drop", fill = "right") %>%
+    left_join((data$Y %>% select(-"Type") %>% mutate(Parent = as.character(.data$Parent))), by = c("ResourceId" = "Parent")) %>%
+    select("JobId", "Start", "End", "Position", "Height") %>%
+    bind_rows(data$Application %>% select("JobId", "Start", "End", "Position", "Height")) -> all_states
 
-	data$Last %>% rename(Dependent="Last") %>% select("JobId", "Dependent") %>% inner_join(all_states, by=c("JobId"="JobId")) -> app_dep
-	for(i in seq(1, length(deps))){
-	   app_dep %>% filter(.data$JobId %in% deps[[i]]) %>%
-	   mutate(Path = path[i]) %>% arrange(.data$End) %>% bind_rows(ret) -> ret
-	}
+  data$Last %>%
+    rename(Dependent = "Last") %>%
+    select("JobId", "Dependent") %>%
+    inner_join(all_states, by = c("JobId" = "JobId")) -> app_dep
+  for (i in seq(1, length(deps))) {
+    app_dep %>%
+      filter(.data$JobId %in% deps[[i]]) %>%
+      mutate(Path = path[i]) %>%
+      arrange(.data$End) %>%
+      bind_rows(ret) -> ret
+  }
 
-	return(ret)
+  return(ret)
 }

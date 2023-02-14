@@ -19,7 +19,6 @@ panel_node_summary <- function(data, legend = data$config$summary_nodes$legend,
                                expand_x = data$config$expand,
                                x_start = data$config$limits$start,
                                x_end = data$config$limits$end) {
-
   ## Check for non-valid arguments
   if (is.null(legend) || !is.logical(legend)) {
     legend <- TRUE

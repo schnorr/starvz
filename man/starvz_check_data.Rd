@@ -28,5 +28,6 @@ The following conditions are check in order and return FALSE if any fail
 }
 \examples{
 starvz_check_data(starvz_sample_lu,
-                  tables = list("Comm_state" = c("Node")))
+  tables = list("Comm_state" = c("Node"))
+)
 }

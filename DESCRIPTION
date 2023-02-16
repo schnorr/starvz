@@ -73,6 +73,7 @@ Collate:
     'phase2_mpi.R'
     'phase2_node_summary.R'
     'phase2_pmtool.R'
+    'phase2_progress.R'
     'phase2_states_chart.R'
     'phase2_themes.R'
     'phase2_time_integration.R'
@@ -85,4 +86,6 @@ Suggests:
     testthat,
     flexmix,
     car,
-    viridis
+    viridis,
+    ggrepel,
+    mclust

@@ -1284,7 +1284,7 @@ panel_dist2d <- function(data,
   if (requireNamespace("viridis", quietly = TRUE)) {
     panel <- panel + viridis::scale_fill_viridis(name = "Node", breaks = seq(0, n_nodes), discrete = TRUE)
   } else {
-    starvz_warn("In panel_dist2d: We suggest package viridis for high number of nodes")
+    starvz_warn("In panel_dist2d: We suggest package viridis for a high number of nodes")
   }
 
   if (legend) {

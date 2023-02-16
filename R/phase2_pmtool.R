@@ -35,22 +35,7 @@ panel_pmtool_st <- function(data = NULL,
     x_end <- NA
   }
 
-  # Get traces
-  dfw <- data$Pmtool_states
-
   starvz_log("Entry of state_pmtool_chart")
-
-  # Filter
-  dfwapp <- dfw %>%
-    filter(.data$sched == data$config$pmtool$state$sched)
-
-  # Obtain time interval
-  tstart <- dfwapp %>%
-    .$Start %>%
-    min()
-  tend <- dfwapp %>%
-    .$End %>%
-    max()
 
   # Plot
   gow <- ggplot() +

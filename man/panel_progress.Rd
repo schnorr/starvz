@@ -47,5 +47,5 @@ The progress panel show a progress metric per node, clustering nodes with
 a similar metric
 }
 \examples{
-panel_progress(starvz_sample_lu$Application, 20, 0.01)
+panel_progress(starvz_sample_lu$Application, 20, 0.01, show_abe = FALSE)
 }

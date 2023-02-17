@@ -153,6 +153,10 @@ panel_progress <- function(df_app, nsteps, cluster_option,
   if (is.null(func_progress_global)) {
     func_progress_global <- total_tasks_completed_global_het
   }
+  if (is.null(df_app)) {
+    starvz_warn("df_app is NULL")
+    return(NULL)
+  }
   # Compute end, steps, and intervals
   df_app %>%
     .$End %>%

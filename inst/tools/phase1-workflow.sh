@@ -188,11 +188,11 @@ else
   echo "Nature, ResourceId, Type, Start, End, Duration, Depth, Value" | gzip -c > $PAJE_COMM_STATE
   zgrep -e "Communication Thread State" paje.csv.gz | gzip -c >> $PAJE_COMM_STATE
 
-  echo "Nature, ResourceId, Type, Start, End, Duration, Depth, Value, Size, Params, Footprint, Tag, JobId, SubmitOrder, GFlop, X, Y, Iteration, Subiteration" | gzip -c > $PAJE_WORKER_STATE
+  echo "Nature, ResourceId, Type, Start, End, Duration, Depth, Value, Size, Params, Footprint, Tag, JobId, SubmitOrder, GFlop, X, Y, Iteration, Subiteration, NumaNodes" | gzip -c > $PAJE_WORKER_STATE
   if [ -n "$STARVZ_EXCLUDE_TASKS" ]; then
     zgrep -e "Worker State" paje.csv.gz | grep -E -v $(echo $STARVZ_EXCLUDE_TASKS | sed "s/,/|/g" | sed "s/ //g" ) | gzip -c >> $PAJE_WORKER_STATE
   else
-    zgrep -a -e "Worker State" paje.csv.gz | sed -e 's/\(State\)\(,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*$\)/\1\2,,,,,,,,,,,/g' | gzip -c >> $PAJE_WORKER_STATE
+    zgrep -a -e "Worker State" paje.csv.gz | sed -e 's/\(State\)\(,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*$\)/\1\2,,,,,,,,,,,,/g' | gzip -c >> $PAJE_WORKER_STATE
   fi
 
   echo "Nature, ResourceId, Type, Start, End, Duration, Depth, Value" | gzip -c > $PAJE_OTHER_STATE

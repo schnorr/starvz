@@ -124,7 +124,7 @@ read_worker_csv <- function(where = ".",
       tibble() %>%
       mutate(Resource = as.factor(.data$Resource)) %>%
       mutate(Node = as.factor(.data$Node)) %>%
-      mutate(ResourceType = as.factor(gsub("[[:digit:]]+", "", .data$Resource))) %>%
+      mutate(ResourceType = as.factor(gsub("[_[:digit:]]+", "", .data$Resource))) %>%
       mutate(Resource = as.factor(.data$Resource))
   } else {
     starvz_log("This is a single-node trace...")

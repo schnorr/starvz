@@ -92,6 +92,14 @@ yconf <- function(dfw = NULL, option = "ALL", Y = NULL, show_mpi = TRUE) {
       group_by(.data$Node, .data$ResourceType) %>%
       arrange(.data$Node, .data$ResourceId, .data$ResourceType) %>%
       ungroup()
+  } else if (option == "ALL_nompi") {
+    y_conf <- dfw %>%
+      select("Node", "ResourceId", "ResourceType", "Position", "Height") %>%
+      distinct() %>%
+      group_by(.data$Node, .data$ResourceType) %>%
+      arrange(.data$Node, .data$ResourceId, .data$ResourceType) %>%
+      ungroup()
+      show_mpi <- FALSE
   } else { # First and Last ("FIRST_LAST") or anything else
     y_conf <- dfw %>%
       select("Node", "ResourceId", "ResourceType", "Position", "Height") %>%

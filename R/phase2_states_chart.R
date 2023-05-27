@@ -342,6 +342,7 @@ geom_path_highlight <- function(paths = NULL) {
 #' @param x_end X-axis end value
 #' @param step time-step
 #' @param legend option to activate legend
+#' @param selected_nodes select only some nodes in some plots
 #' @return A ggplot object
 #' @include starvz_data.R
 #' @examples
@@ -353,7 +354,8 @@ panel_st_agg_node <- function(data,
                               x_start = data$config$limits$start,
                               x_end = data$config$limits$end,
                               step = data$config$st$aggregation$step,
-                              legend = data$config$st$legend) {
+                              legend = data$config$st$legend,
+                              selected_nodes = data$config$selected_nodes) {
   if (is.null(step) || !is.numeric(step)) {
     if (is.null(data$config$global_agg_step)) {
       agg_step <- 100
@@ -374,6 +376,22 @@ panel_st_agg_node <- function(data,
 
   if (is.null(legend) || !is.logical(legend)) {
     legend <- TRUE
+  }
+
+  if (!is.null(selected_nodes)) {
+    data$Y %>%
+      separate(.data$Parent, into = c("Node"), remove = FALSE, extra = "drop", fill = "right") %>%
+      filter(.data$Node %in% selected_nodes) %>%
+      arrange(.data$Position) %>%
+      mutate(New = cumsum(lag(.data$Height, default = 0))) %>%
+      select("Parent", "New") -> new_y
+
+    data$Application <- data$Application %>%
+      left_join(new_y, by = c("ResourceId" = "Parent")) %>%
+      mutate(Position = if_else(is.na(.data$New), -3, .data$New)) %>%
+      mutate(Height = if_else(is.na(.data$New), 0, .data$Height)) %>%
+      select(-"New") %>%
+      filter(.data$Position >= 0)
   }
 
   step <- 100
@@ -404,20 +422,22 @@ panel_st_agg_node <- function(data,
     mutate(Height = 1) %>%
     ungroup() -> df.spatial_prep
 
-  hl_per_node_ABE(data$Application) %>%
-    mutate(Node = as.integer(as.character(.data$Node))) %>%
-    select(-"MinPosition", -"MaxPosition") %>%
-    left_join(df.node_position %>% select("Node", "ResourceType.Position", "ResourceType.Height") %>% unique(), by = c("Node")) %>%
-    select("Node", "Result", "ResourceType.Position", "ResourceType.Height") %>%
-    arrange(-.data$Node) %>%
-    group_by(.data$Node, .data$Result) %>%
-    summarize(
-      Node.Position = min(.data$ResourceType.Position),
-      Node.Height = sum(.data$ResourceType.Height)
-    ) %>%
-    ungroup() %>%
-    mutate(MinPosition = .data$Node.Position) %>%
-    mutate(MaxPosition = .data$Node.Position + .data$Node.Height + space.between) -> df.pernodeABE
+  if (data$config$st$abe$active) {
+    hl_per_node_ABE(data$Application) %>%
+      mutate(Node = as.integer(as.character(.data$Node))) %>%
+      select(-"MinPosition", -"MaxPosition") %>%
+      left_join(df.node_position %>% select("Node", "ResourceType.Position", "ResourceType.Height") %>% unique(), by = c("Node")) %>%
+      select("Node", "Result", "ResourceType.Position", "ResourceType.Height") %>%
+      arrange(-.data$Node) %>%
+      group_by(.data$Node, .data$Result) %>%
+      summarize(
+        Node.Position = min(.data$ResourceType.Position),
+        Node.Height = sum(.data$ResourceType.Height)
+      ) %>%
+      ungroup() %>%
+      mutate(MinPosition = .data$Node.Position) %>%
+      mutate(MaxPosition = .data$Node.Position + .data$Node.Height + space.between) -> df.pernodeABE
+  }
 
   df.node_position %>%
     group_by(.data$Node, .data$ResourceType) %>%

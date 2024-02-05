@@ -1,8 +1,13 @@
 #' @include starvz_data.R
 
 check_arrow <- function() {
-  if (!arrow_available()) {
-    starvz_warn("R package arrow was not property installed, use: install_arrow()")
+  if (!requireNamespace("arrow", quietly = TRUE)) {
+    msg <- paste(
+      "The 'arrow' package is required but is not available. Install it with:",
+      'install.packages("arrow", repos = c("https://p3m.dev/cran/2024-02-02", getOption("repos")))',
+      sep = "\n"
+    )
+    stop(msg, call. = FALSE)
   }
 }
 

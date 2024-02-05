@@ -24,10 +24,12 @@ and the configuration file, and return a starvz_data
 class used in starvz functions
 }
 \examples{
+\dontshow{if (requireNamespace("arrow", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 starvz_read("folder_to_parquet_files/")
 starvz_read(
   directory = "folder_to_parquet_files/",
   config_file = "path_to_config.yaml"
 )
 starvz_read() # Read current directory
+\dontshow{\}) # examplesIf}
 }

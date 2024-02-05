@@ -16,7 +16,6 @@
 #' @importFrom stringr str_replace str_replace_all str_to_title
 #' @importFrom purrr list_modify map map2
 #' @importFrom patchwork wrap_plots
-#' @importFrom arrow arrow_available read_feather read_parquet write_feather write_parquet codec_is_available ParquetWriterProperties
 #' @importFrom lpSolve lp
 #' @importFrom data.tree as.Node Prune Set
 #' @importFrom gtools mixedorder mixedsort

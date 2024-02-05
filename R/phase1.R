@@ -18,7 +18,7 @@ NULL
 #' @return ggplot object with all starvz plots
 #' @family phase1 functions
 #'
-#' @examples
+#' @examplesIf requireNamespace("arrow", quietly = TRUE)
 #' \donttest{
 #' example_folder <- system.file("extdata", "lu_trace", package = "starvz")
 #' starvz_phase1(directory = example_folder)
@@ -262,8 +262,9 @@ hl_y_paje_tree <- function(where = ".") {
   entities.csv <- paste0(where, "/entities.csv")
 
   if (file.exists(entities.feather)) {
+    check_arrow()
     starvz_log(paste("Reading ", entities.feather))
-    dfe <- read_feather(entities.feather)
+    dfe <- arrow::read_feather(entities.feather)
   } else if (file.exists(entities.csv)) {
     starvz_log(paste("Reading ", entities.csv))
     dfe <- starvz_suppressWarnings(read_csv(entities.csv,

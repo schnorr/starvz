@@ -626,8 +626,9 @@ pmtool_bounds_csv_parser <- function(where = ".", ZERO = 0) {
   entities.csv <- paste0(where, "/pmtool.csv")
 
   if (file.exists(entities.feather)) {
+    check_arrow()
     starvz_log(paste("Reading ", entities.feather))
-    pm <- read_feather(entities.feather)
+    pm <- arrow::read_feather(entities.feather)
   } else if (file.exists(entities.csv)) {
     starvz_log(paste("Reading ", entities.csv))
     pm <- starvz_suppressWarnings(read_csv(entities.csv,
@@ -795,8 +796,9 @@ task_handles_parser <- function(where = ".") {
   entities.feather <- paste0(where, "/task_handles.feather")
 
   if (file.exists(entities.feather)) {
+    check_arrow()
     starvz_log(paste("Reading ", entities.feather))
-    ret <- read_feather(entities.feather)
+    ret <- arrow::read_feather(entities.feather)
     return(ret)
   }
 

@@ -5,7 +5,7 @@ starvz_read_some_feather <- function(directory = ".", tables = c("application"))
   l2 <- lapply(tables, function(table) {
     table_file <- file.path(directory, paste0(table, ".feather"))
     if (file.exists(table_file)) {
-      read_parquet(table_file)
+      arrow::read_parquet(table_file)
     } else {
       starvz_log(paste("The file:", table_file, " does not exist on that directory. Ignore."))
       NULL
@@ -16,6 +16,7 @@ starvz_read_some_feather <- function(directory = ".", tables = c("application"))
 }
 
 starvz_read_feather <- function(directory = ".") {
+  check_arrow()
   filenames <- list.files(
     path = directory,
     pattern = "*.feather",
@@ -31,7 +32,8 @@ starvz_read_feather <- function(directory = ".") {
 the_fast_reader_function <- starvz_read_feather
 
 starvz_read_some_parquet <- function(directory = ".", tables = c("application")) {
-  if (!codec_is_available("gzip")) {
+  check_arrow()
+  if (!arrow::codec_is_available("gzip")) {
     starvz_warn("R package arrow does not have 'gzip' codec, try using arrow::install_arrow()")
     return(list())
   } else {
@@ -39,7 +41,7 @@ starvz_read_some_parquet <- function(directory = ".", tables = c("application"))
     l2 <- lapply(tables, function(table) {
       table_file <- file.path(directory, paste0(table, ".parquet"))
       if (file.exists(table_file)) {
-        read_parquet(table_file)
+        arrow::read_parquet(table_file)
       } else {
         starvz_log(paste("The file:", table_file, " does not exist on that directory. Ignore."))
         NULL
@@ -51,6 +53,7 @@ starvz_read_some_parquet <- function(directory = ".", tables = c("application"))
 }
 
 starvz_read_parquet <- function(directory = ".") {
+  check_arrow()
   filenames <- list.files(
     path = directory,
     pattern = "*.parquet",
@@ -99,7 +102,7 @@ starvz_read_some <- function(directory = ".", tables = c("application"), config_
 #' @return The starvz_data with all tables
 #' @usage starvz_read(directory = ".",
 #'                config_file = NULL, selective = TRUE)
-#' @examples
+#' @examplesIf requireNamespace("arrow", quietly = TRUE)
 #' starvz_read("folder_to_parquet_files/")
 #' starvz_read(
 #'   directory = "folder_to_parquet_files/",

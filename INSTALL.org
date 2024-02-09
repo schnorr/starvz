@@ -246,7 +246,7 @@ While the ~arrow~ installation is straightforward in many systems
 (pre-compiled binaries), it may be hard to obtain an installation with
 compression support in Debian systems.  See [[https://issues.apache.org/jira/browse/ARROW-8556][this link for more
 information]]. A possible fix is do the following (install everything by
-hand [[https://cran.r-project.org/web/packages/arrow/vignettes/install.html][following a combination of these instructions]]). See below for
+hand [[https://arrow.apache.org/docs/r/articles/install.html][following a combination of these instructions]]). See below for
 details.
 
 *** Install the Apache Arrow C++
@@ -291,16 +291,12 @@ your R session:
 
 #+begin_src R :results output :session :exports both
 library(arrow)
-arrow_available()
 arrow::CompressionType
 #+end_src
 
 Confirm the output is something like this:
 
 #+BEGIN_EXAMPLE
-> arrow_available()
-[1] TRUE
-
 > arrow::CompressionType
 $UNCOMPRESSED
 [1] 0

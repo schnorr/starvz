@@ -9,7 +9,8 @@ panel_st_agg_node(
   x_start = data$config$limits$start,
   x_end = data$config$limits$end,
   step = data$config$st$aggregation$step,
-  legend = data$config$st$legend
+  legend = data$config$st$legend,
+  selected_nodes = data$config$selected_nodes
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ panel_st_agg_node(
 \item{step}{time-step}
 
 \item{legend}{option to activate legend}
+
+\item{selected_nodes}{select only some nodes in some plots}
 }
 \value{
 A ggplot object

@@ -4,4 +4,6 @@
 *.png
 *.rec
 *.csv
+*.Rcheck/*
 inst/tools/starvz_fast_csv_split
+starvz_*.tar.gz

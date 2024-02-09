@@ -44,14 +44,13 @@ Imports: methods,
     data.tree,
     RColorBrewer,
     zoo,
-    Rcpp,
-    arrow (>= 3.0.0)
+    Rcpp
 License: GPL-3
 Encoding: UTF-8
 SystemRequirements: C++, arrow package with gzip codec, StarPU
 LazyData: true
 LinkingTo: Rcpp (>= 1.0.6), BH
-RoxygenNote: 7.1.1
+RoxygenNote: 7.2.3
 Collate:
     'RcppExports.R'
     'starvz_data.R'
@@ -83,9 +82,11 @@ Collate:
     'read_functions.R'
     'write_functions.R'
 Suggests:
+    arrow (>= 3.0.0),
     testthat,
     flexmix,
     car,
     viridis,
     ggrepel,
     mclust
+Additional_repositories: https://p3m.dev/cran/2024-02-02

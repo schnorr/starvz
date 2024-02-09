@@ -8,7 +8,7 @@ starvz_write_feather <- function(data, directory = ".") {
       starvz_log(filename)
       if (!is.null(data[[x]])) {
         if (is.data.frame(data[[x]])) {
-          write_feather(data[[x]], filename)
+          arrow::write_feather(data[[x]], filename)
         } else {
           starvz_log(paste(filename, "must be a data frame."))
         }
@@ -23,7 +23,7 @@ starvz_write_parquet <- function(data, directory = ".") {
   if (is.null(data)) {
     return(NULL)
   }
-  if (!codec_is_available("gzip")) {
+  if (!arrow::codec_is_available("gzip")) {
     starvz_warn("R package arrow does not have 'gzip' codec, try using arrow::install_arrow()")
   } else {
     invisible(data %>% list_modify("Origin" = NULL) %>% names() %>%
@@ -32,7 +32,7 @@ starvz_write_parquet <- function(data, directory = ".") {
         starvz_log(filename)
         if (!is.null(data[[x]])) {
           if (is.data.frame(data[[x]])) {
-            write_parquet(data[[x]], filename, compression = "gzip")
+            arrow::write_parquet(data[[x]], filename, compression = "gzip")
           } else {
             starvz_log(paste(filename, "must be a data frame."))
           }

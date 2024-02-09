@@ -8,6 +8,7 @@ test_that("starvz_plot works", {
   expect_equal(class(pl), c("patchwork", "gg", "ggplot"))
 
   skip_on_cran()
+  skip_if_not_installed("arrow")
 
   other_data <- starvz_sample_lu
 
@@ -49,7 +50,7 @@ test_that("starvz_plot works", {
   other_data <- starvz_phase1(system.file("extdata", "lu_trace", package = "starvz"), lu_colors, state_filter = 2, whichApplication = "lu")
   other_data <- starvz_read(system.file("extdata", "lu_trace", package = "starvz"), system.file("extdata", "config.yaml", package = "starvz"))
   result <- all.equal(nrow(other_data$Application), nrow(starvz_sample_lu$Application))
-  if (codec_is_available("gzip")) {
+  if (arrow::codec_is_available("gzip")) {
     expect_equal(result, TRUE)
   }
 

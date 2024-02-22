@@ -11,7 +11,7 @@ NULL
 #'
 #' @param directory Directory of CSV files
 #' @param app_states_fun Function to determine application
-#' @param state_filter Type of filder
+#' @param state_filter Type of filter
 #' @param whichApplication Name of Application
 #' @param input.parquet Use or not of parquet files
 #' @param config_file StarVZ config structure, this function uses only the app_tasks

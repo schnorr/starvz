@@ -15,18 +15,25 @@ function usage()
     echo "  no parameters are required"
 }
 
+if [ -z "$STARPU_FXT_SUFFIX" ];
+then
+    PROF_PREFIX="prof_file_"
+else
+    PROF_PREFIX="STARPU_FXT_SUFFIX"
+fi
+
 if [ -z "$STARVZ_USE_PAJE_TRACE" ] || [ "$STARVZ_USE_PAJE_TRACE" -ne 1 ];
 then 
-    ls -1 prof_file_* > /dev/null
+    ls -1 $PROF_PREFIX* > /dev/null
     es=$?
     if [ $es -ne 0 ]
     then
-	echo "The directory dont have prof_file_* files"
+	echo "The directory dont have $PROF_PREFIX* files"
 	exit 1
     fi
 
     # get all the FXTs
-    FXTS=$(ls -1 prof_file_* | sort --version-sort)
+    FXTS=$(ls -1 $PROF_PREFIX* | sort --version-sort)
 
     echo "Execute stapu_fxt_tool"
     date "+%a %d %b %Y %H:%M:%S %Z"

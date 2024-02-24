@@ -19,7 +19,7 @@ if [ -z "$STARPU_FXT_SUFFIX" ];
 then
     PROF_PREFIX="prof_file_"
 else
-    PROF_PREFIX="STARPU_FXT_SUFFIX"
+    PROF_PREFIX="$STARPU_FXT_SUFFIX"
 fi
 
 if [ -z "$STARVZ_USE_PAJE_TRACE" ] || [ "$STARVZ_USE_PAJE_TRACE" -ne 1 ];

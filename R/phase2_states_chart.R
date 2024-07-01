@@ -394,7 +394,6 @@ panel_st_agg_node <- function(data,
       filter(.data$Position >= 0)
   }
 
-  step <- 100
   df <- time_aggregation_prep(data$Application)
   df <- time_aggregation_do(df %>%
     group_by(.data$Node, .data$ResourceId, .data$ResourceType, .data$Task), step)

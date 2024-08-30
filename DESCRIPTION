@@ -2,14 +2,14 @@ Package: starvz
 Title: R-Based Visualization Techniques for Task-Based Applications
 Version: 0.8.0
 Authors@R: c(
-    person("Lucas Mello Schnorr", email = "schnorr@inf.ufrgs.br", role = c("aut", "ths"), comment = c(ORCID = "0000-0003-4828-9942")),
-    person("Vinicius Garcia Pinto", email = "vgpinto@inf.ufrgs.br", role = c("aut"), comment = c(ORCID = "0000-0002-6845-9358")),
-    person("Lucas Leandro Nesi", email = "lucas.nesi@inf.ufrgs.br", role = c("aut", "cre"), comment = c(ORCID = "0000-0001-8874-1839")),
-    person("Marcelo Cogo Miletto", email = "marcelo.miletto@inf.ufrgs.br", role = c("aut"), comment = c(ORCID = "0000-0002-1191-3863")),
-    person("Guilherme Alles", email = "galles@inf.ufrgs.br", role = c("ctb")),
-    person("Arnaud Legrand", email = "arnaud.legrand@imag.fr", role = c("ctb")),
-    person("Luka Stanisic", email = "luka.stanisic@mpcdf.mpg.de", role = c("ctb")),
-    person("Rémy Drouilhet", email = "remy.drouilhet@univ-grenoble-alpes.fr", role = c("ctb"))
+    person("Lucas", "Mello Schnorr", email = "schnorr@inf.ufrgs.br", role = c("aut", "ths"), comment = c(ORCID = "0000-0003-4828-9942")),
+    person("Vinicius", "Garcia Pinto", email = "vgpinto@inf.ufrgs.br", role = c("aut"), comment = c(ORCID = "0000-0002-6845-9358")),
+    person("Lucas", "Leandro Nesi", email = "lucas.nesi@inf.ufrgs.br", role = c("aut", "cre"), comment = c(ORCID = "0000-0001-8874-1839")),
+    person("Marcelo", "Cogo Miletto", email = "marcelo.miletto@inf.ufrgs.br", role = c("aut"), comment = c(ORCID = "0000-0002-1191-3863")),
+    person("Guilherme", "Alles", email = "galles@inf.ufrgs.br", role = c("ctb")),
+    person("Arnaud", "Legrand", email = "arnaud.legrand@imag.fr", role = c("ctb")),
+    person("Luka", "Stanisic", email = "luka.stanisic@mpcdf.mpg.de", role = c("ctb")),
+    person("Rémy", "Drouilhet", email = "remy.drouilhet@univ-grenoble-alpes.fr", role = c("ctb"))
   )
 Description: Performance analysis workflow that combines the power of the R
     language (and the tidyverse realm) and many auxiliary tools to

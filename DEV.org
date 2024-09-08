@@ -71,6 +71,23 @@ have all their dependencies ready but have their execution delayed.
 * CRAN SUB
 ** Message to CRAN for Submission on 30/08/2024
 *** New Version
+- We updated the package to version 0.8.2 to make adjustments requested
+  by the R Team.
+
+*** Test environments
+- local Debian 12 install, R 4.4.1
+- Github Actions (https://github.com/schnorr/starvz/actions/runs/10762103944)
+  - Linux: R 4.4.1 and R Under development (unstable) (2024-09-06 r87103)
+  - Windows: R 4.4.1
+  - OS X: 4.4.1
+
+*** R CMD check results
+ DONE
+
+Status: OK
+
+** Message to CRAN for Submission on 30/08/2024
+*** New Version
 - We updated the package to version 0.8.1 to correct problems warned
   by the R Team.
 

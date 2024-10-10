@@ -40,7 +40,9 @@ starvz_read_some_parquet <- function(directory = ".", tables = c("application"))
     l1 <- list(Origin = directory)
     l2 <- lapply(tables, function(table) {
       table_file <- file.path(directory, paste0(table, ".parquet"))
-      if (file.exists(table_file)) {
+      if (dir.exists(table_file)) {
+        arrow::open_dataset(table_file)
+      }else if (file.exists(table_file)) {
         arrow::read_parquet(table_file)
       } else {
         starvz_log(paste("The file:", table_file, " does not exist on that directory. Ignore."))

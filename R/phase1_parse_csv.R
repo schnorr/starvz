@@ -1018,6 +1018,8 @@ read_dag <- function(where = ".", Application = NULL, dfl = NULL) {
       select(-"Container", -"Origin") %>%
       # 2. Dest becomes ResourceId for these MPI tasks
       rename(ResourceId = "Dest") %>%
+      mutate(ResourceId = as.character(.data$ResourceId)) %>%
+      filter(!(MPIType == 'x' & grepl("^CPU|^CUDA", ResourceId))) %>%
       mutate(ResourceId = as.factor(.data$ResourceId)) %>%
       separate_res() %>%
       tibble() %>%

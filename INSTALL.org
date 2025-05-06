@@ -255,6 +255,7 @@ You may need to install bz2, lz4, snappy, zlib, and zstd libraries.
 
 #+begin_src shell :results output
 git clone https://github.com/apache/arrow
+git checkout release-20.0.0-rc2
 cd arrow/cpp
 mkdir build
 cd build
@@ -267,6 +268,7 @@ cmake -DARROW_CSV=ON \
       -DARROW_WITH_SNAPPY=ON \
       -DARROW_WITH_ZLIB=ON \
       -DARROW_WITH_ZSTD=ON \
+      -DCMAKE_INSTALL_PREFIX=/home/schnorr/install/arrow
       ..
 make
 make install
@@ -281,6 +283,7 @@ export ARROW_USE_PKG_CONFIG=true
 export LIBARROW_BINARY=false
 export LIBARROW_MINIMAL=false
 export PKG_CONFIG_PATH=/home/schnorr/install/arrow/lib/pkgconfig/
+export LD_LIBRARY_PATH=/home/schnorr/install/arrow/lib/
 cd arrow/r
 make clean
 R CMD INSTALL .

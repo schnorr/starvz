@@ -289,6 +289,16 @@ make clean
 R CMD INSTALL .
 #+end_src
 
+*** Verify that the installation is OK
+
+Before loading up the =arrow= package in R, we need to define the
+=LD_LIBRARY_PATH= to the appropriate value so the R shell is capable to
+find the dynamic libraries of Apache Arrow C++.
+
+#+begin_src shell :results output :exports both
+export LD_LIBRARY_PATH=/home/schnorr/install/arrow/lib/
+#+end_src
+
 Verify that everything went smoothly by issuing these commands in
 your R session:
 

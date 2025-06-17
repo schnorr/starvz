@@ -10,5 +10,5 @@ test_that("starvz with QR", {
   other_data <- starvz_read(system.file("extdata", "qr_trace", package = "starvz"), system.file("extdata", "qr.yaml", package = "starvz"))
   pl <- NULL
   pl <- starvz_plot(other_data)
-  expect_equal(class(pl), c("patchwork", "gg", "ggplot"))
+  expect_true(is_ggplot(pl) && inherits(pl, "patchwork"))
 })

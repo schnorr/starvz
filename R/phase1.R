@@ -129,7 +129,7 @@ starvz_phase1 <- function(directory = ".", app_states_fun = lu_colors,
   data$Gaps <- NULL # gaps(data)
 
   starvz_log("Call Latest.")
-  data$Last <- compute_all_last(data)
+  data$Last <- NULL # compute_all_last(data)
 
   if (input.parquet == "1") {
     starvz_log("Saving as parquet")

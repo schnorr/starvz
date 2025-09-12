@@ -103,11 +103,11 @@ abe_cpu_cuda_inner <- function(dfl, debug = FALSE) {
   if (debug) {
     print("ABE: Inicial metrics (v2)")
     print(paste("values:", values))
+    print(paste("nvalues:", nvalues))    
     print(paste("types:", types))
+    print(paste("ntypes:", ntypes))    
     print(paste("names:", names))
     print(paste("nnames:", nnames))
-    print(paste("nvalues:", nvalues))
-    print(paste("ntypes:", ntypes))
     print(paste("size:", size))
   }
 

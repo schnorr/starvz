@@ -80,7 +80,8 @@ panel_st_agg_dynamic <- function(data = NULL,
       base_size = data$config$base_size,
       labels = data$config$st$labels,
       expand_value_x = expand_x,
-      expand_value_y = expand_y
+      expand_value_y = expand_y,
+      rect_outline = data$config$st$rect_outline
     ) +
     xlab("Time [ms]")
 
@@ -458,7 +459,7 @@ aggregate_trace <- function(df_native, states, excludeIds, min_time_pure) {
   df_aggregate %>% ungroup()
 }
 
-geom_aggregated_states <- function(data = NULL, Show.Outliers = FALSE, min_time_pure = 1000, states = NA, base_size = 22, labels = "1", expand_value_x = 0.05, expand_value_y = 0.01) {
+geom_aggregated_states <- function(data = NULL, Show.Outliers = FALSE, min_time_pure = 1000, states = NA, base_size = 22, labels = "1", expand_value_x = 0.05, expand_value_y = 0.01, rect_outline = FALSE) {
   if (is.null(data)) stop("data is NULL when given to geom_aggregated_states")
   if (is.na(states)) stop("states is NA when given to geom_aggregated_states")
 
@@ -516,6 +517,20 @@ geom_aggregated_states <- function(data = NULL, Show.Outliers = FALSE, min_time_
     ymax = .data$Position + .data$Height,
     alpha = .data$aggregated
   ))
+
+  # rect_outline at aggregated area
+  if (rect_outline) {
+      ret[[length(ret) + 1]] <- geom_rect(data = dfw %>%
+                                              select(Start, End, Position, Height) %>% unique,
+                                          aes(
+                                              xmin = .data$Start,
+                                              xmax = .data$End,
+                                              ymin = .data$Position,
+                                              ymax = .data$Position + .data$Height - 0.2
+                                          ),
+                                          fill = NA,
+                                          color = ifelse(rect_outline, "black", NA))
+  }
   ret[[length(ret) + 1]] <- guides(alpha = FALSE)
   ret[[length(ret) + 1]] <- scale_alpha_discrete(range = c(1, .6))
   ret[[length(ret) + 1]] <- scale_fill_manual(values = extract_colors(dfw, data$Colors))

@@ -489,6 +489,12 @@ geom_aggregated_states <- function(data = NULL, Show.Outliers = FALSE, min_time_
       by = c("ResourceId" = "ResourceId")
     ) -> dfw
 
+  # compute new adjusted Position and Height
+  dfw %>%
+      group_by(ResourceId, Chunk) %>%
+      mutate(Height = Activity * (Height - .2)) %>%
+      mutate(Position = Position + cumsum(Height) - Height) -> dfwA
+
   # The list of geoms
   ret <- list()
 
@@ -502,12 +508,12 @@ geom_aggregated_states <- function(data = NULL, Show.Outliers = FALSE, min_time_
     expand = c(expand_value_y, 0)
   )
 
-  ret[[length(ret) + 1]] <- geom_rect(data = dfw, aes(
+  ret[[length(ret) + 1]] <- geom_rect(data = dfwA, aes(
     fill = .data$Value,
     xmin = .data$Start,
     xmax = .data$End,
     ymin = .data$Position,
-    ymax = .data$Position + (.data$Height - 0.4) * .data$Activity,
+    ymax = .data$Position + .data$Height,
     alpha = .data$aggregated
   ))
   ret[[length(ret) + 1]] <- guides(alpha = FALSE)

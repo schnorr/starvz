@@ -69,7 +69,7 @@ have all their dependencies ready but have their execution delayed.
  possibly revealing bad scheduling decisions.
 
 * CRAN SUB
-** Message to CRAN for Submission on 18/06/2024
+** Message to CRAN for Submission on 18/06/2025
 *** New Version
 - We updated the package to version 0.8.3 to make adjustments required
   for a upcoming release of ggplot2.

@@ -492,9 +492,9 @@ geom_aggregated_states <- function(data = NULL, Show.Outliers = FALSE, min_time_
 
   # compute new adjusted Position and Height
   dfw %>%
-      group_by(ResourceId, Chunk) %>%
-      mutate(Height = Activity * (Height - .2)) %>%
-      mutate(Position = Position + cumsum(Height) - Height) -> dfwA
+    group_by(ResourceId, Chunk) %>%
+    mutate(Height = Activity * (Height - .2)) %>%
+    mutate(Position = Position + cumsum(Height) - Height) -> dfwA
 
   # The list of geoms
   ret <- list()
@@ -520,16 +520,18 @@ geom_aggregated_states <- function(data = NULL, Show.Outliers = FALSE, min_time_
 
   # rect_outline at aggregated area
   if (rect_outline) {
-      ret[[length(ret) + 1]] <- geom_rect(data = dfw %>%
-                                              select(Start, End, Position, Height) %>% unique,
-                                          aes(
-                                              xmin = .data$Start,
-                                              xmax = .data$End,
-                                              ymin = .data$Position,
-                                              ymax = .data$Position + .data$Height - 0.2
-                                          ),
-                                          fill = NA,
-                                          color = ifelse(rect_outline, "black", NA))
+    ret[[length(ret) + 1]] <- geom_rect(
+      data = dfw %>%
+        select(Start, End, Position, Height) %>% unique(),
+      aes(
+        xmin = .data$Start,
+        xmax = .data$End,
+        ymin = .data$Position,
+        ymax = .data$Position + .data$Height - 0.2
+      ),
+      fill = NA,
+      color = ifelse(rect_outline, "black", NA)
+    )
   }
   ret[[length(ret) + 1]] <- guides(alpha = FALSE)
   ret[[length(ret) + 1]] <- scale_alpha_discrete(range = c(1, .6))

@@ -69,6 +69,23 @@ have all their dependencies ready but have their execution delayed.
  possibly revealing bad scheduling decisions.
 
 * CRAN SUB
+** Message to CRAN for Submission on 18/06/2024
+*** New Version
+- We updated the package to version 0.8.3 to make adjustments required
+  for a upcoming release of ggplot2.
+*** Test environments
+- local Ubuntu 24.04.2 LTS, R 4.3.3
+- Github Actions (https://github.com/schnorr/starvz/actions/runs/15734137832)
+  - Linux: R 4.5.1 and R Under development (unstable) 
+  - Windows: R 4.5.1
+  - OS X: 4.5.1
+*** R CMD check results
+R CMD check results - starvz 0.8.3
+Duration: 2m 59.2s
+
+0 errors ✔ | 0 warnings ✔ | 0 notes ✔
+
+
 ** Message to CRAN for Submission on 30/08/2024
 *** New Version
 - We updated the package to version 0.8.2 to make adjustments requested

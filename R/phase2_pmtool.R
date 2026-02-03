@@ -260,7 +260,7 @@ geom_pmtool_bounds <- function(data = NULL) {
   ret[[length(ret) + 1]] <- list(
     geom_segment(
       data = bound %>% filter(.data$Bound == TRUE),
-      aes(x = .data$Time + tstart, xend = .data$Time + tstart, y = .data$MinPosition, yend = .data$MaxPosition), size = 5, alpha = .7, color = "gainsboro"
+      aes(x = .data$Time + tstart, xend = .data$Time + tstart, y = .data$MinPosition, yend = .data$MaxPosition), linewidth = 5, alpha = .7, color = "gainsboro"
     ),
     geom_text(data = bound %>% filter(.data$Bound == TRUE), aes(x = .data$Time + tstart, y = .data$MinPosition + (.data$MaxPosition - .data$MinPosition) / 2, label = .data$Label), angle = 90, color = "black", size = bsize)
   )

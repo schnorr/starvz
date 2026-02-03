@@ -246,7 +246,7 @@ geom_pmtool_bounds <- function(data = NULL) {
         xend = .data$Time + tstart,
         y = .data$MinPosition,
         yend = .data$MaxPosition
-      ), size = 5, alpha = .7, color = "lightgrey"
+      ), linewidth = 5, alpha = .7, color = "lightgrey"
     ),
     geom_text(
       data = bound %>% filter(.data$Bound == FALSE),

@@ -492,9 +492,9 @@ geom_aggregated_states <- function(data = NULL, Show.Outliers = FALSE, min_time_
 
   # compute new adjusted Position and Height
   dfw %>%
-    group_by(ResourceId, Chunk) %>%
-    mutate(Height = Activity * (Height - .2)) %>%
-    mutate(Position = Position + cumsum(Height) - Height) -> dfwA
+    group_by(.data$ResourceId, .data$Chunk) %>%
+    mutate(Height = .data$Activity * (.data$Height - .2)) %>%
+    mutate(Position = .data$Position + cumsum(.data$Height) - .data$Height) -> dfwA
 
   # The list of geoms
   ret <- list()
@@ -522,7 +522,7 @@ geom_aggregated_states <- function(data = NULL, Show.Outliers = FALSE, min_time_
   if (rect_outline) {
     ret[[length(ret) + 1]] <- geom_rect(
       data = dfw %>%
-        select(Start, End, Position, Height) %>% unique(),
+        select(.data$Start, .data$End, .data$Position, .data$Height) %>% unique(),
       aes(
         xmin = .data$Start,
         xmax = .data$End,

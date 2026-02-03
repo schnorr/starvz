@@ -773,7 +773,7 @@ panel_handles <- function(data, JobId = NA, lines = NA, lHandle = NA, name_func 
         alpha = ifelse(is.na(.data$JobId), "0", "1")
       ),
       colour = "black",
-      size = 0.1
+      linewidth = 0.1
     ) +
     scale_fill_manual(
       name = "State         Task", values = fills,

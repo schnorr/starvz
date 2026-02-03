@@ -47,7 +47,7 @@ Imports: methods,
     Rcpp
 License: GPL-3
 Encoding: UTF-8
-SystemRequirements: C++11, arrow package with gzip codec, StarPU
+SystemRequirements: C++11 compiler, arrow package with gzip codec, StarPU
 LazyData: true
 LinkingTo: Rcpp (>= 1.0.6), BH
 RoxygenNote: 7.2.3

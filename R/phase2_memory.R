@@ -1178,7 +1178,7 @@ panel_memory_heatmap <- function(data,
 
   data$Data_handles %>%
     separate(.data$Coordinates, c("Y", "X"), extra = "drop", fill = "right") %>%
-    mutate(across(c(.data$X, .data$Y), as.integer)) %>%
+    mutate(across(c("X", "Y"), as.integer)) %>%
     select("Handle", "X", "Y") -> hand
   d_data %>%
     group_by(.data$Value, .data$Container) %>%

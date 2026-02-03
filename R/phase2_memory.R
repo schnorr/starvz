@@ -835,7 +835,7 @@ panel_handles <- function(data, JobId = NA, lines = NA, lHandle = NA, name_func 
       arrow = arrow_g,
       colour = "black",
       alpha = 0.8,
-      size = rel(1.4)
+      linewidth = rel(1.4)
     ) +
     geom_segment(
       data = final_links_data,
@@ -847,7 +847,7 @@ panel_handles <- function(data, JobId = NA, lines = NA, lHandle = NA, name_func 
         colour = .data$Transfer
       ),
       arrow = arrow_g,
-      size = rel(1), show.legend = FALSE
+      linewidth = rel(1), show.legend = FALSE
     ) +
     geom_segment(
       data = final_links_data,
@@ -858,7 +858,7 @@ panel_handles <- function(data, JobId = NA, lines = NA, lHandle = NA, name_func 
         yend = .data$dest_y + 0.4,
         colour = .data$Transfer
       ),
-      size = rel(1)
+      linewidth = rel(1)
     ) +
     scale_y_continuous(
       breaks = data$handle_gantt_data$position$y1 + 0.4,

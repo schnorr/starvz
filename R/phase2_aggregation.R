@@ -533,7 +533,7 @@ geom_aggregated_states <- function(data = NULL, Show.Outliers = FALSE, min_time_
       color = ifelse(rect_outline, "black", NA)
     )
   }
-  ret[[length(ret) + 1]] <- guides(alpha = FALSE)
+  ret[[length(ret) + 1]] <- guides(alpha = "none")
   ret[[length(ret) + 1]] <- scale_alpha_discrete(range = c(1, .6))
   ret[[length(ret) + 1]] <- scale_fill_manual(values = extract_colors(dfw, data$Colors))
 

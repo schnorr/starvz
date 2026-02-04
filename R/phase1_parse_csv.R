@@ -1044,7 +1044,12 @@ read_links <- function(where = ".", ZERO = 0) {
   link.csv <- paste0(where, "/paje.link.csv.gz")
   if (file.exists(link.csv)) {
     starvz_log(paste("Reading ", link.csv))
-    dfl <- starvz_suppressWarnings(read_csv(link.csv,
+
+    # Uncompress first to avoid parsing problems
+    link.tmp <- paste0(where, "/paje.link.csv")
+    system2("gunzip", c("-c", link.csv), stdout = link.tmp)
+
+    dfl <- starvz_suppressWarnings(read_csv(link.tmp,
       trim_ws = TRUE,
       progress = FALSE,
       col_types = cols(
@@ -1064,6 +1069,8 @@ read_links <- function(where = ".", ZERO = 0) {
         Handle = col_character()
       )
     ))
+
+    unlink(link.tmp)
   } else {
     starvz_log(paste("File", link.csv, "do not exist"))
     return(NULL)

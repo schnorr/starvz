@@ -18,7 +18,7 @@ starvz_phase1(
 
 \item{app_states_fun}{Function to determine application}
 
-\item{state_filter}{Type of filder}
+\item{state_filter}{Type of filter}
 
 \item{whichApplication}{Name of Application}
 

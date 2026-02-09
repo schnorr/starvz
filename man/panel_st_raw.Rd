@@ -42,7 +42,7 @@ panel_st_raw(
 
 \item{selected_nodes}{select only some nodes in some plots}
 
-\item{labels}{labels: [ALL, 1CPU_per_NODE, 1GPU_per_NODE, FIRST_LAST]}
+\item{labels}{labels: [ALL, 1CPU_per_NODE, 1GPU_per_NODE, FIRST_LAST, NODES_only, NODES_1_in_10, 1CPU_1GPU, ALL_nompi]}
 
 \item{alpha}{alpha value for non-anomalous tasks}
 

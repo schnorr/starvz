@@ -50,7 +50,7 @@ Encoding: UTF-8
 SystemRequirements: C++11 compiler, arrow package with gzip codec, StarPU
 LazyData: true
 LinkingTo: Rcpp (>= 1.0.6), BH
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2
 Collate:
     'RcppExports.R'
     'starvz_data.R'

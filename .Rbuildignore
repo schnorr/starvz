@@ -14,3 +14,4 @@ README\.org
 ^\.github$
 inst/tools/starvz_fast_csv_split
 inst/tools/starvz_csv.c
+^cran-comments\.md$

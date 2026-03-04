@@ -230,7 +230,7 @@ panel_progress <- function(df_app, nsteps, cluster_option,
       abe_visu +
       #   scale_y_reverse() +
       theme_bw(base_size = 20) +
-      ylab("Metric Value [0, 1]") +
+      ylab("Node Progression") +
       theme(legend.position = "top") +
       guides(color = guide_colourbar(barwidth = 20, barheight = 0.5)) +
       xlab("Time [ms]") -> original_metrics

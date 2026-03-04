@@ -419,7 +419,7 @@ panel_progress <- function(df_app, nsteps, cluster_option,
 
 
   sum_nodes <- function(x) {
-    x <- as.numeric(x)
+    x <- as.numeric(as.character(x))
     gr <- cumsum(c(TRUE, diff(x) != 1))
     y <- unname(tapply(x, gr, FUN = function(.x) {
       paste(unique(range(.x)), collapse = "-")

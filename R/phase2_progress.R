@@ -428,8 +428,8 @@ panel_progress <- function(df_app, nsteps, cluster_option,
   }
 
   total_nodes <- joined_data %>%
-   .$Node %>% 
-   levels() %>% 
+   pull(Node) %>%
+   unique() %>%
    length()
 
   last <- plot_lines %>%

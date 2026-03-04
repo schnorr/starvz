@@ -517,7 +517,7 @@ panel_progress <- function(df_app, nsteps, cluster_option,
     guides(size = guide_legend(title = "Number of nodes")) +
     abe_s_visu +
     theme_bw(base_size = 22) +
-    ylab("Metric Value [0, 1]") +
+    ylab("Node Progression") +
     theme(legend.position = "top") +
     extra_plot +
     theme(legend.title = element_text(size = 18)) +

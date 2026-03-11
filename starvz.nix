@@ -1,8 +1,6 @@
 { 
     lib,
-    fetchFromGitHub,
     rPackages,
-    # StarPU,
     arrow-cpp,
     pkg-config,
     R
@@ -10,17 +8,10 @@
 rPackages.buildRPackage {
     name = "starvz";
 
-    src = fetchFromGitHub {
-        owner = "schnorr";
-        repo = "starvz";
-        rev = "CRAN_0.7.1";
-        hash = "sha256-zTwr08/0hFdzk/vsxQ2N0MRmEFDm2twYsmVBgXPxpow=";
-    };
+    src = ./.;
     nativeBuildInputs = [ pkg-config R  rPackages.arrow];
 
-    buildInputs = [ arrow-cpp 
-    # StarPU 
-    ];
+    buildInputs = [ arrow-cpp ];
 
     propagatedBuildInputs = with rPackages; [
         rPackages.arrow

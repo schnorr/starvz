@@ -28,38 +28,33 @@ in
     name = "starvz-tools";
     version = "0.7.1";
 
-    src = fetchFromGitHub {
-        owner = "schnorr";
-        repo = "starvz";
-        rev = "CRAN_${f.version}";
-        hash = "sha256-zTwr08/0hFdzk/vsxQ2N0MRmEFDm2twYsmVBgXPxpow=";
-    };
+    src = ./inst;
     nativeBuildInputs = [ 
          makeWrapper
          myR
     ];
     patchPhase = ''
-        patchShebangs inst/tools/*.R
-        patchShebangs inst/tools/*.sh
+        patchShebangs tools/*.R
+        patchShebangs tools/*.sh
     '';
 
     buildInputs = [ zlib ];
 
     buildPhase = ''
-        $CC -O2 inst/tools/starvz_csv.c -o starvz_fast_csv_split -lz -fopenmp
+        $CC -O2 tools/starvz_csv.c -o starvz_fast_csv_split -lz -fopenmp
     '';
 
     installPhase = ''
         # tools/ (STARVZ_HOME/tools/)
         mkdir -p $out/tools
-        cp inst/tools/*.sh inst/tools/*.R inst/tools/starvz inst/tools/starvz_csv.c $out/tools/
+        cp tools/*.sh tools/*.R tools/starvz tools/starvz_csv.c $out/tools/
         cp starvz_fast_csv_split $out/tools/
         chmod +x $out/tools/*.sh $out/tools/starvz
         patch
 
         # etc/ (STARVZ_HOME/etc/)
         mkdir -p $out/etc
-        cp -r inst/etc/* $out/etc/
+        cp -r etc/* $out/etc/
 
         # bin/starvz — placed here so that STARVZ_HOME=$(dirname $0)/..=$out
         mkdir -p $out/bin

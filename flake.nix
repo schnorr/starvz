@@ -27,7 +27,6 @@
         };
 	in
 	{
-        # defaultPackage = self.packages.${system}.starvzTools;
 		packages = rec {
             default = starvzTools;
             inherit starvz starvzTools;

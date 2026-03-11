@@ -21,14 +21,15 @@
 		pkgs = import nixpkgs { inherit system; };
 		starvz = pkgs.callPackage ./starvz.nix {};
 		starvzTools = pkgs.callPackage ./starvzTools.nix { 
-			poti = poti.packages.${system}.default;
-			pajeng = pajeng.packages.${system}.default;
+			poti = poti.packages.${system}.poti;
+			pajeng = pajeng.packages.${system}.pajeng;
             inherit StarPU starvz; 
         };
 	in
 	{
-		packages.${system} = {
-			default = starvzTools;
+        # defaultPackage = self.packages.${system}.starvzTools;
+		packages = rec {
+            default = starvzTools;
             inherit starvz starvzTools;
 		};
 	});

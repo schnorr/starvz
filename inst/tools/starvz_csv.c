@@ -89,6 +89,8 @@ int process_line(char* line, int size, struct t_out_files out_files){
     pos++;
   }
 
+  if(line[comma1] == '"') comma1++;
+
   int select_kind = KIND_OTHER;
   if(line[0]=='E'){
     select_kind = KIND_EVENT;

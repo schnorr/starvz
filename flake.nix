@@ -31,5 +31,17 @@
             default = starvzTools;
             inherit starvz starvzTools;
 		};
+        devShells = {
+            default = pkgs.mkShell {
+                packages = [
+                    pkgs.recutils
+                    starvzTools
+                    starvz
+                    StarPU
+                    poti.packages.${system}.poti
+                    pajeng.packages.${system}.pajeng
+                ];
+            };
+        };
 	});
 }

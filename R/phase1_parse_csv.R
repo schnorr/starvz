@@ -1103,3 +1103,92 @@ read_links <- function(where = ".", ZERO = 0) {
 
   return(dfl)
 }
+
+read_energy <- function(where = ".", ZERO = 0) {
+  energy.csv <- paste0(where, "/energy.csv")
+  if (file.exists(energy.csv)) {
+    starvz_log(paste("Reading ", energy.csv))
+
+    dfenerg <- starvz_suppressWarnings(read_csv(energy.csv,
+      trim_ws = TRUE,
+      progress = FALSE,
+      col_types = cols(
+        counter = col_character(),
+        domain = col_character(),
+        backend = col_character(),
+        scope = col_character(),
+        scope_id = col_integer(),
+        worker = col_character(),
+        energy_j = col_double(),
+        delay_ns = col_integer(),
+        timestamp = col_double()
+      )
+    ))
+
+  } else {
+    starvz_log(paste("File", energy.csv, "do not exist"))
+    return(NULL)
+  }
+
+  # Check if number of lines is greater than zero
+  if ((dfenerg %>% nrow()) == 0) {
+    starvz_log("After attempt to read energy, number of rows is zero")
+    return(NULL)
+  }
+
+  dfenerg <- dfenerg %>%
+    mutate(timestamp = .data$timestamp - ZERO) %>%
+    mutate(
+      counter = as.factor(.data$counter),
+      domain = as.factor(.data$domain),
+      backend = as.factor(.data$backend),
+      scope = as.factor(.data$scope)
+    )
+
+  return(dfenerg)
+}
+
+read_energy_solver <- function(where = ".", ZERO = 0) {
+  energy_solver.csv <- paste0(where, "/energy_solver_input.csv")
+  if (file.exists(energy_solver.csv)) {
+    starvz_log(paste("Reading ", energy_solver.csv))
+
+    dfenergsol <- starvz_suppressWarnings(read_csv(energy_solver.csv,
+      trim_ws = TRUE,
+      progress = FALSE,
+      col_types = cols(
+        event = col_character(),
+        type = col_character(),
+        state_name = col_character(),
+        timestamp = col_double(),
+        worker_id = col_integer(),
+        worker_type = col_character(),
+        thread = col_double(),
+        core = col_integer(),
+        pkg = col_integer(),
+        device = col_integer()
+      )
+    ))
+
+  } else {
+    starvz_log(paste("File", energy_solver.csv, "do not exist"))
+    return(NULL)
+  }
+
+  # Check if number of lines is greater than zero
+  if ((dfenergsol %>% nrow()) == 0) {
+    starvz_log("After attempt to read energy solver, number of rows is zero")
+    return(NULL)
+  }
+
+  dfenergsol <- dfenergsol %>%
+    mutate(timestamp = .data$timestamp - ZERO) %>%
+    mutate(
+      event = as.factor(.data$event),
+      type = as.factor(.data$type),
+      state_name = as.factor(.data$state_name),
+      worker_type = as.factor(.data$worker_type)
+    )
+
+  return(dfenergsol)
+}

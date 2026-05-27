@@ -252,6 +252,9 @@ starvz_read <- function(directory = ".",
     if (config$gpubandwidth$active) {
       tables_to_load <- c(tables_to_load, "variable")
     }
+    if (config$energy) {
+      tables_to_load <- c(tables_to_load, "energy", "energy_solver")
+    }
 
     tables_to_load <- tables_to_load %>% unique()
     starvz_log(paste("Read:", paste(tables_to_load, collapse = " ")))

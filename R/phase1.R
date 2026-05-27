@@ -85,6 +85,14 @@ starvz_phase1 <- function(directory = ".", app_states_fun = lu_colors,
   # Read links
   dfl <- read_links(where = directory, Worker$ZERO)
 
+  # Read energy
+  dfenerg <- read_energy(where = directory, Worker$ZERO)
+
+  # Read energy solver
+  dfenergsol <- read_energy_solver(where = directory, Worker$ZERO)
+
+  # Read
+
   # Read the elimination tree
   dfa <- atree_load(where = directory)
 
@@ -121,6 +129,7 @@ starvz_phase1 <- function(directory = ".", app_states_fun = lu_colors,
     StarPU = Worker$StarPU,
     Colors = Worker$Colors,
     Link = dfl, Dag = dfdag, Y = dfhie, Atree = dfa,
+    Energy = dfenerg, Energy_solver = dfenergsol,
     Pmtool_states = dpmts, entities = entities$dfe,
     Zero = ZERO, Version = Version
   )

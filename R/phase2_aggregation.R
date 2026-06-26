@@ -301,7 +301,7 @@ time_aggregation_prep <- function(dfw = NULL) {
       -"GFlop", -"X", -"Y", -"Subiteration",
       -"Resource", -"Outlier", -"Height",
       -"Position"
-    ) 
+    )
 
   # Define the first zero
   dfw_zero_1 <- dfw_initial %>%

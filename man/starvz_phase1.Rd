@@ -37,7 +37,7 @@ shell tool \code{starvz} or \code{phase1-workflow.sh} in the \code{tools/}
 directory.
 }
 \examples{
-\dontshow{if (requireNamespace("arrow", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (requireNamespace("arrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 \donttest{
 example_folder <- system.file("extdata", "lu_trace", package = "starvz")
 starvz_phase1(directory = example_folder)

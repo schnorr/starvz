@@ -50,7 +50,6 @@ Encoding: UTF-8
 SystemRequirements: C++17, arrow package with gzip codec, StarPU
 LazyData: true
 LinkingTo: Rcpp (>= 1.0.6), BH
-RoxygenNote: 7.3.2
 Collate:
     'RcppExports.R'
     'starvz_data.R'
@@ -66,6 +65,7 @@ Collate:
     'phase2_gaps.R'
     'phase2_imbalance.R'
     'phase2_kchart.R'
+    'phase2_khills.R'
     'phase2_lackready.R'
     'phase2_memory.R'
     'phase2_metrics.R'
@@ -89,3 +89,4 @@ Suggests:
     viridis,
     ggrepel,
     mclust
+Config/roxygen2/version: 8.0.0

@@ -298,7 +298,7 @@ time_aggregation_prep <- function(dfw = NULL) {
       -"Duration",
       -"Size", -"Depth", -"Params", -"JobId",
       -"Footprint", -"Tag",
-      -"GFlop", -"X", -"Y", -"Iteration", -"Subiteration",
+      -"GFlop", -"X", -"Y", -"Subiteration",
       -"Resource", -"Outlier", -"Height",
       -"Position"
     )

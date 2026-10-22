@@ -1005,7 +1005,7 @@ read_dag <- function(where = ".", Application = NULL, dfl = NULL) {
     full_join(Application, by = "JobId")
 
   # Check dfl existence
-  if (!is.null(dfl)) {
+  if (!is.null(dfl) && any(grepl("mpicom", dfdag$JobId))) {
     starvz_log("Get MPI tasks (links) to enrich the DAG")
 
     dfdagl <- dfdag %>%
